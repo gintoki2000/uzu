@@ -1,2 +1,5 @@
 subdir('engine')
-SOURCE_FILES = files('uzu.c') + ENGINE_SOURCE_FILES
+subdir('ecs')
+subdir('toolbox')
+subdir('system')
+source_files = files('uzu.c') + engine_source_files + ecs_source_files + toolbox_source_files + system_source_files

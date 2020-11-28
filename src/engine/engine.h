@@ -20,5 +20,7 @@ void uzu_run(GameDelegate *game_delegate, const GameSetting *game_setting);
 void uzu_stop();
 void uzu_set_frame_rate(Uint32 frame_rate);
 Uint32 uzu_get_frame_rate();
+SDL_Renderer* uzu_get_renderer(); 
+SDL_Window* uzu_get_window();
 
 #endif // UZU_ENGINE_H

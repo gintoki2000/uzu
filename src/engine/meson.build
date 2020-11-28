@@ -1,1 +1,1 @@
-ENGINE_SOURCE_FILES = files('engine.c')
+engine_source_files = files('engine.c')

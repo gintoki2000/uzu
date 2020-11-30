@@ -1,4 +1,4 @@
-#include <toolbox/sprite.h>
+#include "sprite.h"
 #include <SDL2/SDL_render.h>
 
 Sprite* sprite_init(Sprite* s, SDL_Texture* tex)

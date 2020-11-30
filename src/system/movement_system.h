@@ -1,6 +1,6 @@
 #ifndef MOVEMENT_SYSTEM_H
 #define MOVEMENT_SYSTEM_H
-#include <ecs/world.h>
+#include <ecs/ecs.h>
 /**
  * [CommandInput: in, Transform:in-out]
  */

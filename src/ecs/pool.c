@@ -147,7 +147,7 @@ void ecs_pool_rmv(EcsPool* self, ecs_entity_t e)
 void* ecs_pool_get(EcsPool* self, ecs_entity_t e)
 {
   ecs_size_t idx = ECS_ENT_IDX(e);
-  return ECS_POOL_CONTAINS_W_EIDX(self, idx) ? ECS_POOL_DATA_OFFSET(self, idx) : NULL;
+  return ECS_POOL_CONTAINS_W_EIDX(self, idx) ? ECS_POOL_DATA_OFFSET(self, self->sparse.data[idx]) : NULL;
 }
 
 void ecs_pool_swp(EcsPool* self, ecs_entity_t e1, ecs_entity_t e2)

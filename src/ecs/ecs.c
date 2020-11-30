@@ -1,4 +1,4 @@
-#include "world.h"
+#include <ecs/ecs.h>
 #include <ecs/common.h>
 #include <ecs/entity_pool.h>
 #include <ecs/pool.h>

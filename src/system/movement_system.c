@@ -1,19 +1,14 @@
-#include "ecs/world.h"
+#include "ecs/ecs.h"
 #include <components.h>
 #include <system/movement_system.h>
 
-static const SDL_Point dir_to_vel[] = {
-  [UP] = {0, -1},
-  [DOWN] = {0, 1},
-  [LEFT] = {-1, 0},
-  [RIGHT] = {1, 0},
-  [NONE] = {0, 0}
-};
+static const SDL_Point dir_to_vel[] =
+    {[UP] = {0, -1}, [DOWN] = {0, 1}, [LEFT] = {-1, 0}, [RIGHT] = {1, 0}, [NONE] = {0, 0}};
 
 void MovementSystem(Ecs* ecs)
 {
   ecs_entity_t* ent;
-  CommandInput* cmd;
+  CmdInput*     cmd;
   Transform*    tx;
   ecs_size_t    cnt;
 

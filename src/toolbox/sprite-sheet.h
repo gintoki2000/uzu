@@ -1,8 +1,8 @@
 #ifndef SPRITE_SHEET_H
 #define SPRITE_SHEET_H
+#include "common.h"
+#include "sprite.h"
 #include <SDL2/SDL_render.h>
-#include <common.h>
-#include <toolbox/sprite.h>
 
 typedef struct
 {

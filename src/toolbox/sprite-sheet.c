@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include <toolbox/sprite-sheet.h>
+#include "sprite-sheet.h"
 SpriteSheet* sprite_sheet_init_1(SpriteSheet* self,
                                  SDL_Texture* tex,
                                  u32          x,

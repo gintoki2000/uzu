@@ -19,14 +19,8 @@ install_subdir('asserts', install_dir:  meson.source_root() / 'dist')
 
 check_dep = dependency('check')
 
-ecs_test_name = 'ecs_test'
-ecs_test_deps = deps + [check_dep]
-ecs_test_incdirs = include_directories('src')
-ecs_source_files = ['test/ecs_pool_test.c', 'src/ecs/pool.c']
-
-ecs_test_exe = executable(ecs_test_name, ecs_source_files,
-  include_directories: ecs_test_incdirs,
-  dependencies: ecs_test_deps,
-  install: false
+executable('rect_test', toolbox_source_files + files('test/rect_test.c'), 
+  dependencies: deps + [check_dep], 
+  install: false, 
+  include_directories: incdirs
 )
-

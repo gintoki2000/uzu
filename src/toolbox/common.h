@@ -29,6 +29,8 @@ typedef struct
 #define TRUE SDL_TRUE
 #define FALSE SDL_FALSE
 
+#define ASSERT(cd) SDL_assert(cd)
+
 #define CALLBACK_1(_user_data, _func)                                                              \
   ((Callback){                                                                                     \
       .user_data = (void*)_user_data,                                                              \
@@ -36,6 +38,8 @@ typedef struct
   })
 #define CALLBACK_2(_func) ((Callback){ .func = _func })
 #define INLINE static inline
+
+#define DEG_TO_RAD 0.0174532925
 
 typedef enum
 {
@@ -51,6 +55,8 @@ typedef struct
   float x;
   float y;
 } Vec2;
+
+#define VEC2(_x, _y) ((Vec2){.x = _x, .y = _y})
 
 typedef struct
 {

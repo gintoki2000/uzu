@@ -1,12 +1,13 @@
-#include <ecs/ecs.h>
+#include <SDL2/SDL.h>
 #include <ecs/common.h>
+#include <ecs/ecs.h>
 #include <ecs/entity_pool.h>
 #include <ecs/pool.h>
-#include <SDL2/SDL.h>
 #include <stdlib.h>
 #include <string.h>
+#include <toolbox/toolbox.h>
 
-static inline EcsPool* get_pool(Ecs* self, ecs_size_t type) { return self->pools[type]; }
+INLINE EcsPool* get_pool(Ecs* self, ecs_size_t type) { return self->pools[type]; }
 
 Ecs* ecs_new(const EcsType* types, ecs_size_t cnt)
 {
@@ -55,8 +56,8 @@ void ecs_destroy(Ecs* self, ecs_entity_t entity)
 
 void* ecs_add(Ecs* self, ecs_entity_t entity, ecs_size_t component_type)
 {
-  SDL_assert(component_type < self->type_cnt && "invalid type");
-  SDL_assert(ecs_is_valid(self, entity) && "invalid entity");
+  ASSERT(component_type < self->type_cnt && "invalid type");
+  ASSERT(ecs_is_valid(self, entity) && "invalid entity");
   void*          component;
   const EcsType* type;
 
@@ -70,8 +71,8 @@ void* ecs_add(Ecs* self, ecs_entity_t entity, ecs_size_t component_type)
 
 void ecs_rmv(Ecs* self, ecs_entity_t entity, ecs_size_t component_type)
 {
-  SDL_assert(component_type < self->type_cnt && "invalid type");
-  SDL_assert(ecs_is_valid(self, entity) && "invalid entity");
+  ASSERT(component_type < self->type_cnt && "invalid type");
+  ASSERT(ecs_is_valid(self, entity) && "invalid entity");
 
   void*    component;
   EcsPool* pool;
@@ -85,7 +86,7 @@ void ecs_rmv(Ecs* self, ecs_entity_t entity, ecs_size_t component_type)
 void ecs_rmv_all(Ecs* self, ecs_entity_t entity)
 {
   EcsPool* ppool;
-  SDL_assert(ecs_is_valid(self, entity) && "invalid entity");
+  ASSERT(ecs_is_valid(self, entity) && "invalid entity");
 
   for (int i = 0; i < self->type_cnt; ++i)
   {
@@ -99,8 +100,8 @@ void ecs_rmv_all(Ecs* self, ecs_entity_t entity)
 
 void* ecs_get(Ecs* self, ecs_entity_t entity, ecs_size_t type)
 {
-  SDL_assert(type < self->type_cnt && "invalid type");
-  SDL_assert(ecs_is_valid(self, entity) && "invalid entity");
+  ASSERT(type < self->type_cnt && "invalid type");
+  ASSERT(ecs_is_valid(self, entity) && "invalid entity");
   return ecs_pool_get(self->pools[type], entity);
 }
 
@@ -203,9 +204,13 @@ void ecs_each_w_filter(Ecs*             self,
   }
 }
 
-void ecs_data(Ecs* self, ecs_size_t type, ecs_entity_t** entities_ptr, void** components_ptr, ecs_size_t* cnt_ptr)
+void ecs_data(Ecs*           self,
+              ecs_size_t     type,
+              ecs_entity_t** entities_ptr,
+              void**         components_ptr,
+              ecs_size_t*    cnt_ptr)
 {
-  SDL_assert(type < self->type_cnt && "invalid type");
+  ASSERT(type < self->type_cnt && "invalid type");
   if (entities_ptr)
     *entities_ptr = self->pools[type]->dense.entities;
   if (components_ptr)
@@ -214,9 +219,9 @@ void ecs_data(Ecs* self, ecs_size_t type, ecs_entity_t** entities_ptr, void** co
     *cnt_ptr = self->pools[type]->dense.cnt;
 }
 
-SDL_bool ecs_has(Ecs *self, ecs_entity_t entity, ecs_size_t component_type)
+SDL_bool ecs_has(Ecs* self, ecs_entity_t entity, ecs_size_t component_type)
 {
-  SDL_assert(component_type < self->type_cnt && "invalid type");
-  SDL_assert(ecs_is_valid(self, entity) && "invalid entity");
+  ASSERT(component_type < self->type_cnt && "invalid type");
+  ASSERT(ecs_is_valid(self, entity) && "invalid entity");
   return ecs_pool_contains(self->pools[component_type], entity);
 }

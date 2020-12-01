@@ -33,17 +33,17 @@ typedef enum
 
 typedef struct Transform
 {
-  s32 x;
-  s32 y;
-  s32 local_pos_x;
-  s32 local_pos_y;
+  s32    x;
+  s32    y;
+  s32    local_pos_x;
+  s32    local_pos_y;
+  double rot;
 } Transform;
 
 typedef struct Visual
 {
   SDL_Point        anchor;
   SDL_RendererFlip flip;
-  double           rot;
   Sprite           sprite;
 } Visual;
 
@@ -136,9 +136,21 @@ typedef struct Animator
 
 typedef struct HitBox
 {
-  u32 half_width;
-  u32 half_height;
+  Vec2 size;
+  Vec2 anchor;
 } HitBox;
+
+typedef struct HealBar
+{
+  int       len; // in pixel
+  SDL_Color color;
+  SDL_Color border;
+} HealBar;
+
+typedef struct LifeSpan
+{
+  s32 remaining;
+} LifeSpan;
 
 enum
 {
@@ -153,6 +165,10 @@ enum
   HEATH,
   GENERIC_AXE,
   HITBOX,
+  ENEMY_TAG,
+  PLAYER_WEAPON_TAG,
+  HEAL_BAR,
+  LIFE_SPAN,
   NUM_COMPONENTS
 };
 

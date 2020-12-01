@@ -56,7 +56,6 @@ ecs_entity_t ecs_entity_pool_alloc_ent(EcsEntityPool* self)
 
 void ecs_entity_pool_free_ent(EcsEntityPool* self, ecs_entity_t e)
 {
-  SDL_assert(ecs_entity_pool_is_valid(self, e) && "invalid enitity");
   ecs_size_t ent_ver;
   ecs_size_t ent_idx;
 

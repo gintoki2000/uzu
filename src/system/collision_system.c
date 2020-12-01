@@ -1,111 +1,126 @@
-#include <common.h>
+#include "collision_system.h"
 #include <components.h>
-#include <stdio.h>
-#include <system/collision_system.h>
-#include <toolbox/aabb-tree.h>
+#include <toolbox/toolbox.h>
 
-#define MAX_BUF_SIZE 150
+#define BUFF_SIZE 100
 
-typedef struct
+static CollisionPair _pve_pairs[BUFF_SIZE];
+static int           _pve_pair_cnt;
+static CollisionPair _wpve_pairs[BUFF_SIZE];
+static int           _wpve_pair_cnt;
+static Dispatcher*   _dispatcher;
+
+static ecs_entity_t get_player(Ecs* ecs)
 {
-  int          proxy_id;
-  ecs_entity_t ett;
-} __capture01;
-
-typedef struct
-{
-  int ia;
-  int ib;
-} CollisionPair;
-
-static void  __lamda01(void* user_data, int id);
-static AABB* aabb_form_hitbox(AABB* aabb, const HitBox* hb, const Transform* tx);
-
-static AABBTree*     _tree;
-static CollisionPair _pair_buff[MAX_BUF_SIZE];
-static u32           _pair_buff_size;
-
-void collision_system_init()
-{
-  _tree = aabb_tree_new();
-  _pair_buff_size = 0;
+  ecs_entity_t* ett;
+  ecs_size_t    cnt;
+  ecs_data(ecs, PLAYER_TAG, &ett, NULL, &cnt);
+  ASSERT(cnt == 1 && "there is no player");
+  return ett[0];
 }
+
+static Rect* query_boundingbox(Ecs* ecs, ecs_entity_t ett, Rect* rect)
+{
+  HitBox*    hitbox;
+  Transform* transform;
+  float      x, y, w, h;
+
+  hitbox = ecs_get(ecs, ett, HITBOX);
+  transform = ecs_get(ecs, ett, TRANSFORM);
+
+  x = transform->x - hitbox->anchor.x;
+  y = transform->y - hitbox->anchor.y;
+  w = hitbox->size.x;
+  h = hitbox->size.y;
+  rect_init_full(rect, x, y, w, h, hitbox->anchor.x, hitbox->anchor.y, transform->rot);
+  return rect;
+}
+
+static void put_pve_pair(ecs_entity_t player, ecs_entity_t enemy)
+{
+  _pve_pairs[_pve_pair_cnt++] = (CollisionPair){ player, enemy };
+}
+
+static void notify()
+{
+  for (int i = 0; i < _pve_pair_cnt; ++i)
+  {
+    dispatcher_emit(_dispatcher, SIG_PLAYER_COLLIDED_W_ENEMY, &_pve_pairs[i]);
+  }
+
+  for (int i = 0; i < _wpve_pair_cnt; ++i)
+  {
+    dispatcher_emit(_dispatcher, SIG_PLAYER_WEAPON_COLLIED_W_ENEMY, &_wpve_pairs[i]);
+  }
+}
+
+void collision_system_init() { _dispatcher = dispatcher_new(NUM_COLLISION_SIGS); }
 
 void collision_system_fini()
 {
-  aabb_tree_delete(_tree);
-  _tree = NULL;
+  dispatcher_destroy(_dispatcher);
+  _dispatcher = NULL;
+}
+
+void collision_system_connect(int signal, pointer_t user_data, sig_handler_fn_t handler)
+{
+  dispatcher_connect(_dispatcher, signal, user_data, handler);
+}
+
+static void check_player_weapon_w_enemy(Ecs* ecs)
+{
+  ecs_entity_t* enemies;
+  ecs_size_t    enemy_cnt;
+  ecs_entity_t* weapons;
+  ecs_size_t    weapon_cnt;
+  Rect          player_weapon_hitbox;
+  Rect          enemy_hitbox;
+
+  ecs_data(ecs, PLAYER_WEAPON_TAG, &weapons, NULL, &weapon_cnt);
+  ecs_data(ecs, ENEMY_TAG, &enemies, NULL, &enemy_cnt);
+
+  _wpve_pair_cnt = 0;
+  for (int wi = 0; wi < weapon_cnt; ++wi)
+  {
+    query_boundingbox(ecs, weapons[wi], &player_weapon_hitbox);
+    for (int ei = 0; ei < enemy_cnt; ++ei)
+    {
+      query_boundingbox(ecs, enemies[ei], &enemy_hitbox);
+      if (rect_has_intersection(&player_weapon_hitbox, &enemy_hitbox))
+      {
+        _wpve_pairs[_wpve_pair_cnt++] = (CollisionPair){ weapons[wi], enemies[ei] };
+      }
+    }
+  }
+}
+
+static void check_player_w_enemy(Ecs* ecs)
+{
+  ecs_entity_t* enemies;
+  ecs_size_t    enemy_cnt;
+  ecs_entity_t  player;
+  Rect          player_hitbox;
+  Rect          enemy_hitbox;
+
+  player = get_player(ecs);
+  query_boundingbox(ecs, player, &player_hitbox);
+
+  ecs_data(ecs, ENEMY_TAG, &enemies, NULL, &enemy_cnt);
+
+  _pve_pair_cnt = 0;
+  for (int i = 0; i < enemy_cnt; ++i)
+  {
+    query_boundingbox(ecs, enemies[i], &enemy_hitbox);
+    if (rect_has_intersection(&player_hitbox, &enemy_hitbox))
+    {
+      put_pve_pair(player, enemies[i]);
+    }
+  }
 }
 
 void CollisionSystem(Ecs* ecs)
 {
-  ecs_entity_t* ett;
-  HitBox*       hb;
-  ecs_size_t    cnt;
-  __capture01   capture;
-  AABB          aabb;
-
-  ecs_data(ecs, HITBOX, &ett, (void**)&hb, &cnt);
-
-  _pair_buff_size = 0;
-  for (int i = 0; i < cnt; ++i)
-  {
-    if (hb[i].proxy_id == -1)
-    {
-      // create new one
-      aabb_form_hitbox(&aabb, &hb[i], ecs_get(ecs, ett[i], TRANSFORM));
-      hb[i].proxy_id = aabb_tree_create_proxy(_tree, (void*)ett[i], &aabb);
-    }
-    else
-    {
-      aabb_form_hitbox(&aabb, &hb[i], ecs_get(ecs, ett[i], TRANSFORM));
-      aabb_tree_move_proxy(_tree, hb[i].proxy_id, &aabb, (Vec2){ 10, 10 });
-    }
-  }
-
-  for (int i = 0; i < cnt; ++i)
-  {
-    capture.proxy_id = hb[i].proxy_id;
-    aabb_tree_query(_tree, &aabb, CALLBACK_1(&capture, __lamda01));
-  }
-
-  for (u32 i = 0; i < _pair_buff_size; ++i)
-  {
-    printf("Collision[e1 = %u, e2 = %u]\n",
-           (u32)aabb_tree_get_user_data(_tree, _pair_buff[i].ia),
-           (u32)aabb_tree_get_user_data(_tree, _pair_buff[i].ib));
-  }
-}
-
-static void __lamda01(void* user_data, int pid)
-{
-  __capture01* vals;
-
-  vals = (__capture01*)user_data;
-
-  if (vals->proxy_id != pid)
-  {
-    _pair_buff[_pair_buff_size++] = (CollisionPair){
-      max(vals->proxy_id, pid),
-      min(vals->proxy_id, pid),
-    };
-  }
-}
-
-static void vec2_translate(Vec2* v, int x, int y)
-{
-  v->x += x;
-  v->y += y;
-}
-
-static AABB* aabb_form_hitbox(AABB* aabb, const HitBox* hb, const Transform* tx)
-{
-  aabb->lower_bound.x = tx->x - hb->hwidth;
-  aabb->lower_bound.y = tx->y - hb->hheight;
-  aabb->upper_bound.x = tx->x + hb->hwidth;
-  aabb->upper_bound.y = tx->y + hb->hheight;
-
-  // vec2_translate(&aabb->upper_bound, -hb->anchor_x, -hb->anchor_y);
-  // vec2_translate(&aabb->lower_bound, -hb->anchor_x, -hb->anchor_y);
-  return aabb;
+  check_player_w_enemy(ecs);
+  check_player_weapon_w_enemy(ecs);
+  notify();
 }

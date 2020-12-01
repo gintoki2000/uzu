@@ -4,4 +4,6 @@
 #include "common.h"
 #include "sprite.h"
 #include "sprite-sheet.h"
+#include "signal.h"
+#include "rect.h"
 #endif //TOOLBOX_H

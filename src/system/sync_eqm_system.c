@@ -8,28 +8,30 @@
 void SyncEqmSystem(Ecs* ecs)
 {
   ecs_entity_t* ett;
-  Equipment*    eqm;
-  Transform*    tx;
-  Visual*       vs;
-  Transform*    eqmtx;
-  Visual*       eqmvs;
+  Equipment*    equiments;
+  Transform*    transform;
+  Visual*       visual;
+  Transform*    weapon_transform;
+  Visual*       weapon_visual;
   ecs_size_t    cnt;
-  ecs_entity_t  eqme;
+  ecs_entity_t  weapon;
 
-  ecs_data(ecs, EQUIPMENT, &ett, (void**)&eqm, &cnt);
+  ecs_data(ecs, EQUIPMENT, &ett, (void**)&equiments, &cnt);
   for (int i = 0; i < cnt; ++i)
   {
-    eqme = eqm[i].rhand;
+    weapon = equiments[i].rhand;
+    if (weapon == ECS_NULL_ENT)
+      continue;
 
-    tx = ecs_get(ecs, ett[i], TRANSFORM);
-    vs = ecs_get(ecs, ett[i], VISUAL);
+    transform = ecs_get(ecs, ett[i], TRANSFORM);
+    visual = ecs_get(ecs, ett[i], VISUAL);
 
-    eqmtx = ecs_get(ecs, eqme, TRANSFORM);
-    eqmvs = ecs_get(ecs, eqme, VISUAL);
+    weapon_transform = ecs_get(ecs, weapon, TRANSFORM);
+    weapon_visual = ecs_get(ecs, weapon, VISUAL);
 
-    eqmtx->x = tx->x + FLIP_TO_SIGN(vs->flip) * 6;
-    eqmtx->y = tx->y + 6;
+    weapon_transform->x = transform->x + FLIP_TO_SIGN(visual->flip) * 6;
+    weapon_transform->y = transform->y + 6;
 
-    eqmvs->flip = vs->flip;
+    weapon_visual->flip = visual->flip;
   }
 }

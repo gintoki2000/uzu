@@ -7,6 +7,7 @@ static const char*  _texture_files[NUM_TEXS] = {
   [TEX_KNIGHT] = "asserts/knight.png",
   [TEX_AXE] = "asserts/axe.png",
   [TEX_ANIME_SWORD] = "asserts/anime_sword.png",
+  [TEX_BLOOD] = "asserts/blood.png",
 };
 
 static SDL_Texture* load_texture(const char* file)

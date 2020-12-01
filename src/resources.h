@@ -8,6 +8,7 @@ typedef enum
   TEX_KNIGHT,
   TEX_AXE,
   TEX_ANIME_SWORD,
+  TEX_BLOOD,
   NUM_TEXS
 } TextureId;
 BOOL         resources_load();

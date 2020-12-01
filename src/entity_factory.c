@@ -4,7 +4,7 @@
 #include "toolbox/sprite.h"
 #include <entity_factory.h>
 
-ecs_entity_t ettfactory_make_anime_sword(Ecs* ecs)
+ecs_entity_t make_anime_sword(Ecs* ecs)
 {
   SDL_Texture* texture;
   ecs_entity_t sword;
@@ -14,6 +14,7 @@ ecs_entity_t ettfactory_make_anime_sword(Ecs* ecs)
   Transform*      transform;
   GenericSword*   generic_sword;
   WeaponCmdInput* cmd_input;
+  HitBox*         hitbox;
 
   texture = get_texture(TEX_ANIME_SWORD);
 
@@ -25,7 +26,6 @@ ecs_entity_t ettfactory_make_anime_sword(Ecs* ecs)
   sprite_init(&visual->sprite, texture);
   visual->anchor.x = visual->sprite.rect.w / 2;
   visual->anchor.y = visual->sprite.rect.h;
-  visual->rot = 0.0;
 
   generic_sword = ecs_add(ecs, sword, GENERIC_SWORD);
   generic_sword->atk = 1;
@@ -36,10 +36,14 @@ ecs_entity_t ettfactory_make_anime_sword(Ecs* ecs)
   cmd_input = ecs_add(ecs, sword, WP_CMD_INPUT);
   cmd_input->action = WEAPON_ACTION_NONE;
 
+  hitbox = ecs_add(ecs, sword, HITBOX);
+  hitbox->size = VEC2(12.f, 30.f);
+  hitbox->anchor = VEC2(6.f, 30.f);
+
   return sword;
 }
 
-ecs_entity_t ettfactory_make_knight(Ecs* ecs, ecs_entity_t weapon)
+ecs_entity_t make_knight(Ecs* ecs, ecs_entity_t weapon)
 {
   ecs_entity_t knight;
   SDL_Texture* texture;
@@ -81,14 +85,12 @@ ecs_entity_t ettfactory_make_knight(Ecs* ecs, ecs_entity_t weapon)
   animator->elapsed = 0;
 
   hitbox = ecs_add(ecs, knight, HITBOX);
-
-  hitbox->hwidth = 16 / 2;
-  hitbox->hheight = 28 / 2;
-  hitbox->proxy_id = -1;
+  hitbox->size = VEC2(16.f, 20.f);
+  hitbox->anchor = VEC2(8.f, 10.f);
   return knight;
 }
 
-ecs_entity_t ettfactory_make_huge_demon(Ecs* ecs, ecs_entity_t weapon)
+ecs_entity_t make_huge_demon(Ecs* ecs, ecs_entity_t weapon)
 {
   ecs_entity_t demon;
   SDL_Texture* texture;
@@ -97,10 +99,12 @@ ecs_entity_t ettfactory_make_huge_demon(Ecs* ecs, ecs_entity_t weapon)
   /*components */
   Transform* transform;
   Visual*    visual;
-  Equipment* equipment;
   CmdInput*  cmd_input;
   Animator*  animator;
   HitBox*    hitbox;
+  Heath*     heath;
+  HealBar*   healthBar;
+  LifeSpan* life_span;
 
   texture = get_texture(TEX_BIG_DEMON);
   animation_init(&anims[ANIM_STATE_HIT], texture, 32 * 6, 0, 1, 1, 32, 36);
@@ -113,14 +117,12 @@ ecs_entity_t ettfactory_make_huge_demon(Ecs* ecs, ecs_entity_t weapon)
   demon = ecs_create(ecs);
 
   transform = ecs_add(ecs, demon, TRANSFORM);
+  // transform->rot = 45.0;
 
   visual = ecs_add(ecs, demon, VISUAL);
 
   visual->anchor.x = 32 / 2;
   visual->anchor.y = 36 / 2;
-
-  equipment = ecs_add(ecs, demon, EQUIPMENT);
-  equipment->rhand = weapon;
 
   cmd_input = ecs_add(ecs, demon, COMMAND_INPUT);
   cmd_input->action = WEAPON_ACTION_NONE;
@@ -131,15 +133,22 @@ ecs_entity_t ettfactory_make_huge_demon(Ecs* ecs, ecs_entity_t weapon)
   animator->elapsed = 0;
 
   hitbox = ecs_add(ecs, demon, HITBOX);
+  hitbox->size = VEC2(32.f, 36.f);
+  hitbox->anchor = VEC2(16.f, 18.f);
 
-  hitbox->hwidth = 32 / 2;
-  hitbox->hheight = 36 / 2;
-  hitbox->proxy_id = -1;
+  ecs_add(ecs, demon, ENEMY_TAG);
+
+  heath = ecs_add(ecs, demon, HEATH);
+  heath->max_hit_points = 100;
+  heath->hit_points = 60;
+
+  healthBar = ecs_add(ecs, demon, HEAL_BAR);
+  healthBar->len = 40;
 
   return demon;
 }
 
-ecs_entity_t ettfactory_make_axe(Ecs* ecs)
+ecs_entity_t make_axe(Ecs* ecs)
 {
   SDL_Texture* texture;
   ecs_entity_t axe;
@@ -160,11 +169,9 @@ ecs_entity_t ettfactory_make_axe(Ecs* ecs)
   sprite_init(&visual->sprite, texture);
   visual->anchor.x = visual->sprite.rect.w / 2;
   visual->anchor.y = visual->sprite.rect.h;
-  visual->rot = 0.0;
 
   generic_axe = ecs_add(ecs, axe, GENERIC_AXE);
   generic_axe->atk = 1;
-  generic_axe->range = 15;
   generic_axe->step = 0;
   generic_axe->timer = 0;
 
@@ -172,4 +179,36 @@ ecs_entity_t ettfactory_make_axe(Ecs* ecs)
   cmd_input->action = WEAPON_ACTION_NONE;
 
   return axe;
+}
+
+ecs_entity_t make_blood_stain_effect(Ecs *ecs, int x, int y)
+{
+  ecs_entity_t stain_effect;
+
+  Visual* visual;
+  Animator* animator;
+  Transform* transform;
+  LifeSpan* life_span;
+
+  Animation animation;
+  SDL_Texture* texture;
+  texture = get_texture(TEX_BLOOD);
+  animation_init(&animation, texture, 0, 0, 1, 4, 16, 16);
+
+  stain_effect = ecs_create(ecs);
+
+  visual = ecs_add(ecs, stain_effect, VISUAL);
+  visual->anchor = (SDL_Point){8, 8};
+
+  animator = ecs_add(ecs, stain_effect, ANIMATOR);
+  animator_init(animator, &animation, 1);
+  
+  transform = ecs_add(ecs, stain_effect, TRANSFORM);
+  transform->x = x;
+  transform->y = y;
+
+  life_span = ecs_add(ecs, stain_effect, LIFE_SPAN);
+  life_span->remaining = 15; // frames
+  
+  return stain_effect; 
 }

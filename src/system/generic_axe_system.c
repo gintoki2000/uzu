@@ -5,21 +5,21 @@
 #define STEP 7
 #define FLIP_TO_SIGN(f) (f == SDL_FLIP_NONE ? 1 : -1)
 
-static void process(Ecs* ecs, GenericAxe* ax, WeaponCmdInput* cmd, Visual* vs)
+static void process(Ecs* ecs, GenericAxe* gaxe, WeaponCmdInput* cmd, Visual* vs, Transform* tx)
 {
   (void)ecs;
 
-  switch (ax->state)
+  switch (gaxe->state)
   {
   case AXE_STATE_IDLE:
   {
     if (cmd->action == WEAPON_ACTION_REGULAR_ATK)
     {
       cmd->action = WEAPON_ACTION_NONE;
-      ax->state = AXE_STATE_REGULAR_ATK;
-      ax->step = 1;
-      ax->timer = 0;
-      vs->rot = 20.0 * FLIP_TO_SIGN(vs->flip);
+      gaxe->state = AXE_STATE_REGULAR_ATK;
+      gaxe->step = 1;
+      gaxe->timer = 0;
+      tx->rot = 20.0 * FLIP_TO_SIGN(vs->flip);
     }
     else if (cmd->action == WEAPON_ACTION_SPECIAL_ATK)
     {
@@ -30,19 +30,19 @@ static void process(Ecs* ecs, GenericAxe* ax, WeaponCmdInput* cmd, Visual* vs)
   break;
   case AXE_STATE_REGULAR_ATK:
   {
-    ax->timer++;
-    if (ax->timer == INTERVAL)
+    gaxe->timer++;
+    if (gaxe->timer == INTERVAL)
     {
-      ax->timer = 0;
-      ax->step++;
-      if (ax->step == STEP)
+      gaxe->timer = 0;
+      gaxe->step++;
+      if (gaxe->step == STEP)
       {
-        ax->state = AXE_STATE_IDLE;
-        vs->rot = 0.0;
+        gaxe->state = AXE_STATE_IDLE;
+        tx->rot = 0.0;
       }
       else
       {
-        vs->rot = ax->step * 20.0 * FLIP_TO_SIGN(vs->flip);
+        tx->rot = gaxe->step * 20.0 * FLIP_TO_SIGN(vs->flip);
       }
     }
   }
@@ -53,16 +53,18 @@ void GenericAxeSystem(Ecs* ecs)
 {
   ecs_entity_t*   ett;
   WeaponCmdInput* cmd;
-  GenericAxe*     ax;
+  GenericAxe*     gaxe;
   Visual*         vs;
+  Transform*      tx;
   ecs_size_t      cnt;
 
-  ecs_data(ecs, GENERIC_AXE, &ett, (void**)&ax, &cnt);
+  ecs_data(ecs, GENERIC_AXE, &ett, (void**)&gaxe, &cnt);
 
   for (int i = 0; i < cnt; ++i)
   {
     cmd = ecs_get(ecs, ett[i], WP_CMD_INPUT);
     vs = ecs_get(ecs, ett[i], VISUAL);
-    process(ecs, &ax[i], cmd, vs);
+    tx = ecs_get(ecs, ett[i], TRANSFORM);
+    process(ecs, &gaxe[i], cmd, vs, tx);
   }
 }

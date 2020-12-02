@@ -38,10 +38,7 @@ typedef struct Motion
 } Motion;
 typedef struct Transform
 {
-  s32    x;
-  s32    y;
-  s32    local_pos_x;
-  s32    local_pos_y;
+  Vec2   pos;
   double rot;
 } Transform;
 
@@ -125,6 +122,11 @@ typedef struct EnemyTag
   int dummy;
 } EnemyTag;
 
+typedef struct Projectile
+{
+  int atk;
+} Projectile;
+
 typedef struct PlayerWeaponTag
 {
   int dummy;
@@ -148,6 +150,7 @@ typedef struct HitBox
 {
   Vec2 size;
   Vec2 anchor;
+  int proxy_id;
 } HitBox;
 
 typedef struct HealBar
@@ -155,6 +158,7 @@ typedef struct HealBar
   int       len; // in pixel
   SDL_Color color;
   SDL_Color border;
+  SDL_Point anchor;
 } HealBar;
 
 typedef struct LifeSpan
@@ -178,6 +182,7 @@ enum
   GENERIC_BOW,
   HITBOX,
   ENEMY_TAG,
+  PROJECTILE,
   PLAYER_WEAPON_TAG,
   HEAL_BAR,
   LIFE_SPAN,
@@ -199,5 +204,11 @@ void animation_fini(Animation* anim);
 
 Animator* animator_init(Animator* animator, const Animation* anims, u32 cnt);
 void      animator_fini(Animator* animator);
+
+INLINE visual_set_anchor_to_center(Visual* v)
+{
+  v->anchor.x = v->sprite.rect.w / 2;
+  v->anchor.y = v->sprite.rect.h / 2;
+}
 
 #endif // COMPONENTS_H

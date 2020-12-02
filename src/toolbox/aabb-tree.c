@@ -1,12 +1,9 @@
-
-#include <toolbox/aabb-tree.h>
-#include <common.h>
-#include <assert.h>
+#include "aabb-tree.h"
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define NULL_NODE (-1)
+#define RTREE_DEFAULT_CAP 255
 
 typedef struct
 {
@@ -18,110 +15,107 @@ typedef struct
   int   height;
 } TreeNode;
 
-struct AABBTree
+struct RTree
 {
-  int          capacity;
-  int          count;
+  int       capacity;
+  int       count;
   TreeNode* nodes;
-  int          root;
-  int          free_index;
-  int*         next;
+  int       root;
+  int       free_index;
+  int*      next;
 };
 
-static AABBTree* aabb_tree_init(AABBTree* AABBTree)
+static RTree* rtree_init(RTree* self)
 {
-  int n = 16;
-  AABBTree->capacity = n;
-  AABBTree->count = 0;
-  AABBTree->root = NULL_NODE;
-  AABBTree->nodes = calloc(n, sizeof(TreeNode));
-  AABBTree->next = calloc(n, sizeof(int));
-  for (int i = 0; i < n; ++i)
+  self->capacity = RTREE_DEFAULT_CAP;
+  self->count = 0;
+  self->root = NULL_NODE;
+  self->nodes = calloc(RTREE_DEFAULT_CAP, sizeof(TreeNode));
+  self->next = calloc(RTREE_DEFAULT_CAP, sizeof(int));
+  for (int i = 0; i < RTREE_DEFAULT_CAP - 1; ++i)
   {
-    AABBTree->next[i] = i + 1;
-    AABBTree->nodes[i].height = -1;
+    self->next[i] = i + 1;
+    self->nodes[i].height = -1;
   }
-  AABBTree->free_index = 0;
-  AABBTree->next[n - 1] = NULL_NODE;
-  return AABBTree;
+  self->free_index = 0;
+  self->next[RTREE_DEFAULT_CAP - 1] = NULL_NODE;
+  return self;
 }
 
-static bool is_leaf(const TreeNode* node) { return node->child1 == -1; }
+static bool node_is_leaf(const TreeNode* node) { return node->child1 == -1; }
 
-static void aabb_tree_finalize(AABBTree* AABBTree)
+static void rtree_finalize(RTree* self)
 {
-  free(AABBTree->nodes);
-  free(AABBTree->next);
+  free(self->nodes);
+  free(self->next);
 }
-static void aabb_tree_grow_if_need(AABBTree* AABBTree)
+static void rtree_grow_if_need(RTree* self)
 {
-  if (AABBTree->count == AABBTree->capacity)
+  if (self->count == self->capacity)
   {
-    assert(AABBTree->free_index == NULL_NODE);
-    int          count = AABBTree->count;
-    int          new_capacity = AABBTree->capacity * 2;
-    TreeNode* nodes = malloc(new_capacity * sizeof(TreeNode));
-    AABBTree->nodes = memcpy(nodes, AABBTree->nodes, count * sizeof(TreeNode));
-    int* next = malloc(new_capacity * sizeof(int));
-    AABBTree->next = memcpy(next, AABBTree->next, count * sizeof(int));
-    for (int i = count; i < new_capacity; ++i)
+    ASSERT(self->free_index == NULL_NODE);
+
+    self->capacity *= 2;
+    self->nodes = realloc(self->nodes, self->capacity * sizeof(TreeNode));
+    self->next = realloc(self->next, self->capacity * sizeof(int));
+
+    for (int i = self->count; i < self->capacity - 1; ++i)
     {
-      next[i] = i + 1;
-      nodes[i].height = -1;
+      self->next[i] = i + 1;
+      self->nodes[i].height = -1;
     }
-    next[new_capacity - 1] = -1;
-    nodes[new_capacity - 1].height = -1;
-    AABBTree->free_index = count;
-    AABBTree->capacity = new_capacity;
+    self->next[self->capacity - 1] = NULL_NODE;
+    self->nodes[self->capacity - 1].height = -1;
+    self->free_index = self->count;
   }
 }
 
-static int aabb_tree_allocate_node(AABBTree* AABBTree)
+static int rtree_allocate_node(RTree* self)
 {
-  aabb_tree_grow_if_need(AABBTree);
-  TreeNode* nodes = AABBTree->nodes;
-  int          idx = AABBTree->free_index;
-  AABBTree->free_index = AABBTree->next[idx];
+  rtree_grow_if_need(self);
+  TreeNode* nodes = self->nodes;
+  int       idx = self->free_index;
+  self->free_index = self->next[idx];
   nodes[idx].user_data = NULL;
   nodes[idx].parent = NULL_NODE;
   nodes[idx].child1 = NULL_NODE;
   nodes[idx].child2 = NULL_NODE;
   nodes[idx].height = 0;
-  ++AABBTree->count;
+  ++self->count;
   return idx;
 }
 
-static void aabb_tree_free_node(AABBTree* AABBTree, int node_idx)
+static void rtree_free_node(RTree* self, int node_idx)
 {
-  assert(node_idx >= 0 && node_idx < AABBTree->capacity);
-  assert(AABBTree->count > 0);
+  ASSERT(node_idx >= 0 && node_idx < self->capacity);
+  ASSERT(self->count > 0);
 
-  AABBTree->next[node_idx] = AABBTree->free_index;
-  AABBTree->free_index = node_idx;
-  AABBTree->nodes[node_idx].height = -1;
-  --AABBTree->count;
+  self->next[node_idx] = self->free_index;
+  self->free_index = node_idx;
+  self->nodes[node_idx].height = -1;
+  --self->count;
 }
 
-static int aabb_tree_balance(AABBTree* AABBTree, int idx)
+static int rtree_balance(RTree* self, int idx)
 {
   int ia = idx;
-  assert(ia != NULL_NODE);
-  TreeNode* nodes = AABBTree->nodes;
+  ASSERT(ia != NULL_NODE);
+  TreeNode* nodes = self->nodes;
   TreeNode* a = &nodes[ia];
-  if (is_leaf(a) || a->height < 2)
+  if (node_is_leaf(a) || a->height < 2)
   {
     return ia;
   }
 
-  int          ib = a->child1;
-  int          ic = a->child2;
+  int       ib = a->child1;
+  int       ic = a->child2;
   TreeNode* b = nodes + ib;
   TreeNode* c = nodes + ic;
-  int          balance = c->height - b->height;
+  int       balance = c->height - b->height;
   if (balance > 1)
   {
-    int          ih = c->child1;
-    int          ik = c->child2;
+    int       ih = c->child1;
+    int       ik = c->child2;
     TreeNode* h = nodes + ih;
     TreeNode* k = nodes + ik;
 
@@ -142,7 +136,7 @@ static int aabb_tree_balance(AABBTree* AABBTree, int idx)
     }
     else
     {
-      AABBTree->root = ic;
+      self->root = ic;
     }
 
     if (h->height > k->height)
@@ -171,12 +165,12 @@ static int aabb_tree_balance(AABBTree* AABBTree, int idx)
 
   if (balance < -1)
   {
-    int          id = b->child1;
-    int          ie = b->child2;
+    int       id = b->child1;
+    int       ie = b->child2;
     TreeNode* d = nodes + id;
     TreeNode* e = nodes + ie;
-    assert(0 <= id && id < AABBTree->capacity);
-    assert(0 <= ie && ie < AABBTree->capacity);
+    ASSERT(0 <= id && id < self->capacity);
+    ASSERT(0 <= ie && ie < self->capacity);
 
     b->child1 = ia;
     b->parent = a->parent;
@@ -190,13 +184,13 @@ static int aabb_tree_balance(AABBTree* AABBTree, int idx)
       }
       else
       {
-        assert(nodes[b->parent].child2 == ia);
+        ASSERT(nodes[b->parent].child2 == ia);
         nodes[b->parent].child2 = ib;
       }
     }
     else
     {
-      AABBTree->root = ib;
+      self->root = ib;
     }
 
     if (d->height > e->height)
@@ -228,19 +222,19 @@ static int aabb_tree_balance(AABBTree* AABBTree, int idx)
   return ia;
 }
 
-static void aabb_tree_insert_leaf(AABBTree* AABBTree, int leaf)
+static void rtree_insert_leaf(RTree* self, int leaf)
 {
-  TreeNode* nodes = AABBTree->nodes;
-  if (AABBTree->root == NULL_NODE)
+  TreeNode* nodes = self->nodes;
+  if (self->root == NULL_NODE)
   {
-    AABBTree->root = leaf;
-    nodes[AABBTree->root].parent = NULL_NODE;
+    self->root = leaf;
+    nodes[self->root].parent = NULL_NODE;
     return;
   }
 
   AABB leaf_aabb = nodes[leaf].aabb;
-  int  index = AABBTree->root;
-  while (is_leaf(&nodes[index]) == false)
+  int  index = self->root;
+  while (node_is_leaf(&nodes[index]) == false)
   {
     int child1 = nodes[index].child1;
     int child2 = nodes[index].child2;
@@ -255,7 +249,7 @@ static void aabb_tree_insert_leaf(AABBTree* AABBTree, int leaf)
     float inheritance_cost = 2.0f * (combine_area - area);
 
     float cost1;
-    if (is_leaf(&nodes[child1]))
+    if (node_is_leaf(&nodes[child1]))
     {
       AABB aabb = aabb_merge(&leaf_aabb, &nodes[child1].aabb);
       cost1 = aabb_premiter(&aabb) + inheritance_cost;
@@ -269,7 +263,7 @@ static void aabb_tree_insert_leaf(AABBTree* AABBTree, int leaf)
     }
 
     float cost2;
-    if (is_leaf(&nodes[child2]))
+    if (node_is_leaf(&nodes[child2]))
     {
       AABB aabb = aabb_merge(&leaf_aabb, &nodes[child2].aabb);
       cost2 = aabb_premiter(&aabb) + inheritance_cost;
@@ -301,7 +295,7 @@ static void aabb_tree_insert_leaf(AABBTree* AABBTree, int leaf)
 
   // Create a new parent.
   int old_parent = nodes[sibling].parent;
-  int new_parent = aabb_tree_allocate_node(AABBTree);
+  int new_parent = rtree_allocate_node(self);
   nodes[new_parent].parent = old_parent;
   nodes[new_parent].user_data = NULL;
   nodes[new_parent].aabb = aabb_merge(&leaf_aabb, &nodes[sibling].aabb);
@@ -331,20 +325,20 @@ static void aabb_tree_insert_leaf(AABBTree* AABBTree, int leaf)
     nodes[new_parent].child2 = leaf;
     nodes[sibling].parent = new_parent;
     nodes[leaf].parent = new_parent;
-    AABBTree->root = new_parent;
+    self->root = new_parent;
   }
 
   // Walk back up the tree fixing heights and AABBs
   index = nodes[leaf].parent;
   while (index != NULL_NODE)
   {
-    index = aabb_tree_balance(AABBTree, index);
+    index = rtree_balance(self, index);
 
     int child1 = nodes[index].child1;
     int child2 = nodes[index].child2;
 
-    assert(child1 != NULL_NODE);
-    assert(child2 != NULL_NODE);
+    ASSERT(child1 != NULL_NODE);
+    ASSERT(child2 != NULL_NODE);
 
     nodes[index].height = 1 + max(nodes[child1].height, nodes[child2].height);
     nodes[index].aabb = aabb_merge(&nodes[child1].aabb, &nodes[child2].aabb);
@@ -353,13 +347,13 @@ static void aabb_tree_insert_leaf(AABBTree* AABBTree, int leaf)
   }
 }
 
-static void aabb_tree_remove_leaf(AABBTree* AABBTree, int leaf)
+static void rtree_remove_leaf(RTree* self, int leaf)
 {
 
-  TreeNode* nodes = AABBTree->nodes;
-  if (leaf == AABBTree->root)
+  TreeNode* nodes = self->nodes;
+  if (leaf == self->root)
   {
-    AABBTree->root = NULL_NODE;
+    self->root = NULL_NODE;
     return;
   }
 
@@ -386,12 +380,12 @@ static void aabb_tree_remove_leaf(AABBTree* AABBTree, int leaf)
       nodes[grand_parent].child2 = sibling;
     }
     nodes[sibling].parent = grand_parent;
-    aabb_tree_free_node(AABBTree, parent);
+    rtree_free_node(self, parent);
 
     int index = grand_parent;
     while (index != NULL_NODE)
     {
-      index = aabb_tree_balance(AABBTree, index);
+      index = rtree_balance(self, index);
 
       int child1 = nodes[index].child1;
       int child2 = nodes[index].child2;
@@ -404,9 +398,9 @@ static void aabb_tree_remove_leaf(AABBTree* AABBTree, int leaf)
   }
   else
   {
-    AABBTree->root = sibling;
+    self->root = sibling;
     nodes[sibling].parent = NULL_NODE;
-    aabb_tree_free_node(AABBTree, parent);
+    rtree_free_node(self, parent);
   }
 }
 
@@ -443,25 +437,25 @@ static void stack_push(Stack* s, int v)
 }
 static int stack_pop(Stack* s)
 {
-  assert(s->count > 0 && "stack empty");
+  ASSERT(s->count > 0 && "stack empty");
   return s->items[--s->count];
 }
 static bool stack_empty(Stack* s) { return s->count == 0; }
 
 /********************************************************************/
 
-AABBTree* aabb_tree_new() { return aabb_tree_init(malloc(sizeof(AABBTree))); }
+RTree* rtree_new() { return rtree_init(malloc(sizeof(RTree))); }
 
-void aabb_tree_delete(AABBTree* AABBTree)
+void rtree_delete(RTree* self)
 {
-  aabb_tree_finalize(AABBTree);
-  free(AABBTree);
+  rtree_finalize(self);
+  free(self);
 }
 
-int aabb_tree_create_proxy(AABBTree* AABBTree, void* user_data, const AABB* aabb)
+int rtree_create_proxy(RTree* self, void* user_data, const AABB* aabb)
 {
-  int          idx = aabb_tree_allocate_node(AABBTree);
-  TreeNode* nodes = AABBTree->nodes;
+  int       idx = rtree_allocate_node(self);
+  TreeNode* nodes = self->nodes;
 
   nodes[idx].aabb = *aabb;
   nodes[idx].parent = NULL_NODE;
@@ -472,29 +466,26 @@ int aabb_tree_create_proxy(AABBTree* AABBTree, void* user_data, const AABB* aabb
 
   aabb_extend(&nodes[idx].aabb, 5.f);
 
-  aabb_tree_insert_leaf(AABBTree, idx);
+  rtree_insert_leaf(self, idx);
 
   return idx;
 }
 
-void aabb_tree_destroy_proxy(AABBTree* AABBTree, int proxy_id)
+void rtree_destroy_proxy(RTree* self, int proxy_id)
 {
-  assert(0 <= proxy_id && proxy_id < AABBTree->capacity);
-  assert(is_leaf(&AABBTree->nodes[proxy_id]));
+  ASSERT(0 <= proxy_id && proxy_id < self->capacity);
+  ASSERT(node_is_leaf(&self->nodes[proxy_id]));
 
-  aabb_tree_remove_leaf(AABBTree, proxy_id);
-  aabb_tree_free_node(AABBTree, proxy_id);
+  rtree_remove_leaf(self, proxy_id);
+  rtree_free_node(self, proxy_id);
 }
 
-bool aabb_tree_move_proxy(AABBTree*   AABBTree,
-                          int         proxy_id,
-                          const AABB* aabb,
-                          const Vec2  displacement)
+bool rtree_move_proxy(RTree* self, int proxy_id, const AABB* aabb, const Vec2 displacement)
 {
-  TreeNode* nodes = AABBTree->nodes;
-  assert(0 <= proxy_id && proxy_id < AABBTree->capacity);
+  TreeNode* nodes = self->nodes;
+  ASSERT(0 <= proxy_id && proxy_id < self->capacity);
 
-  assert(is_leaf(&nodes[proxy_id]));
+  ASSERT(node_is_leaf(&nodes[proxy_id]));
 
   AABB fat_aabb = *aabb;
   aabb_extend(&fat_aabb, 5.f);
@@ -531,25 +522,25 @@ bool aabb_tree_move_proxy(AABBTree*   AABBTree,
     }
   }
 
-  aabb_tree_remove_leaf(AABBTree, proxy_id);
+  rtree_remove_leaf(self, proxy_id);
 
   nodes[proxy_id].aabb = fat_aabb;
 
-  aabb_tree_insert_leaf(AABBTree, proxy_id);
+  rtree_insert_leaf(self, proxy_id);
 
   return true;
 }
 
-void aabb_tree_query(AABBTree* AABBTree, const AABB* aabb, Callback cb)
+void rtree_query(RTree* self, const AABB* aabb, Callback cb)
 {
-  Stack        stack;
-  void(* fn)(void*, int); 
-  TreeNode* nodes; 
-  
-  nodes = AABBTree->nodes;
-  fn = (void(*)(void*, int)) cb.func;
+  Stack stack;
+  void (*fn)(void*, int);
+  TreeNode* nodes;
+
+  nodes = self->nodes;
+  fn = (void (*)(void*, int))cb.func;
   stack_init(&stack);
-  stack_push(&stack, AABBTree->root);
+  stack_push(&stack, self->root);
   while (!stack_empty(&stack))
   {
     int id = stack_pop(&stack);
@@ -561,7 +552,7 @@ void aabb_tree_query(AABBTree* AABBTree, const AABB* aabb, Callback cb)
     const TreeNode* node = nodes + id;
     if (aabb_test_overlap(aabb, &node->aabb))
     {
-      if (is_leaf(node))
+      if (node_is_leaf(node))
       {
         fn(cb.user_data, id);
       }
@@ -575,16 +566,47 @@ void aabb_tree_query(AABBTree* AABBTree, const AABB* aabb, Callback cb)
   stack_finalize(&stack);
 }
 
-void* aabb_tree_get_user_data(AABBTree* AABBTree, int proxy_id)
+void* rtree_get_user_data(RTree* self, int proxy_id)
 {
-  assert(proxy_id >= 0 && proxy_id < AABBTree->capacity);
-  assert(is_leaf(&AABBTree->nodes[proxy_id]));
-  return AABBTree->nodes[proxy_id].user_data;
+  ASSERT(proxy_id >= 0 && proxy_id < self->capacity);
+  ASSERT(node_is_leaf(&self->nodes[proxy_id]));
+  return self->nodes[proxy_id].user_data;
 }
 
-const AABB* aabb_tree_get_fat_aabb(AABBTree* AABBTree, int proxy_id)
+const AABB* rtree_get_fat_aabb(RTree* self, int proxy_id)
 {
-  assert(proxy_id >= 0 && proxy_id < AABBTree->capacity);
-  assert(is_leaf(&AABBTree->nodes[proxy_id]));
-  return &AABBTree->nodes[proxy_id].aabb;
+  ASSERT(proxy_id >= 0 && proxy_id < self->capacity);
+  ASSERT(node_is_leaf(&self->nodes[proxy_id]));
+  return &self->nodes[proxy_id].aabb;
+}
+
+void rtree_draw(RTree* self, SDL_Renderer* renderer)
+{
+  Stack     stack;
+  SDL_Rect  rect;
+  TreeNode* node;
+  if (self->root == NULL_NODE)
+    return;
+  stack_init(&stack);
+
+
+  SDL_SetRenderDrawColor(renderer, 224, 74, 214, 255);
+  stack_push(&stack, self->root);
+  while (!stack_empty(&stack))
+  {
+    node = &self->nodes[stack_pop(&stack)];
+    rect.x = node->aabb.lower_bound.x;
+    rect.y = node->aabb.lower_bound.y;
+
+    rect.w = node->aabb.upper_bound.x - node->aabb.lower_bound.x;
+    rect.h = node->aabb.upper_bound.y - node->aabb.lower_bound.y;
+    SDL_RenderDrawRect(renderer, &rect);
+
+    if (!node_is_leaf(node))
+    {
+      stack_push(&stack, node->child1);
+      stack_push(&stack, node->child2);
+    }
+  }
+  stack_finalize(&stack);
 }

@@ -24,4 +24,6 @@ INLINE Rect* rect_init(Rect* rect, float x, float y, float w, float h, double an
 }
 
 BOOL rect_has_intersection(const Rect* r1, const Rect* r2);
+
+AABB* rect_get_aabb(const Rect* rect, AABB* aabb);
 #endif // RECT_H

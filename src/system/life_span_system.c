@@ -12,14 +12,10 @@ void LifeSpanSystem(Ecs* ecs)
   if (cnt > 0)
     for (int i = cnt - 1; i; --i)
     {
-      if (life_span[i].remaining > 0)
+      if (--life_span[i].remaining == 0)
       {
-        --life_span[i].remaining;
-        if (life_span[i].remaining == 0)
-        {
-          INFO("e{%3u | %3u} end life span\n", ECS_ENT_IDX(entities[i]), ECS_ENT_VER(entities[i]));
-          ecs_destroy(ecs, entities[i]);
-        }
+        INFO("e{%3u | %3u} end life span\n", ECS_ENT_IDX(entities[i]), ECS_ENT_VER(entities[i]));
+        ecs_destroy(ecs, entities[i]);
       }
     }
 }

@@ -21,10 +21,10 @@ void DrawingHealBarSystem(Ecs* ecs, SDL_Renderer* renderer)
     heath = ecs_get(ecs, entities[i], HEATH);
     p = (float)heath->hit_points / (float)heath->max_hit_points;
 
-    border.x = transform->x;
-    border.y = transform->y;
+    border.x = transform->pos.x - heal_bars[i].anchor.x;
+    border.y = transform->pos.y - heal_bars[i].anchor.y;
     border.w = heal_bars->len;
-    border.h = 10;
+    border.h = 5;
 
     SDL_SetRenderDrawColor(renderer, 200, 0, 0, 255);
     SDL_RenderDrawRect(renderer, &border);

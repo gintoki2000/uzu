@@ -4,10 +4,10 @@
 #include <components.h>
 #include <entity_factory.h>
 #include <stdio.h>
+#include <toolbox/toolbox.h>
 
 #define INTERVAL 1
 #define STEP 7
-#define FLIP_TO_SIGN(f) (f == SDL_FLIP_NONE ? 1 : -1)
 
 static void process(Ecs*            ecs,
                     ecs_entity_t    e,
@@ -55,21 +55,23 @@ static void process(Ecs*            ecs,
   }
 }
 
-static void on_collided(Ecs* ecs, const CollisionPair* pair)
+static void on_player_weapon_hit_enemy(Ecs* ecs, const CollisionPair* pair)
 {
   GenericSword* gswd;
   Transform*    enemy_tx;
   if ((gswd = ecs_get(ecs, pair->e1, GENERIC_SWORD)) != NULL)
   {
     enemy_tx = ecs_get(ecs, pair->e2, TRANSFORM);
-    make_blood_stain_effect(ecs, enemy_tx->x, enemy_tx->y);
+    make_blood_stain_effect(ecs, enemy_tx->pos);
     health_system_apply_damage(ecs, pair->e2, gswd->atk);
   }
 }
 
 void generic_sword_system_init(Ecs* ecs)
 {
-  collision_system_connect(SIG_PLAYER_WEAPON_COLLIED_W_ENEMY, ecs, (sig_handler_fn_t)on_collided);
+  collision_system_connect(SIG_PLAYER_WEAPON_COLLIED_W_ENEMY,
+                           ecs,
+                           (sig_handler_fn_t)on_player_weapon_hit_enemy);
 }
 
 void generic_sword_system_fini() {}

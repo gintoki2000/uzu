@@ -39,6 +39,7 @@ ecs_entity_t make_anime_sword(Ecs* ecs)
   hitbox = ecs_add(ecs, sword, HITBOX);
   hitbox->size = VEC2(12.f, 30.f);
   hitbox->anchor = VEC2(6.f, 30.f);
+  hitbox->proxy_id = NULL_NODE;
 
   return sword;
 }
@@ -85,8 +86,9 @@ ecs_entity_t make_knight(Ecs* ecs, ecs_entity_t weapon)
   animator->elapsed = 0;
 
   hitbox = ecs_add(ecs, knight, HITBOX);
-  hitbox->size = VEC2(16.f, 20.f);
-  hitbox->anchor = VEC2(8.f, 10.f);
+  hitbox->size = VEC2(10.f, 18.f);
+  hitbox->anchor = VEC2(5.f, 6.f);
+  hitbox->proxy_id = NULL_NODE;
   return knight;
 }
 
@@ -109,10 +111,10 @@ ecs_entity_t make_huge_demon(Ecs* ecs, ecs_entity_t weapon)
   texture = get_texture(TEX_BIG_DEMON);
   animation_init(&anims[ANIM_STATE_HIT], texture, 32 * 6, 0, 1, 1, 32, 36);
   animation_init(&anims[ANIM_STATE_IDLE], texture, 0, 0, 1, 4, 32, 36);
-  animation_init(&anims[ANIM_STATE_RUN], texture, 32 * 4, 0, 1, 4, 32, 36);
+  animation_init(&anims[ANIM_STATE_RUN], texture, 128, 0, 1, 4, 32, 36);
 
-  anims[ANIM_STATE_IDLE].frame_duration = 3;
-  anims[ANIM_STATE_RUN].frame_duration = 2;
+  anims[ANIM_STATE_IDLE].frame_duration = 6;
+  anims[ANIM_STATE_RUN].frame_duration = 3;
 
   demon = ecs_create(ecs);
 
@@ -129,12 +131,14 @@ ecs_entity_t make_huge_demon(Ecs* ecs, ecs_entity_t weapon)
 
   animator = ecs_add(ecs, demon, ANIMATOR);
   animator_init(animator, anims, NUM_ANIM_STATES);
-  animator->current_anim = ANIM_STATE_IDLE;
+  animator->current_anim = ANIM_STATE_RUN;
   animator->elapsed = 0;
+
 
   hitbox = ecs_add(ecs, demon, HITBOX);
   hitbox->size = VEC2(32.f, 36.f);
   hitbox->anchor = VEC2(16.f, 18.f);
+  hitbox->proxy_id = NULL_NODE;
 
   ecs_add(ecs, demon, ENEMY_TAG);
 
@@ -144,6 +148,7 @@ ecs_entity_t make_huge_demon(Ecs* ecs, ecs_entity_t weapon)
 
   healthBar = ecs_add(ecs, demon, HEAL_BAR);
   healthBar->len = 40;
+  healthBar->anchor = (SDL_Point){ 20, 25 };
 
   return demon;
 }
@@ -181,7 +186,7 @@ ecs_entity_t make_axe(Ecs* ecs)
   return axe;
 }
 
-ecs_entity_t make_blood_stain_effect(Ecs* ecs, int x, int y)
+ecs_entity_t make_blood_stain_effect(Ecs* ecs, Vec2 pos)
 {
   ecs_entity_t stain_effect;
 
@@ -204,8 +209,7 @@ ecs_entity_t make_blood_stain_effect(Ecs* ecs, int x, int y)
   animator_init(animator, &animation, 1);
 
   transform = ecs_add(ecs, stain_effect, TRANSFORM);
-  transform->x = x;
-  transform->y = y;
+  transform->pos = pos;
 
   life_span = ecs_add(ecs, stain_effect, LIFE_SPAN);
   life_span->remaining = 15; // frames
@@ -233,11 +237,51 @@ ecs_entity_t make_bow(Ecs* ecs)
   visual->anchor.y = visual->sprite.rect.h / 2;
 
   transform = ecs_add(ecs, bow, TRANSFORM);
-  transform->rot = 45.0;
 
   cmd = ecs_add(ecs, bow, WP_CMD_INPUT);
 
   g_bow = ecs_add(ecs, bow, GENERIC_BOW);
 
   return bow;
+}
+
+ecs_entity_t make_arrow(Ecs* ecs, Vec2 pos, Vec2 vel)
+{
+  SDL_Texture* texture;
+  ecs_entity_t arrow;
+
+  Transform*  transform;
+  Visual*     visual;
+  Motion*     motion;
+  Projectile* projectile;
+  HitBox*     hitbox;
+
+  texture = get_texture(TEX_ARROW);
+
+  arrow = ecs_create(ecs);
+
+  transform = ecs_add(ecs, arrow, TRANSFORM);
+  transform->pos = pos;
+
+  motion = ecs_add(ecs, arrow, MOTION);
+  motion->vel = vel;
+  motion->acc = VEC2(0.f, 0.f);
+
+  visual = ecs_add(ecs, arrow, VISUAL);
+  sprite_init(&visual->sprite, texture);
+  visual_set_anchor_to_center(visual);
+
+  projectile = ecs_add(ecs, arrow, PROJECTILE);
+  projectile->atk = 3;
+
+  hitbox = ecs_add(ecs, arrow, HITBOX);
+  hitbox->size.x = visual->sprite.rect.w;
+  hitbox->size.y = 3;
+  hitbox->anchor.x = hitbox->size.x / 2.f;
+  hitbox->anchor.y = hitbox->size.y / 2.f;
+  hitbox->proxy_id = NULL_NODE;
+
+  ecs_add(ecs, arrow, PLAYER_WEAPON_TAG);
+
+  return arrow;
 }

@@ -17,8 +17,8 @@ void DrawSystem(Ecs* ecs, SDL_Renderer* renderer)
     if (!ecs_has(ecs, ett[i], TRANSFORM))
       continue;
     transform = ecs_get(ecs, ett[i], TRANSFORM);
-    dst.x = transform->x - visuals[i].anchor.x;
-    dst.y = transform->y - visuals[i].anchor.y;
+    dst.x = transform->pos.x - visuals[i].anchor.x;
+    dst.y = transform->pos.y - visuals[i].anchor.y;
     dst.w = visuals[i].sprite.rect.w;
     dst.h = visuals[i].sprite.rect.h;
     SDL_RenderCopyEx(renderer,

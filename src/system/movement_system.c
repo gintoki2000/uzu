@@ -19,8 +19,8 @@ void MovementSystem(Ecs* ecs)
   {
     tx = ecs_get(ecs, ent[i], TRANSFORM);
 
-    tx->x += DIR_TO_VEL[cmd[i].desired_dir].x * 4;
-    tx->y += DIR_TO_VEL[cmd[i].desired_dir].y * 4;
+    tx->pos.x += DIR_TO_VEL[cmd[i].desired_dir].x * 4;
+    tx->pos.y += DIR_TO_VEL[cmd[i].desired_dir].y * 4;
     cmd[i].desired_dir = NONE;
   }
 }

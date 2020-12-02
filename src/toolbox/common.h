@@ -29,6 +29,8 @@ typedef struct
 #define TRUE SDL_TRUE
 #define FALSE SDL_FALSE
 
+#define FLIP_TO_SIGN(f) (f == SDL_FLIP_NONE ? 1 : -1)
+
 #define ASSERT(cd) SDL_assert(cd)
 
 #define CALLBACK_1(_user_data, _func)                                                              \
@@ -40,6 +42,20 @@ typedef struct
 #define INLINE static inline
 
 #define DEG_TO_RAD 0.0174532925
+
+#define MAX(__a, __b)                                                                              \
+  ({                                                                                               \
+    __auto_type __tmp_a = (__a);                                                                     \
+    __auto_type __tmp_b = (__b);                                                                     \
+    __tmp_a > __tmp_b ? __tmp_a : __tmp_b;                                                         \
+  })
+
+#define MIN(__a, __b)                                                                              \
+  ({                                                                                               \
+    __auto_type __tmp_a = (__a);                                                                     \
+    __auto_type __tmp_b = (__b);                                                                     \
+    __tmp_a < __tmp_b ? __tmp_a : __tmp_b;                                                         \
+  })
 
 typedef enum
 {
@@ -56,7 +72,7 @@ typedef struct
   float y;
 } Vec2;
 
-#define VEC2(_x, _y) ((Vec2){.x = _x, .y = _y})
+#define VEC2(_x, _y) ((Vec2){ .x = _x, .y = _y })
 
 typedef struct
 {

@@ -4,6 +4,7 @@
 #include "entity_pool.h"
 #include "pool.h"
 #include <SDL2/SDL.h>
+#include <toolbox/toolbox.h>
 
 typedef struct Ecs
 {
@@ -11,6 +12,7 @@ typedef struct Ecs
   EcsType*      types;
   EcsPool**     pools;
   EcsEntityPool entity_pool;
+  Dispatcher*   dispatcher;
 } Ecs;
 
 typedef struct EcsFilter
@@ -21,6 +23,20 @@ typedef struct EcsFilter
   ecs_size_t        ecnt;
 } EcsFilter;
 
+enum
+{
+  ECS_SIG_COMP_RMV,
+  ECS_SIG_COMP_ADD,
+  NUM_ECS_SIGS,
+};
+
+typedef struct EcsComponentEvent
+{
+  ecs_entity_t entity;
+  void*        component;
+  ecs_size_t   type;
+} EcsComponentEvent;
+
 typedef void (*ecs_each_fn_t)(void* user_data, Ecs* ecs, ecs_entity_t entity);
 typedef void (*ecs_each_ex_fn_t)(void* user_data, Ecs* ecs, ecs_entity_t entity, void** components);
 
@@ -30,27 +46,35 @@ void ecs_del(Ecs* ecs);
 Ecs* ecs_init(Ecs* self, const EcsType* types, ecs_size_t type_cnt);
 void ecs_fini(Ecs* self);
 
+/**
+ * create new entity
+ */
 ecs_entity_t ecs_create(Ecs* self);
-void         ecs_destroy(Ecs* self, ecs_entity_t entity);
-void*        ecs_add(Ecs* self, ecs_entity_t entity, ecs_size_t component_type);
+
+/**
+ * remove all component and destroy given entity
+ */
+void  ecs_destroy(Ecs* self, ecs_entity_t entity);
+void* ecs_add(Ecs* self, ecs_entity_t entity, ecs_size_t component_type);
 void* ecs_add_w_data(Ecs* self, ecs_entity_t entity, ecs_size_t component_type, const void* data);
 void  ecs_rmv(Ecs* self, ecs_entity_t entity, ecs_size_t component_type);
 void* ecs_get(Ecs* self, ecs_entity_t entity, ecs_size_t component_type);
-SDL_bool ecs_has(Ecs* self, ecs_entity_t entity, ecs_size_t component_type);
-void     ecs_rmv_all(Ecs* self, ecs_entity_t entity);
-void     ecs_each(Ecs* self, void* user_data, ecs_each_fn_t each_fn);
-void     ecs_each_w_filter(Ecs*             self,
-                           const EcsFilter* filter,
-                           void*            user_data,
-                           ecs_each_ex_fn_t each_fn);
-SDL_bool ecs_has_ex(Ecs* self, const ecs_size_t* types, ecs_size_t cnt);
-void     ecs_data(Ecs*           self,
-                  ecs_size_t     type,
-                  ecs_entity_t** entities_ptr,
-                  void**         components_ptr,
-                  ecs_size_t*    cnt_ptr);
+BOOL  ecs_has(Ecs* self, ecs_entity_t entity, ecs_size_t component_type);
+void  ecs_rmv_all(Ecs* self, ecs_entity_t entity);
+void  ecs_each(Ecs* self, void* user_data, ecs_each_fn_t each_fn);
+void  ecs_each_w_filter(Ecs*             self,
+                        const EcsFilter* filter,
+                        void*            user_data,
+                        ecs_each_ex_fn_t each_fn);
+BOOL  ecs_has_ex(Ecs* self, const ecs_size_t* types, ecs_size_t cnt);
+void  ecs_data(Ecs*           self,
+               ecs_size_t     type,
+               ecs_entity_t** entities_ptr,
+               void**         components_ptr,
+               ecs_size_t*    cnt_ptr);
+void  ecs_connect(Ecs* ecs, int sig, void* udata, sig_handler_fn_t handler);
 
-static SDL_bool ecs_is_valid(Ecs* self, ecs_entity_t entity)
+static BOOL ecs_is_valid(Ecs* self, ecs_entity_t entity)
 {
   return ecs_entity_pool_is_valid(&self->entity_pool, entity);
 }

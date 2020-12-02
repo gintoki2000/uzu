@@ -3,7 +3,6 @@
 
 #define INTERVAL 1
 #define STEP 7
-#define FLIP_TO_SIGN(f) (f == SDL_FLIP_NONE ? 1 : -1)
 
 static void process(Ecs* ecs, GenericAxe* gaxe, WeaponCmdInput* cmd, Visual* vs, Transform* tx)
 {

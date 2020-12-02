@@ -88,3 +88,12 @@ BOOL rect_has_intersection(const Rect* r1, const Rect* r2)
 
   return overlap_x && overlap_y;
 }
+
+AABB* rect_get_aabb(const Rect* rect, AABB* aabb)
+{
+  aabb->lower_bound.x = rect_min_x(rect);
+  aabb->lower_bound.y = rect_min_y(rect);
+  aabb->upper_bound.x = rect_max_x(rect);
+  aabb->upper_bound.y = rect_max_y(rect);
+  return aabb;
+}

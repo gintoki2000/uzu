@@ -15,7 +15,7 @@ void MotionSystem(Ecs* ecs)
   for (int i = 0; i < cnt; ++i)
   {
     transform = ecs_get(ecs, entities[i], TRANSFORM);
-    transform->x += motion[i].vel.x * DT;
-    transform->y += motion[i].vel.y * DT;
+    transform->pos.x += motion[i].vel.x * DT;
+    transform->pos.y += motion[i].vel.y * DT;
   }
 }

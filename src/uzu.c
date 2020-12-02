@@ -27,6 +27,7 @@
 #include <system/player_controller_system.h>
 #include <system/sword_system.h>
 #include <system/sync_eqm_system.h>
+#include <system/motion_system.h>
 
 #define WIN_WIDTH 480
 #define WIN_HEIGHT 360
@@ -57,6 +58,7 @@ static BOOL on_game_init(void* user_data)
 
   /*init keyboard*/
   keybroad_init();
+
 
   /*init _ecs*/
   EcsType types[NUM_COMPONENTS] = {
@@ -129,9 +131,14 @@ static BOOL on_game_init(void* user_data)
         (EcsType){
             .size = sizeof(Motion),
         },
+    [PROJECTILE] =
+        (EcsType){
+            .size = sizeof(Projectile),
+        },
   };
 
   _ecs = ecs_new(types, NUM_COMPONENTS);
+
 
   // ecs_entity_t player = make_knight(_ecs, make_anime_sword(_ecs));
 
@@ -140,22 +147,26 @@ static BOOL on_game_init(void* user_data)
   ecs_add(_ecs, player, PLAYER_TAG);
 
   Transform* tx = ecs_get(_ecs, player, TRANSFORM);
-  tx->x = WIN_WIDTH / 2;
-  tx->y = WIN_HEIGHT / 2;
+  tx->pos.x = WIN_WIDTH / 2;
+  tx->pos.y = WIN_HEIGHT / 2;
 
   srand(SDL_GetTicks());
-  for (int i = 0; i < 20; ++i)
+  for (int i = 0; i < 5; ++i)
   {
     ecs_entity_t demon = make_huge_demon(_ecs, ECS_NULL_ENT);
 
     Transform* dtx = ecs_get(_ecs, demon, TRANSFORM);
-    dtx->x = rand() % WIN_WIDTH;
-    dtx->y = rand() % WIN_HEIGHT;
+    dtx->pos.x = rand() % WIN_WIDTH;
+    dtx->pos.y = rand() % WIN_HEIGHT;
   }
 
-  collision_system_init();
+  collision_system_init(_ecs);
   health_system_init();
   generic_sword_system_init(_ecs);
+  generic_bow_system_init(_ecs);
+
+
+
   return TRUE;
 }
 
@@ -168,6 +179,7 @@ static void on_game_fini(void* user_data)
   collision_system_fini();
   resources_unload();
   ecs_del(_ecs);
+  _ecs = NULL;
   IMG_Quit();
 }
 
@@ -179,13 +191,15 @@ static void on_game_loop(void* user_data, SDL_Renderer* renderer)
   keybroad_update();
   PlayerControllerSystem(_ecs);
   MovementSystem(_ecs);
+  MotionSystem(_ecs); 
   SyncEqmSystem(_ecs);
   CollisionSystem(_ecs);
   AnimatorSystem(_ecs);
   DrawSystem(_ecs, renderer);
   LifeSpanSystem(_ecs);
-  // DrawingHealBarSystem(_ecs, renderer);
-  // DrawingHitboxSystem(_ecs, renderer);
+  collision_system_draw_debug(renderer);
+  //DrawingHealBarSystem(_ecs, renderer);
+  DrawingHitboxSystem(_ecs, renderer);
   GenericSwordSystem(_ecs);
   GenericAxeSystem(_ecs);
   GenericBowSystem(_ecs);

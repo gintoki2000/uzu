@@ -20,12 +20,13 @@
 #include <system/drawing_heal_bar.h>
 #include <system/drawing_hitbox_system.h>
 #include <system/generic_axe_system.h>
+#include <system/generic_bow_system.h>
 #include <system/health_system.h>
+#include <system/life_span_system.h>
 #include <system/movement_system.h>
 #include <system/player_controller_system.h>
 #include <system/sword_system.h>
 #include <system/sync_eqm_system.h>
-#include <system/life_span_system.h>
 
 #define WIN_WIDTH 480
 #define WIN_HEIGHT 360
@@ -120,11 +121,21 @@ static BOOL on_game_init(void* user_data)
         (EcsType){
             .size = sizeof(LifeSpan),
         },
+    [GENERIC_BOW] =
+        (EcsType){
+            .size = sizeof(GenericBow),
+        },
+    [MOTION] =
+        (EcsType){
+            .size = sizeof(Motion),
+        },
   };
 
   _ecs = ecs_new(types, NUM_COMPONENTS);
 
-  ecs_entity_t player = make_knight(_ecs, make_anime_sword(_ecs));
+  // ecs_entity_t player = make_knight(_ecs, make_anime_sword(_ecs));
+
+  ecs_entity_t player = make_knight(_ecs, make_bow(_ecs));
 
   ecs_add(_ecs, player, PLAYER_TAG);
 
@@ -171,12 +182,13 @@ static void on_game_loop(void* user_data, SDL_Renderer* renderer)
   SyncEqmSystem(_ecs);
   CollisionSystem(_ecs);
   AnimatorSystem(_ecs);
-  LifeSpanSystem(_ecs);
   DrawSystem(_ecs, renderer);
-  DrawingHealBarSystem(_ecs, renderer);
-  DrawingHitboxSystem(_ecs, renderer);
+  LifeSpanSystem(_ecs);
+  // DrawingHealBarSystem(_ecs, renderer);
+  // DrawingHitboxSystem(_ecs, renderer);
   GenericSwordSystem(_ecs);
   GenericAxeSystem(_ecs);
+  GenericBowSystem(_ecs);
   SDL_RenderPresent(renderer);
 }
 

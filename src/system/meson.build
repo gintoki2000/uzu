@@ -10,5 +10,6 @@ system_source_files = files(
   'drawing_hitbox_system.c',
   'drawing_heal_bar.c',
   'health_system.c',
-  'life_span_system.c'
+  'life_span_system.c',
+  'generic_bow_system.c'
 )

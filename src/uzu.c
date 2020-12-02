@@ -47,7 +47,7 @@ static BOOL on_game_init(void* user_data)
   IMG_Init(IMG_INIT_PNG);
   if (!resources_load())
   {
-    ERROR("load resources failed");
+    ERROR("load  failed");
     return FALSE;
   }
 

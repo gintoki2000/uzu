@@ -31,6 +31,11 @@ typedef enum
   AXE_STATE_HEAVY_ATK,
 } SwordAxe;
 
+typedef struct Motion
+{
+  Vec2 vel;
+  Vec2 acc;
+} Motion;
 typedef struct Transform
 {
   s32    x;
@@ -94,6 +99,11 @@ typedef struct LevinSword
   u32 step;
 } LevinSword;
 
+typedef struct GenericBow
+{
+  s32 atk;
+} GenericBow;
+
 typedef struct MagicStaff
 {
   s32 mpcost;
@@ -156,6 +166,7 @@ enum
 {
   TRANSFORM,
   VISUAL,
+  MOTION,
   PLAYER_TAG,
   ANIMATOR,
   COMMAND_INPUT,
@@ -164,6 +175,7 @@ enum
   GENERIC_SWORD,
   HEATH,
   GENERIC_AXE,
+  GENERIC_BOW,
   HITBOX,
   ENEMY_TAG,
   PLAYER_WEAPON_TAG,

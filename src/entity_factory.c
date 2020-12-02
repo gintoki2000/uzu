@@ -104,7 +104,7 @@ ecs_entity_t make_huge_demon(Ecs* ecs, ecs_entity_t weapon)
   HitBox*    hitbox;
   Heath*     heath;
   HealBar*   healthBar;
-  LifeSpan* life_span;
+  LifeSpan*  life_span;
 
   texture = get_texture(TEX_BIG_DEMON);
   animation_init(&anims[ANIM_STATE_HIT], texture, 32 * 6, 0, 1, 1, 32, 36);
@@ -181,16 +181,16 @@ ecs_entity_t make_axe(Ecs* ecs)
   return axe;
 }
 
-ecs_entity_t make_blood_stain_effect(Ecs *ecs, int x, int y)
+ecs_entity_t make_blood_stain_effect(Ecs* ecs, int x, int y)
 {
   ecs_entity_t stain_effect;
 
-  Visual* visual;
-  Animator* animator;
+  Visual*    visual;
+  Animator*  animator;
   Transform* transform;
-  LifeSpan* life_span;
+  LifeSpan*  life_span;
 
-  Animation animation;
+  Animation    animation;
   SDL_Texture* texture;
   texture = get_texture(TEX_BLOOD);
   animation_init(&animation, texture, 0, 0, 1, 4, 16, 16);
@@ -198,17 +198,46 @@ ecs_entity_t make_blood_stain_effect(Ecs *ecs, int x, int y)
   stain_effect = ecs_create(ecs);
 
   visual = ecs_add(ecs, stain_effect, VISUAL);
-  visual->anchor = (SDL_Point){8, 8};
+  visual->anchor = (SDL_Point){ 8, 8 };
 
   animator = ecs_add(ecs, stain_effect, ANIMATOR);
   animator_init(animator, &animation, 1);
-  
+
   transform = ecs_add(ecs, stain_effect, TRANSFORM);
   transform->x = x;
   transform->y = y;
 
   life_span = ecs_add(ecs, stain_effect, LIFE_SPAN);
   life_span->remaining = 15; // frames
-  
-  return stain_effect; 
+
+  return stain_effect;
+}
+
+ecs_entity_t make_bow(Ecs* ecs)
+{
+  ecs_entity_t bow;
+
+  Visual*         visual;
+  Transform*      transform;
+  WeaponCmdInput* cmd;
+  GenericBow*     g_bow;
+
+  SDL_Texture* texture;
+  texture = get_texture(TEX_BOW);
+
+  bow = ecs_create(ecs);
+
+  visual = ecs_add(ecs, bow, VISUAL);
+  sprite_init(&visual->sprite, texture);
+  visual->anchor.x = visual->sprite.rect.w / 2;
+  visual->anchor.y = visual->sprite.rect.h / 2;
+
+  transform = ecs_add(ecs, bow, TRANSFORM);
+  transform->rot = 45.0;
+
+  cmd = ecs_add(ecs, bow, WP_CMD_INPUT);
+
+  g_bow = ecs_add(ecs, bow, GENERIC_BOW);
+
+  return bow;
 }

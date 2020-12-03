@@ -12,7 +12,7 @@
 static void process(Ecs*            ecs,
                     ecs_entity_t    e,
                     GenericSword*   gswd,
-                    WeaponCmdInput* cmd,
+                    WeaponAction* cmd,
                     Visual*         vs,
                     Transform*      tx)
 {
@@ -55,15 +55,15 @@ static void process(Ecs*            ecs,
   }
 }
 
-static void on_player_weapon_hit_enemy(Ecs* ecs, const CollisionPair* pair)
+static void on_player_weapon_hit_enemy(Ecs* ecs, const WeaponHitEnemyEvent* evt)
 {
   GenericSword* gswd;
   Transform*    enemy_tx;
-  if ((gswd = ecs_get(ecs, pair->e1, GENERIC_SWORD)) != NULL)
+  if ((gswd = ecs_get(ecs, evt->weapon, GENERIC_SWORD)) != NULL)
   {
-    enemy_tx = ecs_get(ecs, pair->e2, TRANSFORM);
+    enemy_tx = ecs_get(ecs, evt->enemy, TRANSFORM);
     make_blood_stain_effect(ecs, enemy_tx->pos);
-    health_system_apply_damage(ecs, pair->e2, gswd->atk);
+    health_system_apply_damage(ecs, evt->enemy, gswd->atk);
   }
 }
 
@@ -79,7 +79,7 @@ void generic_sword_system_fini() {}
 void GenericSwordSystem(Ecs* ecs)
 {
   ecs_entity_t*   ett;
-  WeaponCmdInput* cmd;
+  WeaponAction* cmd;
   GenericSword*   gswd;
   Visual*         vs;
   Transform*      tx;
@@ -89,7 +89,7 @@ void GenericSwordSystem(Ecs* ecs)
 
   for (int i = 0; i < cnt; ++i)
   {
-    cmd = ecs_get(ecs, ett[i], WP_CMD_INPUT);
+    cmd = ecs_get(ecs, ett[i], WEAPON_ACTION);
     vs = ecs_get(ecs, ett[i], VISUAL);
     tx = ecs_get(ecs, ett[i], TRANSFORM);
     process(ecs, ett[i], &gswd[i], cmd, vs, tx);

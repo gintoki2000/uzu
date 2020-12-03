@@ -12,5 +12,7 @@ system_source_files = files(
   'health_system.c',
   'life_span_system.c',
   'generic_bow_system.c',
-  'motion_system.c'
+  'motion_system.c',
+  'late_destroying_system.c',
+  'golden_sword_system.c'
 )

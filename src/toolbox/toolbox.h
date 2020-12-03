@@ -6,5 +6,5 @@
 #include "sprite-sheet.h"
 #include "signal.h"
 #include "rect.h"
-#include "aabb-tree.h"
+#include "rtree.h"
 #endif //TOOLBOX_H

@@ -7,7 +7,7 @@
 void PlayerControllerSystem(Ecs* ecs)
 {
   ecs_entity_t* player;
-  CmdInput*     cmd;
+  CharacterAction*     cmd;
   Equipment*    eqm;
   Visual*       vs;
   Animator*     ani;
@@ -15,7 +15,7 @@ void PlayerControllerSystem(Ecs* ecs)
 
   ecs_data(ecs, PLAYER_TAG, &player, NULL, NULL);
 
-  cmd = ecs_get(ecs, player[0], COMMAND_INPUT);
+  cmd = ecs_get(ecs, player[0], CHARACTER_ACTION);
   vs = ecs_get(ecs, player[0], VISUAL);
   ani = ecs_get(ecs, player[0], ANIMATOR);
 
@@ -57,11 +57,11 @@ void PlayerControllerSystem(Ecs* ecs)
 
   if (key_just_pressed(KEY_A))
   {
-    WeaponCmdInput* wcmd;
+    WeaponAction* wcmd;
 
     eqm = ecs_get(ecs, player[0], EQUIPMENT);
 
-    wcmd = ecs_get(ecs, eqm->rhand, WP_CMD_INPUT);
+    wcmd = ecs_get(ecs, eqm->rhand, WEAPON_ACTION);
     wcmd->action = WEAPON_ACTION_REGULAR_ATK;
   }
 }

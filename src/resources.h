@@ -11,6 +11,9 @@ typedef enum
   TEX_BLOOD,
   TEX_BOW,
   TEX_ARROW,
+  TEX_YELLOW_THUNDER,
+  TEX_GOLDEN_SWORD,
+  TEX_GOLDEN_CROSS_HIT,
   NUM_TEXS
 } TextureId;
 BOOL         resources_load();

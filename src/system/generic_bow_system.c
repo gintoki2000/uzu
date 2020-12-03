@@ -4,11 +4,13 @@
 #include <components.h>
 #include <entity_factory.h>
 
-static void on_arrow_hit_enemy(Ecs* ecs, const CollisionPair* pair);
+static void on_arrow_hit_enemy(Ecs* ecs, const WeaponHitEnemyEvent* evt);
 
 void generic_bow_system_init(Ecs* ecs)
 {
-  collision_system_connect(SIG_PLAYER_WEAPON_COLLIED_W_ENEMY, ecs, (sig_handler_fn_t)on_arrow_hit_enemy);
+  collision_system_connect(SIG_PLAYER_WEAPON_COLLIED_W_ENEMY,
+                           ecs,
+                           (sig_handler_fn_t)on_arrow_hit_enemy);
 }
 
 void GenericBowSystem(Ecs* ecs)
@@ -17,14 +19,14 @@ void GenericBowSystem(Ecs* ecs)
   ecs_size_t    cnt;
 
   GenericBow*     g_bows;
-  WeaponCmdInput* cmd;
+  WeaponAction* cmd;
   Transform*      transform;
   Visual*         visual;
 
   ecs_data(ecs, GENERIC_BOW, &bows, (void**)&g_bows, &cnt);
   for (int i = 0; i < cnt; ++i)
   {
-    cmd = ecs_get(ecs, bows[i], WP_CMD_INPUT);
+    cmd = ecs_get(ecs, bows[i], WEAPON_ACTION);
 
     if (cmd->action == WEAPON_ACTION_REGULAR_ATK)
     {
@@ -36,12 +38,12 @@ void GenericBowSystem(Ecs* ecs)
   }
 }
 
-static void on_arrow_hit_enemy(Ecs* ecs, const CollisionPair* pair)
+static void on_arrow_hit_enemy(Ecs* ecs, const WeaponHitEnemyEvent* evt)
 {
-  Projectile* projectile;
-  if ((projectile = ecs_get(ecs, pair->e1, PROJECTILE)) != NULL)
+  Projectile* proj;
+  if ((proj = ecs_get(ecs, evt->weapon, PROJECTILE)) != NULL)
   {
-    health_system_apply_damage(ecs, pair->e2, projectile->atk);
-    ecs_destroy(ecs, pair->e1);
+    health_system_apply_damage(ecs, evt->enemy, 2);
+    ecs_add(ecs, evt->weapon, TAG_TO_BE_DESTROYED);
   }
 }

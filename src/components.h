@@ -11,25 +11,25 @@ typedef enum
   RIGHT
 } Direction;
 
-typedef enum
+enum
 {
   WEAPON_ACTION_NONE,
   WEAPON_ACTION_REGULAR_ATK,
   WEAPON_ACTION_SPECIAL_ATK
-} WeaponAction;
+};
 
-typedef enum
+enum
 {
   SWORD_STATE_IDLE,
   SWORD_STATE_REGULAR_ATK
-} SwordState;
+};
 
-typedef enum
+enum
 {
   AXE_STATE_IDLE,
   AXE_STATE_REGULAR_ATK,
   AXE_STATE_HEAVY_ATK,
-} SwordAxe;
+};
 
 typedef struct Motion
 {
@@ -55,11 +55,11 @@ typedef struct Animation
   SpriteSheet sheet;
 } Animation;
 
-typedef struct CmdInput
+typedef struct CharacterAction
 {
   int desired_dir;
   int action;
-} CmdInput;
+} CharacterAction;
 
 typedef struct Equipment
 {
@@ -89,12 +89,12 @@ typedef struct GenericSpear
   s32 atk;
 } GenericSpear;
 
-typedef struct LevinSword
+typedef struct GoldenSword
 {
   s32 state;
   u32 timer;
   u32 step;
-} LevinSword;
+} GoldenSword;
 
 typedef struct GenericBow
 {
@@ -107,20 +107,14 @@ typedef struct MagicStaff
   ecs_entity_t (*projectile_factory_fn)(Ecs*);
 } MagicStaff;
 
-typedef struct WeaponCmdInput
+typedef struct WeaponAction
 {
   int action;
-} WeaponCmdInput;
+} WeaponAction;
 
-typedef struct PlayerTag
-{
-  int dummy;
-} PlayerTag;
+typedef int PlayerTag;
 
-typedef struct EnemyTag
-{
-  int dummy;
-} EnemyTag;
+typedef int EnemyTag;
 
 typedef struct Projectile
 {
@@ -166,6 +160,8 @@ typedef struct LifeSpan
   s32 remaining;
 } LifeSpan;
 
+typedef int TagToBeDestroyed;
+
 enum
 {
   TRANSFORM,
@@ -173,9 +169,9 @@ enum
   MOTION,
   PLAYER_TAG,
   ANIMATOR,
-  COMMAND_INPUT,
+  CHARACTER_ACTION,
   EQUIPMENT,
-  WP_CMD_INPUT,
+  WEAPON_ACTION,
   GENERIC_SWORD,
   HEATH,
   GENERIC_AXE,
@@ -186,6 +182,8 @@ enum
   PLAYER_WEAPON_TAG,
   HEAL_BAR,
   LIFE_SPAN,
+  TAG_TO_BE_DESTROYED,
+  GOLDEN_SWORD,
   NUM_COMPONENTS
 };
 
@@ -205,7 +203,7 @@ void animation_fini(Animation* anim);
 Animator* animator_init(Animator* animator, const Animation* anims, u32 cnt);
 void      animator_fini(Animator* animator);
 
-INLINE visual_set_anchor_to_center(Visual* v)
+INLINE void visual_set_anchor_to_center(Visual* v)
 {
   v->anchor.x = v->sprite.rect.w / 2;
   v->anchor.y = v->sprite.rect.h / 2;

@@ -22,12 +22,14 @@
 #include <system/generic_axe_system.h>
 #include <system/generic_bow_system.h>
 #include <system/health_system.h>
+#include <system/late_destroying_system.h>
 #include <system/life_span_system.h>
+#include <system/motion_system.h>
 #include <system/movement_system.h>
 #include <system/player_controller_system.h>
 #include <system/sword_system.h>
 #include <system/sync_eqm_system.h>
-#include <system/motion_system.h>
+#include <system/golden_sword_system.h>
 
 #define WIN_WIDTH 480
 #define WIN_HEIGHT 360
@@ -59,7 +61,6 @@ static BOOL on_game_init(void* user_data)
   /*init keyboard*/
   keybroad_init();
 
-
   /*init _ecs*/
   EcsType types[NUM_COMPONENTS] = {
     [VISUAL] =
@@ -79,13 +80,13 @@ static BOOL on_game_init(void* user_data)
         (EcsType){
             .size = sizeof(PlayerTag),
         },
-    [COMMAND_INPUT] =
+    [CHARACTER_ACTION] =
         (EcsType){
-            .size = sizeof(CmdInput),
+            .size = sizeof(CharacterAction),
         },
-    [WP_CMD_INPUT] =
+    [WEAPON_ACTION] =
         (EcsType){
-            .size = sizeof(WeaponCmdInput),
+            .size = sizeof(WeaponAction),
         },
     [GENERIC_SWORD] =
         (EcsType){
@@ -135,14 +136,22 @@ static BOOL on_game_init(void* user_data)
         (EcsType){
             .size = sizeof(Projectile),
         },
+    [TAG_TO_BE_DESTROYED] =
+        (EcsType){
+            .size = sizeof(TagToBeDestroyed),
+        },
+    [GOLDEN_SWORD] =
+        (EcsType){
+            .size = sizeof(GoldenSword),
+        },
   };
 
   _ecs = ecs_new(types, NUM_COMPONENTS);
 
+  //ecs_entity_t player = make_knight(_ecs, make_anime_sword(_ecs));
+  ecs_entity_t player = make_knight(_ecs, make_golden_sword(_ecs));
 
-  // ecs_entity_t player = make_knight(_ecs, make_anime_sword(_ecs));
-
-  ecs_entity_t player = make_knight(_ecs, make_bow(_ecs));
+  // ecs_entity_t player = make_knight(_ecs, make_bow(_ecs));
 
   ecs_add(_ecs, player, PLAYER_TAG);
 
@@ -156,16 +165,15 @@ static BOOL on_game_init(void* user_data)
     ecs_entity_t demon = make_huge_demon(_ecs, ECS_NULL_ENT);
 
     Transform* dtx = ecs_get(_ecs, demon, TRANSFORM);
-    dtx->pos.x = rand() % WIN_WIDTH;
-    dtx->pos.y = rand() % WIN_HEIGHT;
+    dtx->pos.x = rand() % (WIN_WIDTH - 60) + 20;
+    dtx->pos.y = rand() % (WIN_HEIGHT - 60) + 20;
   }
 
   collision_system_init(_ecs);
   health_system_init();
   generic_sword_system_init(_ecs);
   generic_bow_system_init(_ecs);
-
-
+  golden_sword_system_init(_ecs);
 
   return TRUE;
 }
@@ -176,9 +184,9 @@ static void on_game_fini(void* user_data)
 
   generic_sword_system_fini();
   health_system_fini();
-  collision_system_fini();
   resources_unload();
   ecs_del(_ecs);
+  collision_system_fini();
   _ecs = NULL;
   IMG_Quit();
 }
@@ -191,18 +199,20 @@ static void on_game_loop(void* user_data, SDL_Renderer* renderer)
   keybroad_update();
   PlayerControllerSystem(_ecs);
   MovementSystem(_ecs);
-  MotionSystem(_ecs); 
+  MotionSystem(_ecs);
   SyncEqmSystem(_ecs);
   CollisionSystem(_ecs);
   AnimatorSystem(_ecs);
   DrawSystem(_ecs, renderer);
   LifeSpanSystem(_ecs);
   collision_system_draw_debug(renderer);
-  //DrawingHealBarSystem(_ecs, renderer);
+  DrawingHealBarSystem(_ecs, renderer);
   DrawingHitboxSystem(_ecs, renderer);
   GenericSwordSystem(_ecs);
   GenericAxeSystem(_ecs);
   GenericBowSystem(_ecs);
+  GoldenSwordSystem(_ecs);
+  LateDestroyingSystem(_ecs);
   SDL_RenderPresent(renderer);
 }
 

@@ -9,11 +9,11 @@ static const SDL_Point DIR_TO_VEL[] = {
 void MovementSystem(Ecs* ecs)
 {
   ecs_entity_t* ent;
-  CmdInput*     cmd;
+  CharacterAction*     cmd;
   Transform*    tx;
   ecs_size_t    cnt;
 
-  ecs_data(ecs, COMMAND_INPUT, &ent, (void**)&cmd, &cnt);
+  ecs_data(ecs, CHARACTER_ACTION, &ent, (void**)&cmd, &cnt);
 
   for (int i = 0; i < cnt; ++i)
   {

@@ -38,8 +38,15 @@ Ecs* ecs_init(Ecs* self, const EcsType* types, ecs_size_t cnt)
   return self;
 }
 
+static void __lamda01(void* udata, Ecs* ecs, ecs_entity_t entity)
+{
+  (void)udata;
+  ecs_destroy(ecs, entity);
+}
+
 void ecs_fini(Ecs* self)
 {
+  ecs_each(self, NULL, __lamda01);
   for (int i = 0; i < self->type_cnt; ++i)
     ecs_pool_del(self->pools[i]);
   free(self->pools);

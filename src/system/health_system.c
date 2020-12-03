@@ -17,7 +17,7 @@ void health_system_apply_damage(Ecs* ecs, ecs_entity_t entity, int damage)
     {
       EntityDiedEvent evt = (EntityDiedEvent){entity};
       dispatcher_emit(_dispatcher, SIG_ENTITY_DIED, &evt);
-      ecs_destroy(ecs, entity);
+      ecs_add(ecs, entity, TAG_TO_BE_DESTROYED);
     }
   }
 }

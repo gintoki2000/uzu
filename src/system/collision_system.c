@@ -47,6 +47,26 @@ static AABB* query_aabb(AABB* aabb, const HitBox* hitbox, const Transform* trans
   return rect_get_aabb(&rect, aabb);
 }
 
+static Rect* query_rect_by_entity(Rect* r, Ecs* ecs, ecs_entity_t entity)
+{
+
+  Transform* transform;
+  HitBox*    hitbox;
+
+  transform = ecs_get(ecs, entity, TRANSFORM);
+  hitbox = ecs_get(ecs, entity, HITBOX);
+
+  rect_init_full(r,
+                 transform->pos.x - hitbox->anchor.x,
+                 transform->pos.y - hitbox->anchor.y,
+                 hitbox->size.x,
+                 hitbox->size.y,
+                 hitbox->anchor.x,
+                 hitbox->anchor.y,
+                 transform->rot);
+  return r;
+}
+
 static void update_proxies(Ecs* ecs)
 {
   ecs_entity_t* entites;
@@ -141,43 +161,55 @@ static void broad_phase(Ecs* ecs)
   }
 }
 
+static void handle(Ecs* ecs, const CollisionPair* p)
+{
+  if (ecs_has(ecs, p->e1, PLAYER_WEAPON_TAG))
+  {
+    if (ecs_has(ecs, p->e2, ENEMY_TAG))
+    {
+      dispatcher_emit(_dispatcher,
+                      SIG_PLAYER_WEAPON_COLLIED_W_ENEMY,
+                      &(WeaponHitEnemyEvent){ .weapon = p->e1, .enemy = p->e2 });
+    }
+  }
+  if (ecs_has(ecs, p->e1, ENEMY_TAG))
+  {
+    if (ecs_has(ecs, p->e2, PLAYER_WEAPON_TAG))
+    {
+
+      dispatcher_emit(_dispatcher,
+                      SIG_PLAYER_WEAPON_COLLIED_W_ENEMY,
+                      &(WeaponHitEnemyEvent){ .weapon = p->e2, .enemy = p->e1 });
+    }
+  }
+}
+
 static void narrow_phase(Ecs* ecs)
 {
-  (void)ecs;
 
   if (_pair_cnt == 0)
     return;
-  INFO("BEFORE SORTING:\n");
-  for (u32 i = 0; i < _pair_cnt; ++i)
-  {
-    INFO("Pair{e1:{ %2u| %2u }, e2:{ %2u | %2u } }\n",
-         ECS_ENT_IDX(_pair_buff[i].e1),
-         ECS_ENT_VER(_pair_buff[i].e1),
-         ECS_ENT_IDX(_pair_buff[i].e2),
-         ECS_ENT_VER(_pair_buff[i].e2));
-  }
+
+  Rect r1, r2;
 
   qsort(_pair_buff, _pair_cnt, sizeof(CollisionPair), (__compar_fn_t)compr_pair);
 
-  INFO("AFTER SORTING:\n");
-  for (u32 i = 0; i < _pair_cnt; ++i)
-  {
-    INFO("Pair{e1:{ %2u| %2u }, e2:{ %2u | %2u } }\n",
-         ECS_ENT_IDX(_pair_buff[i].e1),
-         ECS_ENT_VER(_pair_buff[i].e1),
-         ECS_ENT_IDX(_pair_buff[i].e2),
-         ECS_ENT_VER(_pair_buff[i].e2));
-  }
-  _pair_cnt =  remove_duplicate_pairs(_pair_buff, _pair_cnt);
+  _pair_cnt = remove_duplicate_pairs(_pair_buff, _pair_cnt);
 
-  INFO("AFTER REMOVING DUPLICATES:\n");
   for (u32 i = 0; i < _pair_cnt; ++i)
   {
-    INFO("Pair{e1:{ %2u| %2u }, e2:{ %2u | %2u } }\n",
-         ECS_ENT_IDX(_pair_buff[i].e1),
-         ECS_ENT_VER(_pair_buff[i].e1),
-         ECS_ENT_IDX(_pair_buff[i].e2),
-         ECS_ENT_VER(_pair_buff[i].e2));
+    query_rect_by_entity(&r1, ecs, _pair_buff[i].e1);
+    query_rect_by_entity(&r2, ecs, _pair_buff[i].e2);
+    if (rect_has_intersection(&r1, &r2))
+    {
+      /*  INFO("e1{ %2u | %2u } <---> e2{ %2u | %2u}\n",
+             ECS_ENT_IDX(_pair_buff[i].e1),
+             ECS_ENT_VER(_pair_buff[i].e1),
+             ECS_ENT_IDX(_pair_buff[i].e2),
+             ECS_ENT_VER(_pair_buff[i].e2));
+             */
+      handle(ecs, &_pair_buff[i]);
+    }
   }
 }
 
@@ -208,4 +240,9 @@ void CollisionSystem(Ecs* ecs)
   update_proxies(ecs);
   broad_phase(ecs);
   narrow_phase(ecs);
+}
+
+void collision_system_query(const AABB *aabb, Callback callback)
+{
+  rtree_query(_rtree, aabb, callback);
 }

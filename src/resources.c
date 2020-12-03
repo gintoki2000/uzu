@@ -10,6 +10,9 @@ static const char*  _texture_files[NUM_TEXS] = {
   [TEX_BLOOD] = "asserts/blood.png",
   [TEX_BOW] = "asserts/bow.png",
   [TEX_ARROW] = "asserts/arrow.png",
+  [TEX_YELLOW_THUNDER] = "asserts/Thunder_Yellow.png",
+  [TEX_GOLDEN_SWORD] = "asserts/weapon_lavish_sword.png",
+  [TEX_GOLDEN_CROSS_HIT] = "asserts/golden_cross_hit.png",
 };
 
 static SDL_Texture* load_texture(const char* file)

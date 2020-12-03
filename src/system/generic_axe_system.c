@@ -4,7 +4,7 @@
 #define INTERVAL 1
 #define STEP 7
 
-static void process(Ecs* ecs, GenericAxe* gaxe, WeaponCmdInput* cmd, Visual* vs, Transform* tx)
+static void process(Ecs* ecs, GenericAxe* gaxe, WeaponAction* cmd, Visual* vs, Transform* tx)
 {
   (void)ecs;
 
@@ -51,7 +51,7 @@ static void process(Ecs* ecs, GenericAxe* gaxe, WeaponCmdInput* cmd, Visual* vs,
 void GenericAxeSystem(Ecs* ecs)
 {
   ecs_entity_t*   ett;
-  WeaponCmdInput* cmd;
+  WeaponAction* cmd;
   GenericAxe*     gaxe;
   Visual*         vs;
   Transform*      tx;
@@ -61,7 +61,7 @@ void GenericAxeSystem(Ecs* ecs)
 
   for (int i = 0; i < cnt; ++i)
   {
-    cmd = ecs_get(ecs, ett[i], WP_CMD_INPUT);
+    cmd = ecs_get(ecs, ett[i], WEAPON_ACTION);
     vs = ecs_get(ecs, ett[i], VISUAL);
     tx = ecs_get(ecs, ett[i], TRANSFORM);
     process(ecs, &gaxe[i], cmd, vs, tx);

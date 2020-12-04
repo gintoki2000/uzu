@@ -29,7 +29,7 @@ typedef struct
 #define TRUE SDL_TRUE
 #define FALSE SDL_FALSE
 
-#define FLIP_TO_SIGN(f) (f == SDL_FLIP_NONE ? 1 : -1)
+#define FLIP_TO_SIGN(__f) (__f == SDL_FLIP_NONE ? 1 : -1)
 
 #define ASSERT(cd) SDL_assert(cd)
 
@@ -45,17 +45,19 @@ typedef struct
 
 #define MAX(__a, __b)                                                                              \
   ({                                                                                               \
-    __auto_type __tmp_a = (__a);                                                                     \
-    __auto_type __tmp_b = (__b);                                                                     \
+    __auto_type __tmp_a = (__a);                                                                   \
+    __auto_type __tmp_b = (__b);                                                                   \
     __tmp_a > __tmp_b ? __tmp_a : __tmp_b;                                                         \
   })
 
 #define MIN(__a, __b)                                                                              \
   ({                                                                                               \
-    __auto_type __tmp_a = (__a);                                                                     \
-    __auto_type __tmp_b = (__b);                                                                     \
+    __auto_type __tmp_a = (__a);                                                                   \
+    __auto_type __tmp_b = (__b);                                                                   \
     __tmp_a < __tmp_b ? __tmp_a : __tmp_b;                                                         \
   })
+#define BIT(__x) (1 << (__x))
+
 
 typedef enum
 {

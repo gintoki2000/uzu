@@ -15,21 +15,21 @@
 #include <engine/keyboard.h>
 
 #include <system/animator_system.h>
+#include <system/collision_filter.h>
 #include <system/collision_system.h>
 #include <system/draw_system.h>
 #include <system/drawing_heal_bar.h>
 #include <system/drawing_hitbox_system.h>
-#include <system/generic_axe_system.h>
-#include <system/generic_bow_system.h>
 #include <system/health_system.h>
 #include <system/late_destroying_system.h>
 #include <system/life_span_system.h>
+#include <system/mediator.h>
 #include <system/motion_system.h>
 #include <system/movement_system.h>
 #include <system/player_controller_system.h>
-#include <system/sword_system.h>
+#include <system/swinging_system.h>
 #include <system/sync_eqm_system.h>
-#include <system/golden_sword_system.h>
+#include <system/weapon_dealing_damage_system.h>
 
 #define WIN_WIDTH 480
 #define WIN_HEIGHT 360
@@ -73,7 +73,7 @@ static BOOL on_game_init(void* user_data)
         },
     [ANIMATOR] =
         (EcsType){
-            .size = sizeof(Animator),
+            .size    = sizeof(Animator),
             .fini_fn = (ecs_comp_fini_fn_t)animator_fini,
         },
     [PLAYER_TAG] =
@@ -88,17 +88,9 @@ static BOOL on_game_init(void* user_data)
         (EcsType){
             .size = sizeof(WeaponAction),
         },
-    [GENERIC_SWORD] =
-        (EcsType){
-            .size = sizeof(GenericSword),
-        },
     [EQUIPMENT] =
         (EcsType){
             .size = sizeof(Equipment),
-        },
-    [GENERIC_AXE] =
-        (EcsType){
-            .size = sizeof(GenericAxe),
         },
     [HEATH] =
         (EcsType){
@@ -112,10 +104,6 @@ static BOOL on_game_init(void* user_data)
         (EcsType){
             .size = sizeof(EnemyTag),
         },
-    [PLAYER_WEAPON_TAG] =
-        (EcsType){
-            .size = sizeof(PlayerWeaponTag),
-        },
     [HEAL_BAR] =
         (EcsType){
             .size = sizeof(HealBar),
@@ -123,10 +111,6 @@ static BOOL on_game_init(void* user_data)
     [LIFE_SPAN] =
         (EcsType){
             .size = sizeof(LifeSpan),
-        },
-    [GENERIC_BOW] =
-        (EcsType){
-            .size = sizeof(GenericBow),
         },
     [MOTION] =
         (EcsType){
@@ -140,40 +124,48 @@ static BOOL on_game_init(void* user_data)
         (EcsType){
             .size = sizeof(TagToBeDestroyed),
         },
-    [GOLDEN_SWORD] =
+    [WEAPON_CORE] =
         (EcsType){
-            .size = sizeof(GoldenSword),
+            .size = sizeof(WeaponCore),
+        },
+    [DAMAGE_OUTPUT] =
+        (EcsType){
+            .size = sizeof(DamageOutput),
+        },
+    [SWINGABLE] =
+        (EcsType){
+            .size = sizeof(Swingable),
         },
   };
 
   _ecs = ecs_new(types, NUM_COMPONENTS);
 
-  //ecs_entity_t player = make_knight(_ecs, make_anime_sword(_ecs));
-  ecs_entity_t player = make_knight(_ecs, make_golden_sword(_ecs));
-
+  // ecs_entity_t player = make_knight(_ecs, make_anime_sword(_ecs));
+  ecs_entity_t player =
+      make_knight(_ecs, make_golden_sword(_ecs, CATEGORY_PLAYER_WEAPON, BIT(CATEGORY_ENEMY)));
   // ecs_entity_t player = make_knight(_ecs, make_bow(_ecs));
 
   ecs_add(_ecs, player, PLAYER_TAG);
 
   Transform* tx = ecs_get(_ecs, player, TRANSFORM);
-  tx->pos.x = WIN_WIDTH / 2;
-  tx->pos.y = WIN_HEIGHT / 2;
+  tx->pos.x     = WIN_WIDTH / 2;
+  tx->pos.y     = WIN_HEIGHT / 2;
 
   srand(SDL_GetTicks());
-  for (int i = 0; i < 5; ++i)
+  for (int i = 0; i < 200; ++i)
   {
     ecs_entity_t demon = make_huge_demon(_ecs, ECS_NULL_ENT);
 
     Transform* dtx = ecs_get(_ecs, demon, TRANSFORM);
-    dtx->pos.x = rand() % (WIN_WIDTH - 60) + 20;
-    dtx->pos.y = rand() % (WIN_HEIGHT - 60) + 20;
+    dtx->pos.x     = rand() % (WIN_WIDTH - 60) + 20;
+    dtx->pos.y     = rand() % (WIN_HEIGHT - 60) + 20;
   }
 
+  mediator_init();
   collision_system_init(_ecs);
-  health_system_init();
-  generic_sword_system_init(_ecs);
-  generic_bow_system_init(_ecs);
-  golden_sword_system_init(_ecs);
+  health_system_init(_ecs);
+  weapon_dealing_damage_system_init(_ecs);
+  collision_filter_system_init(_ecs);
 
   return TRUE;
 }
@@ -182,11 +174,10 @@ static void on_game_fini(void* user_data)
 {
   (void)user_data;
 
-  generic_sword_system_fini();
-  health_system_fini();
   resources_unload();
   ecs_del(_ecs);
   collision_system_fini();
+  mediator_fini();
   _ecs = NULL;
   IMG_Quit();
 }
@@ -203,15 +194,12 @@ static void on_game_loop(void* user_data, SDL_Renderer* renderer)
   SyncEqmSystem(_ecs);
   CollisionSystem(_ecs);
   AnimatorSystem(_ecs);
+  SwingingSystem(_ecs);
   DrawSystem(_ecs, renderer);
   LifeSpanSystem(_ecs);
   collision_system_draw_debug(renderer);
   DrawingHealBarSystem(_ecs, renderer);
   DrawingHitboxSystem(_ecs, renderer);
-  GenericSwordSystem(_ecs);
-  GenericAxeSystem(_ecs);
-  GenericBowSystem(_ecs);
-  GoldenSwordSystem(_ecs);
   LateDestroyingSystem(_ecs);
   SDL_RenderPresent(renderer);
 }
@@ -233,16 +221,16 @@ static void on_game_quit(void* user_data)
 /***********************************************************/
 
 static GameDelegate delegate = (GameDelegate){
-  .init = on_game_init,
-  .fini = on_game_fini,
-  .loop = on_game_loop,
+  .init  = on_game_init,
+  .fini  = on_game_fini,
+  .loop  = on_game_loop,
   .event = game_on_event,
 };
 
 static GameSetting setting = (GameSetting){
-  .frame_rate = 30,
-  .window_title = "app",
-  .window_width = 480 * 2,
+  .frame_rate    = 50,
+  .window_title  = "app",
+  .window_width  = 480 * 2,
   .window_height = 320 * 2,
 };
 

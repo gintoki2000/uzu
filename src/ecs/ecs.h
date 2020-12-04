@@ -72,7 +72,7 @@ void  ecs_data(Ecs*           self,
                ecs_entity_t** entities_ptr,
                void**         components_ptr,
                ecs_size_t*    cnt_ptr);
-void  ecs_connect(Ecs* ecs, int sig, void* udata, sig_handler_fn_t handler);
+void  ecs_connect(Ecs* ecs, int sig, void* udata, slot_t slot);
 
 static BOOL ecs_is_valid(Ecs* self, ecs_entity_t entity)
 {

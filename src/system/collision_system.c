@@ -1,22 +1,13 @@
 #include "collision_system.h"
+#include "mediator.h"
 #include <components.h>
 #include <toolbox/toolbox.h>
 
 #define BUFF_SIZE 255
 
-static Dispatcher*   _dispatcher;
 static RTree*        _rtree;
 static CollisionPair _pair_buff[BUFF_SIZE];
 static u32           _pair_cnt;
-
-static ecs_entity_t get_player(Ecs* ecs)
-{
-  ecs_entity_t* ett;
-  ecs_size_t    cnt;
-  ecs_data(ecs, PLAYER_TAG, &ett, NULL, &cnt);
-  ASSERT(cnt == 1 && "there is no player");
-  return ett[0];
-}
 
 static void on_component_remove(void* udata, const EcsComponentEvent* event)
 {
@@ -27,7 +18,6 @@ static void on_component_remove(void* udata, const EcsComponentEvent* event)
     if (hitbox->proxy_id != NULL_NODE)
     {
       rtree_destroy_proxy(_rtree, hitbox->proxy_id);
-      INFO("destroy proxy_id: %d\n", hitbox->proxy_id);
     }
   }
 }
@@ -47,14 +37,14 @@ static AABB* query_aabb(AABB* aabb, const HitBox* hitbox, const Transform* trans
   return rect_get_aabb(&rect, aabb);
 }
 
-static Rect* query_rect_by_entity(Rect* r, Ecs* ecs, ecs_entity_t entity)
+static Rect* get_bounding_box(Rect* r, Ecs* ecs, ecs_entity_t entity)
 {
 
   Transform* transform;
   HitBox*    hitbox;
 
   transform = ecs_get(ecs, entity, TRANSFORM);
-  hitbox = ecs_get(ecs, entity, HITBOX);
+  hitbox    = ecs_get(ecs, entity, HITBOX);
 
   rect_init_full(r,
                  transform->pos.x - hitbox->anchor.x,
@@ -103,7 +93,7 @@ static void __lamda01(__capture01* capture, int proxy_id)
 {
   if (capture->proxy_id != proxy_id)
   {
-    ecs_entity_t entity = (ecs_entity_t)rtree_get_user_data(_rtree, proxy_id);
+    ecs_entity_t entity     = (ecs_entity_t)rtree_get_user_data(_rtree, proxy_id);
     _pair_buff[_pair_cnt++] = (CollisionPair){
       MAX(capture->entity, entity),
       MIN(capture->entity, entity),
@@ -156,31 +146,8 @@ static void broad_phase(Ecs* ecs)
     transform = ecs_get(ecs, entities[i], TRANSFORM);
     query_aabb(&aabb, &hitbox[i], transform);
     capture.proxy_id = hitbox[i].proxy_id;
-    capture.entity = entities[i];
+    capture.entity   = entities[i];
     rtree_query(_rtree, &aabb, CALLBACK_1(&capture, __lamda01));
-  }
-}
-
-static void handle(Ecs* ecs, const CollisionPair* p)
-{
-  if (ecs_has(ecs, p->e1, PLAYER_WEAPON_TAG))
-  {
-    if (ecs_has(ecs, p->e2, ENEMY_TAG))
-    {
-      dispatcher_emit(_dispatcher,
-                      SIG_PLAYER_WEAPON_COLLIED_W_ENEMY,
-                      &(WeaponHitEnemyEvent){ .weapon = p->e1, .enemy = p->e2 });
-    }
-  }
-  if (ecs_has(ecs, p->e1, ENEMY_TAG))
-  {
-    if (ecs_has(ecs, p->e2, PLAYER_WEAPON_TAG))
-    {
-
-      dispatcher_emit(_dispatcher,
-                      SIG_PLAYER_WEAPON_COLLIED_W_ENEMY,
-                      &(WeaponHitEnemyEvent){ .weapon = p->e2, .enemy = p->e1 });
-    }
   }
 }
 
@@ -190,7 +157,8 @@ static void narrow_phase(Ecs* ecs)
   if (_pair_cnt == 0)
     return;
 
-  Rect r1, r2;
+  Rect    r1, r2;
+  HitBox *hitbox1, *hitbox2;
 
   qsort(_pair_buff, _pair_cnt, sizeof(CollisionPair), (__compar_fn_t)compr_pair);
 
@@ -198,51 +166,43 @@ static void narrow_phase(Ecs* ecs)
 
   for (u32 i = 0; i < _pair_cnt; ++i)
   {
-    query_rect_by_entity(&r1, ecs, _pair_buff[i].e1);
-    query_rect_by_entity(&r2, ecs, _pair_buff[i].e2);
-    if (rect_has_intersection(&r1, &r2))
+    hitbox1 = ecs_get(ecs, _pair_buff[i].e1, HITBOX);
+    hitbox2 = ecs_get(ecs, _pair_buff[i].e2, HITBOX);
+    if ((BIT(hitbox1->category) & hitbox2->mask_bits) ||
+        (BIT(hitbox2->category) & hitbox1->mask_bits))
     {
-      /*  INFO("e1{ %2u | %2u } <---> e2{ %2u | %2u}\n",
-             ECS_ENT_IDX(_pair_buff[i].e1),
-             ECS_ENT_VER(_pair_buff[i].e1),
-             ECS_ENT_IDX(_pair_buff[i].e2),
-             ECS_ENT_VER(_pair_buff[i].e2));
-             */
-      handle(ecs, &_pair_buff[i]);
+      get_bounding_box(&r1, ecs, _pair_buff[i].e1);
+      get_bounding_box(&r2, ecs, _pair_buff[i].e2);
+      if (rect_has_intersection(&r1, &r2))
+      {
+        mediator_emit(SIG_COLLISION, &(SysEvt_Collision){ _pair_buff[i].e1, _pair_buff[i].e2 });
+      }
     }
   }
 }
-
+/* public functions */
 void collision_system_init(Ecs* ecs)
 {
-  _dispatcher = dispatcher_new(NUM_COLLISION_SIGS);
   _rtree = rtree_new();
-  ecs_connect(ecs, ECS_SIG_COMP_RMV, NULL, (sig_handler_fn_t)on_component_remove);
+  ecs_connect(ecs, ECS_SIG_COMP_RMV, NULL, (slot_t)on_component_remove);
 }
 
 void collision_system_fini()
 {
-  dispatcher_destroy(_dispatcher);
   rtree_delete(_rtree);
   _rtree = NULL;
-  _dispatcher = NULL;
-}
-
-void collision_system_connect(int signal, pointer_t user_data, sig_handler_fn_t handler)
-{
-  dispatcher_connect(_dispatcher, signal, user_data, handler);
 }
 
 void collision_system_draw_debug(SDL_Renderer* renderer) { rtree_draw(_rtree, renderer); }
+
+void collision_system_query(const AABB* aabb, Callback callback)
+{
+  rtree_query(_rtree, aabb, callback);
+}
 
 void CollisionSystem(Ecs* ecs)
 {
   update_proxies(ecs);
   broad_phase(ecs);
   narrow_phase(ecs);
-}
-
-void collision_system_query(const AABB *aabb, Callback callback)
-{
-  rtree_query(_rtree, aabb, callback);
 }

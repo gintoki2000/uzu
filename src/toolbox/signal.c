@@ -52,19 +52,19 @@ void signal_destroy(Signal* sig)
   free(sig);
 }
 
-void signal_connect(Signal* sig, void* user_data, sig_handler_fn_t handler)
+void signal_connect(Signal* sig, void* user_data, slot_t slot)
 {
   signal_grow_if_need(sig);
-  sig->callbacks[sig->count++] = CALLBACK_1(user_data, handler);
+  sig->callbacks[sig->count++] = CALLBACK_1(user_data, slot);
 }
 
-void signal_disconnect(Signal* sig, sig_handler_fn_t handler)
+void signal_disconnect(Signal* sig, slot_t slot)
 {
   Callback* callbacks = sig->callbacks;
   u32       count = sig->count;
   for (u32 i = 0; i < count; ++i)
   {
-    if (callbacks[i].func == (pointer_t)handler)
+    if (callbacks[i].func == (pointer_t)slot)
     {
       callbacks[i] = callbacks[count - 1];
       --sig->count;
@@ -75,11 +75,11 @@ void signal_disconnect(Signal* sig, sig_handler_fn_t handler)
 
 void signal_emit(Signal* sig, const void* evt)
 {
-  sig_handler_fn_t func;
-  pointer_t        user_data;
+  slot_t    func;
+  pointer_t user_data;
   for (u32 i = 0; i < sig->count; ++i)
   {
-    func = (sig_handler_fn_t)sig->callbacks[i].func;
+    func = (slot_t)sig->callbacks[i].func;
     user_data = sig->callbacks[i].user_data;
 
     func(user_data, evt);
@@ -118,14 +118,14 @@ void dispatcher_destroy(Dispatcher* dp)
   free(dp);
 }
 
-void dispatcher_connect(Dispatcher* dp, int sig, void* user_data, sig_handler_fn_t handler)
+void dispatcher_connect(Dispatcher* dp, int sig, void* user_data, slot_t slot)
 {
-  signal_connect(dp->signals + sig, user_data, handler);
+  signal_connect(dp->signals + sig, user_data, slot);
 }
 
-void dispatcher_disconnect(Dispatcher* dp, int sig, sig_handler_fn_t handler)
+void dispatcher_disconnect(Dispatcher* dp, int sig, slot_t slot)
 {
-  signal_disconnect(dp->signals + sig, handler);
+  signal_disconnect(dp->signals + sig, slot);
 }
 
 void dispatcher_emit(Dispatcher* dp, int sig, const void* evt)

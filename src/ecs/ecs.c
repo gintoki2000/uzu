@@ -74,7 +74,7 @@ void* ecs_add(Ecs* self, ecs_entity_t entity, ecs_size_t component_type)
   component = ecs_pool_get(get_pool(self, component_type), entity);
   type = &self->types[component_type];
   if (type->init_fn != NULL)
-    type->init_fn(type->user_data, component);
+    type->init_fn(component);
   return component;
 }
 
@@ -116,6 +116,8 @@ void ecs_rmv_all(Ecs* self, ecs_entity_t entity)
         .component = component,
       };
       dispatcher_emit(self->dispatcher, ECS_SIG_COMP_RMV, &event);
+      if (self->types[i].fini_fn != NULL)
+        self->types[i].fini_fn(component);
       ecs_pool_rmv(ppool, entity);
     }
   }
@@ -249,7 +251,7 @@ SDL_bool ecs_has(Ecs* self, ecs_entity_t entity, ecs_size_t component_type)
   return ecs_pool_contains(self->pools[component_type], entity);
 }
 
-void ecs_connect(Ecs* self, int sig, void* udata, sig_handler_fn_t handler)
+void ecs_connect(Ecs* self, int sig, void* udata, slot_t handler)
 {
   dispatcher_connect(self->dispatcher, sig, udata, handler);
 }

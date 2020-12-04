@@ -1,0 +1,4 @@
+#ifndef CONSTANCES_H
+#define CONSTANCES_H
+#define TILE_SIZE 16
+#endif //CONSTANCES_H

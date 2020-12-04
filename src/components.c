@@ -25,6 +25,7 @@ Animator* animator_init(Animator* animator, const Animation* anims, u32 cnt)
 
 void animator_fini(Animator *animator)
 {
+  INFO("get called\n");
   for (u32 i = 0; i < animator->cnt; ++i)
   {
     animation_fini(&animator->anims[i]);

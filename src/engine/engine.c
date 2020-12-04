@@ -1,10 +1,11 @@
 #include "engine.h"
 #include <SDL2/SDL.h>
+#include <toolbox/toolbox.h>
 
 static SDL_bool      _is_running = SDL_FALSE;
 static SDL_Window*   _window;
 static SDL_Renderer* _renderer;
-static Uint32        _delayTicks;
+static Uint32        _delay_ticks;
 static Uint32        _frame_rate;
 
 static SDL_bool init(const GameSetting* setting)
@@ -35,8 +36,8 @@ void engine_run(GameDelegate* game_delegate, const GameSetting* setting)
   SDL_Event event;
 
   user_data = game_delegate->user_data;
-  loop_fn = game_delegate->loop;
-  event_fn = game_delegate->event;
+  loop_fn   = game_delegate->loop;
+  event_fn  = game_delegate->event;
 
   if (init(setting) && game_delegate->init(user_data))
   {
@@ -51,9 +52,9 @@ void engine_run(GameDelegate* game_delegate, const GameSetting* setting)
       }
       loop_fn(user_data, _renderer);
       elapsedTicks = SDL_GetTicks() - beginingTick;
-      if (elapsedTicks < _delayTicks)
+      if (elapsedTicks < _delay_ticks)
       {
-        SDL_Delay(_delayTicks - elapsedTicks);
+        SDL_Delay(_delay_ticks - elapsedTicks);
       }
     }
   }
@@ -68,7 +69,7 @@ void engine_stop() { _is_running = SDL_FALSE; }
 void engine_set_frame_rate(Uint32 frame_rate)
 {
   _frame_rate = frame_rate;
-  _delayTicks = 1000 / _frame_rate;
+  _delay_ticks = 1000 / _frame_rate;
 }
 
 SDL_Renderer* engine_get_renderer() { return _renderer; }

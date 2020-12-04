@@ -6,15 +6,14 @@
 typedef uint32_t ecs_entity_t;
 typedef uint16_t ecs_size_t;
 
-typedef void (*ecs_comp_init_fn_t)(void*, void*);
-typedef void (*ecs_comp_fini_fn_t)(void*, void*);
-typedef void (*ecs_comp_init_ex_fn_t)(void*, void*, const void*);
+typedef void (*ecs_comp_init_fn_t)(void*);
+typedef void (*ecs_comp_fini_fn_t)(void*);
+typedef void (*ecs_comp_init_ex_fn_t)(void*, const void*);
 
 typedef struct EcsType
 {
   ecs_comp_init_fn_t init_fn;
   ecs_comp_init_fn_t fini_fn;
-  void*              user_data;
   ecs_size_t         size;
 } EcsType;
 
@@ -37,5 +36,8 @@ typedef struct EcsType
   }
 #define ECS_TYPE(_T)                                                                               \
   (EcsType) { .size = sizeof(_T) }
+
+#define ECS_ENT_FMT_PATTERN "[%4u | %4u]"
+#define ECS_ENT_FMT_VARS(_ent) ECS_ENT_IDX(_ent), ECS_ENT_VER(_ent)
 
 #endif // ECS_COMMON_H

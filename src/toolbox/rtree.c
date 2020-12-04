@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define RTREE_DEFAULT_CAP 255
+#define RTREE_DEFAULT_CAP 512
 
 typedef struct
 {

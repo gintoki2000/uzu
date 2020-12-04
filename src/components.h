@@ -20,15 +20,13 @@ enum
 
 enum
 {
-  SWORD_STATE_IDLE,
-  SWORD_STATE_REGULAR_ATK
-};
-
-enum
-{
-  AXE_STATE_IDLE,
-  AXE_STATE_REGULAR_ATK,
-  AXE_STATE_HEAVY_ATK,
+  CATEGORY_PLAYER,
+  CATEGORY_PLAYER_PROJECTILE,
+  CATEGORY_ENEMY,
+  CATEGORY_ENEMY_PROJECTILE,
+  CATEGORY_PLAYER_WEAPON,
+  CATEGORY_ENEMY_WEAPON,
+  NUM_CATEGORIES,
 };
 
 typedef struct Motion
@@ -66,46 +64,35 @@ typedef struct Equipment
   ecs_entity_t rhand;
 } Equipment;
 
-typedef struct GenericSword
+typedef struct WeponBase
 {
-  s32 atk;
-  s32 range;
-  s32 state;
-  u32 timer;
-  u32 step;
-} GenericSword;
+  s32         atk;
+  const char* name;
+  BOOL        in_action;
+} WeaponCore;
 
-typedef struct GenericAxe
+typedef struct Swingable
 {
-  s32 atk;
-  s32 range;
-  s32 state;
-  u32 timer;
-  u32 step;
-} GenericAxe;
+  int  on_action;
+  int  timer;
+  int  step;
+  BOOL is_active;
+} Swingable;
 
-typedef struct GenericSpear
+typedef struct Thustable
 {
-  s32 atk;
-} GenericSpear;
+  int on_action;
+} Thustable;
 
-typedef struct GoldenSword
+typedef struct ThunderStrike
 {
-  s32 state;
-  u32 timer;
-  u32 step;
-} GoldenSword;
+  int on_action;
+} ThundeStrike;
 
-typedef struct GenericBow
+typedef struct DamageOutput
 {
-  s32 atk;
-} GenericBow;
-
-typedef struct MagicStaff
-{
-  s32 mpcost;
-  ecs_entity_t (*projectile_factory_fn)(Ecs*);
-} MagicStaff;
+  int atk;
+} DamageOutput;
 
 typedef struct WeaponAction
 {
@@ -121,15 +108,10 @@ typedef struct Projectile
   int atk;
 } Projectile;
 
-typedef struct PlayerWeaponTag
-{
-  int dummy;
-} PlayerWeaponTag;
-
 typedef struct Heath
 {
-  u32 hit_points;
-  u32 max_hit_points;
+  s32 hit_points;
+  s32 max_hit_points;
 } Heath;
 
 typedef struct Animator
@@ -144,7 +126,9 @@ typedef struct HitBox
 {
   Vec2 size;
   Vec2 anchor;
-  int proxy_id;
+  int  proxy_id;
+  u16  mask_bits;
+  u16  category;
 } HitBox;
 
 typedef struct HealBar
@@ -172,18 +156,17 @@ enum
   CHARACTER_ACTION,
   EQUIPMENT,
   WEAPON_ACTION,
-  GENERIC_SWORD,
   HEATH,
-  GENERIC_AXE,
-  GENERIC_BOW,
   HITBOX,
   ENEMY_TAG,
   PROJECTILE,
-  PLAYER_WEAPON_TAG,
   HEAL_BAR,
   LIFE_SPAN,
   TAG_TO_BE_DESTROYED,
-  GOLDEN_SWORD,
+  SWINGABLE,
+  THUNDER_STRIKE,
+  DAMAGE_OUTPUT,
+  WEAPON_CORE,
   NUM_COMPONENTS
 };
 

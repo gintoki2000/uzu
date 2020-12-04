@@ -1,4 +1,5 @@
 #include "life_span_system.h"
+#include "mediator.h"
 #include <components.h>
 
 void LifeSpanSystem(Ecs* ecs)
@@ -13,7 +14,8 @@ void LifeSpanSystem(Ecs* ecs)
   {
     if (--life_span[i].remaining == 0)
     {
-      INFO("e{%3u | %3u} end life span\n", ECS_ENT_IDX(entities[i]), ECS_ENT_VER(entities[i]));
+      INFO("e"ECS_ENT_FMT_PATTERN" end life span\n", ECS_ENT_FMT_VARS(entities[i]));
+      mediator_emit(SIG_LIFE_SPAN_END_UP, &(SysEvt_LifeSpanEndUp){ entities[i] });
       ecs_destroy(ecs, entities[i]);
     }
   }

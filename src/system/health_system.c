@@ -1,23 +1,23 @@
 #include "health_system.h"
+#include "mediator.h"
 #include <components.h>
 
-static Dispatcher* _dispatcher;
-
-void health_system_init() { _dispatcher = dispatcher_new(NUM_HEALTH_SYSTEM_SIGS); }
-
-void health_system_fini() { dispatcher_destroy(_dispatcher); }
-
-void health_system_apply_damage(Ecs* ecs, ecs_entity_t entity, int damage)
+static void on_deal_damage(Ecs* ecs, const SysEvt_DealDamage* event)
 {
   Heath* health;
-  if ((health = ecs_get(ecs, entity, HEATH)) != NULL)
+  if ((health = ecs_get(ecs, event->receiver, HEATH)) != NULL)
   {
-    health->hit_points -= damage;
+    health->hit_points -= event->damage;
     if (health->hit_points <= 0)
     {
-      EntityDiedEvent evt = (EntityDiedEvent){entity};
-      dispatcher_emit(_dispatcher, SIG_ENTITY_DIED, &evt);
-      ecs_add(ecs, entity, TAG_TO_BE_DESTROYED);
+      health->hit_points = 0;
+      mediator_emit(SIG_ENTITY_DIED, &(SysEvt_EntityDied){ event->receiver });
+      ecs_add(ecs, event->receiver, TAG_TO_BE_DESTROYED);
     }
   }
+}
+
+void health_system_init(Ecs* ecs)
+{
+  mediator_connect(SIG_DEAL_DAMAGE, ecs, SLOT(on_deal_damage));
 }

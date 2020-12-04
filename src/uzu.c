@@ -8,6 +8,8 @@
 #include <components.h>
 #include <entity_factory.h>
 #include <resources.h>
+#include <map.h>
+#include <map_data.h>
 
 #include <ecs/ecs.h>
 
@@ -38,6 +40,8 @@
 
 static Ecs* _ecs;
 
+SDL_Rect g_viewport;
+
 static void on_game_quit(void* user_data);
 static BOOL on_game_init(void* user_data);
 static void on_game_fini(void* user_data);
@@ -58,8 +62,18 @@ static BOOL on_game_init(void* user_data)
   /*set scale*/
   SDL_RenderSetScale(engine_get_renderer(), 2.0, 2.0);
 
+  g_viewport = (SDL_Rect){ 0, 0, WIN_WIDTH, WIN_HEIGHT };
+
+  map_set_data(MAP_LAYER_FLOOR, MAP_TEST_FLOOR, MAP_TEST_COL_CNT * MAP_TEST_ROW_CNT);
+  map_set_data(MAP_LAYER_WALL, MAP_TEST_WALL, MAP_TEST_COL_CNT * MAP_TEST_ROW_CNT);
+  map_set_size(MAP_TEST_COL_CNT, MAP_TEST_ROW_CNT);
+  map_enable_layer(MAP_LAYER_FLOOR);
+  map_enable_layer(MAP_LAYER_WALL);
+
   /*init keyboard*/
   keybroad_init();
+
+  
 
   /*init _ecs*/
   EcsType types[NUM_COMPONENTS] = {
@@ -152,7 +166,7 @@ static BOOL on_game_init(void* user_data)
   tx->pos.y     = WIN_HEIGHT / 2;
 
   srand(SDL_GetTicks());
-  for (int i = 0; i < 200; ++i)
+  for (int i = 0; i < 5; ++i)
   {
     ecs_entity_t demon = make_huge_demon(_ecs, ECS_NULL_ENT);
 
@@ -195,6 +209,7 @@ static void on_game_loop(void* user_data, SDL_Renderer* renderer)
   CollisionSystem(_ecs);
   AnimatorSystem(_ecs);
   SwingingSystem(_ecs);
+  map_draw(renderer);
   DrawSystem(_ecs, renderer);
   LifeSpanSystem(_ecs);
   collision_system_draw_debug(renderer);

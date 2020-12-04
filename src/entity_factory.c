@@ -99,7 +99,6 @@ ecs_entity_t make_huge_demon(Ecs* ecs, ecs_entity_t weapon)
   HitBox*          hitbox;
   Heath*           heath;
   HealBar*         healthBar;
-  LifeSpan*        life_span;
 
   texture = get_texture(TEX_BIG_DEMON);
   animation_init(&anims[ANIM_STATE_HIT], texture, 32 * 6, 0, 1, 1, 32, 36);
@@ -143,9 +142,6 @@ ecs_entity_t make_huge_demon(Ecs* ecs, ecs_entity_t weapon)
   healthBar         = ecs_add(ecs, demon, HEAL_BAR);
   healthBar->len    = 40;
   healthBar->anchor = (SDL_Point){ 20, 25 };
-
-  life_span= ecs_add(ecs, demon, LIFE_SPAN);
-  life_span->remaining = rand() % 200 + 50;
 
   return demon;
 }

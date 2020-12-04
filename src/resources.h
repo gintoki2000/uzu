@@ -14,6 +14,7 @@ typedef enum
   TEX_YELLOW_THUNDER,
   TEX_GOLDEN_SWORD,
   TEX_GOLDEN_CROSS_HIT,
+  TEX_TILESET,
   NUM_TEXS
 } TextureId;
 BOOL         resources_load();

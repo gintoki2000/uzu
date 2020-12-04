@@ -1,5 +1,6 @@
 #include "map.h"
 #include "constances.h"
+#include "resources.h"
 #include <SDL2/SDL_render.h>
 #include <string.h>
 
@@ -10,29 +11,26 @@ enum
   NUM_TILE_TYPES
 };
 
-extern SDL_Rect      g_viewport;
+extern SDL_Rect g_viewport;
 
-static int _floor_layer[MAP_MAX_ROW * MAP_MAX_COL];
-static int _wall_layer[MAP_MAX_ROW * MAP_MAX_COL];
-static int _row_cnt;
-static int _col_cnt;
-static int _position_x;
-static int _position_y;
+static s32 _floor_layer[MAP_MAX_ROW * MAP_MAX_COL];
+static s32 _wall_layer[MAP_MAX_ROW * MAP_MAX_COL];
+static s32 _row_cnt;
+static s32 _col_cnt;
+static s32 _position_x;
+static s32 _position_y;
 
-static int* _layers[] = {
-  [MAP_LAYER_FLOOR] = _floor_layer, 
-  [MAP_LAYER_WALL] = _wall_layer
-};
+static s32* _layers[] = { [MAP_LAYER_FLOOR] = _floor_layer, [MAP_LAYER_WALL] = _wall_layer };
 
 static bool _is_layer_enable[NUM_MAP_LAYERS];
 
-static void map_draw_layer(const int* data, SDL_Renderer* renderer)
+static void map_draw_layer(const s32* data, SDL_Renderer* renderer)
 {
-  int          start_x, start_y, end_x, end_y;
+  s32          start_x, start_y, end_x, end_y;
   SDL_Texture* tileset;
   SDL_Rect     dst;
   SDL_Rect     src;
-  int          tile_id, begin_row;
+  s32          tile_id, begin_row;
 
   start_x = g_viewport.x / TILE_SIZE;
   start_y = g_viewport.y / TILE_SIZE;
@@ -43,17 +41,19 @@ static void map_draw_layer(const int* data, SDL_Renderer* renderer)
   start_x = MAX(0, start_x);
   start_y = MAX(0, start_y);
 
-  end_x = MIN(end_x, _col_cnt - 1);
-  end_y = MIN(end_y, _row_cnt - 1);
+  end_x = MIN(end_x, _col_cnt);
+  end_y = MIN(end_y, _row_cnt);
 
   dst.w = dst.h = TILE_SIZE;
   src.w = src.h = TILE_SIZE;
-  src.y = 0;
+  src.y         = 0;
 
-  for (int y = start_y; y < end_y; ++y)
+  tileset = get_texture(TEX_TILESET);
+
+  for (s32 y = start_y; y < end_y; ++y)
   {
     begin_row = y * _col_cnt;
-    for (int x = start_x; x < end_x; ++x)
+    for (s32 x = start_x; x < end_x; ++x)
     {
       dst.x = x * TILE_SIZE + _position_x;
       dst.y = y * TILE_SIZE + _position_y;
@@ -65,7 +65,6 @@ static void map_draw_layer(const int* data, SDL_Renderer* renderer)
 
       src.x = tile_id * TILE_SIZE;
 
-
       SDL_RenderCopy(renderer, tileset, &src, &dst);
     }
   }
@@ -73,7 +72,7 @@ static void map_draw_layer(const int* data, SDL_Renderer* renderer)
 
 void map_draw(SDL_Renderer* renderer)
 {
-  for (int i = 0; i < NUM_MAP_LAYERS; ++i)
+  for (s32 i = 0; i < NUM_MAP_LAYERS; ++i)
   {
     if (_is_layer_enable[i])
     {
@@ -82,7 +81,7 @@ void map_draw(SDL_Renderer* renderer)
   }
 }
 
-void map_set_size(int w, int h)
+void map_set_size(s32 w, s32 h)
 {
   SDL_assert(w < MAP_MAX_COL);
   SDL_assert(h < MAP_MAX_ROW);
@@ -90,7 +89,7 @@ void map_set_size(int w, int h)
   _col_cnt = w;
 }
 
-void map_get_size(int *w, int *h)
+void map_get_size(s32* w, s32* h)
 {
   if (w != NULL)
     *w = _col_cnt;
@@ -98,27 +97,15 @@ void map_get_size(int *w, int *h)
     *h = _row_cnt;
 }
 
-void map_set_data(int layer, const int *data)
+void map_set_data(s32 layer, const s32* data, u32 cnt)
 {
-  memcpy(_layers[layer], data, sizeof(int) * _row_cnt * _col_cnt);
+  memcpy(_layers[layer], data, sizeof(s32) * cnt);
 }
 
-int* map_get_layer(int layer)
-{
-  return _layers[layer];
-}
+s32* map_get_layer(s32 layer) { return _layers[layer]; }
 
-void map_disable_layer(int layer)
-{
-  _is_layer_enable[layer] = false;
-}
+void map_disable_layer(s32 layer) { _is_layer_enable[layer] = false; }
 
-void map_enable_layer(int layer)
-{
-  _is_layer_enable[layer] = true;
-}
+void map_enable_layer(s32 layer) { _is_layer_enable[layer] = true; }
 
-bool map_is_layer_enable(int layer)
-{
-  return _is_layer_enable[layer];
-}
+bool map_is_layer_enable(s32 layer) { return _is_layer_enable[layer]; }

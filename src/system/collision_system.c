@@ -78,7 +78,8 @@ static void update_proxies(Ecs* ecs)
     }
     else
     {
-      rtree_move_proxy(_rtree, hitboxs[i].proxy_id, &aabb, VEC2(0, 0));
+      if (transform->was_changed)
+        rtree_move_proxy(_rtree, hitboxs[i].proxy_id, &aabb, VEC2(0, 0));
     }
   }
 }

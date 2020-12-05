@@ -36,7 +36,7 @@ typedef struct
 #define CALLBACK_1(_user_data, _func)                                                              \
   ((Callback){                                                                                     \
       .user_data = (void*)_user_data,                                                              \
-      .func = (void*)_func,                                                                        \
+      .func      = (void*)_func,                                                                   \
   })
 #define CALLBACK_2(_func) ((Callback){ .func = _func })
 #define INLINE static inline
@@ -58,7 +58,6 @@ typedef struct
   })
 #define BIT(__x) (1 << (__x))
 
-
 typedef enum
 {
   ORIENTATION_NONE,
@@ -74,7 +73,7 @@ typedef struct
   float y;
 } Vec2;
 
-#define VEC2(_x, _y) ((Vec2){ .x = _x, .y = _y })
+#define VEC2(_x, _y) ((Vec2){ .x = (_x), .y = (_y) })
 
 typedef struct
 {
@@ -88,6 +87,7 @@ INLINE float maxf(float a, float b) { return a > b ? a : b; }
 INLINE float minf(float a, float b) { return a < b ? a : b; }
 INLINE Vec2  maxv(Vec2 a, Vec2 b) { return (Vec2){ maxf(a.x, b.x), maxf(a.y, b.y) }; }
 INLINE Vec2  minv(Vec2 a, Vec2 b) { return (Vec2){ minf(a.x, b.x), minf(a.y, b.y) }; }
+INLINE float absf(float x) { return x >= 0.f ? x : -x; }
 
 INLINE Vec2 subv(Vec2 a, Vec2 b) { return (Vec2){ a.x - b.x, a.y - b.y }; }
 
@@ -147,10 +147,10 @@ INLINE void aabb_extend(AABB* aabb, float v)
 INLINE bool aabb_contains(const AABB* a, const AABB* b)
 {
   bool result = true;
-  result = result && a->lower_bound.x <= b->lower_bound.x;
-  result = result && a->lower_bound.y <= b->lower_bound.y;
-  result = result && b->upper_bound.x <= a->upper_bound.x;
-  result = result && b->upper_bound.y <= a->upper_bound.y;
+  result      = result && a->lower_bound.x <= b->lower_bound.x;
+  result      = result && a->lower_bound.y <= b->lower_bound.y;
+  result      = result && b->upper_bound.x <= a->upper_bound.x;
+  result      = result && b->upper_bound.y <= a->upper_bound.y;
   return result;
 }
 

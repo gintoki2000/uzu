@@ -1,6 +1,7 @@
 #include "motion_system.h"
 #include <components.h>
-#define DT 0.033f
+#include <toolbox/toolbox.h>
+#define DT 0.0166f
 
 void MotionSystem(Ecs* ecs)
 {
@@ -15,7 +16,12 @@ void MotionSystem(Ecs* ecs)
   for (int i = 0; i < cnt; ++i)
   {
     transform = ecs_get(ecs, entities[i], TRANSFORM);
+
+    transform->prev_pos = transform->pos;
     transform->pos.x += motion[i].vel.x * DT;
     transform->pos.y += motion[i].vel.y * DT;
+
+    transform->was_changed = (absf(transform->pos.x - transform->prev_pos.x) > 0.1f ||
+                              absf(transform->pos.y - transform->prev_pos.y) > 0.1f);
   }
 }

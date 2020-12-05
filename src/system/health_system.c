@@ -14,10 +14,16 @@ static void on_deal_damage(Ecs* ecs, const SysEvt_DealDamage* event)
       mediator_emit(SIG_ENTITY_DIED, &(SysEvt_EntityDied){ event->receiver });
       ecs_add(ecs, event->receiver, TAG_TO_BE_DESTROYED);
     }
+    else
+    {
+      mediator_emit(SIG_GET_DAMAGED,
+                    &(SysEvt_GetDamaged){
+                        .dealer  = event->dealer,
+                        .damagee = event->receiver,
+                        .damage  = event->damage,
+                    });
+    }
   }
 }
 
-void health_system_init(Ecs* ecs)
-{
-  mediator_connect(SIG_DEAL_DAMAGE, ecs, SLOT(on_deal_damage));
-}
+void health_system_init(Ecs* ecs) { mediator_connect(SIG_DEAL_DAMAGE, ecs, SLOT(on_deal_damage)); }

@@ -11,10 +11,11 @@ enum
   SIG_PROJECTILE_HIT,
   SIG_LIFE_SPAN_END_UP,
   SIG_DEAL_DAMAGE,
+  SIG_GET_DAMAGED,
   NUM_SYSTEM_SIGNALS,
 };
 
-typedef struct 
+typedef struct
 {
   ecs_entity_t e1;
   ecs_entity_t e2;
@@ -37,17 +38,31 @@ typedef struct
   ecs_entity_t entity;
 } SysEvt_ProjectileHit;
 
-typedef struct 
+typedef struct
 {
   ecs_entity_t dealer;
   ecs_entity_t receiver;
-  int damage;
+  int          damage;
 } SysEvt_DealDamage;
 
-typedef struct 
+typedef struct
 {
   ecs_entity_t entity;
 } SysEvt_LifeSpanEndUp;
+
+typedef struct
+{
+  ecs_entity_t entity;
+  s32          row;
+  s32          col;
+} SysEvt_TileCollision;
+
+typedef struct
+{
+  ecs_entity_t dealer;
+  ecs_entity_t damagee;
+  int          damage;
+} SysEvt_GetDamaged;
 
 void mediator_init();
 void mediator_fini();

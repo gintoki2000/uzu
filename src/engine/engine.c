@@ -52,6 +52,7 @@ void engine_run(GameDelegate* game_delegate, const GameSetting* setting)
       }
       loop_fn(user_data, _renderer);
       elapsedTicks = SDL_GetTicks() - beginingTick;
+      INFO("elapsedTicks: %u\n", elapsedTicks);
       if (elapsedTicks < _delay_ticks)
       {
         SDL_Delay(_delay_ticks - elapsedTicks);

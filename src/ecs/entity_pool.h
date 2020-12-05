@@ -2,6 +2,7 @@
 #define ECS_ENTITY_POOL_H
 #include "common.h"
 #include <SDL2/SDL_stdinc.h>
+#include <toolbox/toolbox.h>
 typedef struct EcsEntityPool
 {
   ecs_entity_t* entities;
@@ -19,7 +20,7 @@ ecs_entity_t ecs_entity_pool_alloc_ent(EcsEntityPool* self);
 /*free given entity and increment version by 1*/
 void ecs_entity_pool_free_ent(EcsEntityPool* self, ecs_entity_t e);
 
-static inline SDL_bool ecs_entity_pool_is_valid(EcsEntityPool* self, ecs_entity_t e)
+INLINE BOOL ecs_entity_pool_is_valid(EcsEntityPool* self, ecs_entity_t e)
 {
   ecs_size_t idx = ECS_ENT_IDX(e);
 

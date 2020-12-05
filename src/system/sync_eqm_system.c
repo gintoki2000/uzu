@@ -29,6 +29,7 @@ void SyncEqmSystem(Ecs* ecs)
 
     weapon_transform->pos.x = transform->pos.x + FLIP_TO_SIGN(visual->flip) * 6;
     weapon_transform->pos.y = transform->pos.y + 6;
+    weapon_transform->was_changed = TRUE;
 
     weapon_visual->flip = visual->flip;
   }

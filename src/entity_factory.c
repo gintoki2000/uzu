@@ -12,7 +12,7 @@ ecs_entity_t make_anime_sword(Ecs* ecs)
   /*component*/
   Visual*       visual;
   Transform*    transform;
-  WeaponAction* cmd_input;
+  WeaponAction* character_actions;
   HitBox*       hitbox;
 
   texture = get_texture(TEX_ANIME_SWORD);
@@ -26,8 +26,8 @@ ecs_entity_t make_anime_sword(Ecs* ecs)
   visual->anchor.x = visual->sprite.rect.w / 2;
   visual->anchor.y = visual->sprite.rect.h;
 
-  cmd_input         = ecs_add(ecs, sword, WEAPON_ACTION);
-  cmd_input->action = WEAPON_ACTION_NONE;
+  character_actions         = ecs_add(ecs, sword, WEAPON_ACTION);
+  character_actions->action = WEAPON_ACTION_NONE;
 
   hitbox           = ecs_add(ecs, sword, HITBOX);
   hitbox->size     = VEC2(12.f, 30.f);
@@ -47,9 +47,11 @@ ecs_entity_t make_knight(Ecs* ecs, ecs_entity_t weapon)
   Transform*       transform;
   Visual*          visual;
   Equipment*       equipment;
-  CharacterAction* cmd_input;
+  CharacterAction* character_actions;
   Animator*        animator;
   HitBox*          hitbox;
+  CharacterStats*  stats;
+  Motion*          motion;
 
   texture = get_texture(TEX_KNIGHT);
   animation_init(&anims[ANIM_STATE_HIT], texture, 0, 0, 1, 1, 16, 28);
@@ -71,17 +73,24 @@ ecs_entity_t make_knight(Ecs* ecs, ecs_entity_t weapon)
   equipment        = ecs_add(ecs, knight, EQUIPMENT);
   equipment->rhand = weapon;
 
-  cmd_input = ecs_add(ecs, knight, CHARACTER_ACTION);
+  character_actions = ecs_add(ecs, knight, CHARACTER_ACTION);
 
   animator = ecs_add(ecs, knight, ANIMATOR);
   animator_init(animator, anims, NUM_ANIM_STATES);
   animator->current_anim = ANIM_STATE_IDLE;
   animator->elapsed      = 0;
 
-  hitbox           = ecs_add(ecs, knight, HITBOX);
-  hitbox->size     = VEC2(10.f, 18.f);
-  hitbox->anchor   = VEC2(5.f, 6.f);
-  hitbox->proxy_id = NULL_NODE;
+  hitbox                       = ecs_add(ecs, knight, HITBOX);
+  hitbox->size                 = VEC2(6.f, 10.f);
+  hitbox->anchor               = VEC2(3.f, -2.f);
+  hitbox->proxy_id             = NULL_NODE;
+  hitbox->check_tile_collision = TRUE;
+
+  stats             = ecs_add(ecs, knight, CHARACTER_STATS);
+  stats->move_speed = 140.f;
+
+
+  motion = ecs_add(ecs, knight, MOTION);
   return knight;
 }
 
@@ -94,11 +103,13 @@ ecs_entity_t make_huge_demon(Ecs* ecs, ecs_entity_t weapon)
   /*components */
   Transform*       transform;
   Visual*          visual;
-  CharacterAction* cmd_input;
+  CharacterAction* character_actions;
   Animator*        animator;
   HitBox*          hitbox;
   Heath*           heath;
   HealBar*         healthBar;
+  Motion*          motion;
+  CharacterStats*  stats;
 
   texture = get_texture(TEX_BIG_DEMON);
   animation_init(&anims[ANIM_STATE_HIT], texture, 32 * 6, 0, 1, 1, 32, 36);
@@ -118,8 +129,8 @@ ecs_entity_t make_huge_demon(Ecs* ecs, ecs_entity_t weapon)
   visual->anchor.x = 32 / 2;
   visual->anchor.y = 36 / 2;
 
-  cmd_input         = ecs_add(ecs, demon, CHARACTER_ACTION);
-  cmd_input->action = WEAPON_ACTION_NONE;
+  character_actions         = ecs_add(ecs, demon, CHARACTER_ACTION);
+  character_actions->action = WEAPON_ACTION_NONE;
 
   animator = ecs_add(ecs, demon, ANIMATOR);
   animator_init(animator, anims, NUM_ANIM_STATES);
@@ -143,6 +154,10 @@ ecs_entity_t make_huge_demon(Ecs* ecs, ecs_entity_t weapon)
   healthBar->len    = 40;
   healthBar->anchor = (SDL_Point){ 20, 25 };
 
+  motion = ecs_add(ecs, demon, MOTION);
+
+  stats = ecs_add(ecs, demon, CHARACTER_STATS);
+
   return demon;
 }
 
@@ -154,7 +169,7 @@ ecs_entity_t make_axe(Ecs* ecs)
   /*component*/
   Visual*       visual;
   Transform*    transform;
-  WeaponAction* cmd_input;
+  WeaponAction* character_actions;
 
   texture = get_texture(TEX_AXE);
 
@@ -167,8 +182,8 @@ ecs_entity_t make_axe(Ecs* ecs)
   visual->anchor.x = visual->sprite.rect.w / 2;
   visual->anchor.y = visual->sprite.rect.h;
 
-  cmd_input         = ecs_add(ecs, axe, WEAPON_ACTION);
-  cmd_input->action = WEAPON_ACTION_NONE;
+  character_actions         = ecs_add(ecs, axe, WEAPON_ACTION);
+  character_actions->action = WEAPON_ACTION_NONE;
 
   return axe;
 }

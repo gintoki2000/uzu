@@ -15,22 +15,28 @@ extern SDL_Rect g_viewport;
 
 static s32 _floor_layer[MAP_MAX_ROW * MAP_MAX_COL];
 static s32 _wall_layer[MAP_MAX_ROW * MAP_MAX_COL];
+static s32 _front_layer[MAP_MAX_ROW * MAP_MAX_COL];
 static s32 _row_cnt;
 static s32 _col_cnt;
 static s32 _position_x;
 static s32 _position_y;
 
-static s32* _layers[] = { [MAP_LAYER_FLOOR] = _floor_layer, [MAP_LAYER_WALL] = _wall_layer };
+static s32* _layers[] = {
+  [MAP_LAYER_FLOOR] = _floor_layer,
+  [MAP_LAYER_WALL]  = _wall_layer,
+  [MAP_LAYER_FRONT] = _front_layer,
+};
 
-static bool _is_layer_enable[NUM_MAP_LAYERS];
+static BOOL _is_layer_enable[NUM_MAP_LAYERS];
 
-static void map_draw_layer(const s32* data, SDL_Renderer* renderer)
+void map_draw_layer(int layer, SDL_Renderer* renderer)
 {
   s32          start_x, start_y, end_x, end_y;
   SDL_Texture* tileset;
   SDL_Rect     dst;
   SDL_Rect     src;
   s32          tile_id, begin_row;
+  const s32*   data = _layers[layer];
 
   start_x = g_viewport.x / TILE_SIZE;
   start_y = g_viewport.y / TILE_SIZE;
@@ -108,4 +114,16 @@ void map_disable_layer(s32 layer) { _is_layer_enable[layer] = false; }
 
 void map_enable_layer(s32 layer) { _is_layer_enable[layer] = true; }
 
-bool map_is_layer_enable(s32 layer) { return _is_layer_enable[layer]; }
+BOOL map_is_layer_enable(s32 layer) { return _is_layer_enable[layer]; }
+
+s32 map_tile_at(s32 layer, s32 x, s32 y)
+{
+  if (x < 0 || y < 0 || y >= _row_cnt || x >= _col_cnt)
+    return 0;
+  return _layers[layer][x + y * _col_cnt];
+}
+
+BOOL map_is_floor(s32 cell_x, s32 cell_y)
+{
+  return map_tile_at(MAP_LAYER_FLOOR, cell_x, cell_y) != 0;
+}

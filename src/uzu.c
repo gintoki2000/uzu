@@ -7,15 +7,16 @@
 
 #include <components.h>
 #include <entity_factory.h>
-#include <resources.h>
 #include <map.h>
 #include <map_data.h>
+#include <resources.h>
 
 #include <ecs/ecs.h>
 
 #include <engine/engine.h>
 #include <engine/keyboard.h>
 
+#include <system/action_execution_system.h>
 #include <system/animator_system.h>
 #include <system/collision_filter.h>
 #include <system/collision_system.h>
@@ -25,9 +26,9 @@
 #include <system/health_system.h>
 #include <system/late_destroying_system.h>
 #include <system/life_span_system.h>
+#include <system/map_collision_system.h>
 #include <system/mediator.h>
 #include <system/motion_system.h>
-#include <system/movement_system.h>
 #include <system/player_controller_system.h>
 #include <system/swinging_system.h>
 #include <system/sync_eqm_system.h>
@@ -66,14 +67,13 @@ static BOOL on_game_init(void* user_data)
 
   map_set_data(MAP_LAYER_FLOOR, MAP_TEST_FLOOR, MAP_TEST_COL_CNT * MAP_TEST_ROW_CNT);
   map_set_data(MAP_LAYER_WALL, MAP_TEST_WALL, MAP_TEST_COL_CNT * MAP_TEST_ROW_CNT);
+  map_set_data(MAP_LAYER_FRONT, MAP_TEST_FRONT, MAP_TEST_COL_CNT * MAP_TEST_ROW_CNT);
   map_set_size(MAP_TEST_COL_CNT, MAP_TEST_ROW_CNT);
   map_enable_layer(MAP_LAYER_FLOOR);
   map_enable_layer(MAP_LAYER_WALL);
 
   /*init keyboard*/
   keybroad_init();
-
-  
 
   /*init _ecs*/
   EcsType types[NUM_COMPONENTS] = {
@@ -150,6 +150,10 @@ static BOOL on_game_init(void* user_data)
         (EcsType){
             .size = sizeof(Swingable),
         },
+    [CHARACTER_STATS] =
+        (EcsType){
+            .size = sizeof(CharacterStats),
+        },
   };
 
   _ecs = ecs_new(types, NUM_COMPONENTS);
@@ -165,14 +169,26 @@ static BOOL on_game_init(void* user_data)
   tx->pos.x     = WIN_WIDTH / 2;
   tx->pos.y     = WIN_HEIGHT / 2;
 
+  Vec2 demon_pos[5] = {
+    { 96.f, 96.f }, { 169.f, 169.f }, { 169.f, 200.f }, { 200.f, 250.f }, { 225.f, 190.f },
+  };
+
   srand(SDL_GetTicks());
+  /*
   for (int i = 0; i < 5; ++i)
   {
     ecs_entity_t demon = make_huge_demon(_ecs, ECS_NULL_ENT);
 
     Transform* dtx = ecs_get(_ecs, demon, TRANSFORM);
-    dtx->pos.x     = rand() % (WIN_WIDTH - 60) + 20;
-    dtx->pos.y     = rand() % (WIN_HEIGHT - 60) + 20;
+    dtx->pos       = demon_pos[i];
+  }
+  */
+  for (int i = 0; i < 100; ++i)
+  {
+    ecs_entity_t demon = make_huge_demon(_ecs, ECS_NULL_ENT);
+
+    Transform* dtx = ecs_get(_ecs, demon, TRANSFORM);
+    dtx->pos       = VEC2(rand() % (WIN_WIDTH - 50) + 25, rand() % (WIN_HEIGHT - 50) + 25);
   }
 
   mediator_init();
@@ -203,16 +219,19 @@ static void on_game_loop(void* user_data, SDL_Renderer* renderer)
   SDL_RenderClear(renderer);
   keybroad_update();
   PlayerControllerSystem(_ecs);
-  MovementSystem(_ecs);
+  ActionExecutionSystem(_ecs);
   MotionSystem(_ecs);
   SyncEqmSystem(_ecs);
   CollisionSystem(_ecs);
+  MapCollisionSystem(_ecs);
   AnimatorSystem(_ecs);
   SwingingSystem(_ecs);
-  map_draw(renderer);
+  map_draw_layer(MAP_LAYER_FLOOR, renderer);
+  map_draw_layer(MAP_LAYER_WALL, renderer);
   DrawSystem(_ecs, renderer);
+  map_draw_layer(MAP_LAYER_FRONT, renderer);
   LifeSpanSystem(_ecs);
-  collision_system_draw_debug(renderer);
+  // collision_system_draw_debug(renderer);
   DrawingHealBarSystem(_ecs, renderer);
   DrawingHitboxSystem(_ecs, renderer);
   LateDestroyingSystem(_ecs);

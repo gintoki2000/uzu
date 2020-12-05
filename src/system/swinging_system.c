@@ -35,6 +35,7 @@ void SwingingSystem(Ecs* ecs)
           weapon_core->in_action  = FALSE;
           damage_output->atk      = 0;
           transform->rot          = 0.0;
+          transform->was_changed  = true;
           swingables[i].is_active = FALSE;
         }
         else
@@ -43,6 +44,7 @@ void SwingingSystem(Ecs* ecs)
           transform = ecs_get(ecs, entities[i], TRANSFORM);
 
           transform->rot = swingables->step * 15.0 * FLIP_TO_SIGN(visual->flip);
+          transform->was_changed  = true;
         }
       }
     }
@@ -61,7 +63,7 @@ void SwingingSystem(Ecs* ecs)
           swingables[i].step      = 0;
           damage_output->atk      = weapon_core->atk * SWINGING_SYSTEM_DAMAGE_ADJ;
           weapon_core->in_action  = TRUE;
-          weapon_action->action = WEAPON_ACTION_NONE;
+          weapon_action->action   = WEAPON_ACTION_NONE;
         }
       }
     }

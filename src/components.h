@@ -36,8 +36,10 @@ typedef struct Motion
 } Motion;
 typedef struct Transform
 {
+  Vec2   prev_pos;
   Vec2   pos;
   double rot;
+  BOOL   was_changed;
 } Transform;
 
 typedef struct Visual
@@ -58,6 +60,13 @@ typedef struct CharacterAction
   int desired_dir;
   int action;
 } CharacterAction;
+
+typedef struct CharacterStat
+{
+  float move_speed;
+  int   str;
+  int   mag;
+} CharacterStats;
 
 typedef struct Equipment
 {
@@ -103,6 +112,12 @@ typedef int PlayerTag;
 
 typedef int EnemyTag;
 
+typedef int WeaponTag;
+
+typedef int ItemTag;
+
+typedef int ProjectileTag;
+
 typedef struct Projectile
 {
   int atk;
@@ -129,6 +144,7 @@ typedef struct HitBox
   int  proxy_id;
   u16  mask_bits;
   u16  category;
+  BOOL check_tile_collision;
 } HitBox;
 
 typedef struct HealBar
@@ -167,6 +183,7 @@ enum
   THUNDER_STRIKE,
   DAMAGE_OUTPUT,
   WEAPON_CORE,
+  CHARACTER_STATS,
   NUM_COMPONENTS
 };
 

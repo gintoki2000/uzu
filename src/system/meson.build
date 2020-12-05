@@ -1,7 +1,6 @@
 system_source_files = files(
   'draw_system.c', 
   'player_controller_system.c', 
-  'movement_system.c', 
   'sync_eqm_system.c',
   'animator_system.c',
   'collision_system.c',
@@ -14,5 +13,7 @@ system_source_files = files(
   'late_destroying_system.c',
   'mediator.c',
   'weapon_dealing_damage_system.c',
-  'swinging_system.c'
+  'swinging_system.c',
+  'map_collision_system.c',
+  'action_execution_system.c'
 )

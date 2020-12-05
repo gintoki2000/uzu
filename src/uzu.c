@@ -23,17 +23,18 @@
 #include <system/draw_system.h>
 #include <system/drawing_heal_bar.h>
 #include <system/drawing_hitbox_system.h>
+#include <system/drop_system.h>
 #include <system/health_system.h>
 #include <system/late_destroying_system.h>
 #include <system/life_span_system.h>
 #include <system/map_collision_system.h>
 #include <system/mediator.h>
 #include <system/motion_system.h>
+#include <system/pickup_system.h>
 #include <system/player_controller_system.h>
 #include <system/swinging_system.h>
 #include <system/sync_eqm_system.h>
 #include <system/weapon_dealing_damage_system.h>
-#include <system/drop_system.h>
 
 #define WIN_WIDTH 480
 #define WIN_HEIGHT 360
@@ -164,14 +165,19 @@ static BOOL on_game_init(void* user_data)
   _ecs = ecs_new(types, NUM_COMPONENTS);
 
   // ecs_entity_t player = make_knight(_ecs, make_anime_sword(_ecs));
-  ecs_entity_t player =
-      make_knight(_ecs, make_golden_sword(_ecs, CATEGORY_PLAYER_WEAPON, BIT(CATEGORY_ENEMY)));
+  // ecs_entity_t player =
+  //  make_knight(_ecs, make_golden_sword(_ecs, CATEGORY_PLAYER_WEAPON, BIT(CATEGORY_ENEMY)));
   // ecs_entity_t player = make_knight(_ecs, make_bow(_ecs));
+  //
+  ecs_entity_t player =
+      make_player(_ecs,
+                  make_knight(_ecs, ECS_NULL_ENT),
+                  make_golden_sword(_ecs, CATEGORY_PLAYER_WEAPON, BIT(CATEGORY_ENEMY)));
 
   ecs_add(_ecs, player, PLAYER_TAG);
 
   Transform* tx = ecs_get(_ecs, player, TRANSFORM);
-  tx->pos.x     = WIN_WIDTH / 2;
+  tx->pos.x     = WIN_WIDTH / 2 + 100;
   tx->pos.y     = WIN_HEIGHT / 2;
 
   Vec2 demon_pos[5] = {
@@ -202,6 +208,7 @@ static BOOL on_game_init(void* user_data)
   weapon_dealing_damage_system_init(_ecs);
   collision_filter_system_init(_ecs);
   drop_system_init(_ecs);
+  pickup_system_init(_ecs);
 
   return TRUE;
 }

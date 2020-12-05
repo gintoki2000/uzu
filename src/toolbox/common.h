@@ -74,6 +74,11 @@ typedef struct
 } Vec2;
 
 #define VEC2(_x, _y) ((Vec2){ .x = (_x), .y = (_y) })
+#define VEC2_ZERO VEC2(0.f, 0.f)
+#define VEC2_UP VEC2(-1.f, 0.f)
+#define VEC2_DOWN VEC2(1.f, 0.f)
+#define VEC2_LEFT VEC2(-1.f, 0.f)
+#define VEC2_RIGHT VEC2(1.f, 0.f)
 
 typedef struct
 {

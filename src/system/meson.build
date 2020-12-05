@@ -17,4 +17,5 @@ system_source_files = files(
   'map_collision_system.c',
   'action_execution_system.c'
   ,'drop_system.c'
+  ,'pickup_system.c'
 )

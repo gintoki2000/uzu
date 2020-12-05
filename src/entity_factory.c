@@ -12,7 +12,7 @@ ecs_entity_t make_anime_sword(Ecs* ecs)
   /*component*/
   Visual*       visual;
   Transform*    transform;
-  WeaponAction* character_actions;
+  WeaponAction* act_input;
   HitBox*       hitbox;
 
   texture = get_texture(TEX_ANIME_SWORD);
@@ -26,8 +26,8 @@ ecs_entity_t make_anime_sword(Ecs* ecs)
   visual->anchor.x = visual->sprite.rect.w / 2;
   visual->anchor.y = visual->sprite.rect.h;
 
-  character_actions         = ecs_add(ecs, sword, WEAPON_ACTION);
-  character_actions->action = WEAPON_ACTION_NONE;
+  act_input         = ecs_add(ecs, sword, WEAPON_ACTION);
+  act_input->action = WEAPON_ACTION_NONE;
 
   hitbox           = ecs_add(ecs, sword, HITBOX);
   hitbox->size     = VEC2(12.f, 30.f);
@@ -47,7 +47,7 @@ ecs_entity_t make_knight(Ecs* ecs, ecs_entity_t weapon)
   Transform*       transform;
   Visual*          visual;
   Equipment*       equipment;
-  CharacterAction* character_actions;
+  CharacterAction* act_input;
   Animator*        animator;
   HitBox*          hitbox;
   CharacterStats*  stats;
@@ -73,7 +73,7 @@ ecs_entity_t make_knight(Ecs* ecs, ecs_entity_t weapon)
   equipment        = ecs_add(ecs, knight, EQUIPMENT);
   equipment->rhand = weapon;
 
-  character_actions = ecs_add(ecs, knight, CHARACTER_ACTION);
+  act_input = ecs_add(ecs, knight, CHARACTER_ACTION);
 
   animator = ecs_add(ecs, knight, ANIMATOR);
   animator_init(animator, anims, NUM_ANIM_STATES);
@@ -85,6 +85,8 @@ ecs_entity_t make_knight(Ecs* ecs, ecs_entity_t weapon)
   hitbox->anchor               = VEC2(3.f, -2.f);
   hitbox->proxy_id             = NULL_NODE;
   hitbox->check_tile_collision = TRUE;
+  hitbox->category             = CATEGORY_PLAYER;
+  hitbox->mask_bits            = BIT(CATEGORY_ITEM);
 
   stats             = ecs_add(ecs, knight, CHARACTER_STATS);
   stats->move_speed = 140.f;
@@ -102,7 +104,7 @@ ecs_entity_t make_huge_demon(Ecs* ecs, ecs_entity_t weapon)
   /*components */
   Transform*       transform;
   Visual*          visual;
-  CharacterAction* character_actions;
+  CharacterAction* act_input;
   Animator*        animator;
   HitBox*          hitbox;
   Heath*           heath;
@@ -129,8 +131,8 @@ ecs_entity_t make_huge_demon(Ecs* ecs, ecs_entity_t weapon)
   visual->anchor.x = 32 / 2;
   visual->anchor.y = 36 / 2;
 
-  character_actions         = ecs_add(ecs, demon, CHARACTER_ACTION);
-  character_actions->action = WEAPON_ACTION_NONE;
+  act_input         = ecs_add(ecs, demon, CHARACTER_ACTION);
+  act_input->action = WEAPON_ACTION_NONE;
 
   animator = ecs_add(ecs, demon, ANIMATOR);
   animator_init(animator, anims, NUM_ANIM_STATES);
@@ -158,11 +160,11 @@ ecs_entity_t make_huge_demon(Ecs* ecs, ecs_entity_t weapon)
 
   stats = ecs_add(ecs, demon, CHARACTER_STATS);
 
-  drop = ecs_add(ecs, demon, DROP);
-  drop->item1 = ITEM_BIG_RED_FLASK;
-  drop->item2 = ITEM_RED_FLASK;
-  drop->change1 = 50;
-  drop->change2 = 70;
+  drop          = ecs_add(ecs, demon, DROP);
+  drop->item1   = ITEM_BIG_RED_FLASK;
+  drop->item2   = ITEM_RED_FLASK;
+  drop->change1 = 30;
+  drop->change2 = 40;
 
   return demon;
 }
@@ -175,7 +177,7 @@ ecs_entity_t make_axe(Ecs* ecs)
   /*component*/
   Visual*       visual;
   Transform*    transform;
-  WeaponAction* character_actions;
+  WeaponAction* act_input;
 
   texture = get_texture(TEX_AXE);
 
@@ -188,8 +190,8 @@ ecs_entity_t make_axe(Ecs* ecs)
   visual->anchor.x = visual->sprite.rect.w / 2;
   visual->anchor.y = visual->sprite.rect.h;
 
-  character_actions         = ecs_add(ecs, axe, WEAPON_ACTION);
-  character_actions->action = WEAPON_ACTION_NONE;
+  act_input         = ecs_add(ecs, axe, WEAPON_ACTION);
+  act_input->action = WEAPON_ACTION_NONE;
 
   return axe;
 }
@@ -372,13 +374,14 @@ ecs_entity_t make_golden_cross_hit_effect(Ecs* ecs, Vec2 pos)
   return entity;
 }
 
-ecs_entity_t make_big_red_flask(Ecs *ecs, Vec2 pos)
+ecs_entity_t make_big_red_flask(Ecs* ecs, Vec2 pos)
 {
   ecs_entity_t entity;
   SDL_Texture* texture;
 
-  Visual* visual;
+  Visual*    visual;
   Transform* transform;
+  HitBox*    hitbox;
 
   texture = get_texture(TEX_FLASK_RED_BIG);
 
@@ -388,20 +391,28 @@ ecs_entity_t make_big_red_flask(Ecs *ecs, Vec2 pos)
   sprite_init(&visual->sprite, texture);
   visual_set_anchor_to_center(visual);
 
-  transform = ecs_add(ecs, entity, TRANSFORM);
+  transform      = ecs_add(ecs, entity, TRANSFORM);
   transform->pos = pos;
+
+  hitbox            = ecs_add(ecs, entity, HITBOX);
+  hitbox->size      = VEC2(visual->sprite.rect.w, visual->sprite.rect.h);
+  hitbox->anchor    = VEC2(hitbox->size.x / 2.f, hitbox->size.y / 2.f);
+  hitbox->proxy_id  = NULL_NODE;
+  hitbox->mask_bits = BIT(CATEGORY_PLAYER);
+  hitbox->category  = CATEGORY_ITEM;
 
   return entity;
 }
 
-ecs_entity_t make_red_flask(Ecs *ecs, Vec2 pos)
+ecs_entity_t make_red_flask(Ecs* ecs, Vec2 pos)
 {
-  
+
   ecs_entity_t entity;
   SDL_Texture* texture;
 
-  Visual* visual;
+  Visual*    visual;
   Transform* transform;
+  HitBox*    hitbox;
 
   texture = get_texture(TEX_FLASK_RED);
 
@@ -411,7 +422,31 @@ ecs_entity_t make_red_flask(Ecs *ecs, Vec2 pos)
   sprite_init(&visual->sprite, texture);
   visual_set_anchor_to_center(visual);
 
-  transform = ecs_add(ecs, entity, TRANSFORM);
+  transform      = ecs_add(ecs, entity, TRANSFORM);
   transform->pos = pos;
+
+  hitbox            = ecs_add(ecs, entity, HITBOX);
+  hitbox->size      = VEC2(visual->sprite.rect.w, visual->sprite.rect.h);
+  hitbox->anchor    = VEC2(hitbox->size.x / 2.f, hitbox->size.y / 2.f);
+  hitbox->proxy_id  = NULL_NODE;
+  hitbox->mask_bits = BIT(CATEGORY_PLAYER);
+  hitbox->category  = CATEGORY_ITEM;
   return entity;
+}
+
+ecs_entity_t make_player(Ecs *ecs, ecs_entity_t character, ecs_entity_t weapon)
+{
+  ecs_add(ecs, character, PLAYER_TAG);
+
+  Equipment* equipment = ecs_get(ecs, character, EQUIPMENT);
+  HitBox* hitbox = ecs_get(ecs, character, HITBOX);
+
+  ASSERT(equipment != NULL && "player entity must have equipment component");
+  ASSERT(hitbox != NULL && "player entity must have hitbox component");
+
+  equipment->rhand = weapon;
+  hitbox->category = CATEGORY_PLAYER;
+  hitbox->mask_bits = BIT(CATEGORY_ITEM);
+
+  return character;
 }

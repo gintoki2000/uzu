@@ -10,12 +10,15 @@ static void weapon_vs_entity(ecs_entity_t weapon, ecs_entity_t entity);
 static void entity_vs_weapon(ecs_entity_t entity, ecs_entity_t weapon);
 static void projectile_vs_entity(ecs_entity_t projectile, ecs_entity_t entity);
 static void entity_vs_projectile(ecs_entity_t entity, ecs_entity_t projectile);
+static void player_vs_item(ecs_entity_t player, ecs_entity_t item);
+static void item_vs_player(ecs_entity_t item, ecs_entity_t player);
 
-static void (*_TABLE[NUM_CATEGORIES][NUM_SYSTEM_SIGNALS])(ecs_entity_t, ecs_entity_t) = 
+static void (*_table[NUM_CATEGORIES][NUM_SYSTEM_SIGNALS])(ecs_entity_t, ecs_entity_t) = 
 {
   [CATEGORY_PLAYER] = {
     [CATEGORY_ENEMY_WEAPON] = entity_vs_weapon,
     [CATEGORY_ENEMY_PROJECTILE] = entity_vs_projectile,
+    [CATEGORY_ITEM] = player_vs_item, 
   },
   [CATEGORY_ENEMY] = {
     [CATEGORY_PLAYER_WEAPON ] = entity_vs_weapon,
@@ -33,6 +36,9 @@ static void (*_TABLE[NUM_CATEGORIES][NUM_SYSTEM_SIGNALS])(ecs_entity_t, ecs_enti
   [CATEGORY_ENEMY_WEAPON] = {
     [CATEGORY_PLAYER] = weapon_vs_entity,
   },
+  [CATEGORY_ITEM] = {
+    [CATEGORY_PLAYER] = item_vs_player,
+  }
 };
 
 void collision_filter_system_init(Ecs* ecs)
@@ -49,7 +55,7 @@ static void on_collision(Ecs* ecs, SysEvt_Collision* event)
   hitbox1 = ecs_get(ecs, event->e1, HITBOX);
   hitbox2 = ecs_get(ecs, event->e2, HITBOX);
 
-  fn = _TABLE[hitbox1->category][hitbox2->category];
+  fn = _table[hitbox1->category][hitbox2->category];
   if (fn != NULL)
     fn(event->e1, event->e2);
 }
@@ -76,6 +82,24 @@ static void entity_vs_projectile(ecs_entity_t entity, ecs_entity_t projectile)
                 &(SysEvt_ProjectileHit){
                     .projectile = projectile,
                     .entity     = entity,
+                });
+}
+
+static void player_vs_item(ecs_entity_t player, ecs_entity_t item)
+{
+  mediator_emit(SIG_PLAYER_HIT_ITEM,
+                &(SysEvt_PlayerHitItem){
+                    .item   = item,
+                    .player = player,
+                });
+}
+
+static void item_vs_player(ecs_entity_t item, ecs_entity_t player)
+{
+  mediator_emit(SIG_PLAYER_HIT_ITEM,
+                &(SysEvt_PlayerHitItem){
+                    .item   = item,
+                    .player = player,
                 });
 }
 

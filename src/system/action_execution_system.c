@@ -3,8 +3,7 @@
 #include <components.h>
 
 static const Vec2 DIR_TO_VEL[] = {
-  [UP] = { 0.f, -1.f },   [DOWN] = { 0.f, 1.f }, [LEFT] = { -1.f, 0.f },
-  [RIGHT] = { 1.f, 0.f }, [NONE] = { 0.f, 0.f },
+  [UP] = VEC2_UP, [DOWN] = VEC2_DOWN, [LEFT] = VEC2_LEFT, [RIGHT] = VEC2_RIGHT, [NONE] = VEC2_ZERO,
 };
 
 static const int DIR_TO_ANIMATION[] = {

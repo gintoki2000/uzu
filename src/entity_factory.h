@@ -15,4 +15,6 @@ ecs_entity_t make_golden_cross_hit_effect(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_big_red_flask(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_red_flask(Ecs* ecs, Vec2 pos);
 
+ecs_entity_t make_player(Ecs* ecs, ecs_entity_t character, ecs_entity_t weapon);
+
 #endif //ENTITY_FACTORY_H

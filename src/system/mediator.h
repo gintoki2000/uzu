@@ -12,6 +12,7 @@ enum
   SIG_LIFE_SPAN_END_UP,
   SIG_DEAL_DAMAGE,
   SIG_GET_DAMAGED,
+  SIG_PLAYER_HIT_ITEM,
   NUM_SYSTEM_SIGNALS,
 };
 
@@ -63,6 +64,12 @@ typedef struct
   ecs_entity_t damagee;
   int          damage;
 } SysEvt_GetDamaged;
+
+typedef struct 
+{
+  ecs_entity_t player;
+  ecs_entity_t item;
+} SysEvt_PlayerHitItem;
 
 void mediator_init();
 void mediator_fini();

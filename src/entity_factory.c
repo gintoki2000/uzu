@@ -89,7 +89,6 @@ ecs_entity_t make_knight(Ecs* ecs, ecs_entity_t weapon)
   stats             = ecs_add(ecs, knight, CHARACTER_STATS);
   stats->move_speed = 140.f;
 
-
   motion = ecs_add(ecs, knight, MOTION);
   return knight;
 }
@@ -110,6 +109,7 @@ ecs_entity_t make_huge_demon(Ecs* ecs, ecs_entity_t weapon)
   HealBar*         healthBar;
   Motion*          motion;
   CharacterStats*  stats;
+  Drop*            drop;
 
   texture = get_texture(TEX_BIG_DEMON);
   animation_init(&anims[ANIM_STATE_HIT], texture, 32 * 6, 0, 1, 1, 32, 36);
@@ -157,6 +157,12 @@ ecs_entity_t make_huge_demon(Ecs* ecs, ecs_entity_t weapon)
   motion = ecs_add(ecs, demon, MOTION);
 
   stats = ecs_add(ecs, demon, CHARACTER_STATS);
+
+  drop = ecs_add(ecs, demon, DROP);
+  drop->item1 = ITEM_BIG_RED_FLASK;
+  drop->item2 = ITEM_RED_FLASK;
+  drop->change1 = 50;
+  drop->change2 = 70;
 
   return demon;
 }
@@ -363,5 +369,49 @@ ecs_entity_t make_golden_cross_hit_effect(Ecs* ecs, Vec2 pos)
   life_span            = ecs_add(ecs, entity, LIFE_SPAN);
   life_span->remaining = animation.sheet.count * animation.frame_duration;
 
+  return entity;
+}
+
+ecs_entity_t make_big_red_flask(Ecs *ecs, Vec2 pos)
+{
+  ecs_entity_t entity;
+  SDL_Texture* texture;
+
+  Visual* visual;
+  Transform* transform;
+
+  texture = get_texture(TEX_FLASK_RED_BIG);
+
+  entity = ecs_create(ecs);
+
+  visual = ecs_add(ecs, entity, VISUAL);
+  sprite_init(&visual->sprite, texture);
+  visual_set_anchor_to_center(visual);
+
+  transform = ecs_add(ecs, entity, TRANSFORM);
+  transform->pos = pos;
+
+  return entity;
+}
+
+ecs_entity_t make_red_flask(Ecs *ecs, Vec2 pos)
+{
+  
+  ecs_entity_t entity;
+  SDL_Texture* texture;
+
+  Visual* visual;
+  Transform* transform;
+
+  texture = get_texture(TEX_FLASK_RED);
+
+  entity = ecs_create(ecs);
+
+  visual = ecs_add(ecs, entity, VISUAL);
+  sprite_init(&visual->sprite, texture);
+  visual_set_anchor_to_center(visual);
+
+  transform = ecs_add(ecs, entity, TRANSFORM);
+  transform->pos = pos;
   return entity;
 }

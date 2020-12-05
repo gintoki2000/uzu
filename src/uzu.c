@@ -33,6 +33,7 @@
 #include <system/swinging_system.h>
 #include <system/sync_eqm_system.h>
 #include <system/weapon_dealing_damage_system.h>
+#include <system/drop_system.h>
 
 #define WIN_WIDTH 480
 #define WIN_HEIGHT 360
@@ -154,6 +155,10 @@ static BOOL on_game_init(void* user_data)
         (EcsType){
             .size = sizeof(CharacterStats),
         },
+    [DROP] =
+        (EcsType){
+            .size = sizeof(Drop),
+        },
   };
 
   _ecs = ecs_new(types, NUM_COMPONENTS);
@@ -174,7 +179,6 @@ static BOOL on_game_init(void* user_data)
   };
 
   srand(SDL_GetTicks());
-  /*
   for (int i = 0; i < 5; ++i)
   {
     ecs_entity_t demon = make_huge_demon(_ecs, ECS_NULL_ENT);
@@ -182,7 +186,7 @@ static BOOL on_game_init(void* user_data)
     Transform* dtx = ecs_get(_ecs, demon, TRANSFORM);
     dtx->pos       = demon_pos[i];
   }
-  */
+  /*
   for (int i = 0; i < 100; ++i)
   {
     ecs_entity_t demon = make_huge_demon(_ecs, ECS_NULL_ENT);
@@ -190,12 +194,14 @@ static BOOL on_game_init(void* user_data)
     Transform* dtx = ecs_get(_ecs, demon, TRANSFORM);
     dtx->pos       = VEC2(rand() % (WIN_WIDTH - 50) + 25, rand() % (WIN_HEIGHT - 50) + 25);
   }
+  */
 
   mediator_init();
   collision_system_init(_ecs);
   health_system_init(_ecs);
   weapon_dealing_damage_system_init(_ecs);
   collision_filter_system_init(_ecs);
+  drop_system_init(_ecs);
 
   return TRUE;
 }
@@ -231,7 +237,7 @@ static void on_game_loop(void* user_data, SDL_Renderer* renderer)
   DrawSystem(_ecs, renderer);
   map_draw_layer(MAP_LAYER_FRONT, renderer);
   LifeSpanSystem(_ecs);
-  // collision_system_draw_debug(renderer);
+  collision_system_draw_debug(renderer);
   DrawingHealBarSystem(_ecs, renderer);
   DrawingHitboxSystem(_ecs, renderer);
   LateDestroyingSystem(_ecs);

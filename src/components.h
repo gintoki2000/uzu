@@ -1,6 +1,7 @@
 #ifndef COMPONENTS_H
 #define COMPONENTS_H
 #include <ecs/ecs.h>
+#include <item.h>
 #include <toolbox/toolbox.h>
 typedef enum
 {
@@ -26,6 +27,7 @@ enum
   CATEGORY_ENEMY_PROJECTILE,
   CATEGORY_PLAYER_WEAPON,
   CATEGORY_ENEMY_WEAPON,
+  CATEGORY_ITEM,
   NUM_CATEGORIES,
 };
 
@@ -160,6 +162,14 @@ typedef struct LifeSpan
   s32 remaining;
 } LifeSpan;
 
+typedef struct
+{
+  ItemId item1;
+  ItemId item2;
+  int    change1;
+  int    change2;
+} Drop;
+
 typedef int TagToBeDestroyed;
 
 enum
@@ -184,6 +194,7 @@ enum
   DAMAGE_OUTPUT,
   WEAPON_CORE,
   CHARACTER_STATS,
+  DROP,
   NUM_COMPONENTS
 };
 

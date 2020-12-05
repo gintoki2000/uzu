@@ -16,4 +16,5 @@ system_source_files = files(
   'swinging_system.c',
   'map_collision_system.c',
   'action_execution_system.c'
+  ,'drop_system.c'
 )

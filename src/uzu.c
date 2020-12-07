@@ -32,9 +32,12 @@
 #include <system/motion_system.h>
 #include <system/pickup_system.h>
 #include <system/player_controller_system.h>
+#include <system/sound_sytem.h>
 #include <system/swinging_system.h>
 #include <system/sync_eqm_system.h>
 #include <system/weapon_dealing_damage_system.h>
+
+#include <ui/health_bar.h>
 
 #define WIN_WIDTH 480
 #define WIN_HEIGHT 360
@@ -56,9 +59,17 @@ static BOOL on_game_init(void* user_data)
   (void)user_data;
   /*load asserts*/
   IMG_Init(IMG_INIT_PNG);
+  if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024) == -1)
+  {
+    ERROR("open audio failed\n");
+    return FALSE;
+  }
+
+  // Mix_AllocateChannels(10);
+
   if (!resources_load())
   {
-    ERROR("load  failed");
+    ERROR("load resources failed\n");
     return FALSE;
   }
 
@@ -160,6 +171,10 @@ static BOOL on_game_init(void* user_data)
         (EcsType){
             .size = sizeof(Drop),
         },
+    [INVULNERABLE] =
+        (EcsType){
+            .size = sizeof(Invulnerable),
+        },
   };
 
   _ecs = ecs_new(types, NUM_COMPONENTS);
@@ -170,9 +185,7 @@ static BOOL on_game_init(void* user_data)
   // ecs_entity_t player = make_knight(_ecs, make_bow(_ecs));
   //
   ecs_entity_t player =
-      make_player(_ecs,
-                  make_knight(_ecs, ECS_NULL_ENT),
-                  make_golden_sword(_ecs, CATEGORY_PLAYER_WEAPON, BIT(CATEGORY_ENEMY)));
+      make_player(_ecs, make_knight(_ecs), make_golden_sword(_ecs, BIT(CATEGORY_ENEMY)));
 
   ecs_add(_ecs, player, PLAYER_TAG);
 
@@ -187,15 +200,16 @@ static BOOL on_game_init(void* user_data)
   srand(SDL_GetTicks());
   for (int i = 0; i < 5; ++i)
   {
-    ecs_entity_t demon = make_huge_demon(_ecs, ECS_NULL_ENT);
+    ecs_entity_t demon = make_huge_demon(_ecs);
 
     Transform* dtx = ecs_get(_ecs, demon, TRANSFORM);
     dtx->pos       = demon_pos[i];
   }
+
   /*
-  for (int i = 0; i < 100; ++i)
+  for (int i = 0; i < 150; ++i)
   {
-    ecs_entity_t demon = make_huge_demon(_ecs, ECS_NULL_ENT);
+    ecs_entity_t demon = make_huge_demon(_ecs);
 
     Transform* dtx = ecs_get(_ecs, demon, TRANSFORM);
     dtx->pos       = VEC2(rand() % (WIN_WIDTH - 50) + 25, rand() % (WIN_HEIGHT - 50) + 25);
@@ -209,6 +223,9 @@ static BOOL on_game_init(void* user_data)
   collision_filter_system_init(_ecs);
   drop_system_init(_ecs);
   pickup_system_init(_ecs);
+  sound_system_init(_ecs);
+
+  Mix_PlayMusic(get_bg_mus(rand() % NUM_BG_MUSICS), -1);
 
   return TRUE;
 }
@@ -223,6 +240,7 @@ static void on_game_fini(void* user_data)
   mediator_fini();
   _ecs = NULL;
   IMG_Quit();
+  Mix_Quit();
 }
 
 static void on_game_loop(void* user_data, SDL_Renderer* renderer)
@@ -234,19 +252,21 @@ static void on_game_loop(void* user_data, SDL_Renderer* renderer)
   PlayerControllerSystem(_ecs);
   ActionExecutionSystem(_ecs);
   MotionSystem(_ecs);
-  SyncEqmSystem(_ecs);
   CollisionSystem(_ecs);
   MapCollisionSystem(_ecs);
+  SyncEqmSystem(_ecs);
   AnimatorSystem(_ecs);
   SwingingSystem(_ecs);
   map_draw_layer(MAP_LAYER_FLOOR, renderer);
   map_draw_layer(MAP_LAYER_WALL, renderer);
   DrawSystem(_ecs, renderer);
   map_draw_layer(MAP_LAYER_FRONT, renderer);
+  ui_heath_bar_draw(_ecs, renderer);
   LifeSpanSystem(_ecs);
-  collision_system_draw_debug(renderer);
+  // collision_system_draw_debug(renderer);
   DrawingHealBarSystem(_ecs, renderer);
   DrawingHitboxSystem(_ecs, renderer);
+  HealthSystem(_ecs);
   LateDestroyingSystem(_ecs);
   SDL_RenderPresent(renderer);
 }

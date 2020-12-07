@@ -1,6 +1,6 @@
 #ifndef ARRAY_H
 #define ARRAY_H
-#include <common.h>
+#include "common.h"
 typedef struct Array
 {
   s8* storage;

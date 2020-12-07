@@ -28,23 +28,27 @@ void SwingingSystem(Ecs* ecs)
         swingables[i].timer = 0;
         if (++swingables[i].step == SWINGING_SYSTEM_STEP)
         {
-          transform     = ecs_get(ecs, entities[i], TRANSFORM);
-          damage_output = ecs_get(ecs, entities[i], DAMAGE_OUTPUT);
-          weapon_core   = ecs_get(ecs, entities[i], WEAPON_CORE);
+          if ((transform = ecs_get(ecs, entities[i], TRANSFORM)) &&
+              (damage_output = ecs_get(ecs, entities[i], DAMAGE_OUTPUT)) &&
+              (weapon_core = ecs_get(ecs, entities[i], WEAPON_CORE)))
+          {
 
-          weapon_core->in_action  = FALSE;
-          damage_output->atk      = 0;
-          transform->rot          = 0.0;
-          transform->was_changed  = true;
-          swingables[i].is_active = FALSE;
+            weapon_core->in_action  = FALSE;
+            damage_output->atk      = 0;
+            transform->rot          = 0.0;
+            transform->was_changed  = true;
+            swingables[i].is_active = FALSE;
+          }
         }
         else
         {
-          visual    = ecs_get(ecs, entities[i], VISUAL);
-          transform = ecs_get(ecs, entities[i], TRANSFORM);
+          if ((visual = ecs_get(ecs, entities[i], VISUAL)) &&
+              (transform = ecs_get(ecs, entities[i], TRANSFORM)))
+          {
 
-          transform->rot = swingables->step * 15.0 * FLIP_TO_SIGN(visual->flip);
-          transform->was_changed  = true;
+            transform->rot         = swingables->step * 20.0 * FLIP_TO_SIGN(visual->flip);
+            transform->was_changed = true;
+          }
         }
       }
     }
@@ -62,6 +66,7 @@ void SwingingSystem(Ecs* ecs)
           swingables[i].is_active = TRUE;
           swingables[i].step      = 0;
           damage_output->atk      = weapon_core->atk * SWINGING_SYSTEM_DAMAGE_ADJ;
+          damage_output->type     = DAMAGE_TYPE_STRIKE;
           weapon_core->in_action  = TRUE;
           weapon_action->action   = WEAPON_ACTION_NONE;
         }

@@ -3,4 +3,5 @@
 #include <ecs/ecs.h>
 #include <toolbox/toolbox.h>
 void health_system_init(Ecs* ecs);
+void HealthSystem(Ecs* ecs);
 #endif // HEATH_SYSTEM_H

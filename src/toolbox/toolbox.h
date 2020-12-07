@@ -7,4 +7,5 @@
 #include "signal.h"
 #include "rect.h"
 #include "rtree.h"
+#include "heap.h"
 #endif //TOOLBOX_H

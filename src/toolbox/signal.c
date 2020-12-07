@@ -16,8 +16,8 @@ struct Dispatcher
 
 static Signal* signal_init(Signal* sig)
 {
-  u32 n = 16;
-  sig->count = 0;
+  u32 n          = 16;
+  sig->count     = 0;
   sig->allocated = n;
   sig->callbacks = calloc(n, sizeof(Callback));
   return sig;
@@ -48,8 +48,11 @@ Signal* signal_new()
 
 void signal_destroy(Signal* sig)
 {
-  signal_finalize(sig);
-  free(sig);
+  if (sig)
+  {
+    signal_finalize(sig);
+    free(sig);
+  }
 }
 
 void signal_connect(Signal* sig, void* user_data, slot_t slot)
@@ -61,7 +64,7 @@ void signal_connect(Signal* sig, void* user_data, slot_t slot)
 void signal_disconnect(Signal* sig, slot_t slot)
 {
   Callback* callbacks = sig->callbacks;
-  u32       count = sig->count;
+  u32       count     = sig->count;
   for (u32 i = 0; i < count; ++i)
   {
     if (callbacks[i].func == (pointer_t)slot)
@@ -79,7 +82,7 @@ void signal_emit(Signal* sig, const void* evt)
   pointer_t user_data;
   for (u32 i = 0; i < sig->count; ++i)
   {
-    func = (slot_t)sig->callbacks[i].func;
+    func      = (slot_t)sig->callbacks[i].func;
     user_data = sig->callbacks[i].user_data;
 
     func(user_data, evt);
@@ -89,7 +92,7 @@ void signal_emit(Signal* sig, const void* evt)
 static Dispatcher* dispatcher_init(Dispatcher* dp, u32 num_singals)
 {
   dp->num_singals = num_singals;
-  dp->signals = calloc(num_singals, sizeof(Signal));
+  dp->signals     = calloc(num_singals, sizeof(Signal));
   for (u32 i = 0; i < num_singals; ++i)
   {
     signal_init(&dp->signals[i]);
@@ -114,8 +117,11 @@ Dispatcher* dispatcher_new(u32 num_singals)
 
 void dispatcher_destroy(Dispatcher* dp)
 {
-  dispatcher_finalize(dp);
-  free(dp);
+  if (dp)
+  {
+    dispatcher_finalize(dp);
+    free(dp);
+  }
 }
 
 void dispatcher_connect(Dispatcher* dp, int sig, void* user_data, slot_t slot)

@@ -21,15 +21,28 @@ enum
 
 enum
 {
+  CHARACTER_ACTION_NONE,
+  CHARACTER_ACTION_REGULAR_ATK,
+  CHARACTER_ACTION_SPECIAL_ATK,
+};
+
+enum
+{
   CATEGORY_PLAYER,
-  CATEGORY_PLAYER_PROJECTILE,
+  CATEGORY_PROJECTILE,
   CATEGORY_ENEMY,
-  CATEGORY_ENEMY_PROJECTILE,
-  CATEGORY_PLAYER_WEAPON,
-  CATEGORY_ENEMY_WEAPON,
+  CATEGORY_WEAPON,
   CATEGORY_ITEM,
   NUM_CATEGORIES,
 };
+
+typedef enum
+{
+  DAMAGE_TYPE_STRIKE,
+  DAMAGE_TYPE_THUST,
+  DAMAGE_TYPE_FIRE,
+  DAMAGE_TYPE_LIGHTNING,
+} DamageType;
 
 typedef struct Motion
 {
@@ -103,6 +116,7 @@ typedef struct ThunderStrike
 typedef struct DamageOutput
 {
   int atk;
+  int type;
 } DamageOutput;
 
 typedef struct WeaponAction
@@ -116,7 +130,10 @@ typedef int EnemyTag;
 
 typedef int WeaponTag;
 
-typedef int ItemTag;
+typedef struct
+{
+  ItemId item_id;
+} ItemTag;
 
 typedef int ProjectileTag;
 
@@ -172,6 +189,16 @@ typedef struct
 
 typedef int TagToBeDestroyed;
 
+typedef struct
+{
+  int remaining;
+} Invulnerable;
+
+typedef struct
+{
+  int x;
+} AiInput;
+
 enum
 {
   TRANSFORM,
@@ -195,6 +222,8 @@ enum
   WEAPON_CORE,
   CHARACTER_STATS,
   DROP,
+  ITEM_TAG,
+  INVULNERABLE,
   NUM_COMPONENTS
 };
 

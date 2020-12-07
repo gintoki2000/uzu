@@ -44,6 +44,7 @@ typedef struct
   ecs_entity_t dealer;
   ecs_entity_t receiver;
   int          damage;
+  int          type;
 } SysEvt_DealDamage;
 
 typedef struct
@@ -63,9 +64,10 @@ typedef struct
   ecs_entity_t dealer;
   ecs_entity_t damagee;
   int          damage;
+  int          type;
 } SysEvt_GetDamaged;
 
-typedef struct 
+typedef struct
 {
   ecs_entity_t player;
   ecs_entity_t item;

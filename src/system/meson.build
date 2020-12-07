@@ -18,4 +18,5 @@ system_source_files = files(
   'action_execution_system.c'
   ,'drop_system.c'
   ,'pickup_system.c'
+  ,'sound_sytem.c'
 )

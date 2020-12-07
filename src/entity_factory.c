@@ -33,11 +33,12 @@ ecs_entity_t make_anime_sword(Ecs* ecs)
   hitbox->size     = VEC2(12.f, 30.f);
   hitbox->anchor   = VEC2(6.f, 30.f);
   hitbox->proxy_id = NULL_NODE;
+  hitbox->category = CATEGORY_WEAPON;
 
   return sword;
 }
 
-ecs_entity_t make_knight(Ecs* ecs, ecs_entity_t weapon)
+ecs_entity_t make_knight(Ecs* ecs)
 {
   ecs_entity_t knight;
   SDL_Texture* texture;
@@ -52,13 +53,14 @@ ecs_entity_t make_knight(Ecs* ecs, ecs_entity_t weapon)
   HitBox*          hitbox;
   CharacterStats*  stats;
   Motion*          motion;
+  Heath*           heath;
 
   texture = get_texture(TEX_KNIGHT);
   animation_init(&anims[ANIM_STATE_HIT], texture, 0, 0, 1, 1, 16, 28);
   animation_init(&anims[ANIM_STATE_IDLE], texture, 16 * 1, 0, 1, 4, 16, 28);
   animation_init(&anims[ANIM_STATE_RUN], texture, 16 * 5, 0, 1, 4, 16, 28);
 
-  anims[ANIM_STATE_IDLE].frame_duration = 3;
+  anims[ANIM_STATE_IDLE].frame_duration = 6;
   anims[ANIM_STATE_RUN].frame_duration  = 2;
 
   knight = ecs_create(ecs);
@@ -71,7 +73,7 @@ ecs_entity_t make_knight(Ecs* ecs, ecs_entity_t weapon)
   visual->anchor.y = 28 / 2;
 
   equipment        = ecs_add(ecs, knight, EQUIPMENT);
-  equipment->rhand = weapon;
+  equipment->rhand = ECS_NULL_ENT;
 
   act_input = ecs_add(ecs, knight, CHARACTER_ACTION);
 
@@ -85,17 +87,20 @@ ecs_entity_t make_knight(Ecs* ecs, ecs_entity_t weapon)
   hitbox->anchor               = VEC2(3.f, -2.f);
   hitbox->proxy_id             = NULL_NODE;
   hitbox->check_tile_collision = TRUE;
-  hitbox->category             = CATEGORY_PLAYER;
-  hitbox->mask_bits            = BIT(CATEGORY_ITEM);
 
   stats             = ecs_add(ecs, knight, CHARACTER_STATS);
   stats->move_speed = 140.f;
 
   motion = ecs_add(ecs, knight, MOTION);
+
+  heath                 = ecs_add(ecs, knight, HEATH);
+  heath->hit_points     = 10;
+  heath->max_hit_points = 20;
+
   return knight;
 }
 
-ecs_entity_t make_huge_demon(Ecs* ecs, ecs_entity_t weapon)
+ecs_entity_t make_huge_demon(Ecs* ecs)
 {
   ecs_entity_t demon;
   SDL_Texture* texture;
@@ -140,10 +145,10 @@ ecs_entity_t make_huge_demon(Ecs* ecs, ecs_entity_t weapon)
   animator->elapsed      = 0;
 
   hitbox            = ecs_add(ecs, demon, HITBOX);
-  hitbox->size      = VEC2(32.f, 36.f);
-  hitbox->anchor    = VEC2(16.f, 18.f);
+  hitbox->size      = VEC2(20.f, 36.f);
+  hitbox->anchor    = VEC2(10.f, 18.f);
   hitbox->proxy_id  = NULL_NODE;
-  hitbox->mask_bits = BIT(CATEGORY_PLAYER_WEAPON) | BIT(CATEGORY_PLAYER_PROJECTILE);
+  hitbox->mask_bits = BIT(CATEGORY_WEAPON) | BIT(CATEGORY_PROJECTILE);
   hitbox->category  = CATEGORY_ENEMY;
 
   ecs_add(ecs, demon, ENEMY_TAG);
@@ -287,12 +292,12 @@ ecs_entity_t make_arrow(Ecs* ecs, Vec2 pos, Vec2 vel)
   hitbox->anchor.x = hitbox->size.x / 2.f;
   hitbox->anchor.y = hitbox->size.y / 2.f;
   hitbox->proxy_id = NULL_NODE;
-  hitbox->category = CATEGORY_PLAYER_PROJECTILE;
+  hitbox->category = CATEGORY_PROJECTILE;
 
   return arrow;
 }
 
-ecs_entity_t make_golden_sword(Ecs* ecs, u16 category, u16 mask_bits)
+ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
 {
   ecs_entity_t entity;
 
@@ -323,8 +328,8 @@ ecs_entity_t make_golden_sword(Ecs* ecs, u16 category, u16 mask_bits)
   hitbox->size      = VEC2(visual->sprite.rect.w, visual->sprite.rect.h);
   hitbox->anchor    = VEC2(visual->anchor.x, visual->anchor.y);
   hitbox->proxy_id  = NULL_NODE;
-  hitbox->mask_bits = BIT(category);
-  hitbox->category  = mask_bits;
+  hitbox->category  = CATEGORY_WEAPON;
+  hitbox->mask_bits = mask_bits;
 
   core            = ecs_add(ecs, entity, WEAPON_CORE);
   core->atk       = 2;
@@ -382,6 +387,7 @@ ecs_entity_t make_big_red_flask(Ecs* ecs, Vec2 pos)
   Visual*    visual;
   Transform* transform;
   HitBox*    hitbox;
+  ItemTag*   tag;
 
   texture = get_texture(TEX_FLASK_RED_BIG);
 
@@ -398,8 +404,11 @@ ecs_entity_t make_big_red_flask(Ecs* ecs, Vec2 pos)
   hitbox->size      = VEC2(visual->sprite.rect.w, visual->sprite.rect.h);
   hitbox->anchor    = VEC2(hitbox->size.x / 2.f, hitbox->size.y / 2.f);
   hitbox->proxy_id  = NULL_NODE;
-  hitbox->mask_bits = BIT(CATEGORY_PLAYER);
   hitbox->category  = CATEGORY_ITEM;
+  hitbox->mask_bits = BIT(CATEGORY_PLAYER);
+
+  tag          = ecs_add(ecs, entity, ITEM_TAG);
+  tag->item_id = ITEM_BIG_RED_FLASK;
 
   return entity;
 }
@@ -413,6 +422,7 @@ ecs_entity_t make_red_flask(Ecs* ecs, Vec2 pos)
   Visual*    visual;
   Transform* transform;
   HitBox*    hitbox;
+  ItemTag*   tag;
 
   texture = get_texture(TEX_FLASK_RED);
 
@@ -429,24 +439,27 @@ ecs_entity_t make_red_flask(Ecs* ecs, Vec2 pos)
   hitbox->size      = VEC2(visual->sprite.rect.w, visual->sprite.rect.h);
   hitbox->anchor    = VEC2(hitbox->size.x / 2.f, hitbox->size.y / 2.f);
   hitbox->proxy_id  = NULL_NODE;
-  hitbox->mask_bits = BIT(CATEGORY_PLAYER);
   hitbox->category  = CATEGORY_ITEM;
+  hitbox->mask_bits = BIT(CATEGORY_PLAYER);
+
+  tag          = ecs_add(ecs, entity, ITEM_TAG);
+  tag->item_id = ITEM_RED_FLASK;
   return entity;
 }
 
-ecs_entity_t make_player(Ecs *ecs, ecs_entity_t character, ecs_entity_t weapon)
+ecs_entity_t make_player(Ecs* ecs, ecs_entity_t character, ecs_entity_t weapon)
 {
   ecs_add(ecs, character, PLAYER_TAG);
 
   Equipment* equipment = ecs_get(ecs, character, EQUIPMENT);
-  HitBox* hitbox = ecs_get(ecs, character, HITBOX);
+  HitBox*    hitbox    = ecs_get(ecs, character, HITBOX);
 
   ASSERT(equipment != NULL && "player entity must have equipment component");
   ASSERT(hitbox != NULL && "player entity must have hitbox component");
 
-  equipment->rhand = weapon;
-  hitbox->category = CATEGORY_PLAYER;
-  hitbox->mask_bits = BIT(CATEGORY_ITEM);
+  equipment->rhand  = weapon;
+  hitbox->category  = CATEGORY_PLAYER;
+  hitbox->mask_bits = BIT(CATEGORY_ITEM) | BIT(CATEGORY_WEAPON) | BIT(CATEGORY_PROJECTILE);
 
   return character;
 }

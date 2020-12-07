@@ -28,16 +28,16 @@ struct RTree
 static RTree* rtree_init(RTree* self)
 {
   self->capacity = RTREE_DEFAULT_CAP;
-  self->count = 0;
-  self->root = NULL_NODE;
-  self->nodes = calloc(RTREE_DEFAULT_CAP, sizeof(TreeNode));
-  self->next = calloc(RTREE_DEFAULT_CAP, sizeof(int));
+  self->count    = 0;
+  self->root     = NULL_NODE;
+  self->nodes    = calloc(RTREE_DEFAULT_CAP, sizeof(TreeNode));
+  self->next     = calloc(RTREE_DEFAULT_CAP, sizeof(int));
   for (int i = 0; i < RTREE_DEFAULT_CAP - 1; ++i)
   {
-    self->next[i] = i + 1;
+    self->next[i]         = i + 1;
     self->nodes[i].height = -1;
   }
-  self->free_index = 0;
+  self->free_index                  = 0;
   self->next[RTREE_DEFAULT_CAP - 1] = NULL_NODE;
   return self;
 }
@@ -57,30 +57,32 @@ static void rtree_grow_if_need(RTree* self)
 
     self->capacity *= 2;
     self->nodes = realloc(self->nodes, self->capacity * sizeof(TreeNode));
-    self->next = realloc(self->next, self->capacity * sizeof(int));
+    self->next  = realloc(self->next, self->capacity * sizeof(int));
 
     for (int i = self->count; i < self->capacity - 1; ++i)
     {
-      self->next[i] = i + 1;
+      self->next[i]         = i + 1;
       self->nodes[i].height = -1;
     }
-    self->next[self->capacity - 1] = NULL_NODE;
+    self->next[self->capacity - 1]         = NULL_NODE;
     self->nodes[self->capacity - 1].height = -1;
-    self->free_index = self->count;
+    self->free_index                       = self->count;
   }
 }
 
 static int rtree_allocate_node(RTree* self)
 {
-  rtree_grow_if_need(self);
-  TreeNode* nodes = self->nodes;
-  int       idx = self->free_index;
-  self->free_index = self->next[idx];
+
+  ASSERT(self->free_index != -1);
+
+  TreeNode* nodes      = self->nodes;
+  int       idx        = self->free_index;
+  self->free_index     = self->next[idx];
   nodes[idx].user_data = NULL;
-  nodes[idx].parent = NULL_NODE;
-  nodes[idx].child1 = NULL_NODE;
-  nodes[idx].child2 = NULL_NODE;
-  nodes[idx].height = 0;
+  nodes[idx].parent    = NULL_NODE;
+  nodes[idx].child1    = NULL_NODE;
+  nodes[idx].child2    = NULL_NODE;
+  nodes[idx].height    = 0;
   ++self->count;
   return idx;
 }
@@ -90,8 +92,8 @@ static void rtree_free_node(RTree* self, int node_idx)
   ASSERT(node_idx >= 0 && node_idx < self->capacity);
   ASSERT(self->count > 0);
 
-  self->next[node_idx] = self->free_index;
-  self->free_index = node_idx;
+  self->next[node_idx]         = self->free_index;
+  self->free_index             = node_idx;
   self->nodes[node_idx].height = -1;
   --self->count;
 }
@@ -101,23 +103,23 @@ static int rtree_balance(RTree* self, int idx)
   int ia = idx;
   ASSERT(ia != NULL_NODE);
   TreeNode* nodes = self->nodes;
-  TreeNode* a = &nodes[ia];
+  TreeNode* a     = &nodes[ia];
   if (node_is_leaf(a) || a->height < 2)
   {
     return ia;
   }
 
-  int       ib = a->child1;
-  int       ic = a->child2;
-  TreeNode* b = nodes + ib;
-  TreeNode* c = nodes + ic;
+  int       ib      = a->child1;
+  int       ic      = a->child2;
+  TreeNode* b       = nodes + ib;
+  TreeNode* c       = nodes + ic;
   int       balance = c->height - b->height;
   if (balance > 1)
   {
     int       ih = c->child1;
     int       ik = c->child2;
-    TreeNode* h = nodes + ih;
-    TreeNode* k = nodes + ik;
+    TreeNode* h  = nodes + ih;
+    TreeNode* k  = nodes + ik;
 
     c->child1 = ia;
     c->parent = a->parent;
@@ -144,8 +146,8 @@ static int rtree_balance(RTree* self, int idx)
       c->child2 = ih;
       a->child2 = ik;
       k->parent = ia;
-      a->aabb = aabb_merge(&b->aabb, &k->aabb);
-      c->aabb = aabb_merge(&a->aabb, &h->aabb);
+      a->aabb   = aabb_merge(&b->aabb, &k->aabb);
+      c->aabb   = aabb_merge(&a->aabb, &h->aabb);
       a->height = 1 + max(b->height, k->height);
       c->height = 1 + max(a->height, h->height);
     }
@@ -154,8 +156,8 @@ static int rtree_balance(RTree* self, int idx)
       c->child2 = ik;
       a->child2 = ih;
       h->parent = ia;
-      a->aabb = aabb_merge(&b->aabb, &h->aabb);
-      c->aabb = aabb_merge(&a->aabb, &k->aabb);
+      a->aabb   = aabb_merge(&b->aabb, &h->aabb);
+      c->aabb   = aabb_merge(&a->aabb, &k->aabb);
       a->height = 1 + max(b->height, h->height);
       c->height = 1 + max(a->height, k->height);
     }
@@ -167,8 +169,8 @@ static int rtree_balance(RTree* self, int idx)
   {
     int       id = b->child1;
     int       ie = b->child2;
-    TreeNode* d = nodes + id;
-    TreeNode* e = nodes + ie;
+    TreeNode* d  = nodes + id;
+    TreeNode* e  = nodes + ie;
     ASSERT(0 <= id && id < self->capacity);
     ASSERT(0 <= ie && ie < self->capacity);
 
@@ -198,8 +200,8 @@ static int rtree_balance(RTree* self, int idx)
       b->child2 = id;
       a->child1 = ie;
       e->parent = ia;
-      a->aabb = aabb_merge(&c->aabb, &e->aabb);
-      b->aabb = aabb_merge(&a->aabb, &d->aabb);
+      a->aabb   = aabb_merge(&c->aabb, &e->aabb);
+      b->aabb   = aabb_merge(&a->aabb, &d->aabb);
 
       a->height = 1 + max(c->height, e->height);
       b->height = 1 + max(a->height, d->height);
@@ -209,8 +211,8 @@ static int rtree_balance(RTree* self, int idx)
       b->child2 = ie;
       a->child1 = id;
       d->parent = ia;
-      a->aabb = aabb_merge(&c->aabb, &d->aabb);
-      b->aabb = aabb_merge(&a->aabb, &e->aabb);
+      a->aabb   = aabb_merge(&c->aabb, &d->aabb);
+      b->aabb   = aabb_merge(&a->aabb, &e->aabb);
 
       a->height = 1 + max(c->height, d->height);
       b->height = 1 + max(a->height, e->height);
@@ -227,13 +229,13 @@ static void rtree_insert_leaf(RTree* self, int leaf)
   TreeNode* nodes = self->nodes;
   if (self->root == NULL_NODE)
   {
-    self->root = leaf;
+    self->root               = leaf;
     nodes[self->root].parent = NULL_NODE;
     return;
   }
 
   AABB leaf_aabb = nodes[leaf].aabb;
-  int  index = self->root;
+  int  index     = self->root;
   while (node_is_leaf(&nodes[index]) == false)
   {
     int child1 = nodes[index].child1;
@@ -242,7 +244,7 @@ static void rtree_insert_leaf(RTree* self, int leaf)
     float area = aabb_premiter(&nodes[index].aabb);
 
     AABB  combined_aabb = aabb_merge(&nodes[index].aabb, &leaf_aabb);
-    float combine_area = aabb_premiter(&combined_aabb);
+    float combine_area  = aabb_premiter(&combined_aabb);
 
     float cost = 2.0f * combine_area;
 
@@ -252,28 +254,28 @@ static void rtree_insert_leaf(RTree* self, int leaf)
     if (node_is_leaf(&nodes[child1]))
     {
       AABB aabb = aabb_merge(&leaf_aabb, &nodes[child1].aabb);
-      cost1 = aabb_premiter(&aabb) + inheritance_cost;
+      cost1     = aabb_premiter(&aabb) + inheritance_cost;
     }
     else
     {
-      AABB  aabb = aabb_merge(&leaf_aabb, &nodes[child1].aabb);
+      AABB  aabb    = aabb_merge(&leaf_aabb, &nodes[child1].aabb);
       float oldArea = aabb_premiter(&nodes[child1].aabb);
       float newArea = aabb_premiter(&aabb);
-      cost1 = (newArea - oldArea) + inheritance_cost;
+      cost1         = (newArea - oldArea) + inheritance_cost;
     }
 
     float cost2;
     if (node_is_leaf(&nodes[child2]))
     {
       AABB aabb = aabb_merge(&leaf_aabb, &nodes[child2].aabb);
-      cost2 = aabb_premiter(&aabb) + inheritance_cost;
+      cost2     = aabb_premiter(&aabb) + inheritance_cost;
     }
     else
     {
-      AABB  aabb = aabb_merge(&leaf_aabb, &nodes[child2].aabb);
+      AABB  aabb    = aabb_merge(&leaf_aabb, &nodes[child2].aabb);
       float oldArea = aabb_premiter(&nodes[child2].aabb);
       float newArea = aabb_premiter(&aabb);
-      cost2 = newArea - oldArea + inheritance_cost;
+      cost2         = newArea - oldArea + inheritance_cost;
     }
 
     if (cost < cost1 && cost < cost2)
@@ -294,12 +296,12 @@ static void rtree_insert_leaf(RTree* self, int leaf)
   int sibling = index;
 
   // Create a new parent.
-  int old_parent = nodes[sibling].parent;
-  int new_parent = rtree_allocate_node(self);
-  nodes[new_parent].parent = old_parent;
+  int old_parent              = nodes[sibling].parent;
+  int new_parent              = rtree_allocate_node(self);
+  nodes[new_parent].parent    = old_parent;
   nodes[new_parent].user_data = NULL;
-  nodes[new_parent].aabb = aabb_merge(&leaf_aabb, &nodes[sibling].aabb);
-  nodes[new_parent].height = nodes[sibling].height + 1;
+  nodes[new_parent].aabb      = aabb_merge(&leaf_aabb, &nodes[sibling].aabb);
+  nodes[new_parent].height    = nodes[sibling].height + 1;
 
   if (old_parent != NULL_NODE)
   {
@@ -315,17 +317,17 @@ static void rtree_insert_leaf(RTree* self, int leaf)
 
     nodes[new_parent].child1 = sibling;
     nodes[new_parent].child2 = leaf;
-    nodes[sibling].parent = new_parent;
-    nodes[leaf].parent = new_parent;
+    nodes[sibling].parent    = new_parent;
+    nodes[leaf].parent       = new_parent;
   }
   else
   {
     // The sibling was the root.
     nodes[new_parent].child1 = sibling;
     nodes[new_parent].child2 = leaf;
-    nodes[sibling].parent = new_parent;
-    nodes[leaf].parent = new_parent;
-    self->root = new_parent;
+    nodes[sibling].parent    = new_parent;
+    nodes[leaf].parent       = new_parent;
+    self->root               = new_parent;
   }
 
   // Walk back up the tree fixing heights and AABBs
@@ -341,7 +343,7 @@ static void rtree_insert_leaf(RTree* self, int leaf)
     ASSERT(child2 != NULL_NODE);
 
     nodes[index].height = 1 + max(nodes[child1].height, nodes[child2].height);
-    nodes[index].aabb = aabb_merge(&nodes[child1].aabb, &nodes[child2].aabb);
+    nodes[index].aabb   = aabb_merge(&nodes[child1].aabb, &nodes[child2].aabb);
 
     index = nodes[index].parent;
   }
@@ -357,7 +359,7 @@ static void rtree_remove_leaf(RTree* self, int leaf)
     return;
   }
 
-  int parent = nodes[leaf].parent;
+  int parent       = nodes[leaf].parent;
   int grand_parent = nodes[parent].parent;
   int sibling;
   if (nodes[parent].child1 == leaf)
@@ -390,7 +392,7 @@ static void rtree_remove_leaf(RTree* self, int leaf)
       int child1 = nodes[index].child1;
       int child2 = nodes[index].child2;
 
-      nodes[index].aabb = aabb_merge(&nodes[child1].aabb, &nodes[child2].aabb);
+      nodes[index].aabb   = aabb_merge(&nodes[child1].aabb, &nodes[child2].aabb);
       nodes[index].height = 1 + max(nodes[child1].height, nodes[child2].height);
 
       index = nodes[index].parent;
@@ -398,7 +400,7 @@ static void rtree_remove_leaf(RTree* self, int leaf)
   }
   else
   {
-    self->root = sibling;
+    self->root            = sibling;
     nodes[sibling].parent = NULL_NODE;
     rtree_free_node(self, parent);
   }
@@ -413,10 +415,10 @@ typedef struct
 
 static void stack_init(Stack* s)
 {
-  int n = 64;
+  int n       = 64;
   s->capacity = n;
-  s->count = 0;
-  s->items = calloc(n, sizeof(int));
+  s->count    = 0;
+  s->items    = calloc(n, sizeof(int));
 }
 
 static void stack_finalize(Stack* s) { free(s->items); }
@@ -448,20 +450,23 @@ RTree* rtree_new() { return rtree_init(malloc(sizeof(RTree))); }
 
 void rtree_delete(RTree* self)
 {
-  rtree_finalize(self);
-  free(self);
+  if (self)
+  {
+    rtree_finalize(self);
+    free(self);
+  }
 }
 
 int rtree_create_proxy(RTree* self, void* user_data, const AABB* aabb)
 {
-  int       idx = rtree_allocate_node(self);
+  int       idx   = rtree_allocate_node(self);
   TreeNode* nodes = self->nodes;
 
-  nodes[idx].aabb = *aabb;
-  nodes[idx].parent = NULL_NODE;
-  nodes[idx].child1 = NULL_NODE;
-  nodes[idx].child2 = NULL_NODE;
-  nodes[idx].height = 0;
+  nodes[idx].aabb      = *aabb;
+  nodes[idx].parent    = NULL_NODE;
+  nodes[idx].child1    = NULL_NODE;
+  nodes[idx].child2    = NULL_NODE;
+  nodes[idx].height    = 0;
   nodes[idx].user_data = user_data;
 
   aabb_extend(&nodes[idx].aabb, 5.f);
@@ -538,7 +543,7 @@ void rtree_query(RTree* self, const AABB* aabb, Callback cb)
   TreeNode* nodes;
 
   nodes = self->nodes;
-  fn = (void (*)(void*, int))cb.func;
+  fn    = (void (*)(void*, int))cb.func;
   stack_init(&stack);
   stack_push(&stack, self->root);
   while (!stack_empty(&stack))
@@ -589,12 +594,11 @@ void rtree_draw(RTree* self, SDL_Renderer* renderer)
     return;
   stack_init(&stack);
 
-
   SDL_SetRenderDrawColor(renderer, 224, 74, 214, 255);
   stack_push(&stack, self->root);
   while (!stack_empty(&stack))
   {
-    node = &self->nodes[stack_pop(&stack)];
+    node   = &self->nodes[stack_pop(&stack)];
     rect.x = node->aabb.lower_bound.x;
     rect.y = node->aabb.lower_bound.y;
 

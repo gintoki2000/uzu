@@ -16,24 +16,20 @@ static void item_vs_player(ecs_entity_t item, ecs_entity_t player);
 static void (*_table[NUM_CATEGORIES][NUM_SYSTEM_SIGNALS])(ecs_entity_t, ecs_entity_t) = 
 {
   [CATEGORY_PLAYER] = {
-    [CATEGORY_ENEMY_WEAPON] = entity_vs_weapon,
-    [CATEGORY_ENEMY_PROJECTILE] = entity_vs_projectile,
+    [CATEGORY_WEAPON] = entity_vs_weapon,
+    [CATEGORY_PROJECTILE] = entity_vs_projectile,
     [CATEGORY_ITEM] = player_vs_item, 
   },
   [CATEGORY_ENEMY] = {
-    [CATEGORY_PLAYER_WEAPON ] = entity_vs_weapon,
-    [CATEGORY_PLAYER_PROJECTILE] = entity_vs_projectile,
+    [CATEGORY_WEAPON ] = entity_vs_weapon,
+    [CATEGORY_PROJECTILE] = entity_vs_projectile,
   },
-  [CATEGORY_PLAYER_PROJECTILE] = {
+  [CATEGORY_PROJECTILE] = {
     [CATEGORY_ENEMY] = projectile_vs_entity,
-  },
-  [CATEGORY_PLAYER_WEAPON] = {
-    [CATEGORY_ENEMY] = weapon_vs_entity,
-  },
-  [CATEGORY_ENEMY_PROJECTILE] = {
     [CATEGORY_PLAYER] = projectile_vs_entity,
   },
-  [CATEGORY_ENEMY_WEAPON] = {
+  [CATEGORY_WEAPON] = {
+    [CATEGORY_ENEMY] = weapon_vs_entity,
     [CATEGORY_PLAYER] = weapon_vs_entity,
   },
   [CATEGORY_ITEM] = {
@@ -52,12 +48,14 @@ static void on_collision(Ecs* ecs, SysEvt_Collision* event)
   HitBox* hitbox2;
   void (*fn)(ecs_entity_t, ecs_entity_t);
 
-  hitbox1 = ecs_get(ecs, event->e1, HITBOX);
-  hitbox2 = ecs_get(ecs, event->e2, HITBOX);
+  if ((hitbox1 = ecs_get(ecs, event->e1, HITBOX)) != NULL &&
+      (hitbox2 = ecs_get(ecs, event->e2, HITBOX)) != NULL)
+  {
 
-  fn = _table[hitbox1->category][hitbox2->category];
-  if (fn != NULL)
-    fn(event->e1, event->e2);
+    fn = _table[hitbox1->category][hitbox2->category];
+    if (fn != NULL)
+      fn(event->e1, event->e2);
+  }
 }
 
 static void weapon_vs_entity(ecs_entity_t weapon, ecs_entity_t entity)

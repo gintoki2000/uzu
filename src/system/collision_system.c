@@ -3,7 +3,7 @@
 #include <components.h>
 #include <toolbox/toolbox.h>
 
-#define BUFF_SIZE 255
+#define BUFF_SIZE 200
 
 static RTree*        _rtree;
 static CollisionPair _pair_buff[BUFF_SIZE];
@@ -79,11 +79,7 @@ static void update_proxies(Ecs* ecs)
     else
     {
       if (transform->was_changed)
-        rtree_move_proxy(
-            _rtree,
-            hitboxs[i].proxy_id,
-            &aabb,
-            VEC2(0, 0));
+        rtree_move_proxy(_rtree, hitboxs[i].proxy_id, &aabb, VEC2(0, 0));
     }
   }
 }
@@ -98,6 +94,7 @@ static void __lamda01(__capture01* capture, int proxy_id)
 {
   if (capture->proxy_id != proxy_id)
   {
+    ASSERT(_pair_cnt < BUFF_SIZE);
     ecs_entity_t entity     = (ecs_entity_t)rtree_get_user_data(_rtree, proxy_id);
     _pair_buff[_pair_cnt++] = (CollisionPair){
       MAX(capture->entity, entity),
@@ -173,7 +170,7 @@ static void narrow_phase(Ecs* ecs)
   {
     hitbox1 = ecs_get(ecs, _pair_buff[i].e1, HITBOX);
     hitbox2 = ecs_get(ecs, _pair_buff[i].e2, HITBOX);
-    if ((BIT(hitbox1->category) & hitbox2->mask_bits) ||
+    if ((BIT(hitbox1->category) & hitbox2->mask_bits) &&
         (BIT(hitbox2->category) & hitbox1->mask_bits))
     {
       get_bounding_box(&r1, ecs, _pair_buff[i].e1);

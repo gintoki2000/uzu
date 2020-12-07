@@ -8,4 +8,6 @@
 #include "rect.h"
 #include "rtree.h"
 #include "heap.h"
+#include "ptrarray.h"
+#include "array.h"
 #endif //TOOLBOX_H

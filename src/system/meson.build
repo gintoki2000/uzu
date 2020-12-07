@@ -19,4 +19,5 @@ system_source_files = files(
   ,'drop_system.c'
   ,'pickup_system.c'
   ,'sound_sytem.c'
+  ,'camera_following_system.c'
 )

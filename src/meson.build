@@ -8,4 +8,4 @@ source_files = files('uzu.c',
   'resources.c', 
   'entity_factory.c',
   'map.c',
-  'inventory.c') + engine_source_files + ecs_source_files + toolbox_source_files + system_source_files + ui_source_files
+  'inventory.c', 'graph.c', 'generator.c') + engine_source_files + ecs_source_files + toolbox_source_files + system_source_files + ui_source_files

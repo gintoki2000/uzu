@@ -1,7 +1,8 @@
 #include "drawing_heal_bar.h"
 #include <components.h>
 
-void DrawingHealBarSystem(Ecs* ecs, SDL_Renderer* renderer)
+extern SDL_Rect g_viewport;
+void            DrawingHealBarSystem(Ecs* ecs, SDL_Renderer* renderer)
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;
@@ -18,16 +19,16 @@ void DrawingHealBarSystem(Ecs* ecs, SDL_Renderer* renderer)
   for (int i = 0; i < cnt; ++i)
   {
     transform = ecs_get(ecs, entities[i], TRANSFORM);
-    heath = ecs_get(ecs, entities[i], HEATH);
-    p = (float)heath->hit_points / (float)heath->max_hit_points;
+    heath     = ecs_get(ecs, entities[i], HEATH);
+    p         = (float)heath->hit_points / (float)heath->max_hit_points;
 
-    border.x = transform->pos.x - heal_bars[i].anchor.x;
-    border.y = transform->pos.y - heal_bars[i].anchor.y;
+    border.x = transform->pos.x - heal_bars[i].anchor.x - g_viewport.x;
+    border.y = transform->pos.y - heal_bars[i].anchor.y - g_viewport.y;
     border.w = heal_bars->len;
-    border.h = 5;
+    border.h = 3;
 
-    SDL_SetRenderDrawColor(renderer, 200, 0, 0, 255);
-    SDL_RenderDrawRect(renderer, &border);
+    //SDL_SetRenderDrawColor(renderer, 200, 0, 0, 255);
+    //SDL_RenderDrawRect(renderer, &border);
 
     inner.x = border.x + 1;
     inner.y = border.y + 1;

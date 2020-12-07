@@ -7,7 +7,7 @@ typedef enum
 {
   BT_NODE_TYPE_SELECTOR,
   BT_NODE_TYPE_SEQUENCE,
-  BT_NODE_TYPE_LEAF,
+  BT_NODE_TYPE_TASK,
 } bt_NodeType;
 
 typedef enum
@@ -19,20 +19,12 @@ typedef enum
 
 typedef struct
 {
-  int node[BT_MAX_CHILD];
-  int cnt;
-} bt_NodeList;
-
-typedef struct
-{
   bt_NodeType type;
-  bt_NodeList child;
 } bt_Node;
 
 typedef struct
 {
-  bt_Node* mem_pool;
-  
+  bt_Node* root;
 } bt_BehaviourTree;
 
 #endif // BEHAVIOUR_TREE_H

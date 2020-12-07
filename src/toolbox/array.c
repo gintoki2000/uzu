@@ -23,6 +23,11 @@ Array* array_init(Array* self, u32 el_size)
   return self;
 }
 
+void array_fini(Array *_self)
+{
+  free(_self->storage);
+}
+
 void* _array_addn(Array* self, u32 n)
 {
   u32 ncap;

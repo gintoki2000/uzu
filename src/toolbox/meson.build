@@ -1,1 +1,1 @@
-toolbox_source_files = files('sprite.c', 'sprite-sheet.c', 'signal.c', 'rect.c', 'toolbox.h', 'rtree.c', 'array.c')
+toolbox_source_files = files('sprite.c', 'sprite-sheet.c', 'signal.c', 'rect.c', 'toolbox.h', 'rtree.c', 'array.c', 'ptrarray.c', 'heap.c')

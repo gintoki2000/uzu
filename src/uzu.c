@@ -7,6 +7,7 @@
 
 #include <components.h>
 #include <entity_factory.h>
+#include <generator.h>
 #include <map.h>
 #include <map_data.h>
 #include <resources.h>
@@ -30,6 +31,7 @@
 #include <system/map_collision_system.h>
 #include <system/mediator.h>
 #include <system/motion_system.h>
+#include <system/camera_following_system.h>
 #include <system/pickup_system.h>
 #include <system/player_controller_system.h>
 #include <system/sound_sytem.h>
@@ -78,12 +80,15 @@ static BOOL on_game_init(void* user_data)
 
   g_viewport = (SDL_Rect){ 0, 0, WIN_WIDTH, WIN_HEIGHT };
 
+  /*
   map_set_data(MAP_LAYER_FLOOR, MAP_TEST_FLOOR, MAP_TEST_COL_CNT * MAP_TEST_ROW_CNT);
   map_set_data(MAP_LAYER_WALL, MAP_TEST_WALL, MAP_TEST_COL_CNT * MAP_TEST_ROW_CNT);
   map_set_data(MAP_LAYER_FRONT, MAP_TEST_FRONT, MAP_TEST_COL_CNT * MAP_TEST_ROW_CNT);
   map_set_size(MAP_TEST_COL_CNT, MAP_TEST_ROW_CNT);
   map_enable_layer(MAP_LAYER_FLOOR);
   map_enable_layer(MAP_LAYER_WALL);
+  */
+
 
   /*init keyboard*/
   keybroad_init();
@@ -175,6 +180,10 @@ static BOOL on_game_init(void* user_data)
         (EcsType){
             .size = sizeof(Invulnerable),
         },
+    [CAMERA_TARGET_TAG] =
+        (EcsType){
+            .size = sizeof(CameraTargetTag),
+        },
   };
 
   _ecs = ecs_new(types, NUM_COMPONENTS);
@@ -184,27 +193,13 @@ static BOOL on_game_init(void* user_data)
   //  make_knight(_ecs, make_golden_sword(_ecs, CATEGORY_PLAYER_WEAPON, BIT(CATEGORY_ENEMY)));
   // ecs_entity_t player = make_knight(_ecs, make_bow(_ecs));
   //
-  ecs_entity_t player =
-      make_player(_ecs, make_knight(_ecs), make_golden_sword(_ecs, BIT(CATEGORY_ENEMY)));
-
-  ecs_add(_ecs, player, PLAYER_TAG);
-
-  Transform* tx = ecs_get(_ecs, player, TRANSFORM);
-  tx->pos.x     = WIN_WIDTH / 2 + 100;
-  tx->pos.y     = WIN_HEIGHT / 2;
-
-  Vec2 demon_pos[5] = {
-    { 96.f, 96.f }, { 169.f, 169.f }, { 169.f, 200.f }, { 200.f, 250.f }, { 225.f, 190.f },
-  };
 
   srand(SDL_GetTicks());
-  for (int i = 0; i < 5; ++i)
-  {
-    ecs_entity_t demon = make_huge_demon(_ecs);
-
-    Transform* dtx = ecs_get(_ecs, demon, TRANSFORM);
-    dtx->pos       = demon_pos[i];
-  }
+  set_generator_param(GENERATOR_PARAM_WIDTH, 100);
+  set_generator_param(GENERATOR_PARAM_HEIGHT, 100);
+  set_generator_param(GENERATOR_PARAM_MAX_ROOM_SIZE, 15);
+  set_generator_param(GENERATOR_PARAM_MIN_ROOM_SIZE, 6);
+  generate_new_dungeon(_ecs);
 
   /*
   for (int i = 0; i < 150; ++i)
@@ -256,6 +251,7 @@ static void on_game_loop(void* user_data, SDL_Renderer* renderer)
   MapCollisionSystem(_ecs);
   SyncEqmSystem(_ecs);
   AnimatorSystem(_ecs);
+  CameraFollowingSystem(_ecs);
   SwingingSystem(_ecs);
   map_draw_layer(MAP_LAYER_FLOOR, renderer);
   map_draw_layer(MAP_LAYER_WALL, renderer);
@@ -264,6 +260,9 @@ static void on_game_loop(void* user_data, SDL_Renderer* renderer)
   ui_heath_bar_draw(_ecs, renderer);
   LifeSpanSystem(_ecs);
   // collision_system_draw_debug(renderer);
+  draw_rooms(renderer, 2);
+  draw_graph(renderer, 2);
+  draw_tree(renderer, 2);
   DrawingHealBarSystem(_ecs, renderer);
   DrawingHitboxSystem(_ecs, renderer);
   HealthSystem(_ecs);

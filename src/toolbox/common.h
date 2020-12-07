@@ -58,6 +58,8 @@ typedef struct
   })
 #define BIT(__x) (1 << (__x))
 
+#define ABS(__x) ((__x) > 0 ? (__x) : -(__x))
+
 typedef enum
 {
   ORIENTATION_NONE,

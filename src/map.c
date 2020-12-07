@@ -61,8 +61,8 @@ void map_draw_layer(int layer, SDL_Renderer* renderer)
     begin_row = y * _col_cnt;
     for (s32 x = start_x; x < end_x; ++x)
     {
-      dst.x = x * TILE_SIZE + _position_x;
-      dst.y = y * TILE_SIZE + _position_y;
+      dst.x = x * TILE_SIZE + _position_x - g_viewport.x;
+      dst.y = y * TILE_SIZE + _position_y - g_viewport.y;
 
       tile_id = data[begin_row + x];
       if (tile_id == 0)
@@ -126,4 +126,14 @@ s32 map_tile_at(s32 layer, s32 x, s32 y)
 BOOL map_is_floor(s32 cell_x, s32 cell_y)
 {
   return map_tile_at(MAP_LAYER_FLOOR, cell_x, cell_y) != 0;
+}
+
+void set_tile_at(s32 layer, s32 x, s32 y, s32 tile)
+{
+  _layers[layer][x + y * _col_cnt] = tile;
+}
+
+void map_clear(s32 layer)
+{
+  memset(_layers[layer], 0, _row_cnt * _col_cnt);
 }

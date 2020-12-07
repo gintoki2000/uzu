@@ -1,6 +1,7 @@
 #include "drawing_hitbox_system.h"
 #include <components.h>
 
+extern SDL_Rect g_viewport;
 static void draw_rect(Rect* r, SDL_Renderer* renderer)
 {
 	SDL_SetRenderDrawColor(renderer, 67, 63, 196, 0xff);
@@ -25,8 +26,8 @@ void DrawingHitboxSystem(Ecs* ecs, SDL_Renderer* renderer)
   {
     transform = ecs_get(ecs, entities[i], TRANSFORM);
 
-    x = transform->pos.x - hitboxs[i].anchor.x;
-    y = transform->pos.y - hitboxs[i].anchor.y;
+    x = transform->pos.x - hitboxs[i].anchor.x - g_viewport.x;
+    y = transform->pos.y - hitboxs[i].anchor.y - g_viewport.y;
     w = hitboxs[i].size.x;
     h = hitboxs[i].size.y;
     rect_init_full(&rect, x, y, w, h, hitboxs[i].anchor.x, hitboxs[i].anchor.y, transform->rot);

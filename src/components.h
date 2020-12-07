@@ -130,6 +130,8 @@ typedef int EnemyTag;
 
 typedef int WeaponTag;
 
+typedef int CameraTargetTag;
+
 typedef struct
 {
   ItemId item_id;
@@ -224,6 +226,7 @@ enum
   DROP,
   ITEM_TAG,
   INVULNERABLE,
+  CAMERA_TARGET_TAG,
   NUM_COMPONENTS
 };
 

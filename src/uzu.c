@@ -1,3 +1,4 @@
+#include "behaviour_tree.h"
 #include <SDL2/SDL_image.h>
 
 #include <stdio.h>
@@ -6,6 +7,7 @@
 #include <toolbox/toolbox.h>
 
 #include <components.h>
+#include <constances.h>
 #include <entity_factory.h>
 #include <generator.h>
 #include <map.h>
@@ -18,7 +20,9 @@
 #include <engine/keyboard.h>
 
 #include <system/action_execution_system.h>
+#include <system/ai_system.h>
 #include <system/animator_system.h>
+#include <system/camera_following_system.h>
 #include <system/collision_filter.h>
 #include <system/collision_system.h>
 #include <system/draw_system.h>
@@ -31,20 +35,16 @@
 #include <system/map_collision_system.h>
 #include <system/mediator.h>
 #include <system/motion_system.h>
-#include <system/camera_following_system.h>
 #include <system/pickup_system.h>
 #include <system/player_controller_system.h>
 #include <system/sound_sytem.h>
 #include <system/swinging_system.h>
 #include <system/sync_eqm_system.h>
 #include <system/weapon_dealing_damage_system.h>
+#include <system/animator_controller_system.h>
+#include <system/draw_target.h>
 
 #include <ui/health_bar.h>
-
-#define WIN_WIDTH 480
-#define WIN_HEIGHT 360
-#define SCL_X 2.0
-#define SCL_Y 2.0
 
 static Ecs* _ecs;
 
@@ -56,6 +56,28 @@ static void on_game_fini(void* user_data);
 static void on_game_quit(void* user_data);
 static void on_game_loop(void* user_data, SDL_Renderer* renderer);
 
+static void swpan_player()
+{
+  ecs_entity_t player;
+  Transform*   tx;
+
+  player = make_player(_ecs, make_knight(_ecs), make_golden_sword(_ecs, BIT(CATEGORY_ENEMY)));
+
+  tx        = ecs_get(_ecs, player, TRANSFORM);
+  tx->pos.x = WIN_WIDTH / 2;
+  tx->pos.y = WIN_HEIGHT / 2;
+}
+
+static void swpan_enemy()
+{
+  ecs_entity_t enemy;
+  Transform*   tx;
+
+  enemy     = make_huge_demon(_ecs);
+  tx        = ecs_get(_ecs, enemy, TRANSFORM);
+  tx->pos.x = rand() % (WIN_WIDTH);
+  tx->pos.y = rand() % WIN_HEIGHT;
+}
 static BOOL on_game_init(void* user_data)
 {
   (void)user_data;
@@ -80,15 +102,12 @@ static BOOL on_game_init(void* user_data)
 
   g_viewport = (SDL_Rect){ 0, 0, WIN_WIDTH, WIN_HEIGHT };
 
-  /*
   map_set_data(MAP_LAYER_FLOOR, MAP_TEST_FLOOR, MAP_TEST_COL_CNT * MAP_TEST_ROW_CNT);
   map_set_data(MAP_LAYER_WALL, MAP_TEST_WALL, MAP_TEST_COL_CNT * MAP_TEST_ROW_CNT);
   map_set_data(MAP_LAYER_FRONT, MAP_TEST_FRONT, MAP_TEST_COL_CNT * MAP_TEST_ROW_CNT);
   map_set_size(MAP_TEST_COL_CNT, MAP_TEST_ROW_CNT);
   map_enable_layer(MAP_LAYER_FLOOR);
   map_enable_layer(MAP_LAYER_WALL);
-  */
-
 
   /*init keyboard*/
   keybroad_init();
@@ -184,6 +203,15 @@ static BOOL on_game_init(void* user_data)
         (EcsType){
             .size = sizeof(CameraTargetTag),
         },
+    [AI_AGENT] =
+        (EcsType){
+            .size    = sizeof(AIAgent),
+            .fini_fn = (ecs_comp_fini_fn_t)ai_agent_fini,
+        },
+    [BTV_MOVE_DESTINATION] =
+        (EcsType){
+            .size = sizeof(btv_MoveDestination),
+        },
   };
 
   _ecs = ecs_new(types, NUM_COMPONENTS);
@@ -195,11 +223,17 @@ static BOOL on_game_init(void* user_data)
   //
 
   srand(SDL_GetTicks());
+  /*
   set_generator_param(GENERATOR_PARAM_WIDTH, 100);
   set_generator_param(GENERATOR_PARAM_HEIGHT, 100);
   set_generator_param(GENERATOR_PARAM_MAX_ROOM_SIZE, 15);
   set_generator_param(GENERATOR_PARAM_MIN_ROOM_SIZE, 6);
   generate_new_dungeon(_ecs);
+  */
+
+  swpan_player();
+  //for (int i = 0; i < 20; ++i)
+    swpan_enemy();
 
   /*
   for (int i = 0; i < 150; ++i)
@@ -220,7 +254,7 @@ static BOOL on_game_init(void* user_data)
   pickup_system_init(_ecs);
   sound_system_init(_ecs);
 
-  Mix_PlayMusic(get_bg_mus(rand() % NUM_BG_MUSICS), -1);
+  // Mix_PlayMusic(get_bg_mus(rand() % NUM_BG_MUSICS), -1);
 
   return TRUE;
 }
@@ -244,12 +278,14 @@ static void on_game_loop(void* user_data, SDL_Renderer* renderer)
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
   SDL_RenderClear(renderer);
   keybroad_update();
+  AiSystem(_ecs);
   PlayerControllerSystem(_ecs);
   ActionExecutionSystem(_ecs);
   MotionSystem(_ecs);
   CollisionSystem(_ecs);
   MapCollisionSystem(_ecs);
   SyncEqmSystem(_ecs);
+  AnimatorControllerSystem(_ecs);
   AnimatorSystem(_ecs);
   CameraFollowingSystem(_ecs);
   SwingingSystem(_ecs);
@@ -259,13 +295,14 @@ static void on_game_loop(void* user_data, SDL_Renderer* renderer)
   map_draw_layer(MAP_LAYER_FRONT, renderer);
   ui_heath_bar_draw(_ecs, renderer);
   LifeSpanSystem(_ecs);
-  // collision_system_draw_debug(renderer);
-  draw_rooms(renderer, 2);
-  draw_graph(renderer, 2);
-  draw_tree(renderer, 2);
+ // collision_system_draw_debug(renderer);
+  // draw_rooms(renderer, 2);
+  // draw_graph(renderer, 2);
+  // draw_tree(renderer, 2);
   DrawingHealBarSystem(_ecs, renderer);
-  DrawingHitboxSystem(_ecs, renderer);
-  HealthSystem(_ecs);
+   DrawingHitboxSystem(_ecs, renderer);
+   HealthSystem(_ecs);
+  DrawTarget(_ecs, renderer);
   LateDestroyingSystem(_ecs);
   SDL_RenderPresent(renderer);
 }

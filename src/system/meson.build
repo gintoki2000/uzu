@@ -20,4 +20,7 @@ system_source_files = files(
   ,'pickup_system.c'
   ,'sound_sytem.c'
   ,'camera_following_system.c'
+  ,'ai_system.c'
+  ,'animator_controller_system.c'
+  ,'draw_target.c'
 )

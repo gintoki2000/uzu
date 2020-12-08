@@ -100,7 +100,7 @@ INLINE Vec2 subv(Vec2 a, Vec2 b) { return (Vec2){ a.x - b.x, a.y - b.y }; }
 
 INLINE Vec2 mulv(Vec2 a, float k) { return (Vec2){ a.x * k, a.y * k }; }
 
-INLINE float lengthv(Vec2 v) { return sqrtf(v.x * v.x + v.y * v.y); }
+INLINE float lengthv(Vec2 v) { return SDL_sqrtf(v.x * v.x + v.y * v.y); }
 
 INLINE float normalizev(Vec2* v)
 {

@@ -1,5 +1,6 @@
 #ifndef COMPONENTS_H
 #define COMPONENTS_H
+#include "behaviour_tree.h"
 #include <ecs/ecs.h>
 #include <item.h>
 #include <toolbox/toolbox.h>
@@ -198,8 +199,13 @@ typedef struct
 
 typedef struct
 {
-  int x;
-} AiInput;
+  bt_Node* root;
+} AIAgent;
+
+//** BT Vars
+
+typedef Vec2 btv_MoveDestination;
+
 
 enum
 {
@@ -227,6 +233,9 @@ enum
   ITEM_TAG,
   INVULNERABLE,
   CAMERA_TARGET_TAG,
+  AI_AGENT,
+  BTV_MOVE_DESTINATION,
+  BTV_WAIT_TIME,
   NUM_COMPONENTS
 };
 
@@ -246,10 +255,7 @@ void animation_fini(Animation* anim);
 Animator* animator_init(Animator* animator, const Animation* anims, u32 cnt);
 void      animator_fini(Animator* animator);
 
-INLINE void visual_set_anchor_to_center(Visual* v)
-{
-  v->anchor.x = v->sprite.rect.w / 2;
-  v->anchor.y = v->sprite.rect.h / 2;
-}
+void visual_set_anchor_to_center(Visual* v);
+void ai_agent_fini(AIAgent* ai_agent);
 
 #endif // COMPONENTS_H

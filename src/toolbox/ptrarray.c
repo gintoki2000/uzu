@@ -30,10 +30,10 @@ PtrArray* ptr_array_init(PtrArray* self, destroy_fn_t destroy_fn)
 
 PtrArray* ptr_array_init_w_cap(PtrArray* self, destroy_fn_t destroy_fn, u32 cap)
 {
-  self->cap = cap;
-  self->cnt = 0;
+  self->cap        = cap;
+  self->cnt        = 0;
   self->destroy_fn = destroy_fn;
-  self->storage = malloc(sizeof(pointer_t) * self->cap);
+  self->storage    = malloc(sizeof(pointer_t) * self->cap);
   return self;
 }
 
@@ -49,7 +49,7 @@ void ptr_array_fini(PtrArray* self)
 {
   if (self->destroy_fn != NULL)
   {
-    for (int i = 0; i < self->cnt; ++i)
+    for (u32 i = 0; i < self->cnt; ++i)
     {
       self->destroy_fn(self->storage[i]);
     }
@@ -64,7 +64,7 @@ pointer_t ptr_array_add(PtrArray* self, pointer_t p)
     ptr_array_reserve(self, self->cap * 2);
   }
 
- return self->storage[self->cnt++] = p;
+  return self->storage[self->cnt++] = p;
 }
 
 BOOL ptr_array_remove(PtrArray* self, pointer_t p)
@@ -82,7 +82,7 @@ void ptr_array_remove_idx(PtrArray* self, u32 idx)
 {
   assert(idx >= 0 && idx < self->cnt && "out of index");
   int        cnt = self->cnt;
-  pointer_t* a = self->storage;
+  pointer_t* a   = self->storage;
   for (int i = idx; i < cnt - 1; ++i)
   {
     a[i] = a[i + 1];
@@ -105,7 +105,7 @@ void ptr_array_swap_and_pop(PtrArray* self, u32 idx)
 int ptr_array_index_of(PtrArray* self, pointer_t p)
 {
   int        cnt = self->cnt;
-  pointer_t* a = self->storage;
+  pointer_t* a   = self->storage;
   for (int i = 0; i < cnt; ++i)
     if (a[i] == p)
       return i;
@@ -118,7 +118,7 @@ void ptr_array_reserve(PtrArray* self, u32 n)
 {
   if (n <= self->cap)
     return;
-  self->cap = n;
+  self->cap     = n;
   self->storage = realloc(self->storage, self->cap * sizeof(pointer_t));
 }
 
@@ -130,7 +130,7 @@ void ptr_array_sort(PtrArray* self, __compar_fn_t comp)
 void ptr_array_foreach(PtrArray* self, consume_fn_t consume_fn, pointer_t user_data)
 {
   assert(consume_fn != NULL);
-  int        cnt = self->cnt;
+  int        cnt     = self->cnt;
   pointer_t* storage = self->storage;
   for (int i = 0; i < cnt; ++i)
     if (consume_fn(user_data, storage[i]))

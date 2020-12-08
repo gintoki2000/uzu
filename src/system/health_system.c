@@ -4,11 +4,13 @@
 
 static void on_deal_damage(Ecs* ecs, const SysEvt_DealDamage* event)
 {
+  INFO("\n");
   Heath* health;
   if ((health = ecs_get(ecs, event->receiver, HEATH)) != NULL &&
       !ecs_has(ecs, event->receiver, INVULNERABLE))
   {
     health->hit_points -= event->damage;
+    INFO("hit_points: %d\n", health->hit_points);
     if (health->hit_points <= 0)
     {
       health->hit_points = 0;

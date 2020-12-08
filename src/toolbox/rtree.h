@@ -17,6 +17,6 @@ void* rtree_get_user_data(RTree* self, int proxy_id);
 
 const AABB* rtree_get_fat_aabb(RTree* self, int proxy_id);
 
-void rtree_draw(RTree* self, SDL_Renderer* renderer);
+void rtree_draw(RTree* self, SDL_Renderer* renderer, const SDL_Rect* viewport);
 
 #endif // AABB_TREE_H

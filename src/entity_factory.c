@@ -1,8 +1,10 @@
-#include "components.h"
-#include "ecs/ecs.h"
-#include "resources.h"
-#include "toolbox/sprite.h"
+#include <ai/btt_find_random_location.h>
+#include <ai/btt_move_to.h>
+#include <ai/btt_wait.h>
+#include <components.h>
+#include <ecs/ecs.h>
 #include <entity_factory.h>
+#include <resources.h>
 
 ecs_entity_t make_anime_sword(Ecs* ecs)
 {
@@ -60,8 +62,8 @@ ecs_entity_t make_knight(Ecs* ecs)
   animation_init(&anims[ANIM_STATE_IDLE], texture, 16 * 1, 0, 1, 4, 16, 28);
   animation_init(&anims[ANIM_STATE_RUN], texture, 16 * 5, 0, 1, 4, 16, 28);
 
-  anims[ANIM_STATE_IDLE].frame_duration = 6;
-  anims[ANIM_STATE_RUN].frame_duration  = 2;
+  anims[ANIM_STATE_IDLE].frame_duration = 8;
+  anims[ANIM_STATE_RUN].frame_duration  = 4;
 
   knight = ecs_create(ecs);
 
@@ -115,16 +117,17 @@ ecs_entity_t make_huge_demon(Ecs* ecs)
   Heath*           heath;
   HealBar*         healthBar;
   Motion*          motion;
-  CharacterStats*  stats;
+  //CharacterStats*  stats;
   Drop*            drop;
+  AIAgent*         ai_agent;
 
   texture = get_texture(TEX_BIG_DEMON);
   animation_init(&anims[ANIM_STATE_HIT], texture, 32 * 6, 0, 1, 1, 32, 36);
   animation_init(&anims[ANIM_STATE_IDLE], texture, 0, 0, 1, 4, 32, 36);
-  animation_init(&anims[ANIM_STATE_RUN], texture, 128, 0, 1, 4, 32, 36);
+  animation_init(&anims[ANIM_STATE_RUN], texture, 4 * 32, 0, 1, 4, 32, 36);
 
-  anims[ANIM_STATE_IDLE].frame_duration = 6;
-  anims[ANIM_STATE_RUN].frame_duration  = 3;
+  anims[ANIM_STATE_IDLE].frame_duration = 8;
+  anims[ANIM_STATE_RUN].frame_duration  = 6;
 
   demon = ecs_create(ecs);
 
@@ -141,7 +144,7 @@ ecs_entity_t make_huge_demon(Ecs* ecs)
 
   animator = ecs_add(ecs, demon, ANIMATOR);
   animator_init(animator, anims, NUM_ANIM_STATES);
-  animator->current_anim = ANIM_STATE_IDLE;
+  animator->current_anim = ANIM_STATE_RUN;
   animator->elapsed      = 0;
 
   hitbox            = ecs_add(ecs, demon, HITBOX);
@@ -163,13 +166,34 @@ ecs_entity_t make_huge_demon(Ecs* ecs)
 
   motion = ecs_add(ecs, demon, MOTION);
 
-  stats = ecs_add(ecs, demon, CHARACTER_STATS);
+  //stats = ecs_add(ecs, demon, CHARACTER_STATS);
 
   drop          = ecs_add(ecs, demon, DROP);
   drop->item1   = ITEM_BIG_RED_FLASK;
   drop->item2   = ITEM_RED_FLASK;
   drop->change1 = 30;
   drop->change2 = 40;
+
+  ai_agent = ecs_add(ecs, demon, AI_AGENT);
+
+  /*buid behaviour tree*/
+  bt_Repeater*            root;
+  bt_Sequence*            sequence;
+  btt_FindRandomLocation* find_location_task;
+  btt_MoveTo*             move_to_task;
+  btt_Wait*               wait_task;
+
+  find_location_task = btt_find_random_location_new();
+  move_to_task       = btt_move_to_new();
+  wait_task          = btt_wait_new(120);
+  sequence           = bt_sequence_new();
+  root               = bt_repeater_new((bt_Node*)sequence, -1);
+
+  bt_sequence_add(sequence, (bt_Node*)find_location_task);
+  bt_sequence_add(sequence, (bt_Node*)move_to_task);
+  bt_sequence_add(sequence, (bt_Node*)wait_task);
+
+  ai_agent->root = (bt_Node*)root;
 
   return demon;
 }
@@ -450,6 +474,7 @@ ecs_entity_t make_red_flask(Ecs* ecs, Vec2 pos)
 ecs_entity_t make_player(Ecs* ecs, ecs_entity_t character, ecs_entity_t weapon)
 {
   ecs_add(ecs, character, PLAYER_TAG);
+  ecs_add(ecs, character, CAMERA_TARGET_TAG);
 
   Equipment* equipment = ecs_get(ecs, character, EQUIPMENT);
   HitBox*    hitbox    = ecs_get(ecs, character, HITBOX);

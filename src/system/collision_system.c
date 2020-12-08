@@ -3,11 +3,13 @@
 #include <components.h>
 #include <toolbox/toolbox.h>
 
-#define BUFF_SIZE 200
+#define BUFF_SIZE 300
 
 static RTree*        _rtree;
 static CollisionPair _pair_buff[BUFF_SIZE];
 static u32           _pair_cnt;
+
+extern SDL_Rect g_viewport;
 
 static void on_component_remove(void* udata, const EcsComponentEvent* event)
 {
@@ -195,7 +197,7 @@ void collision_system_fini()
   _rtree = NULL;
 }
 
-void collision_system_draw_debug(SDL_Renderer* renderer) { rtree_draw(_rtree, renderer); }
+void collision_system_draw_debug(SDL_Renderer* renderer) { rtree_draw(_rtree, renderer, &g_viewport); }
 
 void collision_system_query(const AABB* aabb, Callback callback)
 {

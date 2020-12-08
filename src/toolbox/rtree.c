@@ -585,7 +585,7 @@ const AABB* rtree_get_fat_aabb(RTree* self, int proxy_id)
   return &self->nodes[proxy_id].aabb;
 }
 
-void rtree_draw(RTree* self, SDL_Renderer* renderer)
+void rtree_draw(RTree* self, SDL_Renderer* renderer, const SDL_Rect* viewport)
 {
   Stack     stack;
   SDL_Rect  rect;
@@ -599,8 +599,8 @@ void rtree_draw(RTree* self, SDL_Renderer* renderer)
   while (!stack_empty(&stack))
   {
     node   = &self->nodes[stack_pop(&stack)];
-    rect.x = node->aabb.lower_bound.x;
-    rect.y = node->aabb.lower_bound.y;
+    rect.x = node->aabb.lower_bound.x - viewport->x;
+    rect.y = node->aabb.lower_bound.y - viewport->y;
 
     rect.w = node->aabb.upper_bound.x - node->aabb.lower_bound.x;
     rect.h = node->aabb.upper_bound.y - node->aabb.lower_bound.y;

@@ -18,6 +18,7 @@ static const char*  _texture_files[NUM_TEXS] = {
   [TEX_FLASK_RED]         = "asserts/flask_red.png",
   [TEX_FLASK_RED_BIG]     = "asserts/flask_big_red.png",
   [TEX_PLAYER_HEALTH_BAR] = "asserts/player_health_bar.png",
+  [TEX_CHORT]             = "asserts/chort.png",
 };
 
 static Mix_Music*  _bg_musics[NUM_BG_MUSICS];
@@ -107,6 +108,12 @@ void resources_unload()
       Mix_FreeMusic(_bg_musics[i]);
       _bg_musics[i] = NULL;
     }
+  }
+  for (int i = 0; i < NUM_SFXS; ++i)
+  {
+    if (_sfx[i] != NULL)
+      Mix_FreeChunk(_sfx[i]);
+    _sfx[i] = NULL;
   }
 }
 

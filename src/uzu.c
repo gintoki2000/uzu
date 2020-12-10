@@ -21,11 +21,13 @@
 
 #include <system/action_execution_system.h>
 #include <system/ai_system.h>
+#include <system/animator_controller_system.h>
 #include <system/animator_system.h>
 #include <system/camera_following_system.h>
 #include <system/collision_filter.h>
 #include <system/collision_system.h>
 #include <system/draw_system.h>
+#include <system/draw_target.h>
 #include <system/drawing_heal_bar.h>
 #include <system/drawing_hitbox_system.h>
 #include <system/drop_system.h>
@@ -41,8 +43,8 @@
 #include <system/swinging_system.h>
 #include <system/sync_eqm_system.h>
 #include <system/weapon_dealing_damage_system.h>
-#include <system/animator_controller_system.h>
-#include <system/draw_target.h>
+
+#include <system/debug/draw_path.h>
 
 #include <ui/health_bar.h>
 
@@ -65,18 +67,24 @@ static void swpan_player()
 
   tx        = ecs_get(_ecs, player, TRANSFORM);
   tx->pos.x = WIN_WIDTH / 2;
-  tx->pos.y = WIN_HEIGHT / 2;
+  tx->pos.y = WIN_HEIGHT / 2 + 50;
 }
 
 static void swpan_enemy()
 {
-  ecs_entity_t enemy;
+  ecs_entity_t enemy, e2;
   Transform*   tx;
 
   enemy     = make_huge_demon(_ecs);
   tx        = ecs_get(_ecs, enemy, TRANSFORM);
-  tx->pos.x = rand() % (WIN_WIDTH);
-  tx->pos.y = rand() % WIN_HEIGHT;
+  tx->pos.x = TILE_SIZE * 6;
+  tx->pos.y = TILE_SIZE * 7;
+
+  e2 = make_chort(_ecs);
+  tx = ecs_get(_ecs, e2, TRANSFORM);
+  tx->pos.x = TILE_SIZE * 5;
+  tx->pos.y = TILE_SIZE * 12;
+
 }
 static BOOL on_game_init(void* user_data)
 {
@@ -187,10 +195,6 @@ static BOOL on_game_init(void* user_data)
         (EcsType){
             .size = sizeof(Swingable),
         },
-    [CHARACTER_STATS] =
-        (EcsType){
-            .size = sizeof(CharacterStats),
-        },
     [DROP] =
         (EcsType){
             .size = sizeof(Drop),
@@ -212,6 +216,10 @@ static BOOL on_game_init(void* user_data)
         (EcsType){
             .size = sizeof(btv_MoveDestination),
         },
+    [BTV_PATH] =
+        (EcsType){
+            .size = sizeof(btv_Path),
+        },
   };
 
   _ecs = ecs_new(types, NUM_COMPONENTS);
@@ -232,7 +240,7 @@ static BOOL on_game_init(void* user_data)
   */
 
   swpan_player();
-  //for (int i = 0; i < 20; ++i)
+  // for (int i = 0; i < 20; ++i)
     swpan_enemy();
 
   /*
@@ -254,7 +262,7 @@ static BOOL on_game_init(void* user_data)
   pickup_system_init(_ecs);
   sound_system_init(_ecs);
 
-  // Mix_PlayMusic(get_bg_mus(rand() % NUM_BG_MUSICS), -1);
+  Mix_PlayMusic(get_bg_mus(BG_MUS_CATCH_THE_MYSTERY), -1);
 
   return TRUE;
 }
@@ -295,13 +303,14 @@ static void on_game_loop(void* user_data, SDL_Renderer* renderer)
   map_draw_layer(MAP_LAYER_FRONT, renderer);
   ui_heath_bar_draw(_ecs, renderer);
   LifeSpanSystem(_ecs);
- // collision_system_draw_debug(renderer);
+  collision_system_draw_debug(renderer);
   // draw_rooms(renderer, 2);
   // draw_graph(renderer, 2);
   // draw_tree(renderer, 2);
   DrawingHealBarSystem(_ecs, renderer);
-   DrawingHitboxSystem(_ecs, renderer);
-   HealthSystem(_ecs);
+  DrawingHitboxSystem(_ecs, renderer);
+  DrawPath(_ecs, renderer);
+  HealthSystem(_ecs);
   DrawTarget(_ecs, renderer);
   LateDestroyingSystem(_ecs);
   SDL_RenderPresent(renderer);

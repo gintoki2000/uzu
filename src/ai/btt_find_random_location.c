@@ -23,7 +23,7 @@ btt_FindRandomLocation* btt_find_random_location_init(btt_FindRandomLocation* se
 
 void btt_find_random_location_exec(btt_FindRandomLocation* self, Ecs* ecs, ecs_entity_t entity)
 {
-  INFO("executing...\n");
+  //INFO("executing...\n");
   btv_MoveDestination* dest;
   dest    = ecs_add(ecs, entity, BTV_MOVE_DESTINATION);
   dest->x = rand() % WIN_WIDTH;

@@ -27,7 +27,7 @@ INLINE float get_distance(const Point* a, const Point* b)
 }
 /**********************************************************/
 void vertex_add_edge(Vertex* v, Edge* e) { ptr_array_add(v->edges, e); }
-void vertex_remove_edge(Vertex* v, Edge* e) { ptr_array_remove(v->edges, e); }
+void vertex_remove_edge(Vertex* v, Edge* e) { ptr_array_rmv(v->edges, e); }
 
 /**********************************************************/
 
@@ -212,9 +212,9 @@ void graph_destroy_vertex(Graph* g, int iv)
     e  = v->edges->storage[i];
     ne = NEXT_VERTEX(v, e);
     vertex_remove_edge(ne, e);
-    ptr_array_remove(g->edges, e);
+    ptr_array_rmv(g->edges, e);
   }
-  ptr_array_remove(g->vertices, v);
+  ptr_array_rmv(g->vertices, v);
 }
 
 PtrArray* graph_minimum_spanning_tree(Graph* g)
@@ -234,7 +234,7 @@ PtrArray* graph_minimum_spanning_tree(Graph* g)
     ptr_array_add(E, v->edges->storage[i]);
   }
 
-  ptr_array_remove(O, v);
+  ptr_array_rmv(O, v);
   ptr_array_add(C, v);
 
   while (O->cnt > 0)
@@ -252,7 +252,7 @@ PtrArray* graph_minimum_spanning_tree(Graph* g)
 
     v = !ptr_array_contains(C, e->a) ? e->a : e->b;
     ptr_array_add(C, v);
-    ptr_array_remove(O, v);
+    ptr_array_rmv(O, v);
     for (int i = 0; i < v->edges->cnt; ++i)
     {
       Vertex* n = NEXT_VERTEX(v, v->edges->storage[i]);
@@ -267,7 +267,7 @@ PtrArray* graph_minimum_spanning_tree(Graph* g)
       while (i < E->cnt && ptr_array_contains(C, ((Edge*)E->storage[i])->a) &&
              ptr_array_contains(C, ((Edge*)E->storage[i])->b))
       {
-        ptr_array_swap_and_pop(E, i);
+        ptr_array_qrmv(E, i);
       }
     }
   }

@@ -1,3 +1,5 @@
+#include "ai/btt_follow_path.h"
+#include <ai/btt_find_player_location.h>
 #include <ai/btt_find_random_location.h>
 #include <ai/btt_move_to.h>
 #include <ai/btt_wait.h>
@@ -53,7 +55,6 @@ ecs_entity_t make_knight(Ecs* ecs)
   CharacterAction* act_input;
   Animator*        animator;
   HitBox*          hitbox;
-  CharacterStats*  stats;
   Motion*          motion;
   Heath*           heath;
 
@@ -90,10 +91,8 @@ ecs_entity_t make_knight(Ecs* ecs)
   hitbox->proxy_id             = NULL_NODE;
   hitbox->check_tile_collision = TRUE;
 
-  stats             = ecs_add(ecs, knight, CHARACTER_STATS);
-  stats->move_speed = 140.f;
-
-  motion = ecs_add(ecs, knight, MOTION);
+  motion            = ecs_add(ecs, knight, MOTION);
+  motion->max_speed = 100;
 
   heath                 = ecs_add(ecs, knight, HEATH);
   heath->hit_points     = 10;
@@ -109,17 +108,15 @@ ecs_entity_t make_huge_demon(Ecs* ecs)
   Animation    anims[NUM_ANIM_STATES];
 
   /*components */
-  Transform*       transform;
-  Visual*          visual;
-  CharacterAction* act_input;
-  Animator*        animator;
-  HitBox*          hitbox;
-  Heath*           heath;
-  HealBar*         healthBar;
-  Motion*          motion;
-  //CharacterStats*  stats;
-  Drop*            drop;
-  AIAgent*         ai_agent;
+  Transform* transform;
+  Visual*    visual;
+  Animator*  animator;
+  HitBox*    hitbox;
+  Heath*     heath;
+  HealBar*   healthBar;
+  Motion*    motion;
+  Drop*      drop;
+  AIAgent*   ai_agent;
 
   texture = get_texture(TEX_BIG_DEMON);
   animation_init(&anims[ANIM_STATE_HIT], texture, 32 * 6, 0, 1, 1, 32, 36);
@@ -132,27 +129,24 @@ ecs_entity_t make_huge_demon(Ecs* ecs)
   demon = ecs_create(ecs);
 
   transform = ecs_add(ecs, demon, TRANSFORM);
-  // transform->rot = 45.0;
 
   visual = ecs_add(ecs, demon, VISUAL);
 
   visual->anchor.x = 32 / 2;
   visual->anchor.y = 36 / 2;
 
-  act_input         = ecs_add(ecs, demon, CHARACTER_ACTION);
-  act_input->action = WEAPON_ACTION_NONE;
-
   animator = ecs_add(ecs, demon, ANIMATOR);
   animator_init(animator, anims, NUM_ANIM_STATES);
   animator->current_anim = ANIM_STATE_RUN;
   animator->elapsed      = 0;
 
-  hitbox            = ecs_add(ecs, demon, HITBOX);
-  hitbox->size      = VEC2(20.f, 36.f);
-  hitbox->anchor    = VEC2(10.f, 18.f);
-  hitbox->proxy_id  = NULL_NODE;
-  hitbox->mask_bits = BIT(CATEGORY_WEAPON) | BIT(CATEGORY_PROJECTILE);
-  hitbox->category  = CATEGORY_ENEMY;
+  hitbox                       = ecs_add(ecs, demon, HITBOX);
+  hitbox->size                 = VEC2(20.f, 36.f);
+  hitbox->anchor               = VEC2(10.f, 18.f);
+  hitbox->proxy_id             = NULL_NODE;
+  hitbox->mask_bits            = BIT(CATEGORY_WEAPON) | BIT(CATEGORY_PROJECTILE);
+  hitbox->category             = CATEGORY_ENEMY;
+  hitbox->check_tile_collision = TRUE;
 
   ecs_add(ecs, demon, ENEMY_TAG);
 
@@ -164,9 +158,8 @@ ecs_entity_t make_huge_demon(Ecs* ecs)
   healthBar->len    = 40;
   healthBar->anchor = (SDL_Point){ 20, 25 };
 
-  motion = ecs_add(ecs, demon, MOTION);
-
-  //stats = ecs_add(ecs, demon, CHARACTER_STATS);
+  motion            = ecs_add(ecs, demon, MOTION);
+  motion->max_speed = 60;
 
   drop          = ecs_add(ecs, demon, DROP);
   drop->item1   = ITEM_BIG_RED_FLASK;
@@ -174,9 +167,8 @@ ecs_entity_t make_huge_demon(Ecs* ecs)
   drop->change1 = 30;
   drop->change2 = 40;
 
-  ai_agent = ecs_add(ecs, demon, AI_AGENT);
-
-  /*buid behaviour tree*/
+  /*
+  buid behaviour tree
   bt_Repeater*            root;
   bt_Sequence*            sequence;
   btt_FindRandomLocation* find_location_task;
@@ -192,10 +184,137 @@ ecs_entity_t make_huge_demon(Ecs* ecs)
   bt_sequence_add(sequence, (bt_Node*)find_location_task);
   bt_sequence_add(sequence, (bt_Node*)move_to_task);
   bt_sequence_add(sequence, (bt_Node*)wait_task);
+  */
 
+  bt_Repeater*            root;
+  bt_Sequence*            sequence;
+  btt_FindPlayerLocation* find_player_location_task;
+  btt_FollowPath*         follow_path_task;
+  btt_Wait*               wait_task;
+
+  sequence                  = bt_sequence_new();
+  find_player_location_task = btt_find_player_location_new();
+  wait_task                 = btt_wait_new(180);
+  follow_path_task          = btt_follow_path_new();
+
+  bt_sequence_add(sequence, (bt_Node*)find_player_location_task);
+  bt_sequence_add(sequence, (bt_Node*)follow_path_task);
+  bt_sequence_add(sequence, (bt_Node*)wait_task);
+
+  root = bt_repeater_new((bt_Node*)sequence, -1);
+
+  ai_agent       = ecs_add(ecs, demon, AI_AGENT);
   ai_agent->root = (bt_Node*)root;
 
   return demon;
+}
+
+ecs_entity_t make_chort(Ecs* ecs)
+{
+  ecs_entity_t entity;
+  SDL_Texture* texture;
+  Animation    anims[NUM_ANIM_STATES];
+
+  /*components */
+  Transform* transform;
+  Visual*    visual;
+  Animator*  animator;
+  HitBox*    hitbox;
+  Heath*     heath;
+  HealBar*   healthBar;
+  Motion*    motion;
+  Drop*      drop;
+  AIAgent*   ai_agent;
+
+  texture = get_texture(TEX_CHORT);
+  animation_init(&anims[ANIM_STATE_HIT], texture, 16 * 6, 0, 1, 1, 16, 24);
+  animation_init(&anims[ANIM_STATE_IDLE], texture, 0, 0, 1, 4, 16, 24);
+  animation_init(&anims[ANIM_STATE_RUN], texture, 16 * 4, 0, 1, 4, 16, 24);
+
+  anims[ANIM_STATE_IDLE].frame_duration = 8;
+  anims[ANIM_STATE_RUN].frame_duration  = 6;
+
+  entity = ecs_create(ecs);
+
+  transform = ecs_add(ecs, entity, TRANSFORM);
+
+  visual = ecs_add(ecs, entity, VISUAL);
+
+  visual->anchor.x = 16 / 2;
+  visual->anchor.y = 24 / 2;
+
+  animator = ecs_add(ecs, entity, ANIMATOR);
+  animator_init(animator, anims, NUM_ANIM_STATES);
+  animator->current_anim = ANIM_STATE_RUN;
+  animator->elapsed      = 0;
+
+  hitbox                       = ecs_add(ecs, entity, HITBOX);
+  hitbox->size                 = VEC2(16.f, 10.f);
+  hitbox->anchor               = VEC2(8.f, 0.f);
+  hitbox->proxy_id             = NULL_NODE;
+  hitbox->mask_bits            = BIT(CATEGORY_WEAPON) | BIT(CATEGORY_PROJECTILE);
+  hitbox->category             = CATEGORY_ENEMY;
+  hitbox->check_tile_collision = TRUE;
+
+  ecs_add(ecs, entity, ENEMY_TAG);
+
+  heath                 = ecs_add(ecs, entity, HEATH);
+  heath->max_hit_points = 100;
+  heath->hit_points     = 100;
+
+  healthBar         = ecs_add(ecs, entity, HEAL_BAR);
+  healthBar->len    = 20;
+  healthBar->anchor = (SDL_Point){ 20, 25 };
+
+  motion            = ecs_add(ecs, entity, MOTION);
+  motion->max_speed = 70;
+
+  drop          = ecs_add(ecs, entity, DROP);
+  drop->item1   = ITEM_BIG_RED_FLASK;
+  drop->item2   = ITEM_RED_FLASK;
+  drop->change1 = 30;
+  drop->change2 = 40;
+
+  /*
+  buid behaviour tree
+  bt_Repeater*            root;
+  bt_Sequence*            sequence;
+  btt_FindRandomLocation* find_location_task;
+  btt_MoveTo*             move_to_task;
+  btt_Wait*               wait_task;
+
+  find_location_task = btt_find_random_location_new();
+  move_to_task       = btt_move_to_new();
+  wait_task          = btt_wait_new(120);
+  sequence           = bt_sequence_new();
+  root               = bt_repeater_new((bt_Node*)sequence, -1);
+
+  bt_sequence_add(sequence, (bt_Node*)find_location_task);
+  bt_sequence_add(sequence, (bt_Node*)move_to_task);
+  bt_sequence_add(sequence, (bt_Node*)wait_task);
+  */
+
+  bt_Repeater*            root;
+  bt_Sequence*            sequence;
+  btt_FindPlayerLocation* find_player_location_task;
+  btt_FollowPath*         follow_path_task;
+  btt_Wait*               wait_task;
+
+  sequence                  = bt_sequence_new();
+  find_player_location_task = btt_find_player_location_new();
+  wait_task                 = btt_wait_new(180);
+  follow_path_task          = btt_follow_path_new();
+
+  bt_sequence_add(sequence, (bt_Node*)find_player_location_task);
+  bt_sequence_add(sequence, (bt_Node*)follow_path_task);
+  bt_sequence_add(sequence, (bt_Node*)wait_task);
+
+  root = bt_repeater_new((bt_Node*)sequence, -1);
+
+  ai_agent       = ecs_add(ecs, entity, AI_AGENT);
+  ai_agent->root = (bt_Node*)root;
+
+  return entity;
 }
 
 ecs_entity_t make_axe(Ecs* ecs)

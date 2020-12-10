@@ -55,11 +55,11 @@ ecs_entity_t ecs_create(Ecs* self);
  * remove all component and destroy given entity
  */
 void  ecs_destroy(Ecs* self, ecs_entity_t entity);
-void* ecs_add(Ecs* self, ecs_entity_t entity, ecs_size_t component_type);
-void* ecs_add_w_data(Ecs* self, ecs_entity_t entity, ecs_size_t component_type, const void* data);
-void  ecs_rmv(Ecs* self, ecs_entity_t entity, ecs_size_t component_type);
-void* ecs_get(Ecs* self, ecs_entity_t entity, ecs_size_t component_type);
-BOOL  ecs_has(Ecs* self, ecs_entity_t entity, ecs_size_t component_type);
+void* ecs_add(Ecs* self, ecs_entity_t entity, ecs_size_t type_id);
+void* ecs_add_w_data(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const void* data);
+void  ecs_rmv(Ecs* self, ecs_entity_t entity, ecs_size_t type_id);
+void* ecs_get(Ecs* self, ecs_entity_t entity, ecs_size_t type_id);
+BOOL  ecs_has(Ecs* self, ecs_entity_t entity, ecs_size_t type_id);
 void  ecs_rmv_all(Ecs* self, ecs_entity_t entity);
 void  ecs_each(Ecs* self, void* user_data, ecs_each_fn_t each_fn);
 void  ecs_each_w_filter(Ecs*             self,

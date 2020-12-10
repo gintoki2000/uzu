@@ -1,6 +1,7 @@
 #ifndef COMPONENTS_H
 #define COMPONENTS_H
 #include "behaviour_tree.h"
+#include "path_finder.h"
 #include <ecs/ecs.h>
 #include <item.h>
 #include <toolbox/toolbox.h>
@@ -47,8 +48,10 @@ typedef enum
 
 typedef struct Motion
 {
-  Vec2 vel;
-  Vec2 acc;
+  Vec2  vel;
+  Vec2  acc;
+  float max_speed;
+  float max_force;
 } Motion;
 typedef struct Transform
 {
@@ -77,12 +80,6 @@ typedef struct CharacterAction
   int action;
 } CharacterAction;
 
-typedef struct CharacterStat
-{
-  float move_speed;
-  int   str;
-  int   mag;
-} CharacterStats;
 
 typedef struct Equipment
 {
@@ -132,6 +129,8 @@ typedef int EnemyTag;
 typedef int WeaponTag;
 
 typedef int CameraTargetTag;
+
+typedef int TileCollisionTag;
 
 typedef struct
 {
@@ -205,7 +204,12 @@ typedef struct
 //** BT Vars
 
 typedef Vec2 btv_MoveDestination;
-
+typedef struct
+{
+  pf_Node nodes[100];
+  int     cnt;
+  int     curr;
+} btv_Path;
 
 enum
 {
@@ -228,14 +232,13 @@ enum
   THUNDER_STRIKE,
   DAMAGE_OUTPUT,
   WEAPON_CORE,
-  CHARACTER_STATS,
   DROP,
   ITEM_TAG,
   INVULNERABLE,
   CAMERA_TARGET_TAG,
   AI_AGENT,
   BTV_MOVE_DESTINATION,
-  BTV_WAIT_TIME,
+  BTV_PATH,
   NUM_COMPONENTS
 };
 

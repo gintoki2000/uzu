@@ -29,7 +29,7 @@ void btt_wait_start(btt_Wait* self)
 
 void btt_wait_exec(btt_Wait* self, Ecs* ecs, ecs_entity_t entity)
 {
-  INFO("ticks: %d\n", self->ticks);
+  //INFO("ticks: %d\n", self->ticks);
   (void)ecs;
   (void)entity;
   --self->ticks;

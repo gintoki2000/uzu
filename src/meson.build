@@ -9,4 +9,4 @@ source_files = files('uzu.c',
   'resources.c', 
   'entity_factory.c',
   'map.c',
-  'inventory.c', 'graph.c', 'generator.c', 'behaviour_tree.c') + engine_source_files + ecs_source_files + toolbox_source_files + system_source_files + ui_source_files + btt_source_files
+  'inventory.c', 'graph.c', 'generator.c', 'behaviour_tree.c', 'path_finder.c') + engine_source_files + ecs_source_files + toolbox_source_files + system_source_files + ui_source_files + btt_source_files

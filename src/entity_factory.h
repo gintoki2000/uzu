@@ -7,6 +7,7 @@ ecs_entity_t make_anime_sword(Ecs* ecs);
 ecs_entity_t make_axe(Ecs* ecs);
 ecs_entity_t make_knight(Ecs* ecs);
 ecs_entity_t make_huge_demon(Ecs* ecs);
+ecs_entity_t make_chort(Ecs* ecs);
 ecs_entity_t make_blood_stain_effect(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_bow(Ecs* ecs);
 ecs_entity_t make_arrow(Ecs* ecs, Vec2 pos, Vec2 vel);

@@ -26,8 +26,8 @@ void ecs_del(Ecs* ecs)
 Ecs* ecs_init(Ecs* self, const EcsType* types, ecs_size_t cnt)
 {
   self->type_cnt = cnt;
-  self->types = malloc(cnt * sizeof(EcsType));
-  self->pools = calloc(cnt, sizeof(void*));
+  self->types    = malloc(cnt * sizeof(EcsType));
+  self->pools    = calloc(cnt, sizeof(void*));
   memcpy(self->types, types, cnt * sizeof(EcsType));
   for (int i = 0; i < cnt; ++i)
   {
@@ -63,61 +63,73 @@ void ecs_destroy(Ecs* self, ecs_entity_t entity)
   ecs_entity_pool_free_ent(&self->entity_pool, entity);
 }
 
-void* ecs_add(Ecs* self, ecs_entity_t entity, ecs_size_t component_type)
+void* ecs_add(Ecs* self, ecs_entity_t entity, ecs_size_t type_id)
 {
-  ASSERT(component_type < self->type_cnt && "invalid type");
+  ASSERT(type_id < self->type_cnt && "invalid type");
   ASSERT(ecs_is_valid(self, entity) && "invalid entity");
   void*          component;
   const EcsType* type;
+  EcsPool*       pool;
 
-  ecs_pool_add(get_pool(self, component_type), entity);
-  component = ecs_pool_get(get_pool(self, component_type), entity);
-  type = &self->types[component_type];
-  if (type->init_fn != NULL)
-    type->init_fn(component);
-  return component;
+  pool = self->pools[type_id];
+  if (ecs_pool_add(pool, entity))
+  {
+    component = ecs_pool_get(pool, entity);
+    type      = &self->types[type_id];
+    if (type->init_fn != NULL)
+      type->init_fn(component);
+    return component;
+  }
+  return ecs_pool_get(pool, entity);
 }
 
-void ecs_rmv(Ecs* self, ecs_entity_t entity, ecs_size_t component_type)
+void ecs_rmv(Ecs* self, ecs_entity_t entity, ecs_size_t type_id)
 {
-  ASSERT(component_type < self->type_cnt && "invalid type");
+  ASSERT(type_id < self->type_cnt && "invalid type");
   ASSERT(ecs_is_valid(self, entity) && "invalid entity");
 
   void*    component;
   EcsPool* pool;
 
-  pool = get_pool(self, component_type);
+  pool = get_pool(self, type_id);
 
-  component = ecs_pool_get(pool, entity);
-  EcsComponentEvent event = (EcsComponentEvent){
-    .entity = entity,
-    .type = component_type,
-    .component = component,
-  };
-  dispatcher_emit(self->dispatcher, ECS_SIG_COMP_RMV, &event);
-  ecs_pool_rmv(pool, entity);
+  if ((component = ecs_pool_get(pool, entity)) != NULL)
+  {
+    EcsComponentEvent event = (EcsComponentEvent){
+      .entity    = entity,
+      .type      = type_id,
+      .component = component,
+    };
+    dispatcher_emit(self->dispatcher, ECS_SIG_COMP_RMV, &event);
+    ecs_pool_rmv(pool, entity);
+  }
 }
 
 void ecs_rmv_all(Ecs* self, ecs_entity_t entity)
 {
-  EcsPool* ppool;
-  void*    component;
   ASSERT(ecs_is_valid(self, entity) && "invalid entity");
+  EcsPool*       ppool;
+  void*          component;
+  const EcsType* types;
+  EcsPool**      pools;
 
+  types = self->types;
+  pools = self->pools;
   for (int i = 0; i < self->type_cnt; ++i)
   {
-    ppool = self->pools[i];
-    if (ecs_pool_contains(ppool, entity))
+    ppool = pools[i];
+    if ((component = ecs_pool_get(ppool, entity)) != NULL)
     {
       component = ecs_pool_get(ppool, entity);
-      EcsComponentEvent event = (EcsComponentEvent){
-        .entity = entity,
-        .type = i,
-        .component = component,
-      };
-      dispatcher_emit(self->dispatcher, ECS_SIG_COMP_RMV, &event);
-      if (self->types[i].fini_fn != NULL)
-        self->types[i].fini_fn(component);
+      dispatcher_emit(self->dispatcher,
+                      ECS_SIG_COMP_RMV,
+                      &(EcsComponentEvent){
+                          .entity    = entity,
+                          .type      = i,
+                          .component = component,
+                      });
+      if (types[i].fini_fn != NULL)
+        types[i].fini_fn(component);
       ecs_pool_rmv(ppool, entity);
     }
   }
@@ -135,7 +147,7 @@ void ecs_each(Ecs* self, void* user_data, ecs_each_fn_t each_fn)
   ecs_size_t    size;
   ecs_entity_t* entities;
 
-  size = self->entity_pool.size;
+  size     = self->entity_pool.size;
   entities = self->entity_pool.entities;
   if (self->entity_pool.destroyed_index == ECS_NULL_IDX)
   {
@@ -168,21 +180,21 @@ void ecs_each_w_filter(Ecs*             self,
   SDL_bool      match;
 
   pool_cnt = self->type_cnt;
-  pools = self->pools;
+  pools    = self->pools;
 
   /**
    * tìm ra pool chứa ít phần tử nhất trong danh sách type
    * việc này giúp chúng giảm tối đa việc duyệt và so khớp nhất có thể
    */
   min_pool = pools[filter->required[0]];
-  min_cnt = ecs_pool_cnt(min_pool);
+  min_cnt  = ecs_pool_cnt(min_pool);
 
   for (int ti = 1; ti < filter->rcnt; ++ti)
   {
     tp = pools[filter->required[ti]];
     if (ecs_pool_cnt(tp) < min_cnt)
     {
-      min_cnt = ecs_pool_cnt(tp);
+      min_cnt  = ecs_pool_cnt(tp);
       min_pool = tp;
     }
   }
@@ -192,13 +204,13 @@ void ecs_each_w_filter(Ecs*             self,
    * từng entity trong pool có khớp với tập component đầu vào hay không
    * nếu có thì lấy component tương ứng và đưa vào mảng tạm và gọi callback
    */
-  entities = min_pool->dense.entities;
+  entities   = min_pool->dense.entities;
   entity_cnt = min_pool->dense.cnt;
 
   for (int ei = 0; ei < entity_cnt; ++ei)
   {
 
-    te = entities[ei];
+    te    = entities[ei];
     match = SDL_TRUE;
     for (int ti = 0; ti < filter->rcnt; ++ti)
     {
@@ -244,11 +256,11 @@ void ecs_data(Ecs*           self,
     *cnt_ptr = self->pools[type]->dense.cnt;
 }
 
-SDL_bool ecs_has(Ecs* self, ecs_entity_t entity, ecs_size_t component_type)
+SDL_bool ecs_has(Ecs* self, ecs_entity_t entity, ecs_size_t type_id)
 {
-  ASSERT(component_type < self->type_cnt && "invalid type");
+  ASSERT(type_id < self->type_cnt && "invalid type");
   ASSERT(ecs_is_valid(self, entity) && "invalid entity");
-  return ecs_pool_contains(self->pools[component_type], entity);
+  return ecs_pool_contains(self->pools[type_id], entity);
 }
 
 void ecs_connect(Ecs* self, int sig, void* udata, slot_t handler)

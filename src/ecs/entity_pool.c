@@ -1,16 +1,15 @@
 #include "entity_pool.h"
 #include "common.h"
-#include <SDL2/SDL_assert.h>
 #include <stdlib.h>
 
 #define ECS_ENTITY_POOL_DEFAULT_SIZE 16
 
 EcsEntityPool* ecs_entity_pool_init(EcsEntityPool* self)
 {
-  self->cnt = 0;
-  self->size = ECS_ENTITY_POOL_DEFAULT_SIZE;
+  self->cnt             = 0;
+  self->size            = ECS_ENTITY_POOL_DEFAULT_SIZE;
   self->destroyed_index = 0;
-  self->entities = malloc(ECS_ENTITY_POOL_DEFAULT_SIZE * sizeof(ecs_entity_t));
+  self->entities        = malloc(ECS_ENTITY_POOL_DEFAULT_SIZE * sizeof(ecs_entity_t));
 
   for (int i = 0; i < ECS_ENTITY_POOL_DEFAULT_SIZE - 1; ++i)
   {
@@ -20,13 +19,7 @@ EcsEntityPool* ecs_entity_pool_init(EcsEntityPool* self)
   return self;
 }
 
-void ecs_entity_pool_fini(EcsEntityPool* self)
-{
-  if (self != NULL)
-  {
-    free(self->entities);
-  }
-}
+void ecs_entity_pool_fini(EcsEntityPool* self) { free(self->entities); }
 
 ecs_entity_t ecs_entity_pool_alloc_ent(EcsEntityPool* self)
 {
@@ -43,13 +36,13 @@ ecs_entity_t ecs_entity_pool_alloc_ent(EcsEntityPool* self)
       self->entities[i] = ECS_ENT(i + 1, 0);
     }
     self->entities[self->size - 1] = ECS_ENT(ECS_NULL_IDX, 0);
-    self->destroyed_index = old_size;
+    self->destroyed_index          = old_size;
   }
 
-  idx = self->destroyed_index;
-  ver = ECS_ENT_VER(self->entities[idx]);
+  idx                   = self->destroyed_index;
+  ver                   = ECS_ENT_VER(self->entities[idx]);
   self->destroyed_index = ECS_ENT_IDX(self->entities[idx]);
-  self->entities[idx] = ECS_ENT(idx, ver);
+  self->entities[idx]   = ECS_ENT(idx, ver);
 
   return ECS_ENT(idx, ver);
 }
@@ -63,6 +56,5 @@ void ecs_entity_pool_free_ent(EcsEntityPool* self, ecs_entity_t e)
   ent_idx = ECS_ENT_IDX(e);
 
   self->entities[ent_idx] = ECS_ENT(self->destroyed_index, ent_ver + 1);
-  self->destroyed_index = ent_idx;
+  self->destroyed_index   = ent_idx;
 }
-

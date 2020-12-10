@@ -60,14 +60,14 @@ typedef struct
 
 #define ABS(__x) ((__x) > 0 ? (__x) : -(__x))
 
-typedef enum
-{
-  ORIENTATION_NONE,
-  ORIENTATION_UP,
-  ORIENTATION_DOWN,
-  ORIENTATION_LEFT,
-  ORIENTATION_RIGHT
-} orientation_t;
+#define SWAP(__a, __b)                                                                             \
+  do                                                                                               \
+  {                                                                                                \
+    typeof(__a) __tmp = (__a);                                                                     \
+    __a               = __b;                                                                       \
+    __b               = __tmp;                                                                     \
+  } while (0)
+
 
 typedef struct
 {
@@ -113,6 +113,21 @@ INLINE float normalizev(Vec2* v)
   v->x *= ivlen;
   v->y *= ivlen;
   return len;
+}
+
+INLINE Vec2 normv(Vec2 v)
+{
+  float len   = lengthv(v);
+  float ivlen = 1.f / len;
+  return VEC2(v.x * ivlen, v.y * ivlen);
+}
+
+INLINE Vec2 truncatev(Vec2 v, float max_len) {
+  if (lengthv(v) > max_len)
+  {
+    return mulv(normv(v), max_len); 
+  }
+  return v;
 }
 
 INLINE bool aabb_test_overlap(const AABB* a, const AABB* b)

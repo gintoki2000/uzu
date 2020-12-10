@@ -19,6 +19,7 @@ typedef enum
   TEX_FLASK_RED_BIG,
   TEX_FLASK_RED,
   TEX_PLAYER_HEALTH_BAR,
+  TEX_CHORT,
   NUM_TEXS
 } TextureId;
 

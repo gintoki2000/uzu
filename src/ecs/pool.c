@@ -1,6 +1,5 @@
 #include "pool.h"
 #include "ecs/common.h"
-#include <SDL2/SDL_assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -109,12 +108,12 @@ void ecs_pool_fini(EcsPool* self)
   }
 }
 
-void ecs_pool_add(EcsPool* self, ecs_entity_t e)
+BOOL ecs_pool_add(EcsPool* self, ecs_entity_t e)
 {
   ecs_size_t idx = ECS_ENT_IDX(e);
 
   if (ECS_POOL_CONTAINS_W_EIDX(self, idx))
-    return;
+    return FALSE;
   if (idx >= self->sparse.size)
     realloc_sparse_array(self, idx + 1);
 
@@ -124,6 +123,7 @@ void ecs_pool_add(EcsPool* self, ecs_entity_t e)
   self->sparse.data[idx] = self->dense.cnt++;
   self->dense.entities[self->dense.cnt - 1] = e;
   memset(ECS_POOL_DATA_OFFSET(self, self->dense.cnt - 1), 0, self->type_size);
+  return TRUE;
 }
 
 void ecs_pool_rmv(EcsPool* self, ecs_entity_t e)
@@ -132,11 +132,11 @@ void ecs_pool_rmv(EcsPool* self, ecs_entity_t e)
 
   eidx = ECS_ENT_IDX(e);
 
-  SDL_assert(eidx < self->sparse.size && "this pool does not contains given entity");
+  ASSERT(eidx < self->sparse.size && "this pool does not contains given entity");
 
   cidx = self->sparse.data[eidx];
 
-  SDL_assert(cidx != ECS_NULL_IDX && "this pool does not contains given entity");
+  ASSERT(cidx != ECS_NULL_IDX && "this pool does not contains given entity");
 
   last_cidx = self->dense.cnt - 1;
   ecs_pool_swp_internal(self, cidx, last_cidx);

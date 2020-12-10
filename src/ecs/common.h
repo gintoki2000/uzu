@@ -8,7 +8,6 @@ typedef uint16_t ecs_size_t;
 
 typedef void (*ecs_comp_init_fn_t)(void*);
 typedef void (*ecs_comp_fini_fn_t)(void*);
-typedef void (*ecs_comp_init_ex_fn_t)(void*, const void*);
 
 typedef struct EcsType
 {
@@ -28,14 +27,6 @@ typedef struct EcsType
 #define ECS_ENT_IDX(e) (((e) >> ECS_ENT_IDX_SHIFT) & ECS_SIZE_MAX)
 #define ECS_ENT_VER(e) (((e) >> ECS_ENT_VER_SHIFT) & ECS_SIZE_MAX)
 #define ECS_ENT(idx, ver) (((idx) << ECS_ENT_IDX_SHIFT) | ((ver) << ECS_ENT_VER_SHIFT))
-
-#define ECS_TYPE_FULL(_T, _init_fn, _fini_fn, _user_data)                                          \
-  (EcsType)                                                                                        \
-  {                                                                                                \
-    .init_fn = _init_fn, .fini_fn = _fini_fn, .user_data = _user_data, .size = sizeof(_T)          \
-  }
-#define ECS_TYPE(_T)                                                                               \
-  (EcsType) { .size = sizeof(_T) }
 
 #define ECS_ENT_FMT_PATTERN "[%4u | %4u]"
 #define ECS_ENT_FMT_VARS(_ent) ECS_ENT_IDX(_ent), ECS_ENT_VER(_ent)

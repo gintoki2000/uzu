@@ -8,11 +8,16 @@ void CameraFollowingSystem(Ecs *ecs)
   ecs_size_t cnt;
   Transform* transform;
 
+  Vec2 target;
+
+
   ecs_data(ecs, CAMERA_TARGET_TAG, &entities, NULL, &cnt);
 
   if (cnt > 0 && (transform = ecs_get(ecs, entities[0], TRANSFORM)))
   {
-    g_viewport.x = transform->pos.x - g_viewport.w / 2;
-    g_viewport.y = transform->pos.y - g_viewport.h / 2;
+    target.x = transform->pos.x - g_viewport.w / 2; 
+    target.y = transform->pos.y - g_viewport.h / 2;
+    g_viewport.x += (target.x - g_viewport.x) * 0.1f;
+    g_viewport.y += (target.y - g_viewport.y) * 0.1f;
   }
 }

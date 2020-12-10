@@ -27,7 +27,7 @@ static btt_MoveTo* btt_move_to_init(btt_MoveTo* self)
 
 void btt_move_to_exec(btt_MoveTo* self, Ecs* ecs, ecs_entity_t entity)
 {
-  INFO("executing...\n");
+  // INFO("executing...\n");
   Motion*              motion;
   Transform*           transform;
   btv_MoveDestination* destination;
@@ -36,40 +36,36 @@ void btt_move_to_exec(btt_MoveTo* self, Ecs* ecs, ecs_entity_t entity)
   if (destination == NULL)
   {
     INFO("there is no destination\n");
-    bt_node_set_fail(self);
-    return;
+    bt_finish_exec(self, BT_STATUS_FAILURE);
   }
 
   if ((motion = ecs_get(ecs, entity, MOTION)) && (transform = ecs_get(ecs, entity, TRANSFORM)))
-  {
+  { 
 
+    Vec2 steer;
     Vec2 desired = subv(*destination, transform->pos);
     int  d       = lengthv(desired);
-    /*INFO("vel=(%1.f, %1.f) acc=(%1.f, %1.f)\n",
-         motion->vel.x,
-         motion->vel.y,
-         motion->acc.x,
-         motion->acc.y);
-         */
+    normalizev(&desired);
     if (d < 50)
     {
       motion->vel = VEC2_ZERO;
       motion->acc = VEC2_ZERO;
-      bt_node_set_stt(self, BT_STATUS_SUCCESS);
+      ecs_rmv(ecs, entity, BTV_MOVE_DESTINATION);
+      bt_finish_exec(self, BT_STATUS_SUCCESS);
     }
     else
     {
-      normalizev(&desired);
-      desired    = mulv(desired, MAX_SPEED);
-      Vec2 steer = subv(desired, motion->vel);
+      desired = mulv(desired, MAX_SPEED);
+      steer   = subv(desired, motion->vel);
+      steer   = truncatev(steer, MAX_FORCE);
       motion->acc.x += steer.x;
       motion->acc.y += steer.y;
+      bt_finish_exec(self, BT_STATUS_RUNNING);
     }
   }
   else
   {
     INFO("e" ECS_ENT_FMT_PATTERN " is not moveable object\n", ECS_ENT_FMT_VARS(entity));
-    bt_node_set_fail(self);
-    return;
+    bt_finish_exec(self, BT_STATUS_FAILURE);
   }
 }

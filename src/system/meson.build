@@ -23,4 +23,5 @@ system_source_files = files(
   ,'ai_system.c'
   ,'animator_controller_system.c'
   ,'draw_target.c'
+  ,'debug/draw_path.c'
 )

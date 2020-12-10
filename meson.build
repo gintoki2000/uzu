@@ -6,7 +6,12 @@ subdir('src')
 
 project_name = 'uzu'
 incdirs = include_directories('src')
-deps = [dependency('SDL2', required: true), dependency('SDL2_image', required: true), dependency('SDL2_mixer', required: true)]
+deps = [
+  dependency('SDL2', required: true), 
+  dependency('SDL2_image', required: true), 
+  dependency('SDL2_mixer', required: true), 
+  dependency('cglm')
+]
 
 executable(project_name, source_files, 
   include_directories: incdirs,

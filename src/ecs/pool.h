@@ -1,7 +1,7 @@
 #ifndef ECS_POOL_H
 #define ECS_POOL_H
 #include "common.h"
-#include <SDL2/SDL.h>
+#include <toolbox/toolbox.h>
 
 typedef struct EcsPool
 {
@@ -28,7 +28,7 @@ void     ecs_pool_del(EcsPool* pool);
 EcsPool* ecs_pool_init(EcsPool* self, ecs_size_t type_size);
 void     ecs_pool_fini(EcsPool* self);
 
-void  ecs_pool_add(EcsPool* self, ecs_entity_t e);
+BOOL  ecs_pool_add(EcsPool* self, ecs_entity_t e);
 void  ecs_pool_rmv(EcsPool* self, ecs_entity_t e);
 void* ecs_pool_get(EcsPool* self, ecs_entity_t e);
 void  ecs_pool_swp(EcsPool* self, ecs_entity_t e1, ecs_entity_t e2);

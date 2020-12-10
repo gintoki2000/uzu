@@ -21,11 +21,11 @@ PtrArray* ptr_array_init_w_array(PtrArray* self, destroy_fn_t destroy_fn, pointe
 void      ptr_array_fini(PtrArray* self);
 
 pointer_t ptr_array_add(PtrArray* self, pointer_t p);
-BOOL      ptr_array_remove(PtrArray* self, pointer_t p);
-void      ptr_array_remove_idx(PtrArray* self, u32 idx);
-void      ptr_array_swap_and_pop(PtrArray* self, u32 idx);
+BOOL      ptr_array_rmv(PtrArray* self, pointer_t p);
+void      ptr_array_rmv_idx(PtrArray* self, u32 idx);
+void      ptr_array_qrmv(PtrArray* self, u32 idx);
 
-int  ptr_array_index_of(PtrArray* self, pointer_t p);
+int  ptr_array_idx_of(PtrArray* self, pointer_t p);
 BOOL ptr_array_contains(PtrArray* self, pointer_t p);
 
 void ptr_array_reserve(PtrArray* self, u32 n);

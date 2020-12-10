@@ -24,6 +24,13 @@ typedef struct bt_NodeVtbl
   bt_start_fn_t start;
 } bt_NodeVtbl;
 
+#define BT_DEF_NODE_VTBL(__cname, __fini_fn, __start_fn, __exec_fn)                                \
+  static bt_NodeVtbl __cname = {                                                                   \
+    .fini  = (destroy_fn_t)__fini_fn,                                                              \
+    .start = (bt_start_fn_t)__start_fn,                                                            \
+    .exec  = (bt_exec_fn_t)__exec_fn,                                                              \
+  }
+
 typedef struct bt_Node
 {
   const bt_NodeVtbl* vtbl;
@@ -43,6 +50,13 @@ typedef struct bt_Node
 #define bt_node_set_succesed(__self) (bt_node_set_stt(__self, BT_STATUS_SUCCESS))
 #define bt_node_set_fail(__self) (bt_node_set_stt(__self, BT_STATUS_FAILURE))
 #define bt_node_set_running(__self) (bt_node_set_stt(__self, BT_STATUS_RUNNING))
+
+#define bt_finish_exec(__self, __stt)                                                              \
+  do                                                                                               \
+  {                                                                                                \
+    bt_node_set_stt(__self, __stt);                                                                \
+    return;                                                                                        \
+  } while (0)
 
 void     bt_node_del(bt_Node* node);
 bt_Node* bt_node_init(bt_Node* self);

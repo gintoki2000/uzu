@@ -17,6 +17,7 @@ void MotionSystem(Ecs* ecs)
   {
     motion_ls[i].vel.x += motion_ls[i].acc.x * DT;
     motion_ls[i].vel.y += motion_ls[i].acc.y * DT;
+    motion_ls[i].vel = truncatev(motion_ls[i].vel, 100);
     motion_ls[i].acc = VEC2_ZERO;
   }
 

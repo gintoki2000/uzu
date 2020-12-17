@@ -3,7 +3,7 @@
 #include <constances.h>
 extern SDL_Rect g_viewport;
 
-void DrawPath(Ecs* ecs, SDL_Renderer* renderer)
+void dbsys_path_update(Ecs* ecs, SDL_Renderer* renderer)
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;
@@ -11,7 +11,6 @@ void DrawPath(Ecs* ecs, SDL_Renderer* renderer)
   int           x1, y1, x2, y2;
 
   ecs_data(ecs, BTV_PATH, &entities, (void**)&paths, &cnt);
-  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
   for (int i = 0; i < cnt; ++i)
   {
@@ -22,6 +21,11 @@ void DrawPath(Ecs* ecs, SDL_Renderer* renderer)
 
       x2 = (paths[i].nodes[j + 1].x + 0.5) * TILE_SIZE - g_viewport.x;
       y2 = (paths[i].nodes[j + 1].y + 0.5) * TILE_SIZE - g_viewport.y;
+
+      if (j == paths[i].curr)
+        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+      else
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
       SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
     }
   }

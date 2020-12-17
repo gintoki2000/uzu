@@ -19,6 +19,7 @@ static const char*  _texture_files[NUM_TEXS] = {
   [TEX_FLASK_RED_BIG]     = "asserts/flask_big_red.png",
   [TEX_PLAYER_HEALTH_BAR] = "asserts/player_health_bar.png",
   [TEX_CHORT]             = "asserts/chort.png",
+  [TEX_CLEAVER]           = "asserts/weapon_cleaver.png",
 };
 
 static Mix_Music*  _bg_musics[NUM_BG_MUSICS];
@@ -117,8 +118,17 @@ void resources_unload()
   }
 }
 
-SDL_Texture* get_texture(int texture_id) { return _textures[texture_id]; }
+SDL_Texture* get_texture(int texture_id)
+{
+  return _textures[texture_id];
+}
 
-Mix_Music* get_bg_mus(BgMusId id) { return _bg_musics[id]; }
+Mix_Music* get_bg_mus(BgMusId id)
+{
+  return _bg_musics[id];
+}
 
-Mix_Chunk* get_sfx(SfxId id) { return _sfx[id]; }
+Mix_Chunk* get_sfx(SfxId id)
+{
+  return _sfx[id];
+}

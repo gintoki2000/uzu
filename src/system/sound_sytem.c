@@ -5,10 +5,6 @@
 
 static void on_get_damage(Ecs* ecs, const SysEvt_GetDamaged* event)
 {
-  if (event->type == DAMAGE_TYPE_STRIKE)
-  {
-    Mix_PlayChannel(-1, get_sfx(SFX_SWORD_HIT), 0);
-  };
 }
 
 void sound_system_init(Ecs *ecs)

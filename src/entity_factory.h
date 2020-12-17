@@ -5,6 +5,7 @@
 
 ecs_entity_t make_anime_sword(Ecs* ecs);
 ecs_entity_t make_axe(Ecs* ecs);
+ecs_entity_t make_cleaver(Ecs* ecs, u16 mask_bits);
 ecs_entity_t make_knight(Ecs* ecs);
 ecs_entity_t make_huge_demon(Ecs* ecs);
 ecs_entity_t make_chort(Ecs* ecs);

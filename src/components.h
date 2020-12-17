@@ -14,19 +14,12 @@ typedef enum
   RIGHT
 } Direction;
 
-enum
-{
-  WEAPON_ACTION_NONE,
-  WEAPON_ACTION_REGULAR_ATK,
-  WEAPON_ACTION_SPECIAL_ATK
-};
-
-enum
+typedef enum
 {
   CHARACTER_ACTION_NONE,
   CHARACTER_ACTION_REGULAR_ATK,
   CHARACTER_ACTION_SPECIAL_ATK,
-};
+} CharacterAction;
 
 enum
 {
@@ -45,6 +38,52 @@ typedef enum
   DAMAGE_TYPE_FIRE,
   DAMAGE_TYPE_LIGHTNING,
 } DamageType;
+
+typedef enum
+{
+  ENEMY_TYPE_HUGE_DEMON,
+  ENEMY_TYPE_CHORT,
+} EnemyType;
+
+typedef enum
+{
+  ANIM_STATE_IDLE,
+  ANIM_STATE_RUN,
+  ANIM_STATE_HIT,
+  NUM_ANIM_STATES,
+} AnimationState;
+
+typedef enum
+{
+  TRANSFORM,
+  VISUAL,
+  MOTION,
+  ANIMATOR,
+  CONTROLLER,
+  EQUIPMENT,
+  WEAPON_ACTION,
+  HEATH,
+  HITBOX,
+  PROJECTILE,
+  HEAL_BAR,
+  LIFE_SPAN,
+  TAG_TO_BE_DESTROYED,
+  WEAPON_SKILL_SWING,
+  WEAPON_SKILL_CHARGE,
+  DAMAGE_OUTPUT,
+  WEAPON_CORE,
+  DROP,
+  ITEM_TAG,
+  INVULNERABLE,
+  ENEMY_TAG,
+  PLAYER_TAG,
+  CAMERA_TARGET_TAG,
+  TILE_COLLISION_TAG,
+  AI_AGENT,
+  BTV_MOVE_DESTINATION,
+  BTV_PATH,
+  NUM_COMPONENTS
+} ComponentId;
 
 typedef struct Motion
 {
@@ -74,42 +113,49 @@ typedef struct Animation
   SpriteSheet sheet;
 } Animation;
 
-typedef struct CharacterAction
+typedef struct Controller
 {
-  int desired_dir;
-  int action;
-} CharacterAction;
-
+  Direction desired_dir;
+  Vec2      desired_vel;
+  int       action;
+  BOOL      in_action;
+  BOOL      lock_dir;
+  BOOL      lock_movement;
+} Controller;
 
 typedef struct Equipment
 {
-  ecs_entity_t rhand;
+  ecs_entity_t weapon;
+  Vec2         weapon_anchor;
 } Equipment;
 
 typedef struct WeponBase
 {
-  s32         atk;
-  const char* name;
-  BOOL        in_action;
+  ecs_entity_t wearer;
+  s32          atk;
+  const char*  name;
 } WeaponCore;
 
-typedef struct Swingable
+/*Weapon skills*/
+typedef struct wpskl_Swing
+{
+  CharacterAction on_action;
+  int             timer;
+  int             step;
+  BOOL            is_active;
+} wpskl_Swing;
+
+typedef struct wpskl_Charge
 {
   int  on_action;
   int  timer;
-  int  step;
   BOOL is_active;
-} Swingable;
+} wpskl_Charge;
 
-typedef struct Thustable
+typedef struct wpskl_Thust
 {
   int on_action;
-} Thustable;
-
-typedef struct ThunderStrike
-{
-  int on_action;
-} ThundeStrike;
+} wpskl_Thust;
 
 typedef struct DamageOutput
 {
@@ -117,11 +163,7 @@ typedef struct DamageOutput
   int type;
 } DamageOutput;
 
-typedef struct WeaponAction
-{
-  int action;
-} WeaponAction;
-
+/*entity tag*/
 typedef int PlayerTag;
 
 typedef int EnemyTag;
@@ -132,12 +174,14 @@ typedef int CameraTargetTag;
 
 typedef int TileCollisionTag;
 
+typedef int ProjectileTag;
+
+typedef int TagToBeDestroyed;
+
 typedef struct
 {
   ItemId item_id;
 } ItemTag;
-
-typedef int ProjectileTag;
 
 typedef struct Projectile
 {
@@ -168,13 +212,13 @@ typedef struct HitBox
   BOOL check_tile_collision;
 } HitBox;
 
-typedef struct HealBar
+typedef struct HealthBar
 {
   int       len; // in pixel
   SDL_Color color;
   SDL_Color border;
   SDL_Point anchor;
-} HealBar;
+} HealthBar;
 
 typedef struct LifeSpan
 {
@@ -188,8 +232,6 @@ typedef struct
   int    change1;
   int    change2;
 } Drop;
-
-typedef int TagToBeDestroyed;
 
 typedef struct
 {
@@ -206,49 +248,10 @@ typedef struct
 typedef Vec2 btv_MoveDestination;
 typedef struct
 {
-  pf_Node nodes[100];
-  int     cnt;
-  int     curr;
+  Vec2i nodes[100];
+  int   cnt;
+  int   curr;
 } btv_Path;
-
-enum
-{
-  TRANSFORM,
-  VISUAL,
-  MOTION,
-  PLAYER_TAG,
-  ANIMATOR,
-  CHARACTER_ACTION,
-  EQUIPMENT,
-  WEAPON_ACTION,
-  HEATH,
-  HITBOX,
-  ENEMY_TAG,
-  PROJECTILE,
-  HEAL_BAR,
-  LIFE_SPAN,
-  TAG_TO_BE_DESTROYED,
-  SWINGABLE,
-  THUNDER_STRIKE,
-  DAMAGE_OUTPUT,
-  WEAPON_CORE,
-  DROP,
-  ITEM_TAG,
-  INVULNERABLE,
-  CAMERA_TARGET_TAG,
-  AI_AGENT,
-  BTV_MOVE_DESTINATION,
-  BTV_PATH,
-  NUM_COMPONENTS
-};
-
-typedef enum
-{
-  ANIM_STATE_IDLE,
-  ANIM_STATE_RUN,
-  ANIM_STATE_HIT,
-  NUM_ANIM_STATES,
-} AnimationState;
 
 Animation*
 animation_init(Animation* anim, SDL_Texture* tex, u32 x, u32 y, u32 row, u32 col, u32 sw, u32 sh);

@@ -19,32 +19,33 @@
 #include <engine/engine.h>
 #include <engine/keyboard.h>
 
-#include <system/action_execution_system.h>
+#include "system/animator_ctl_sys.h"
+#include "system/animator_sys.h"
+#include "system/camera_sys.h"
+#include "system/collision_mgr_sys.h"
+#include "system/collision_sys.h"
+#include "system/dmg_sys.h"
+#include "system/draw_sys.h"
+#include "system/health_bar_drawing_sys.h"
+#include "system/health_sys.h"
+#include "system/late_destroying_sys.h"
+#include "system/life_span_sys.h"
+#include "system/motion_sys.h"
+#include "system/pickup_sys.h"
+#include "system/player_ctl_sys.h"
+#include "system/tile_collision_sys.h"
 #include <system/ai_system.h>
-#include <system/animator_controller_system.h>
-#include <system/animator_system.h>
-#include <system/camera_following_system.h>
-#include <system/collision_filter.h>
-#include <system/collision_system.h>
-#include <system/draw_system.h>
-#include <system/draw_target.h>
-#include <system/drawing_heal_bar.h>
-#include <system/drawing_hitbox_system.h>
 #include <system/drop_system.h>
-#include <system/health_system.h>
-#include <system/late_destroying_system.h>
-#include <system/life_span_system.h>
-#include <system/map_collision_system.h>
 #include <system/mediator.h>
-#include <system/motion_system.h>
-#include <system/pickup_system.h>
-#include <system/player_controller_system.h>
-#include <system/sound_sytem.h>
-#include <system/swinging_system.h>
-#include <system/sync_eqm_system.h>
-#include <system/weapon_dealing_damage_system.h>
+#include <system/equipment_sys.h>
 
+#include "system/debug/draw_hitbox.h"
+#include "system/debug/draw_target.h"
 #include <system/debug/draw_path.h>
+#include <system/debug/draw_position.h>
+
+#include <system/weapon_skill/charge.h>
+#include <system/weapon_skill/swing.h>
 
 #include <ui/health_bar.h>
 
@@ -63,7 +64,7 @@ static void swpan_player()
   ecs_entity_t player;
   Transform*   tx;
 
-  player = make_player(_ecs, make_knight(_ecs), make_golden_sword(_ecs, BIT(CATEGORY_ENEMY)));
+  player = make_player(_ecs, make_knight(_ecs), make_cleaver(_ecs, BIT(CATEGORY_ENEMY)));
 
   tx        = ecs_get(_ecs, player, TRANSFORM);
   tx->pos.x = WIN_WIDTH / 2;
@@ -80,11 +81,10 @@ static void swpan_enemy()
   tx->pos.x = TILE_SIZE * 6;
   tx->pos.y = TILE_SIZE * 7;
 
-  e2 = make_chort(_ecs);
-  tx = ecs_get(_ecs, e2, TRANSFORM);
+  e2        = make_chort(_ecs);
+  tx        = ecs_get(_ecs, e2, TRANSFORM);
   tx->pos.x = TILE_SIZE * 5;
   tx->pos.y = TILE_SIZE * 12;
-
 }
 static BOOL on_game_init(void* user_data)
 {
@@ -139,13 +139,9 @@ static BOOL on_game_init(void* user_data)
         (EcsType){
             .size = sizeof(PlayerTag),
         },
-    [CHARACTER_ACTION] =
+    [CONTROLLER] =
         (EcsType){
-            .size = sizeof(CharacterAction),
-        },
-    [WEAPON_ACTION] =
-        (EcsType){
-            .size = sizeof(WeaponAction),
+            .size = sizeof(Controller),
         },
     [EQUIPMENT] =
         (EcsType){
@@ -165,7 +161,7 @@ static BOOL on_game_init(void* user_data)
         },
     [HEAL_BAR] =
         (EcsType){
-            .size = sizeof(HealBar),
+            .size = sizeof(HealthBar),
         },
     [LIFE_SPAN] =
         (EcsType){
@@ -191,9 +187,13 @@ static BOOL on_game_init(void* user_data)
         (EcsType){
             .size = sizeof(DamageOutput),
         },
-    [SWINGABLE] =
+    [WEAPON_SKILL_SWING] =
         (EcsType){
-            .size = sizeof(Swingable),
+            .size = sizeof(wpskl_Swing),
+        },
+    [WEAPON_SKILL_CHARGE] =
+        (EcsType){
+            .size = sizeof(wpskl_Charge),
         },
     [DROP] =
         (EcsType){
@@ -241,7 +241,7 @@ static BOOL on_game_init(void* user_data)
 
   swpan_player();
   // for (int i = 0; i < 20; ++i)
-    swpan_enemy();
+  swpan_enemy();
 
   /*
   for (int i = 0; i < 150; ++i)
@@ -260,7 +260,6 @@ static BOOL on_game_init(void* user_data)
   collision_filter_system_init(_ecs);
   drop_system_init(_ecs);
   pickup_system_init(_ecs);
-  sound_system_init(_ecs);
 
   Mix_PlayMusic(get_bg_mus(BG_MUS_CATCH_THE_MYSTERY), -1);
 
@@ -286,33 +285,34 @@ static void on_game_loop(void* user_data, SDL_Renderer* renderer)
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
   SDL_RenderClear(renderer);
   keybroad_update();
-  AiSystem(_ecs);
-  PlayerControllerSystem(_ecs);
-  ActionExecutionSystem(_ecs);
-  MotionSystem(_ecs);
-  CollisionSystem(_ecs);
-  MapCollisionSystem(_ecs);
-  SyncEqmSystem(_ecs);
-  AnimatorControllerSystem(_ecs);
-  AnimatorSystem(_ecs);
-  CameraFollowingSystem(_ecs);
-  SwingingSystem(_ecs);
+  sys_ai_update(_ecs);
+  sys_player_controller_update(_ecs);
+  sys_equipment_update(_ecs);
+  sys_motion_update(_ecs);
+  sys_collision_update(_ecs);
+  sys_tile_collision_update(_ecs);
+  sys_wpskl_swing_update(_ecs);
+  sys_wpskl_charge_update(_ecs);
+  sys_animator_controller_update(_ecs);
+  sys_animator_update(_ecs);
+  sys_camera_update(_ecs);
+  sys_heath_update(_ecs);
+  sys_health_bar_update(_ecs, renderer);
   map_draw_layer(MAP_LAYER_FLOOR, renderer);
   map_draw_layer(MAP_LAYER_WALL, renderer);
-  DrawSystem(_ecs, renderer);
+  sys_draw_update(_ecs, renderer);
   map_draw_layer(MAP_LAYER_FRONT, renderer);
   ui_heath_bar_draw(_ecs, renderer);
-  LifeSpanSystem(_ecs);
-  collision_system_draw_debug(renderer);
+  sys_life_span_update(_ecs);
+  dbsys_rtree_update(renderer);
   // draw_rooms(renderer, 2);
   // draw_graph(renderer, 2);
   // draw_tree(renderer, 2);
-  DrawingHealBarSystem(_ecs, renderer);
-  DrawingHitboxSystem(_ecs, renderer);
-  DrawPath(_ecs, renderer);
-  HealthSystem(_ecs);
-  DrawTarget(_ecs, renderer);
-  LateDestroyingSystem(_ecs);
+  dbsys_hitbox_update(_ecs, renderer);
+  dbsys_path_update(_ecs, renderer);
+  dbsys_mvto_target_update(_ecs, renderer);
+  dbsys_draw_position_update(_ecs, renderer);
+  sys_late_destroying_update(_ecs);
   SDL_RenderPresent(renderer);
 }
 

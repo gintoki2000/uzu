@@ -1,27 +1,32 @@
 system_source_files = files(
-  'draw_system.c', 
-  'player_controller_system.c', 
-  'sync_eqm_system.c',
-  'animator_system.c',
-  'collision_system.c',
-  'drawing_hitbox_system.c',
-  'drawing_heal_bar.c',
-  'health_system.c',
-  'life_span_system.c',
-  'motion_system.c',
-  'collision_filter.c',
-  'late_destroying_system.c',
-  'mediator.c',
-  'weapon_dealing_damage_system.c',
-  'swinging_system.c',
-  'map_collision_system.c',
-  'action_execution_system.c'
-  ,'drop_system.c'
-  ,'pickup_system.c'
-  ,'sound_sytem.c'
-  ,'camera_following_system.c'
-  ,'ai_system.c'
-  ,'animator_controller_system.c'
-  ,'draw_target.c'
-  ,'debug/draw_path.c'
+  './mediator.c',
+
+  './motion_sys.c',
+  './draw_sys.c',
+  './ai_system.c',
+  './collision_sys.c',
+  './tile_collision_sys.c',
+  './collision_mgr_sys.c',
+  './animator_sys.c',
+  './animator_ctl_sys.c',
+  './camera_sys.c',
+  './health_sys.c',
+  './health_bar_drawing_sys.c',
+  './late_destroying_sys.c',
+  './dmg_sys.c',
+  './life_span_sys.c',
+  './pickup_sys.c',
+  './drop_system.c',
+  './player_ctl_sys.c',
+  './equipment_sys.c',
+
+  #weapon skill systems
+  './weapon_skill/swing.c',
+  './weapon_skill/charge.c',
+
+  #debug systems
+  './debug/draw_path.c',
+  './debug/draw_hitbox.c',
+  './debug/draw_target.c',
+  './debug/draw_position.c',
 )

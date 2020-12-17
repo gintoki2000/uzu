@@ -1,6 +1,2 @@
-btt_source_files = files('btt_wait.c', 
-'btt_move_to.c', 
-'btt_find_random_location.c', 
-'btt_find_player_location.c',
-'btt_follow_path.c'
-)
+ai_source_files = files('wait.c', 'is_player_far_away.c', 'find_random_destination.c', 'move_to.c', 'is_player_far_away.c', './attack.c')
+

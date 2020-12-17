@@ -28,7 +28,7 @@ PtrArray* ptr_array_init(PtrArray* self, destroy_fn_t destroy_fn)
   return ptr_array_init_w_cap(self, destroy_fn, 16);
 }
 
-PtrArray* ptr_array_init_w_cap(PtrArray* self, destroy_fn_t destroy_fn, u32 cap)
+PtrArray* ptr_array_init_w_cap(PtrArray* self, destroy_fn_t destroy_fn, s32 cap)
 {
   self->cap        = cap;
   self->cnt        = 0;
@@ -49,7 +49,7 @@ void ptr_array_fini(PtrArray* self)
 {
   if (self->destroy_fn != NULL)
   {
-    for (u32 i = 0; i < self->cnt; ++i)
+    for (s32 i = 0; i < self->cnt; ++i)
     {
       self->destroy_fn(self->storage[i]);
     }
@@ -78,7 +78,7 @@ BOOL ptr_array_rmv(PtrArray* self, pointer_t p)
   return false;
 }
 
-void ptr_array_rmv_idx(PtrArray* self, u32 idx)
+void ptr_array_rmv_idx(PtrArray* self, s32 idx)
 {
   assert(idx >= 0 && idx < self->cnt && "out of index");
   int        cnt = self->cnt;
@@ -90,7 +90,7 @@ void ptr_array_rmv_idx(PtrArray* self, u32 idx)
   --self->cnt;
 }
 
-void ptr_array_qrmv(PtrArray* self, u32 idx)
+void ptr_array_qrmv(PtrArray* self, s32 idx)
 {
   assert(idx >= 0 && idx < self->cnt && "out of index");
   if (self->destroy_fn != NULL)
@@ -114,7 +114,7 @@ int ptr_array_idx_of(PtrArray* self, pointer_t p)
 
 BOOL ptr_array_contains(PtrArray* self, pointer_t p) { return ptr_array_idx_of(self, p) != -1; }
 
-void ptr_array_reserve(PtrArray* self, u32 n)
+void ptr_array_reserve(PtrArray* self, s32 n)
 {
   if (n <= self->cap)
     return;

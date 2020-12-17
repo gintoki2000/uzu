@@ -2,11 +2,19 @@
 #define PATH_FINDER_H
 #include <toolbox/toolbox.h>
 
-typedef struct pf_Node
+typedef struct
 {
-  int x, y;
-} pf_Node;
+  Vec2i start;
+  Vec2i end;
+} PathFindingInput;
 
-BOOL find_path(int src_x, int src_y, int dst_x, int dst_y, pf_Node* path, int* cnt);
+typedef struct
+{
+  int    cnt;
+  int    max_dist;
+  Vec2i* nodes;
+} PathFindingOutput;
+
+BOOL find_path(int src_x, int src_y, int dst_x, int dst_y, Vec2i* path, int* cnt);
 
 #endif // PATH_FINDER_H

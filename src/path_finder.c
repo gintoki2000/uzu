@@ -3,11 +3,12 @@
 #include "map.h"
 #include <toolbox/toolbox.h>
 
-typedef struct pf_GirdNode
+typedef struct GirdNode
 {
   int   x, y;
   float priority;
-} pf_GirdNode;
+  int   dist;
+} GirdNode;
 
 /*
 INLINE float distance(int x1, int y1, int x2, int y2)
@@ -19,17 +20,17 @@ INLINE float distance(int x1, int y1, int x2, int y2)
 
 INLINE float heuristic(int x1, int y1, int x2, int y2) { return ABS(x1 - x2) + ABS(y1 - y2); }
 
-static int compare_node_priority(const pf_GirdNode* a, const pf_GirdNode* b)
+static int compare_node_priority(const GirdNode* a, const GirdNode* b)
 {
   return a->priority - b->priority;
 }
 
-static pf_GirdNode* grid_node_new(int x, int y, float priority)
+static GirdNode* grid_node_new(int x, int y, float priority)
 {
-  pf_GirdNode* p = malloc(sizeof(pf_GirdNode));
-  p->x           = x;
-  p->y           = y;
-  p->priority    = priority;
+  GirdNode* p = malloc(sizeof(GirdNode));
+  p->x        = x;
+  p->y        = y;
+  p->priority = priority;
   return p;
 }
 
@@ -62,7 +63,7 @@ static void adj(int x, int y, int* neighbor_x, int* neighbor_y, int* cnt)
   }
 }
 
-static void retrieve(const pf_GirdNode* came_from, int dst_x, int dst_y, pf_Node* path, int* cnt)
+static void retrieve(const GirdNode* came_from, int dst_x, int dst_y, Vec2i* path, int* cnt)
 {
   int x, y, w, h, i;
 
@@ -74,7 +75,7 @@ static void retrieve(const pf_GirdNode* came_from, int dst_x, int dst_y, pf_Node
   while (x != -1 && y != -1)
   {
     ASSERT(*cnt < 100 - 1);
-    path[(*cnt)++] = (pf_Node){ x, y };
+    path[(*cnt)++] = (Vec2i){ x, y };
 
     i = y * w + x;
     x = came_from[i].x;
@@ -84,18 +85,18 @@ static void retrieve(const pf_GirdNode* came_from, int dst_x, int dst_y, pf_Node
     SWAP(path[i], path[(*cnt) - i - 1]);
 }
 
-BOOL find_path(int x1, int y1, int x2, int y2, pf_Node* path, int* cnt)
+BOOL find_path(int x1, int y1, int x2, int y2, Vec2i* path, int* cnt)
 {
-  BOOL*        visited   = NULL;
-  pf_GirdNode* came_from = NULL;
-  Heap*        queue     = NULL; /* Heap<pf_GirdNode> */
-  pf_GirdNode* curr;
-  int          curr_x, curr_y, index;
-  int          next_x[4] = { 0 }, next_y[4] = { 0 };
-  int          neighbor_cnt, tile_cnt;
-  float        priority;
-  BOOL         found = false;
-  int          w, h;
+  BOOL*     visited   = NULL;
+  GirdNode* came_from = NULL;
+  Heap*     queue     = NULL; /* Heap<GirdNode> */
+  GirdNode* curr;
+  int       curr_x, curr_y, index;
+  int       next_x[4] = { 0 }, next_y[4] = { 0 };
+  int       neighbor_cnt, tile_cnt;
+  float     priority;
+  BOOL      found = false;
+  int       w, h;
 
   if (x1 == x2 && y1 == y2)
     return FALSE;
@@ -103,11 +104,11 @@ BOOL find_path(int x1, int y1, int x2, int y2, pf_Node* path, int* cnt)
   map_get_size(&w, &h);
   tile_cnt  = w * h;
   visited   = calloc(tile_cnt, sizeof(BOOL));
-  came_from = calloc(tile_cnt, sizeof(pf_GirdNode));
+  came_from = calloc(tile_cnt, sizeof(GirdNode));
   queue     = heap_new((compare_fn_t)compare_node_priority, (destroy_fn_t)free);
 
   for (int i = 0; i < tile_cnt; ++i)
-    came_from[i] = (pf_GirdNode){ -1, -1, -1.f };
+    came_from[i] = (GirdNode){ -1, -1, -1.f , 999};
 
   visited[y1 * w + x1] = true;
 
@@ -133,7 +134,7 @@ BOOL find_path(int x1, int y1, int x2, int y2, pf_Node* path, int* cnt)
       if (!visited[index])
       {
         visited[index]   = true;
-        came_from[index] = (pf_GirdNode){ curr_x, curr_y, -1.f };
+        came_from[index] = (GirdNode){ curr_x, curr_y, -1.f };
         priority         = heuristic(x2, y2, next_x[i], next_y[i]);
         heap_add(queue, grid_node_new(next_x[i], next_y[i], priority));
       }

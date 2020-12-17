@@ -28,6 +28,8 @@ typedef struct
 #define BOOL SDL_bool
 #define TRUE SDL_TRUE
 #define FALSE SDL_FALSE
+#define RECT SDL_Rect
+#define POINT SDL_Point
 
 #define FLIP_TO_SIGN(__f) (__f == SDL_FLIP_NONE ? 1 : -1)
 
@@ -68,12 +70,16 @@ typedef struct
     __b               = __tmp;                                                                     \
   } while (0)
 
-
 typedef struct
 {
   float x;
   float y;
 } Vec2;
+
+typedef struct
+{
+  int x, y;
+} Vec2i;
 
 #define VEC2(_x, _y) ((Vec2){ .x = (_x), .y = (_y) })
 #define VEC2_ZERO VEC2(0.f, 0.f)
@@ -115,6 +121,13 @@ INLINE float normalizev(Vec2* v)
   return len;
 }
 
+INLINE void vec2_scale_to_length(Vec2* v, float len)
+{
+  normalizev(v);
+  v->x *= len;
+  v->y *= len;
+}
+
 INLINE Vec2 normv(Vec2 v)
 {
   float len   = lengthv(v);
@@ -122,10 +135,11 @@ INLINE Vec2 normv(Vec2 v)
   return VEC2(v.x * ivlen, v.y * ivlen);
 }
 
-INLINE Vec2 truncatev(Vec2 v, float max_len) {
+INLINE Vec2 truncatev(Vec2 v, float max_len)
+{
   if (lengthv(v) > max_len)
   {
-    return mulv(normv(v), max_len); 
+    return mulv(normv(v), max_len);
   }
   return v;
 }

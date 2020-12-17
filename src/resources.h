@@ -20,6 +20,7 @@ typedef enum
   TEX_FLASK_RED,
   TEX_PLAYER_HEALTH_BAR,
   TEX_CHORT,
+  TEX_CLEAVER,
   NUM_TEXS
 } TextureId;
 

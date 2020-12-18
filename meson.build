@@ -10,7 +10,9 @@ deps = [
   dependency('SDL2', required: true), 
   dependency('SDL2_image', required: true), 
   dependency('SDL2_mixer', required: true), 
-  dependency('cglm')
+  dependency('cglm'),
+  dependency('SDL2_gfx'),
+  dependency('json-c', static: true),
 ]
 
 executable(project_name, source_files, 
@@ -21,11 +23,3 @@ executable(project_name, source_files,
 )
 
 install_subdir('asserts', install_dir:  meson.source_root() / 'dist')
-
-check_dep = dependency('check')
-
-executable('rect_test', toolbox_source_files + files('test/rect_test.c'), 
-  dependencies: deps + [check_dep], 
-  install: false, 
-  include_directories: incdirs
-)

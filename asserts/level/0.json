@@ -117,7 +117,7 @@
  "tilesets":[
         {
          "firstgid":1,
-         "source":"..\/..\/CPP-Projects\/PlatformerGame\/asserts\/levels\/untitled.tsx"
+         "source":"..\/..\/..\/..\/CPP-Projects\/PlatformerGame\/asserts\/levels\/untitled.tsx"
         }],
  "tilewidth":16,
  "type":"map",

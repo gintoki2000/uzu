@@ -11,9 +11,10 @@ void sys_player_controller_update(Ecs* ecs)
   ecs_entity_t player;
   Controller*  controller;
 
-  player     = get_player(ecs);
-  controller = ecs_get(ecs, player, CONTROLLER);
+  if ((player = get_player(ecs)) == ECS_NULL_ENT)
+    return;
 
+  controller = ecs_get(ecs, player, CONTROLLER);
 
   controller->desired_vel = VEC2_ZERO;
 

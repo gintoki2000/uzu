@@ -13,5 +13,7 @@ source_files = files('uzu.c',
   'graph.c',
   'generator.c', 
   'behaviour_tree.c', 
-  'path_finder.c', 'utils.c'
+  'path_finder.c', 'utils.c',
+  './read_all.c',
+  './map-loader.c',
   ) + engine_source_files + ecs_source_files + toolbox_source_files + system_source_files + ui_source_files + ai_source_files

@@ -11,7 +11,7 @@ MoveTo*            move_to_init(MoveTo* self, float slow_down_radius, float arri
 bt_Status          move_to_exec(MoveTo* self, Ecs* ecs, ecs_entity_t entity);
 
 BT_ALLOC_FN(MoveTo, move_to)
-BT_NODE_VTBL_INST_FN(bt_Node, move_to)
+BT_VTBL_INST_FN(bt_Node, move_to)
 
 void move_to_vtbl_init(bt_NodeVtbl* vtbl)
 {

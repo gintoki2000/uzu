@@ -82,6 +82,8 @@ typedef enum
   AI_AGENT,
   BTV_MOVE_DESTINATION,
   BTV_PATH,
+  BTV_FOLLOWING_TARGET,
+  SPOT,
   NUM_COMPONENTS
 } ComponentId;
 
@@ -112,6 +114,12 @@ typedef struct Animation
   s32         frame_duration;
   SpriteSheet sheet;
 } Animation;
+
+typedef struct Spot
+{
+  Vec2  pos;
+  float radius;
+} Spot;
 
 typedef struct Controller
 {
@@ -252,6 +260,8 @@ typedef struct
   int   cnt;
   int   curr;
 } btv_Path;
+
+typedef ecs_entity_t btv_FollowingTarget;
 
 Animation*
 animation_init(Animation* anim, SDL_Texture* tex, u32 x, u32 y, u32 row, u32 col, u32 sw, u32 sh);

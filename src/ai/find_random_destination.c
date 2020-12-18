@@ -6,7 +6,7 @@ void      find_random_destination_vtbl_init(bt_NodeVtbl* vtbl);
 bt_Status find_random_destination_exec(FindRandomDestination* self, Ecs* ecs, ecs_entity_t entity);
 FindRandomDestination* find_random_destination_init(FindRandomDestination* self);
 
-BT_NODE_VTBL_INST_FN(bt_Node, find_random_destination)
+BT_VTBL_INST_FN(bt_Node, find_random_destination)
 BT_ALLOC_FN(FindRandomDestination, find_random_destination)
 
 void find_random_destination_vtbl_init(bt_NodeVtbl* vtbl)

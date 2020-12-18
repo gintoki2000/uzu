@@ -1,6 +1,8 @@
 #include <ai/attack.h>
+#include <ai/find_player_target.h>
 #include <ai/find_random_destination.h>
-#include <ai/is_player_far_away.h>
+#include <ai/follow.h>
+#include <ai/is_player_cross_spot.h>
 #include <ai/move_to.h>
 #include <ai/wait.h>
 #include <behaviour_tree.h>
@@ -189,7 +191,7 @@ ecs_entity_t make_huge_demon(Ecs* ecs)
   /*
   buid behaviour tree
   bt_Repeater*            root;
-  bt_Sequence*            move_to_player_seq;
+  bt_Sequence*            chase_seq;
   btt_FindRandomLocation* find_location_task;
   btt_MoveTo*             move_to_task;
   btt_Wait*               wait_task;
@@ -197,18 +199,18 @@ ecs_entity_t make_huge_demon(Ecs* ecs)
   find_location_task = btt_find_random_location_new();
   move_to_task       = btt_move_to_new();
   wait_task          = btt_wait_new(120);
-  move_to_player_seq           = bt_sequence_new();
-  root               = bt_repeater_new((bt_Node*)move_to_player_seq, -1);
+  chase_seq           = bt_sequence_new();
+  root               = bt_repeater_new((bt_Node*)chase_seq, -1);
 
-  bt_sequence_add(move_to_player_seq, (bt_Node*)find_location_task);
-  bt_sequence_add(move_to_player_seq, (bt_Node*)move_to_task);
-  bt_sequence_add(move_to_player_seq, (bt_Node*)wait_task);
+  bt_sequence_add(chase_seq, (bt_Node*)find_location_task);
+  bt_sequence_add(chase_seq, (bt_Node*)move_to_task);
+  bt_sequence_add(chase_seq, (bt_Node*)wait_task);
   */
 
   return demon;
 }
 
-ecs_entity_t make_chort(Ecs* ecs)
+ecs_entity_t make_chort(Ecs* ecs, Vec2 pos)
 {
   ecs_entity_t entity;
   SDL_Texture* texture;
@@ -226,6 +228,7 @@ ecs_entity_t make_chort(Ecs* ecs)
   AIAgent*    ai_agent;
   Equipment*  equipment;
   Controller* controller;
+  Spot*       spot;
 
   texture = get_texture(TEX_CHORT);
   animation_init(&anims[ANIM_STATE_HIT], texture, 16 * 6, 0, 1, 1, 16, 24);
@@ -237,7 +240,12 @@ ecs_entity_t make_chort(Ecs* ecs)
 
   entity = ecs_create(ecs);
 
-  transform = ecs_add(ecs, entity, TRANSFORM);
+  transform      = ecs_add(ecs, entity, TRANSFORM);
+  transform->pos = pos;
+
+  spot         = ecs_add(ecs, entity, SPOT);
+  spot->radius = TILE_SIZE * 7;
+  spot->pos    = pos;
 
   visual = ecs_add(ecs, entity, VISUAL);
 
@@ -283,36 +291,42 @@ ecs_entity_t make_chort(Ecs* ecs)
   controller->lock_movement = TRUE;
 
   bt_Root*     root;
-  bt_Sequence* move_to_player_seq;
-  // IsPlayerFarAway*       is_player_far_away;
-  FindRandomDestination* find_random_destination;
-  MoveTo*                move_to;
-  Wait*                  wait;
-  bt_Selector*           selector;
-  Attack*                attack;
-  bt_Sequence*           attack_seq;
+  bt_Sequence* chase_seq;
+  // FindRandomDestination* find_random_destination;
+  // MoveTo*                move_to;
+  Wait*              wait;
+  bt_Selector*       selector;
+  Attack*            attack;
+  bt_Sequence*       attack_seq;
+  FindPlayerTarget*  find_player_target;
+  Follow*            follow;
+  IsPlayerCrossSpot* is_player_cross_spot;
 
-  root           = bt_root_new();
-  move_to_player_seq = bt_sequence_new();
-  // is_player_far_away      = is_player_far_away_new(TILE_SIZE * 3);
-  find_random_destination = find_random_destination_new();
-  move_to                 = move_to_new(TILE_SIZE * 2, 1.f);
-  wait                    = wait_new(120);
-  attack                  = attack_new();
-  selector                = bt_selector_new();
-  attack_seq              = bt_sequence_new();
+  root      = bt_root_new();
+  chase_seq = bt_sequence_new();
+  // find_random_destination = find_random_destination_new();
+  // move_to                 = move_to_new(TILE_SIZE * 2, 1.f);
+  wait                 = wait_new(30);
+  attack               = attack_new();
+  selector             = bt_selector_new();
+  attack_seq           = bt_sequence_new();
+  follow               = follow_new(15.f);
+  find_player_target   = find_player_target_new();
+  is_player_cross_spot = is_player_cross_spot_new();
 
-  bt_root_set_child(root, (bt_Node*)selector);
+  bt_root_set_child(root, (bt_Node*)is_player_cross_spot);
 
-  // bt_decorator_set_child((bt_Decorator*)is_player_far_away, (bt_Node*)move_to_player_seq);
+  bt_decorator_set_child((bt_Decorator*)is_player_cross_spot, (bt_Node*)selector);
 
-  bt_sequence_add(move_to_player_seq, (bt_Node*)find_random_destination);
-  bt_sequence_add(move_to_player_seq, (bt_Node*)move_to);
+  // bt_decorator_set_child((bt_Decorator*)is_player_far_away, (bt_Node*)chase_seq);
+
+  bt_sequence_add(chase_seq, (bt_Node*)find_player_target);
+  bt_sequence_add(chase_seq, (bt_Node*)follow);
 
   bt_sequence_add(attack_seq, (bt_Node*)attack);
   bt_sequence_add(attack_seq, (bt_Node*)wait);
 
-  bt_selector_add(selector, (bt_Node*)move_to_player_seq);
+  bt_selector_add(selector, (bt_Node*)chase_seq);
   bt_selector_add(selector, (bt_Node*)attack_seq);
 
   ai_agent       = ecs_add(ecs, entity, AI_AGENT);

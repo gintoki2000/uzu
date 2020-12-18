@@ -33,7 +33,39 @@ static void on_deal_damage(Ecs* ecs, const SysEvt_DealDamage* event)
   }
 }
 
-void health_system_init(Ecs* ecs) { mediator_connect(SIG_DEAL_DAMAGE, ecs, SLOT(on_deal_damage)); }
+static void on_hit_trap(Ecs* ecs, const SysEvt_EntityHitTrap* event)
+{
+  Heath* health;
+  if ((health = ecs_get(ecs, event->entity, HEATH)) != NULL &&
+      !ecs_has(ecs, event->entity, INVULNERABLE))
+  {
+    health->hit_points -= 1;
+    if (health->hit_points <= 0)
+    {
+      health->hit_points = 0;
+      mediator_emit(SIG_ENTITY_DIED, &(SysEvt_EntityDied){ event->entity });
+      ecs_add(ecs, event->entity, TAG_TO_BE_DESTROYED);
+    }
+    else
+    {
+      Invulnerable* invulnerable;
+      mediator_emit(SIG_GET_DAMAGED,
+                    &(SysEvt_GetDamaged){
+                        .damagee = event->entity,
+                        .damage  = 1,
+                        .type    = DAMAGE_TYPE_THUST,
+                    });
+      invulnerable            = ecs_add(ecs, event->entity, INVULNERABLE);
+      invulnerable->remaining = 10;
+    }
+  }
+}
+
+void health_system_init(Ecs* ecs)
+{
+  mediator_connect(SIG_DEAL_DAMAGE, ecs, SLOT(on_deal_damage));
+  mediator_connect(SIG_HIT_TRAP, ecs, SLOT(on_hit_trap));
+}
 
 void sys_heath_update(Ecs* ecs)
 {

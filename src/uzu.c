@@ -72,19 +72,6 @@ static void swpan_player()
   tx->pos.y = WIN_HEIGHT / 2 + 50;
 }
 
-static void swpan_enemy()
-{
-  ecs_entity_t enemy;
-  Transform*   tx;
-
-  enemy     = make_huge_demon(_ecs);
-  tx        = ecs_get(_ecs, enemy, TRANSFORM);
-  tx->pos.x = TILE_SIZE * 6;
-  tx->pos.y = TILE_SIZE * 7;
-
-  make_chort(_ecs, VEC2(TILE_SIZE * 5, TILE_SIZE * 12));
-  make_chort(_ecs, VEC2(TILE_SIZE * 22, TILE_SIZE * 10));
-}
 static BOOL on_game_init(void* user_data)
 {
   (void)user_data;
@@ -227,8 +214,6 @@ static BOOL on_game_init(void* user_data)
   srand(SDL_GetTicks());
 
   swpan_player();
-  // for (int i = 0; i < 20; ++i)
-  swpan_enemy();
 
   mediator_init();
   collision_system_init(_ecs);
@@ -238,9 +223,9 @@ static BOOL on_game_init(void* user_data)
   drop_system_init(_ecs);
   pickup_system_init(_ecs);
 
-  //Mix_PlayMusic(get_bg_mus(BG_MUS_CATCH_THE_MYSTERY), -1);
+  // Mix_PlayMusic(get_bg_mus(BG_MUS_CATCH_THE_MYSTERY), -1);
 
-  load_map("asserts/level/0.json", NULL);
+  load_map("asserts/level/0.json", _ecs);
 
   return TRUE;
 }
@@ -284,11 +269,11 @@ static void on_game_loop(void* user_data, SDL_Renderer* renderer)
   map_draw_layer(MAP_LAYER_FRONT, renderer);
   ui_heath_bar_draw(_ecs, renderer);
   sys_life_span_update(_ecs);
-  // dbsys_rtree_update(renderer);
+   dbsys_rtree_update(renderer);
   // draw_rooms(renderer, 2);
   // draw_graph(renderer, 2);
-  // draw_tree(renderer, 2);
-  // dbsys_hitbox_update(_ecs, renderer);
+  //draw_tree(renderer, 2);
+  dbsys_hitbox_update(_ecs, renderer);
   // dbsys_path_update(_ecs, renderer);
   dbsys_mvto_target_update(_ecs, renderer);
   dbsys_draw_position_update(_ecs, renderer);

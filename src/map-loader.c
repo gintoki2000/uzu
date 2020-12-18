@@ -1,4 +1,5 @@
 #include "map-loader.h"
+#include "entity_factory.h"
 #include "map.h"
 #include "read_all.h"
 #include <json-c/json.h>
@@ -51,6 +52,25 @@ static int parse_tilelayer(const json_object* tilelayer_json_obj)
 
 static int parse_objectgroup(const json_object* object_group_json_obj, Ecs* ecs)
 {
+  const json_object* objects_json_obj;
+  int                objcnt;
+  const char*        objtype;
+  const json_object* obj_json_obj;
+  Vec2               pos;
+  objects_json_obj = json_object_object_get(object_group_json_obj, "objects");
+  objcnt           = json_object_array_length(objects_json_obj);
+  for (int i = 0; i < objcnt; ++i)
+  {
+    obj_json_obj = json_object_array_get_idx(objects_json_obj, i);
+    objtype      = json_object_get_string(json_object_object_get(obj_json_obj, "type"));
+    if (strcmp(objtype, "Chort") == 0)
+    {
+      pos.x = json_object_get_double(json_object_object_get(obj_json_obj, "x"));
+      pos.y = json_object_get_double(json_object_object_get(obj_json_obj, "y"));
+      make_chort(ecs, pos);
+    }
+  }
+  return 0;
 }
 
 static int parse_layer(const json_object* layer_json_obj, Ecs* ecs)
@@ -78,8 +98,8 @@ static int parse(const json_object* map_json_obj, Ecs* ecs)
   int                cnt, w, h;
   layers_json_obj = json_object_object_get(map_json_obj, "layers");
   cnt             = json_object_array_length(layers_json_obj);
-  w = json_object_get_int(json_object_object_get(map_json_obj, "width"));
-  h = json_object_get_int(json_object_object_get(map_json_obj, "height"));
+  w               = json_object_get_int(json_object_object_get(map_json_obj, "width"));
+  h               = json_object_get_int(json_object_object_get(map_json_obj, "height"));
   map_set_size(w, h);
   for (int i = 0; i < cnt; ++i)
   {
@@ -111,5 +131,6 @@ int load_map(const char* filename, Ecs* ecs)
   parse(json_obj, ecs);
   fclose(file);
   json_object_put(json_obj);
+  free(input);
   return 0;
 }

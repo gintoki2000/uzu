@@ -1,4 +1,5 @@
 #include "tile_collision_sys.h"
+#include "mediator.h"
 
 #include <components.h>
 #include <constances.h>
@@ -15,33 +16,6 @@ INLINE RECT get_bounding_box(const HitBox* hitbox, const Transform* transform)
   };
 }
 
-static BOOL has_collision(const RECT* obj_rect, Vec2 vel)
-{
-
-  int left_tile;
-  int top_tile;
-  int bottom_tile;
-  int right_tile;
-
-  left_tile   = (int)(obj_rect->x / TILE_SIZE);
-  right_tile  = (int)((obj_rect->x + obj_rect->w) / TILE_SIZE);
-  bottom_tile = (int)((obj_rect->y + obj_rect->h) / TILE_SIZE);
-  top_tile    = (int)(obj_rect->y / TILE_SIZE);
-
-  for (int row = top_tile; row <= bottom_tile; ++row)
-  {
-    for (int col = left_tile; col <= right_tile; ++col)
-    {
-      if (!map_is_floor(col, row))
-      {
-        return TRUE;
-      }
-    }
-  }
-
-  return FALSE;
-}
-
 void sys_tile_collision_update(Ecs* ecs)
 {
   ecs_entity_t* entities;
@@ -49,7 +23,13 @@ void sys_tile_collision_update(Ecs* ecs)
 
   HitBox*    hitbox;
   Transform* transform;
-  RECT       boundingbox;
+  RECT       obj_rect;
+
+  int left_tile;
+  int top_tile;
+  int bottom_tile;
+  int right_tile;
+  int tile_id;
 
   ecs_data(ecs, TILE_COLLISION_TAG, &entities, NULL, &cnt);
   for (int i = 0; i < cnt; ++i)
@@ -57,10 +37,29 @@ void sys_tile_collision_update(Ecs* ecs)
     if ((transform = ecs_get(ecs, entities[i], TRANSFORM)) &&
         (hitbox = ecs_get(ecs, entities[i], HITBOX)))
     {
-      boundingbox = get_bounding_box(hitbox, transform);
-      if (has_collision(&boundingbox, (Vec2){0.f, 0.f}))
+      obj_rect    = get_bounding_box(hitbox, transform);
+      left_tile   = (int)(obj_rect.x / TILE_SIZE);
+      right_tile  = (int)((obj_rect.x + obj_rect.w) / TILE_SIZE);
+      bottom_tile = (int)((obj_rect.y + obj_rect.h) / TILE_SIZE);
+      top_tile    = (int)(obj_rect.y / TILE_SIZE);
+
+      for (int row = top_tile; row <= bottom_tile; ++row)
       {
-        transform->pos = transform->prev_pos;
+        for (int col = left_tile; col <= right_tile; ++col)
+        {
+          tile_id = map_tile_at(MAP_LAYER_FLOOR, col, row);
+          if (tile_id == 0)
+            transform->pos = transform->prev_pos;
+          else if (tile_id >= 11 && tile_id <= 13)
+          {
+            mediator_emit(SIG_HIT_TRAP,
+                          &(SysEvt_EntityHitTrap){
+                              .row    = row,
+                              .col    = col,
+                              .entity = entities[i],
+                          });
+          }
+        }
       }
     }
   }

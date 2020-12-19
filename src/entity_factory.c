@@ -4,6 +4,7 @@
 #include <ai/follow.h>
 #include <ai/is_player_cross_spot.h>
 #include <ai/move_to.h>
+#include <ai/set_dest_to_spot.h>
 #include <ai/wait.h>
 #include <behaviour_tree.h>
 #include <components.h>
@@ -113,8 +114,8 @@ ecs_entity_t make_knight(Ecs* ecs)
   motion->max_force = 10;
 
   heath                 = ecs_add(ecs, knight, HEATH);
-  heath->hit_points     = 10;
-  heath->max_hit_points = 20;
+  heath->hit_points     = 40;
+  heath->max_hit_points = 40;
 
   ecs_add(ecs, knight, TILE_COLLISION_TAG);
 
@@ -268,11 +269,11 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 pos)
   ecs_add(ecs, entity, ENEMY_TAG);
 
   heath                 = ecs_add(ecs, entity, HEATH);
-  heath->max_hit_points = 100;
-  heath->hit_points     = 100;
+  heath->max_hit_points = 10;
+  heath->hit_points     = 10;
 
   healthBar         = ecs_add(ecs, entity, HEAL_BAR);
-  healthBar->len    = 20;
+  healthBar->len    = 10;
   healthBar->anchor = (SDL_Point){ 20, 25 };
 
   motion            = ecs_add(ecs, entity, MOTION);
@@ -293,30 +294,38 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 pos)
   bt_Root*     root;
   bt_Sequence* chase_seq;
   // FindRandomDestination* find_random_destination;
-  // MoveTo*                move_to;
-  Wait*              wait;
-  bt_Selector*       selector;
+  MoveTo*            move_to;
+  Wait *             wait, *wait2;
+  bt_Selector*       hostile;
   Attack*            attack;
   bt_Sequence*       attack_seq;
   FindPlayerTarget*  find_player_target;
   Follow*            follow;
   IsPlayerCrossSpot* is_player_cross_spot;
+  bt_Sequence*       back_to_spot_seq;
+  SetDestToSpot*     set_dest_to_spot;
+  bt_Selector*       selector;
 
   root      = bt_root_new();
   chase_seq = bt_sequence_new();
   // find_random_destination = find_random_destination_new();
   // move_to                 = move_to_new(TILE_SIZE * 2, 1.f);
   wait                 = wait_new(30);
+  wait2                = wait_new(60);
   attack               = attack_new();
-  selector             = bt_selector_new();
+  hostile              = bt_selector_new();
   attack_seq           = bt_sequence_new();
   follow               = follow_new(15.f);
   find_player_target   = find_player_target_new();
   is_player_cross_spot = is_player_cross_spot_new();
+  move_to              = move_to_new(2.f);
+  back_to_spot_seq     = bt_sequence_new();
+  set_dest_to_spot     = set_dest_to_spot_new();
+  selector             = bt_selector_new();
 
-  bt_root_set_child(root, (bt_Node*)is_player_cross_spot);
+  bt_root_set_child(root, (bt_Node*)selector);
 
-  bt_decorator_set_child((bt_Decorator*)is_player_cross_spot, (bt_Node*)selector);
+  bt_decorator_set_child((bt_Decorator*)is_player_cross_spot, (bt_Node*)hostile);
 
   // bt_decorator_set_child((bt_Decorator*)is_player_far_away, (bt_Node*)chase_seq);
 
@@ -326,8 +335,14 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 pos)
   bt_sequence_add(attack_seq, (bt_Node*)attack);
   bt_sequence_add(attack_seq, (bt_Node*)wait);
 
-  bt_selector_add(selector, (bt_Node*)chase_seq);
-  bt_selector_add(selector, (bt_Node*)attack_seq);
+  bt_sequence_add(back_to_spot_seq, (bt_Node*)set_dest_to_spot);
+  bt_sequence_add(back_to_spot_seq, (bt_Node*)move_to);
+
+  bt_selector_add(hostile, (bt_Node*)chase_seq);
+  bt_selector_add(hostile, (bt_Node*)attack_seq);
+
+  bt_selector_add(selector, (bt_Node*)is_player_cross_spot);
+  bt_selector_add(selector, (bt_Node*)back_to_spot_seq);
 
   ai_agent       = ecs_add(ecs, entity, AI_AGENT);
   ai_agent->root = (bt_Node*)root;
@@ -516,13 +531,14 @@ ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
   entity  = ecs_create(ecs);
   texture = get_texture(TEX_GOLDEN_SWORD);
 
-  Transform*    transform;
-  Visual*       visual;
-  HitBox*       hitbox;
-  WeaponCore*   core;
-  DamageOutput* damage_output;
-  wpskl_Swing*  wpskl_swing;
-  wpskl_Charge* wpskl_charge;
+  Transform*          transform;
+  Visual*             visual;
+  HitBox*             hitbox;
+  WeaponCore*         core;
+  DamageOutput*       damage_output;
+  wpskl_Swing*        wpskl_swing;
+  wpskl_Charge*       wpskl_charge;
+  wpskl_ThunderStorm* wpskl_thunder_storm;
 
   transform = ecs_add(ecs, entity, TRANSFORM);
 
@@ -551,8 +567,15 @@ ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
   wpskl_swing->step      = 0;
   wpskl_swing->timer     = 0;
 
+  /*
   wpskl_charge            = ecs_add(ecs, entity, WEAPON_SKILL_CHARGE);
   wpskl_charge->on_action = CHARACTER_ACTION_SPECIAL_ATK;
+  */
+
+  wpskl_thunder_storm            = ecs_add(ecs, entity, WEAPON_SKILL_THUNDER_STORM);
+  wpskl_thunder_storm->on_action = CHARACTER_ACTION_SPECIAL_ATK;
+  wpskl_thunder_storm->interval  = 10;
+  wpskl_thunder_storm->total     = 5;
 
   return entity;
 }
@@ -673,4 +696,42 @@ ecs_entity_t make_player(Ecs* ecs, ecs_entity_t character, ecs_entity_t weapon)
   hitbox->mask_bits = BIT(CATEGORY_ITEM) | BIT(CATEGORY_WEAPON) | BIT(CATEGORY_PROJECTILE);
 
   return character;
+}
+
+ecs_entity_t make_thunder(Ecs* ecs, Vec2 pos, u16 mask_bits)
+{
+  ecs_entity_t entity;
+
+  Transform* transform;
+  Visual*    visual;
+  Animator*  animator;
+  LifeSpan*  life_span;
+  HitBox*    hitbox;
+
+  Animation animation;
+  animation_init(&animation, get_texture(TEX_YELLOW_THUNDER), 0, 0, 1, 8, 64, 256);
+  animation.frame_duration = 4;
+
+  entity = ecs_create(ecs);
+
+  transform      = ecs_add(ecs, entity, TRANSFORM);
+  transform->pos = pos;
+
+  visual         = ecs_add(ecs, entity, VISUAL);
+  visual->anchor = (SDL_Point){ 32, 224 };
+
+  animator = ecs_add(ecs, entity, ANIMATOR);
+  animator_init(animator, &animation, 1);
+
+  life_span            = ecs_add(ecs, entity, LIFE_SPAN);
+  life_span->remaining = (animation.sheet.count) * animation.frame_duration;
+
+  hitbox            = ecs_add(ecs, entity, HITBOX);
+  hitbox->size      = VEC2(16.f, 16.f);
+  hitbox->anchor    = VEC2(8.f, 16.f);
+  hitbox->category  = CATEGORY_PROJECTILE;
+  hitbox->mask_bits = mask_bits;
+  hitbox->proxy_id  = NULL_NODE;
+
+  return entity;
 }

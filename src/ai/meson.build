@@ -8,5 +8,6 @@ ai_source_files = files(
   './follow.c',
   './find_player_target.c',
   './is_player_cross_spot.c',
+  './set_dest_to_spot.c',
 )
 

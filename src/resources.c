@@ -20,6 +20,7 @@ static const char*  _texture_files[NUM_TEXS] = {
   [TEX_PLAYER_HEALTH_BAR] = "asserts/player_health_bar.png",
   [TEX_CHORT]             = "asserts/chort.png",
   [TEX_CLEAVER]           = "asserts/weapon_cleaver.png",
+  [TEX_RED_THUNDER]       = "asserts/Thunder.png"
 };
 
 static Mix_Music*  _bg_musics[NUM_BG_MUSICS];
@@ -74,7 +75,7 @@ BOOL resources_load()
   {
     if ((_bg_musics[i] = Mix_LoadMUS(_bg_mus_files[i])) == NULL)
     {
-      ERROR("unable to load music \"%s\":\n", _bg_mus_files[i], Mix_GetError());
+      ERROR("unable to load music \"%s\": %s\n", _bg_mus_files[i], Mix_GetError());
       return FALSE;
     }
   }

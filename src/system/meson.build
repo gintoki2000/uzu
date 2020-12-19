@@ -23,6 +23,7 @@ system_source_files = files(
   #weapon skill systems
   './weapon_skill/swing.c',
   './weapon_skill/charge.c',
+  './weapon_skill/thunder_storm.c',
 
   #debug systems
   './debug/draw_path.c',

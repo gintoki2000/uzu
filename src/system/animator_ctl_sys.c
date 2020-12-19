@@ -10,7 +10,7 @@ void sys_animator_controller_update(Ecs* ecs)
   Visual*       visual;
 
   float          vx, vy;
-  AnimationState next_state, curr_state;
+  AnimationState next_state;
 
   ecs_data(ecs, ANIMATOR, &entities, (void**)&animators, &cnt);
   for (int i = 0; i < cnt; ++i)

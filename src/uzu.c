@@ -45,6 +45,7 @@
 #include <system/debug/draw_path.h>
 #include <system/debug/draw_position.h>
 
+#include "system/weapon_skill/thunder_storm.h"
 #include <system/weapon_skill/charge.h>
 #include <system/weapon_skill/swing.h>
 
@@ -207,6 +208,10 @@ static BOOL on_game_init(void* user_data)
         (EcsType){
             .size = sizeof(Spot),
         },
+    [WEAPON_SKILL_THUNDER_STORM] =
+        (EcsType){
+            .size = sizeof(wpskl_ThunderStorm),
+        },
   };
 
   _ecs = ecs_new(types, NUM_COMPONENTS);
@@ -258,6 +263,7 @@ static void on_game_loop(void* user_data, SDL_Renderer* renderer)
   sys_equipment_update(_ecs);
   sys_wpskl_swing_update(_ecs);
   sys_wpskl_charge_update(_ecs);
+  sys_wpskl_thunder_storm_update(_ecs);
   sys_animator_controller_update(_ecs);
   sys_animator_update(_ecs);
   sys_camera_update(_ecs);
@@ -269,10 +275,10 @@ static void on_game_loop(void* user_data, SDL_Renderer* renderer)
   map_draw_layer(MAP_LAYER_FRONT, renderer);
   ui_heath_bar_draw(_ecs, renderer);
   sys_life_span_update(_ecs);
-   dbsys_rtree_update(renderer);
+  dbsys_rtree_update(renderer);
   // draw_rooms(renderer, 2);
   // draw_graph(renderer, 2);
-  //draw_tree(renderer, 2);
+  // draw_tree(renderer, 2);
   dbsys_hitbox_update(_ecs, renderer);
   // dbsys_path_update(_ecs, renderer);
   dbsys_mvto_target_update(_ecs, renderer);

@@ -70,6 +70,7 @@ typedef enum
   TAG_TO_BE_DESTROYED,
   WEAPON_SKILL_SWING,
   WEAPON_SKILL_CHARGE,
+  WEAPON_SKILL_THUNDER_STORM,
   DAMAGE_OUTPUT,
   WEAPON_CORE,
   DROP,
@@ -79,6 +80,7 @@ typedef enum
   PLAYER_TAG,
   CAMERA_TARGET_TAG,
   TILE_COLLISION_TAG,
+  CHARACTER_ANIMATOR_TAG,
   AI_AGENT,
   BTV_MOVE_DESTINATION,
   BTV_PATH,
@@ -165,6 +167,15 @@ typedef struct wpskl_Thust
   int on_action;
 } wpskl_Thust;
 
+typedef struct wpskl_ThunderStorm
+{
+  int on_action;
+  u16 remaining;
+  u16 interval;
+  u16 total;
+  u16 timer;
+} wpskl_ThunderStorm;
+
 typedef struct DamageOutput
 {
   int atk;
@@ -185,6 +196,8 @@ typedef int TileCollisionTag;
 typedef int ProjectileTag;
 
 typedef int TagToBeDestroyed;
+
+typedef int CharacterAnimatorTag;
 
 typedef struct
 {

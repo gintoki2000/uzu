@@ -495,7 +495,7 @@ bool rtree_move_proxy(RTree* self, int proxy_id, const AABB* aabb, const Vec2 di
   AABB fat_aabb = *aabb;
   aabb_extend(&fat_aabb, 5.f);
 
-  Vec2 d = mulv(displacement, 2.f);
+  Vec2 d = vec2_mul(displacement, 2.f);
 
   if (d.x < 0.0f)
   {

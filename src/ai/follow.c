@@ -82,14 +82,14 @@ static bt_Status follow_exec(Follow* self, Ecs* ecs, ecs_entity_t entity)
     ASSERT(motion != NULL);
 
     target_pos = get_entity_position(ecs, *target);
-    desired    = subv(target_pos, transform->pos);
-    float dist = normalizev(&desired);
+    desired    = vec2_sub(target_pos, transform->pos);
+    float dist = vec2_make_uvec(&desired);
     if (dist < self->arrive_radius)
     {
       return BT_STATUS_SUCCESS;
     }
-    desired     = mulv(desired, motion->max_speed);
-    motion->acc = truncatev(subv(desired, motion->vel), motion->max_force);
+    desired     = vec2_mul(desired, motion->max_speed);
+    motion->acc = vec2_trunc(vec2_sub(desired, motion->vel), motion->max_force);
     return BT_STATUS_RUNNING;
   }
   else

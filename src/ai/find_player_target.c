@@ -46,7 +46,7 @@ static bt_Status find_player_target_exec(FindPlayerTarget* self, Ecs* ecs, ecs_e
       (transform = ecs_get(ecs, entity, TRANSFORM)) == NULL)
     return BT_STATUS_FAILURE;
 
-  if (lengthv(subv(player_transform->pos, transform->pos)) < 16.f)
+  if (vec2_mag(vec2_sub(player_transform->pos, transform->pos)) < 16.f)
     return BT_STATUS_FAILURE;
 
   *((btv_FollowingTarget*)ecs_add(ecs, entity, BTV_FOLLOWING_TARGET)) = player;

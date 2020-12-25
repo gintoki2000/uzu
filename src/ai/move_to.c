@@ -43,14 +43,14 @@ static bt_Status move_to_exec(MoveTo* self, Ecs* ecs, ecs_entity_t entity)
   if ((destination = ecs_get(ecs, entity, BTV_MOVE_DESTINATION)) &&
       (transform = ecs_get(ecs, entity, TRANSFORM)) && (motion = ecs_get(ecs, entity, MOTION)))
   {
-    desired = subv(*destination, transform->pos);
-    float d = normalizev(&desired);
+    desired = vec2_sub(*destination, transform->pos);
+    float d = vec2_make_uvec(&desired);
     if (d < self->arrive_radius)
     {
       return BT_STATUS_SUCCESS;
     }
-    desired     = mulv(desired, motion->max_speed);
-    motion->acc = truncatev(subv(desired, motion->vel), motion->max_force);
+    desired     = vec2_mul(desired, motion->max_speed);
+    motion->acc = vec2_trunc(vec2_sub(desired, motion->vel), motion->max_force);
     return BT_STATUS_RUNNING;
   }
   else

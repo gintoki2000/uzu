@@ -49,5 +49,5 @@ BOOL is_player_far_away_pred(IsPlayerFarAway* self, Ecs* ecs, ecs_entity_t entit
   dist.x = player_transform->pos.x - owner_transform->pos.x;
   dist.y = player_transform->pos.y - owner_transform->pos.y;
 
-  return lengthv(dist) > self->radius;
+  return vec2_mag(dist) > self->radius;
 }

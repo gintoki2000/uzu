@@ -43,7 +43,7 @@ void sys_wpskl_charge_update(Ecs* ecs)
                (weaer_motion = ecs_get(ecs, weapon_core->wearer, MOTION)) &&
                (visual = ecs_get(ecs, entities[i], VISUAL)))
       {
-        weaer_motion->acc = mulv(VEC2_RIGHT, FLIP_TO_SIGN(visual->flip) * weaer_motion->max_force);
+        weaer_motion->acc = vec2_mul(VEC2_RIGHT, FLIP_TO_SIGN(visual->flip) * weaer_motion->max_force);
       }
     }
     else if ((transform = ecs_get(ecs, entities[i], TRANSFORM)) &&
@@ -65,7 +65,7 @@ void sys_wpskl_charge_update(Ecs* ecs)
         wearer_controller->in_action = TRUE;
         wpskl_charges[i].is_active   = TRUE;
         wpskl_charges[i].timer       = 0;
-        weaer_motion->acc = mulv(VEC2_RIGHT, FLIP_TO_SIGN(visual->flip) * weaer_motion->max_force);
+        weaer_motion->acc = vec2_mul(VEC2_RIGHT, FLIP_TO_SIGN(visual->flip) * weaer_motion->max_force);
       }
     }
   }

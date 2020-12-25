@@ -42,7 +42,7 @@ void sys_motion_update(Ecs* ecs)
   {
     motion_ls[i].vel.x += motion_ls[i].acc.x;
     motion_ls[i].vel.y += motion_ls[i].acc.y;
-    motion_ls[i].vel = truncatev(motion_ls[i].vel, motion_ls[i].max_speed);
+    motion_ls[i].vel = vec2_trunc(motion_ls[i].vel, motion_ls[i].max_speed);
     motion_ls[i].acc = VEC2_ZERO;
   }
 

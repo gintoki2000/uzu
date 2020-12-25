@@ -51,10 +51,10 @@ bt_Status find_random_destination_exec(FindRandomDestination* self, Ecs* ecs, ec
   Vec2 player_pos = get_entity_position(ecs, get_player(ecs));
   Vec2 owner_pos  = get_entity_position(ecs, entity);
 
-  Vec2 x = subv(player_pos, owner_pos);
+  Vec2 x = vec2_sub(player_pos, owner_pos);
 
   float l;
-  if ((l = lengthv(x)) < 20)
+  if ((l = vec2_mag(x)) < 20)
   {
     return BT_STATUS_FAILURE;
   }

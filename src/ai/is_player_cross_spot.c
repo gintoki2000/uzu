@@ -50,5 +50,5 @@ BOOL is_player_cross_spot_pred(IsPlayerCrossSpot* self, Ecs* ecs, ecs_entity_t e
   ASSERT(spot != NULL);
   ASSERT(player_transform != NULL);
 
-  return lengthv(subv(player_transform->pos, spot->pos)) < spot->radius;
+  return vec2_mag(vec2_sub(player_transform->pos, spot->pos)) < spot->radius;
 }

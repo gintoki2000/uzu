@@ -59,7 +59,7 @@ bt_Status find_random_destination_exec(FindRandomDestination* self, Ecs* ecs, ec
     return BT_STATUS_FAILURE;
   }
 
-  btv_MoveDestination* destination = ecs_add(ecs, entity, BTV_MOVE_DESTINATION);
+  Destination* destination = ecs_add(ecs, entity, DESTINATION);
   vec2_scale_to_length(&x, l - 16);
 
   *destination = (Vec2){ owner_pos.x + x.x, owner_pos.y + x.y };

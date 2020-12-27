@@ -1,13 +1,13 @@
 #include "motion_sys.h"
 
 #include <components.h>
-#include <toolbox/toolbox.h>
 #include <ecs/ecs.h>
+#include <toolbox/toolbox.h>
 #define DT 0.0166f
 
 extern Ecs* g_ecs;
 
-static void set_vel_by_controller_input()
+static void set_vel_by_controller_input(void)
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;
@@ -37,7 +37,7 @@ void motion_system_update()
   Transform* transform;
   Motion*    motion_ls;
 
-  set_vel_by_controller_input(g_ecs);
+  set_vel_by_controller_input();
 
   ecs_raw(g_ecs, MOTION, &entities, (void**)&motion_ls, &cnt);
 
@@ -53,11 +53,9 @@ void motion_system_update()
   {
     transform = ecs_get(g_ecs, entities[i], TRANSFORM);
 
+    transform->prev_rot = transform->rot;
     transform->prev_pos = transform->pos;
     transform->pos.x += motion_ls[i].vel.x * DT;
     transform->pos.y += motion_ls[i].vel.y * DT;
-
-    transform->was_changed = (absf(transform->pos.x - transform->prev_pos.x) > 0.1f ||
-                              absf(transform->pos.y - transform->prev_pos.y) > 0.1f);
   }
 }

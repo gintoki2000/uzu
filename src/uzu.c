@@ -192,17 +192,17 @@ static BOOL on_game_init(void* user_data)
             .size    = sizeof(AIAgent),
             .fini_fn = (ecs_comp_fini_fn_t)ai_agent_fini,
         },
-    [BTV_MOVE_DESTINATION] =
+    [DESTINATION] =
         (EcsType){
-            .size = sizeof(btv_MoveDestination),
+            .size = sizeof(Destination),
         },
-    [BTV_PATH] =
+    [PATH] =
         (EcsType){
-            .size = sizeof(btv_Path),
+            .size = sizeof(Path),
         },
-    [BTV_FOLLOWING_TARGET] =
+    [FOLLOWING_TARGET] =
         (EcsType){
-            .size = sizeof(btv_FollowingTarget),
+            .size = sizeof(FollowingTarget),
         },
     [SPOT] =
         (EcsType){

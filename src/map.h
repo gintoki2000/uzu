@@ -35,6 +35,7 @@ typedef struct AnimatedTile
   int tiles[4];
   int duration;
   int cnt;
+  int curr;
 } AnimatedTile;
 
 typedef struct AnimatedCell

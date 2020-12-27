@@ -58,9 +58,14 @@ typedef struct
     __auto_type __tmp_b = (__b);                                                                   \
     __tmp_a < __tmp_b ? __tmp_a : __tmp_b;                                                         \
   })
+
 #define BIT(__x) (1 << (__x))
 
-#define ABS(__x) ((__x) > 0 ? (__x) : -(__x))
+#define ABS(__x)                                                                                   \
+  ({                                                                                               \
+    __auto_type __tmp = __x;                                                                       \
+    __tmp > 0 ? __tmp : -__tmp;                                                                    \
+  })
 
 #define SWAP(__a, __b)                                                                             \
   ({                                                                                               \
@@ -73,7 +78,7 @@ typedef struct
 #define COS SDL_cos
 #define SQRTF SDL_sqrtf
 
-#define EPSILON 0.0001f
+#define EPSILON 0.001f
 
 typedef struct
 {

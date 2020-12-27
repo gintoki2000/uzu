@@ -87,6 +87,8 @@ ecs_entity_t make_knight(Ecs* ecs, Vec2 pos)
   transform      = ecs_add(ecs, knight, TRANSFORM);
   transform->pos = pos;
 
+  INFO("pos=(%2.f, %2.f)", pos.x, pos.y);
+
   visual = ecs_add(ecs, knight, VISUAL);
 
   visual->anchor.x = 16 / 2;
@@ -104,11 +106,10 @@ ecs_entity_t make_knight(Ecs* ecs, Vec2 pos)
   animator->current_anim = ANIM_STATE_IDLE;
   animator->elapsed      = 0;
 
-  hitbox                       = ecs_add(ecs, knight, HITBOX);
-  hitbox->size                 = VEC2(6.f, 10.f);
-  hitbox->anchor               = VEC2(3.f, 10.f);
-  hitbox->proxy_id             = RTREE_NULL_NODE;
-  hitbox->check_tile_collision = TRUE;
+  hitbox           = ecs_add(ecs, knight, HITBOX);
+  hitbox->size     = VEC2(6.f, 10.f);
+  hitbox->anchor   = VEC2(3.f, 10.f);
+  hitbox->proxy_id = RTREE_NULL_NODE;
 
   motion            = ecs_add(ecs, knight, MOTION);
   motion->max_speed = 150;
@@ -688,8 +689,9 @@ ecs_entity_t make_player(Ecs* ecs, ecs_entity_t character, ecs_entity_t weapon)
 
   equip(ecs, character, weapon);
 
-  hitbox->category  = CATEGORY_PLAYER;
-  hitbox->mask_bits = BIT(CATEGORY_ITEM) | BIT(CATEGORY_WEAPON) | BIT(CATEGORY_PROJECTILE);
+  hitbox->category = CATEGORY_PLAYER;
+  hitbox->mask_bits =
+      BIT(CATEGORY_ITEM) | BIT(CATEGORY_WEAPON) | BIT(CATEGORY_PROJECTILE) | BIT(CATEGORY_LADDER);
 
   return character;
 }
@@ -728,6 +730,31 @@ ecs_entity_t make_thunder(Ecs* ecs, Vec2 pos, u16 mask_bits)
   hitbox->category  = CATEGORY_PROJECTILE;
   hitbox->mask_bits = mask_bits;
   hitbox->proxy_id  = RTREE_NULL_NODE;
+
+  return entity;
+}
+
+ecs_entity_t
+make_ladder(Ecs* ecs, const char* name, Vec2 pos, Vec2 size, const char* level, const char* dest)
+{
+  ecs_entity_t entity;
+
+  Transform* transform;
+  HitBox*    hitbox;
+
+  entity = ecs_create(ecs);
+
+  transform      = ecs_add(ecs, entity, TRANSFORM);
+  transform->pos = pos;
+
+  hitbox            = ecs_add(ecs, entity, HITBOX);
+  hitbox->size      = size;
+  hitbox->mask_bits = BIT(CATEGORY_PLAYER);
+  hitbox->category  = CATEGORY_LADDER;
+
+  level_switcher_init(ecs_add(ecs, entity, LEVEL_SWITCHER), level, dest);
+
+  name_init(ecs_add(ecs, entity, NAME), name);
 
   return entity;
 }

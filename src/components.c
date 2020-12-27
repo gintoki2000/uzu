@@ -95,17 +95,17 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
           .size    = sizeof(AIAgent),
           .fini_fn = (ecs_comp_fini_fn_t)ai_agent_fini,
       },
-  [BTV_MOVE_DESTINATION] =
+  [DESTINATION] =
       (EcsType){
-          .size = sizeof(btv_MoveDestination),
+          .size = sizeof(Destination),
       },
-  [BTV_PATH] =
+  [PATH] =
       (EcsType){
-          .size = sizeof(btv_Path),
+          .size = sizeof(Path),
       },
-  [BTV_FOLLOWING_TARGET] =
+  [FOLLOWING_TARGET] =
       (EcsType){
-          .size = sizeof(btv_FollowingTarget),
+          .size = sizeof(FollowingTarget),
       },
   [SPOT] =
       (EcsType){
@@ -114,6 +114,16 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
   [WEAPON_SKILL_THUNDER_STORM] =
       (EcsType){
           .size = sizeof(wpskl_ThunderStorm),
+      },
+  [LEVEL_SWITCHER] =
+      (EcsType){
+          .size    = sizeof(LevelSwitcher),
+          .fini_fn = (ecs_comp_fini_fn_t)level_switcher_fini,
+      },
+  [NAME] =
+      (EcsType){
+          .size    = sizeof(Name),
+          .fini_fn = (ecs_comp_fini_fn_t)name_fini,
       },
 };
 
@@ -164,4 +174,26 @@ void ai_agent_fini(AIAgent* ai_agent)
 void hitbox_init(HitBox* h)
 {
   h->proxy_id = RTREE_NULL_NODE;
+}
+
+void level_switcher_init(LevelSwitcher* sw, const char* level, const char* dest)
+{
+  sw->level = strdup(level);
+  sw->dest  = strdup(dest);
+}
+
+void level_switcher_fini(LevelSwitcher* sw)
+{
+  free(sw->level);
+  free(sw->dest);
+}
+
+void name_fini(Name* name)
+{
+  free(name->value);
+}
+
+void name_init(Name* name, const char* value)
+{
+  name->value = strdup(value);
 }

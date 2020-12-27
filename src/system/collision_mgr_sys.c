@@ -15,6 +15,8 @@ static void projectile_vs_entity(ecs_entity_t projectile, ecs_entity_t entity);
 static void entity_vs_projectile(ecs_entity_t entity, ecs_entity_t projectile);
 static void player_vs_item(ecs_entity_t player, ecs_entity_t item);
 static void item_vs_player(ecs_entity_t item, ecs_entity_t player);
+static void player_vs_ladder(ecs_entity_t player, ecs_entity_t ladder);
+static void ladder_vs_player(ecs_entity_t ladder, ecs_entity_t player);
 
 static void (*_table[NUM_CATEGORIES][NUM_CATEGORIES])(ecs_entity_t, ecs_entity_t) =
 {
@@ -22,6 +24,7 @@ static void (*_table[NUM_CATEGORIES][NUM_CATEGORIES])(ecs_entity_t, ecs_entity_t
     [CATEGORY_WEAPON] = entity_vs_weapon,
     [CATEGORY_PROJECTILE] = entity_vs_projectile,
     [CATEGORY_ITEM] = player_vs_item, 
+    [CATEGORY_LADDER] = player_vs_ladder,
   },
   [CATEGORY_ENEMY] = {
     [CATEGORY_WEAPON ] = entity_vs_weapon,
@@ -37,7 +40,10 @@ static void (*_table[NUM_CATEGORIES][NUM_CATEGORIES])(ecs_entity_t, ecs_entity_t
   },
   [CATEGORY_ITEM] = {
     [CATEGORY_PLAYER] = item_vs_player,
-  }
+  },
+  [CATEGORY_LADDER] = {
+    [CATEGORY_PLAYER] = ladder_vs_player,
+  },
 };
 
 void collision_manager_system_init()
@@ -64,52 +70,68 @@ static void on_collision(void* arg, SysEvt_Collision* event)
 static void weapon_vs_entity(ecs_entity_t weapon, ecs_entity_t entity)
 {
   mediator_broadcast(SYS_SIG_WEAPON_HIT,
-                &(SysEvt_WeaponHit){
-                    .weapon = weapon,
-                    .entity = entity,
-                });
+                     &(SysEvt_WeaponHit){
+                         .weapon = weapon,
+                         .entity = entity,
+                     });
 }
 static void entity_vs_weapon(ecs_entity_t entity, ecs_entity_t weapon)
 {
   mediator_broadcast(SYS_SIG_WEAPON_HIT,
-                &(SysEvt_WeaponHit){
-                    .weapon = weapon,
-                    .entity = entity,
-                });
+                     &(SysEvt_WeaponHit){
+                         .weapon = weapon,
+                         .entity = entity,
+                     });
 }
 static void projectile_vs_entity(ecs_entity_t projectile, ecs_entity_t entity)
 {
   mediator_broadcast(SYS_SIG_PROJECTILE_HIT,
-                &(SysEvt_ProjectileHit){
-                    .projectile = projectile,
-                    .entity     = entity,
-                });
+                     &(SysEvt_ProjectileHit){
+                         .projectile = projectile,
+                         .entity     = entity,
+                     });
 }
 static void entity_vs_projectile(ecs_entity_t entity, ecs_entity_t projectile)
 {
   mediator_broadcast(SYS_SIG_PROJECTILE_HIT,
-                &(SysEvt_ProjectileHit){
-                    .projectile = projectile,
-                    .entity     = entity,
-                });
+                     &(SysEvt_ProjectileHit){
+                         .projectile = projectile,
+                         .entity     = entity,
+                     });
 }
 
 static void player_vs_item(ecs_entity_t player, ecs_entity_t item)
 {
   mediator_broadcast(SYS_SIG_PLAYER_HIT_ITEM,
-                &(SysEvt_PlayerHitItem){
-                    .item   = item,
-                    .player = player,
-                });
+                     &(SysEvt_PlayerHitItem){
+                         .item   = item,
+                         .player = player,
+                     });
 }
 
 static void item_vs_player(ecs_entity_t item, ecs_entity_t player)
 {
   mediator_broadcast(SYS_SIG_PLAYER_HIT_ITEM,
-                &(SysEvt_PlayerHitItem){
-                    .item   = item,
-                    .player = player,
-                });
+                     &(SysEvt_PlayerHitItem){
+                         .item   = item,
+                         .player = player,
+                     });
 }
 
+static void player_vs_ladder(ecs_entity_t player, ecs_entity_t ladder)
+{
+  (void)player;
+  mediator_broadcast(SYS_SIG_HIT_LADDER,
+                     &(SysEvt_HitLadder){
+                         .ladder = ladder,
+                     });
+}
+static void ladder_vs_player(ecs_entity_t ladder, ecs_entity_t player)
+{
+  (void)player;
+  mediator_broadcast(SYS_SIG_HIT_LADDER,
+                     &(SysEvt_HitLadder){
+                         .ladder = ladder,
+                     });
+}
 #endif // COLLISION_FILTER_H

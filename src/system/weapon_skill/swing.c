@@ -39,7 +39,6 @@ void swing_weapon_skl_system_update(void)
             wearer_controller->in_action = FALSE;
             damage_output->atk           = 0;
             transform->rot               = 0.0;
-            transform->was_changed       = true;
             wpskl_swing[i].is_active     = FALSE;
           }
         }
@@ -48,9 +47,7 @@ void swing_weapon_skl_system_update(void)
           if ((visual = ecs_get(g_ecs, entities[i], VISUAL)) &&
               (transform = ecs_get(g_ecs, entities[i], TRANSFORM)))
           {
-
             transform->rot         = wpskl_swing[i].step * 20.0 * FLIP_TO_SIGN(visual->flip);
-            transform->was_changed = true;
           }
         }
       }

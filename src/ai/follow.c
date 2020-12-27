@@ -45,7 +45,7 @@ static void follow_abort(Follow* self, Ecs* ecs, ecs_entity_t entity)
 
   Motion* motion = ecs_get(ecs, entity, MOTION);
   motion->vel    = VEC2_ZERO;
-  ecs_rmv(ecs, entity, BTV_FOLLOWING_TARGET);
+  ecs_rmv(ecs, entity, FOLLOWING_TARGET);
 }
 
 static void follow_finish(Follow* self, Ecs* ecs, ecs_entity_t entity, bt_Status finish_status)
@@ -56,7 +56,7 @@ static void follow_finish(Follow* self, Ecs* ecs, ecs_entity_t entity, bt_Status
   {
     motion      = ecs_get(ecs, entity, MOTION);
     motion->vel = VEC2_ZERO;
-    ecs_rmv(ecs, entity, BTV_FOLLOWING_TARGET);
+    ecs_rmv(ecs, entity, FOLLOWING_TARGET);
   }
 }
 
@@ -65,15 +65,17 @@ static void follow_finish(Follow* self, Ecs* ecs, ecs_entity_t entity, bt_Status
 #define VEC_FMT_VARS(__v) (__v).x, (__v).y
 */
 
+// follow task chỉ nên gắn component cho entity và follow system sẽ lo chuyện còn lại
+
 static bt_Status follow_exec(Follow* self, Ecs* ecs, ecs_entity_t entity)
 {
-  btv_FollowingTarget* target;
+  FollowingTarget* target;
   Transform*           transform;
   Motion*              motion;
   Vec2                 desired;
   Vec2                 target_pos;
 
-  if ((target = ecs_get(ecs, entity, BTV_FOLLOWING_TARGET)) != NULL)
+  if ((target = ecs_get(ecs, entity, FOLLOWING_TARGET)) != NULL)
   {
     transform = ecs_get(ecs, entity, TRANSFORM);
     motion    = ecs_get(ecs, entity, MOTION);

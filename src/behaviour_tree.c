@@ -431,7 +431,6 @@ bt_Status bt_inverter_exec(bt_Inverter* self, Ecs* ecs, ecs_entity_t entity)
     break;
   case BT_STATUS_FAILURE:
     bt_node_vc_finish(((bt_Decorator*)self)->child, ecs, entity, BT_STATUS_SUCCESS);
-    return BT_STATUS_FAILURE;
     return BT_STATUS_SUCCESS;
     break;
   case BT_STATUS_RUNNING:

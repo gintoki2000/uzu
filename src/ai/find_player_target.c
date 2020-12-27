@@ -49,6 +49,6 @@ static bt_Status find_player_target_exec(FindPlayerTarget* self, Ecs* ecs, ecs_e
   if (vec2_mag(vec2_sub(player_transform->pos, transform->pos)) < 16.f)
     return BT_STATUS_FAILURE;
 
-  *((btv_FollowingTarget*)ecs_add(ecs, entity, BTV_FOLLOWING_TARGET)) = player;
+  *((FollowingTarget*)ecs_add(ecs, entity, FOLLOWING_TARGET)) = player;
   return BT_STATUS_SUCCESS;
 }

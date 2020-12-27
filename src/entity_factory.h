@@ -18,6 +18,8 @@ ecs_entity_t make_big_red_flask(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_red_flask(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_thunder_storm(Ecs* ecs, Vec2 center);
 ecs_entity_t make_thunder(Ecs* ecs, Vec2 pos, u16 mask_bits);
+ecs_entity_t
+make_ladder(Ecs* ecs, const char* name, Vec2 pos, Vec2 size, const char* level, const char* dest);
 
 ecs_entity_t make_player(Ecs* ecs, ecs_entity_t character, ecs_entity_t weapon);
 

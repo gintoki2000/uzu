@@ -18,6 +18,7 @@
 #include "system/equipment_sys.h"
 #include "system/health_sys.h"
 #include "system/healthbar_rendering_sys.h"
+#include "system/hud_system.h"
 #include "system/late_destroying_sys.h"
 #include "system/life_span_sys.h"
 #include "system/mediator.h"
@@ -26,7 +27,6 @@
 #include "system/player_ctl_sys.h"
 #include "system/rendering_sys.h"
 #include "system/tile_collision_sys.h"
-#include "system/hud_system.h"
 
 #include "system/weapon_skill/charge.h"
 #include "system/weapon_skill/swing.h"
@@ -52,6 +52,7 @@ static void         on_load();
 static void         on_unload();
 static void         on_event(const SDL_Event* evt);
 static void         on_update();
+static void         on_player_hit_ladder(void* arg, const SysEvt_HitLadder* event);
 static void         emit_signal(int sig_id, const pointer_t event);
 static void         load_map(const char* filename);
 static json_object* load_json_from_file(const char* filename);
@@ -72,6 +73,7 @@ const Scene g_game_scene = {
 Ecs* g_ecs;
 
 static Dispatcher* _dispatcher;
+static BOOL        _load_next_map;
 
 static void on_load()
 {
@@ -84,6 +86,8 @@ static void on_load()
   pickup_system_init();
   damage_system_init();
   collision_manager_system_init();
+
+  mediator_connect(SYS_SIG_HIT_LADDER, NULL, SLOT(on_player_hit_ladder));
 
   load_map("asserts/level/0.json");
 }
@@ -104,40 +108,56 @@ static void on_event(const SDL_Event* evt)
 
 static void on_update()
 {
-  // update
-  player_controller_system_update();
-  motion_system_update();
-  tile_collision_system_update();
-  collision_system_update();
-  equipment_system_update();
-  animator_controller_system_update();
-  animator_system_update();
-  ai_system_update();
-  health_system_update();
-  camera_system_update();
-  map_update_animated_cells();
+  if (_load_next_map)
+  {
 
-  //  skl
-  swing_weapon_skl_system_update();
-  charge_weapon_skl_system();
-  thunder_storm_weapon_skl_system_update();
+    _load_next_map = FALSE;
+  }
+  else
+  {
+    // update
+    player_controller_system_update();
+    motion_system_update();
+    tile_collision_system_update();
+    collision_system_update();
+    equipment_system_update();
+    animator_controller_system_update();
+    animator_system_update();
+    ai_system_update();
+    health_system_update();
+    camera_system_update();
+    map_update_animated_cells();
 
-  // render
-  map_draw(MAP_LAYER_FLOOR);
-  map_draw(MAP_LAYER_WALL);
-  rendering_system_update();
-  healthbar_rendering_system_update();
-  map_draw(MAP_LAYER_FRONT);
-  hub_system_update();
+    //  skl
+    swing_weapon_skl_system_update();
+    charge_weapon_skl_system();
+    thunder_storm_weapon_skl_system_update();
 
-  // render debug
-  collision_system_render_debug();
-  path_rendering_system_update();
-  position_rendering_system_update();
-  hitbox_rendering_system_update();
+    // render
+    map_draw(MAP_LAYER_FLOOR);
+    map_draw(MAP_LAYER_WALL);
+    rendering_system_update();
+    healthbar_rendering_system_update();
+    map_draw(MAP_LAYER_FRONT);
+    hub_system_update();
 
-  // late update
-  late_destroying_system_update();
+    // render debug
+    collision_system_render_debug();
+    path_rendering_system_update();
+    hitbox_rendering_system_update();
+    position_rendering_system_update();
+
+    // late update
+    late_destroying_system_update();
+    life_span_system_update();
+  }
+}
+
+static void on_player_hit_ladder(void* arg, const SysEvt_HitLadder* event)
+{
+  (void)arg;
+
+  INFO("\n");
 }
 
 static void emit_signal(int sig_id, const pointer_t event)
@@ -147,7 +167,6 @@ static void emit_signal(int sig_id, const pointer_t event)
 
 static void load_map(const char* file)
 {
-
   json_object* json_map = NULL;
 
   if (g_ecs != NULL)
@@ -221,8 +240,10 @@ static int parse_objectgroup(const json_object* object_group_json_obj)
   Vec2               pos;
   Vec2               size;
   const char*        name;
+
   objects_json_obj = json_object_object_get(object_group_json_obj, "objects");
   objcnt           = json_object_array_length(objects_json_obj);
+
   for (int i = 0; i < objcnt; ++i)
   {
     obj_json_obj = json_object_array_get_idx(objects_json_obj, i);
@@ -241,17 +262,17 @@ static int parse_objectgroup(const json_object* object_group_json_obj)
     }
     else if (strcmp(objtype, "Ladder") == 0)
     {
-      const char* next_map;
-      const char* link_with;
+      const char* level;
+      const char* dest;
 
       props_json_obj = json_object_object_get(obj_json_obj, "properties");
 
-      next_map  = json_object_object_get_as_string(props_json_obj, "next_map");
-      link_with = json_object_object_get_as_string(props_json_obj, "link_with");
+      level = json_object_object_get_as_string(props_json_obj, "level");
+      dest  = json_object_object_get_as_string(props_json_obj, "dest");
 
-      // make_ladder(g_ecs, pos, size, name, next_map, link_with);
+      make_ladder(g_ecs, name, pos, size, level, dest);
     }
-    else if (strcmp(objtype, "Player"))
+    else if (strcmp(objtype, "Player") == 0)
     {
       make_player(g_ecs, make_knight(g_ecs, pos), make_golden_sword(g_ecs, BIT(CATEGORY_ENEMY)));
     }

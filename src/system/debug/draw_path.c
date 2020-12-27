@@ -9,10 +9,10 @@ void path_rendering_system_update()
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;
-  btv_Path*     paths;
+  Path*     paths;
   int           x1, y1, x2, y2;
 
-  ecs_raw(g_ecs, BTV_PATH, &entities, (void**)&paths, &cnt);
+  ecs_raw(g_ecs, PATH, &entities, (void**)&paths, &cnt);
 
   for (int i = 0; i < cnt; ++i)
   {

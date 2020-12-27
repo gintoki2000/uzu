@@ -30,9 +30,8 @@ void equipment_system_update()
 
     sign = FLIP_TO_SIGN(visual->flip);
 
-    weapon_transform->pos.x       = transform->pos.x + sign * equiments[i].weapon_anchor.x;
-    weapon_transform->pos.y       = transform->pos.y + equiments[i].weapon_anchor.y;
-    weapon_transform->was_changed = TRUE;
+    weapon_transform->pos.x = transform->pos.x + sign * equiments[i].weapon_anchor.x;
+    weapon_transform->pos.y = transform->pos.y + equiments[i].weapon_anchor.y;
 
     weapon_visual->flip = visual->flip;
   }

@@ -5,6 +5,7 @@
 #include <ecs/ecs.h>
 #include <item.h>
 #include <toolbox/toolbox.h>
+
 typedef enum
 {
   NONE,
@@ -28,6 +29,7 @@ enum
   CATEGORY_ENEMY,
   CATEGORY_WEAPON,
   CATEGORY_ITEM,
+  CATEGORY_LADDER,
   NUM_CATEGORIES,
 };
 
@@ -82,48 +84,50 @@ typedef enum
   TILE_COLLISION_TAG,
   CHARACTER_ANIMATOR_TAG,
   AI_AGENT,
-  BTV_MOVE_DESTINATION,
-  BTV_PATH,
-  BTV_FOLLOWING_TARGET,
+  DESTINATION,
+  PATH,
+  FOLLOWING_TARGET,
   SPOT,
+  LEVEL_SWITCHER,
+  NAME,
   NUM_COMPONENTS
 } ComponentId;
 
-typedef struct Motion
+typedef struct
 {
   Vec2  vel;
   Vec2  acc;
   float max_speed;
   float max_force;
 } Motion;
-typedef struct Transform
+typedef struct
 {
   Vec2   prev_pos;
   Vec2   pos;
+  double prev_rot;
   double rot;
-  BOOL   was_changed;
 } Transform;
 
-typedef struct Visual
+typedef struct
 {
   SDL_Point        anchor;
   SDL_RendererFlip flip;
   Sprite           sprite;
 } Visual;
 
-typedef struct Animation
+typedef struct
 {
   s32         frame_duration;
   SpriteSheet sheet;
 } Animation;
 
-typedef struct Spot
+typedef struct
 {
   Vec2  pos;
   float radius;
 } Spot;
 
-typedef struct Controller
+typedef struct
 {
   Direction desired_dir;
   Vec2      desired_vel;
@@ -133,13 +137,13 @@ typedef struct Controller
   BOOL      lock_movement;
 } Controller;
 
-typedef struct Equipment
+typedef struct
 {
   ecs_entity_t weapon;
   Vec2         weapon_anchor;
 } Equipment;
 
-typedef struct WeponBase
+typedef struct
 {
   ecs_entity_t wearer;
   s32          atk;
@@ -147,7 +151,7 @@ typedef struct WeponBase
 } WeaponCore;
 
 /*Weapon skills*/
-typedef struct wpskl_Swing
+typedef struct
 {
   CharacterAction on_action;
   int             timer;
@@ -155,19 +159,19 @@ typedef struct wpskl_Swing
   BOOL            is_active;
 } wpskl_Swing;
 
-typedef struct wpskl_Charge
+typedef struct
 {
   int  on_action;
   int  timer;
   BOOL is_active;
 } wpskl_Charge;
 
-typedef struct wpskl_Thust
+typedef struct
 {
   int on_action;
 } wpskl_Thust;
 
-typedef struct wpskl_ThunderStorm
+typedef struct
 {
   int on_action;
   u16 remaining;
@@ -176,7 +180,7 @@ typedef struct wpskl_ThunderStorm
   u16 timer;
 } wpskl_ThunderStorm;
 
-typedef struct DamageOutput
+typedef struct
 {
   int atk;
   int type;
@@ -204,18 +208,18 @@ typedef struct
   ItemId item_id;
 } ItemTag;
 
-typedef struct Projectile
+typedef struct
 {
   int atk;
 } Projectile;
 
-typedef struct Heath
+typedef struct
 {
   s32 hit_points;
   s32 max_hit_points;
 } Heath;
 
-typedef struct Animator
+typedef struct
 {
   u32        current_anim;
   u32        elapsed;
@@ -223,17 +227,16 @@ typedef struct Animator
   Animation* anims;
 } Animator;
 
-typedef struct HitBox
+typedef struct
 {
   Vec2 size;
   Vec2 anchor;
   int  proxy_id;
   u16  mask_bits;
   u16  category;
-  BOOL check_tile_collision;
 } HitBox;
 
-typedef struct HealthBar
+typedef struct
 {
   int       len; // in pixel
   SDL_Color color;
@@ -266,15 +269,26 @@ typedef struct
 
 //** BT Vars
 
-typedef Vec2 btv_MoveDestination;
+typedef Vec2 Destination;
 typedef struct
 {
   Vec2i nodes[100];
   int   cnt;
   int   curr;
-} btv_Path;
+} Path;
 
-typedef ecs_entity_t btv_FollowingTarget;
+typedef ecs_entity_t FollowingTarget;
+
+typedef struct
+{
+  char* level;
+  char* dest;
+} LevelSwitcher;
+
+typedef struct
+{
+  char* value;
+} Name;
 
 Animation*
 animation_init(Animation* anim, SDL_Texture* tex, u32 x, u32 y, u32 row, u32 col, u32 sw, u32 sh);
@@ -291,5 +305,11 @@ void hitbox_init(HitBox* h);
 
 void hitbox_init_center(HitBox* h, Vec2 size);
 void hitbox_init_bottom_middle(HitBox* h, Vec2 size);
+
+void level_switcher_init(LevelSwitcher* sw, const char* level, const char* dest);
+void level_switcher_fini(LevelSwitcher* sw);
+
+void name_init(Name* name, const char* value);
+void name_fini(Name* name);
 
 #endif // COMPONENTS_H

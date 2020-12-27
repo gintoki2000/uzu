@@ -33,14 +33,14 @@ static bt_Status set_dest_to_spot_exec(SetDestToSpot* self, Ecs* ecs, ecs_entity
   (void)self;
 
   Spot*                spot;
-  btv_MoveDestination* dest;
+  Destination* dest;
 
   spot = ecs_get(ecs, entity, SPOT);
 
   if (spot == NULL)
     return BT_STATUS_FAILURE;
 
-  dest = ecs_add(ecs, entity, BTV_MOVE_DESTINATION);
+  dest = ecs_add(ecs, entity, DESTINATION);
 
   *dest = spot->pos;
 

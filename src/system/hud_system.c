@@ -1,16 +1,17 @@
 #include "hud_system.h"
 #include <components.h>
 #include <resources.h>
+#include <utils.h>
 
-static const SDL_Rect _start = (SDL_Rect){ 0, 0, 4, 9 };
+static const SDL_Rect _start = { 0, 0, 4, 9 };
 
-static const SDL_Rect _body = (SDL_Rect){ 4, 0, 3, 9 };
+static const SDL_Rect _body = { 4, 0, 3, 9 };
 
-static const SDL_Rect _end = (SDL_Rect){ 7, 0, 5, 9 };
+static const SDL_Rect _end = { 7, 0, 5, 9 };
 
-static const SDL_Color blood_color = (SDL_Color){ 237, 19, 41, 255 };
+static const SDL_Color blood_color = { 237, 19, 41, 255 };
 
-static const SDL_Color blood_lose = (SDL_Color){ 135, 11, 23, 255 };
+static const SDL_Color blood_lose = { 135, 11, 23, 255 };
 
 #define UI_HEALTH_BAR_POSITION_X 10
 #define UI_HEALTH_BAR_POSITION_Y 20
@@ -22,21 +23,17 @@ static void draw_player_health_bar();
 
 static void draw_player_health_bar()
 {
-  ecs_entity_t* entities;
-  ecs_size_t    cnt;
-  SDL_Texture*  texture;
-  SDL_Rect      dst;
-
-  Heath* health;
+  ecs_entity_t player;
+  SDL_Texture* texture;
+  SDL_Rect     dst;
+  Heath*       health;
 
   texture = get_texture(TEX_PLAYER_HEALTH_BAR);
 
-  ecs_raw(g_ecs, PLAYER_TAG, &entities, NULL, &cnt);
-
-  if (cnt > 0)
+  if ((player = get_player(g_ecs)) != ECS_NULL_ENT)
   {
 
-    health = ecs_get(g_ecs, entities[0], HEATH);
+    health = ecs_get(g_ecs, player, HEATH);
 
     dst.x = UI_HEALTH_BAR_POSITION_X;
     dst.y = UI_HEALTH_BAR_POSITION_Y;

@@ -77,15 +77,20 @@ static void update_proxies(Ecs* ecs)
   for (int i = 0; i < cnt; ++i)
   {
     transform = ecs_get(ecs, entites[i], TRANSFORM);
-    query_aabb(&aabb, &hitboxs[i], transform);
     if (hitboxs[i].proxy_id == RTREE_NULL_NODE)
     {
+      query_aabb(&aabb, &hitboxs[i], transform);
       hitboxs[i].proxy_id = rtree_create_proxy(_rtree, (void*)entites[i], &aabb);
     }
     else
     {
-      if (transform->was_changed)
+      if (absf(transform->prev_pos.x - transform->pos.x) > EPSILON ||
+          absf(transform->prev_pos.y - transform->pos.y) > EPSILON ||
+          absf(transform->rot - transform->rot) > EPSILON)
+      {
+        query_aabb(&aabb, &hitboxs[i], transform);
         rtree_move_proxy(_rtree, hitboxs[i].proxy_id, &aabb, VEC2(0, 0));
+      }
     }
   }
 }
@@ -183,7 +188,8 @@ static void narrow_phase(Ecs* ecs)
       get_bounding_box(&r2, ecs, _pair_buff[i].e2);
       if (rect_has_intersection(&r1, &r2))
       {
-        mediator_broadcast(SYS_SIG_COLLISION, &(SysEvt_Collision){ _pair_buff[i].e1, _pair_buff[i].e2 });
+        mediator_broadcast(SYS_SIG_COLLISION,
+                           &(SysEvt_Collision){ _pair_buff[i].e1, _pair_buff[i].e2 });
       }
     }
   }

@@ -66,13 +66,16 @@ void  ecs_each_w_filter(Ecs*             self,
                         const EcsFilter* filter,
                         void*            user_data,
                         ecs_each_ex_fn_t each_fn);
-BOOL  ecs_has_ex(Ecs* self, const ecs_size_t* types, ecs_size_t cnt);
-void  ecs_raw(Ecs*           self,
-               ecs_size_t     type,
-               ecs_entity_t** entities_ptr,
-               void**         components_ptr,
-               ecs_size_t*    cnt_ptr);
-void  ecs_connect(Ecs* ecs, int sig, void* udata, slot_t slot);
+
+ecs_size_t ecs_find(Ecs* self, void* component, ecs_size_t type_id);
+
+BOOL       ecs_has_ex(Ecs* self, const ecs_size_t* types, ecs_size_t cnt);
+void       ecs_raw(Ecs*           self,
+                   ecs_size_t     type,
+                   ecs_entity_t** entities_ptr,
+                   void**         components_ptr,
+                   ecs_size_t*    cnt_ptr);
+void       ecs_connect(Ecs* ecs, int sig, void* udata, slot_t slot);
 
 static BOOL ecs_is_valid(Ecs* self, ecs_entity_t entity)
 {

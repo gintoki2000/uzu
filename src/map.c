@@ -21,7 +21,7 @@ enum
 #define MAP_BLUE_FOUNTAIN_MID_TILE 35
 #define MAP_BLUE_FOUNTAIN_BASIN_TILE 29
 
-extern SDL_Rect g_viewport;
+extern SDL_Rect      g_viewport;
 extern SDL_Renderer* g_renderer;
 
 static s32 _floor_layer[MAP_MAX_ROW * MAP_MAX_COL];
@@ -91,21 +91,29 @@ void map_create_animated_cell(int layer, int row, int col, int anim_tile_id)
   }
 }
 
+static void update_animated_tiles()
+{
+  AnimatedTile* tile;
+  ++_ticks;
+  for (int i = 0; i < ANIMATED_TILE_CNT; ++i)
+  {
+    tile = &_animated_tile_list[i];
+
+    tile->curr = (_ticks / tile->duration) % tile->cnt;
+  }
+}
+
 void map_update_animated_cells()
 {
-  _ticks++;
-  int                 idx;
+  update_animated_tiles();
   const AnimatedTile* tile;
+  const AnimatedCell* cell;
   for (int i = 0; i < _animated_cell_list.cnt; ++i)
   {
 
-    tile = _animated_cell_list.cells[i].anim_tile;
-    idx  = _ticks / tile->duration;
-    idx  = idx % tile->cnt;
-    map_set_tile_at(_animated_cell_list.cells[i].layer,
-                _animated_cell_list.cells[i].col,
-                _animated_cell_list.cells[i].row,
-                tile->tiles[idx]);
+    cell = &_animated_cell_list.cells[i];
+    tile = cell->anim_tile;
+    map_set_tile_at(cell->layer, cell->col, cell->row, tile->tiles[tile->curr]);
   }
 }
 
@@ -175,7 +183,7 @@ void map_get_size(s32* w, s32* h)
 void map_set_data(s32 layer, const s32* data, u32 cnt)
 {
   memcpy(_layers[layer], data, sizeof(s32) * cnt);
-  for (int i = 0; i < cnt; ++i)
+  for (u32 i = 0; i < cnt; ++i)
   {
     if (data[i] == MAP_TRAP_TILE)
       map_create_animated_cell(layer, i / _col_cnt, i % _col_cnt, ANIMATED_TILE_TRAP);

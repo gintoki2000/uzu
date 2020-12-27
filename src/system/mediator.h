@@ -14,6 +14,7 @@ enum
   SYS_SIG_GET_DAMAGED,
   SYS_SIG_PLAYER_HIT_ITEM,
   SYS_SIG_HIT_TRAP,
+  SYS_SIG_HIT_LADDER,
   NUM_SYSTEM_SIGNALS,
 };
 
@@ -79,6 +80,11 @@ typedef struct
   int          row, col;
   ecs_entity_t entity;
 } SysEvt_EntityHitTrap;
+
+typedef struct
+{
+  ecs_entity_t ladder;
+} SysEvt_HitLadder;
 
 void mediator_init();
 void mediator_fini();

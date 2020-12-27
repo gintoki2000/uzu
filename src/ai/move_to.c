@@ -35,12 +35,12 @@ static MoveTo* move_to_init(MoveTo* self, float arrive_radius)
 
 static bt_Status move_to_exec(MoveTo* self, Ecs* ecs, ecs_entity_t entity)
 {
-  btv_MoveDestination* destination;
+  Destination* destination;
   Transform*           transform;
   Motion*              motion;
   Vec2                 desired;
 
-  if ((destination = ecs_get(ecs, entity, BTV_MOVE_DESTINATION)) &&
+  if ((destination = ecs_get(ecs, entity, DESTINATION)) &&
       (transform = ecs_get(ecs, entity, TRANSFORM)) && (motion = ecs_get(ecs, entity, MOTION)))
   {
     desired = vec2_sub(*destination, transform->pos);
@@ -64,9 +64,9 @@ static void move_to_abort(MoveTo* self, Ecs* ecs, ecs_entity_t entity)
   (void)self;
   Motion* motion;
 
-  if (ecs_has(ecs, entity, BTV_MOVE_DESTINATION) && (motion = ecs_get(ecs, entity, MOTION)))
+  if (ecs_has(ecs, entity, DESTINATION) && (motion = ecs_get(ecs, entity, MOTION)))
   {
-    ecs_rmv(ecs, entity, BTV_MOVE_DESTINATION);
+    ecs_rmv(ecs, entity, DESTINATION);
     motion->vel = VEC2_ZERO;
   }
 }
@@ -79,7 +79,7 @@ static void move_to_finish(MoveTo* self, Ecs* ecs, ecs_entity_t entity, bt_Statu
 
   if (finish_status == BT_STATUS_SUCCESS && (motion = ecs_get(ecs, entity, MOTION)))
   {
-    ecs_rmv(ecs, entity, BTV_MOVE_DESTINATION);
+    ecs_rmv(ecs, entity, DESTINATION);
     motion->vel = VEC2_ZERO;
   }
 }

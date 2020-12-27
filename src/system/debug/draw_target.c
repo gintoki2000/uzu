@@ -11,11 +11,11 @@ void move_target_rendering_system_update()
   ecs_entity_t* entities;
   ecs_size_t    cnt;
 
-  btv_MoveDestination* dest;
-  btv_FollowingTarget* target;
+  Destination* dest;
+  FollowingTarget* target;
   Transform*           transform;
   Spot*                spot;
-  ecs_raw(g_ecs, BTV_MOVE_DESTINATION, &entities, (void**)&dest, &cnt);
+  ecs_raw(g_ecs, DESTINATION, &entities, (void**)&dest, &cnt);
   SDL_SetRenderDrawColor(g_renderer, 3, 252, 119, 255);
   int x1, y1, x2, y2;
   for (int i = 0; i < cnt; ++i)
@@ -31,7 +31,7 @@ void move_target_rendering_system_update()
   }
 
   Transform* target_transform;
-  ecs_raw(g_ecs, BTV_FOLLOWING_TARGET, &entities, (void**)&target, &cnt);
+  ecs_raw(g_ecs, FOLLOWING_TARGET, &entities, (void**)&target, &cnt);
   for (int i = 0; i < cnt; ++i)
   {
     if ((transform = ecs_get(g_ecs, entities[i], TRANSFORM)) &&

@@ -33,7 +33,6 @@ void charge_weapon_skl_system()
             (damage_output = ecs_get(g_ecs, entities[i], DAMAGE_OUTPUT)))
         {
           transform->rot               = 0.0;
-          transform->was_changed       = TRUE;
           weaer_motion->vel            = VEC2_ZERO;
           wearer_controller->in_action = FALSE;
           wearer_controller->lock_dir  = FALSE;
@@ -59,7 +58,6 @@ void charge_weapon_skl_system()
       if (wearer_controller->action == wpskl_charges[i].on_action)
       {
         transform->rot               = 90.0 * FLIP_TO_SIGN(visual->flip);
-        transform->was_changed       = TRUE;
         damage_output->atk           = weapon_core->atk;
         damage_output->type          = DAMAGE_TYPE_THUST;
         wearer_controller->action    = CHARACTER_ACTION_NONE;

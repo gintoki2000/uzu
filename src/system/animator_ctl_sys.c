@@ -1,7 +1,10 @@
 #include "animator_ctl_sys.h"
 
 #include <components.h>
-void sys_animator_controller_update(Ecs* ecs)
+
+extern Ecs* g_ecs;
+
+void animator_controller_system_update()
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;
@@ -12,11 +15,11 @@ void sys_animator_controller_update(Ecs* ecs)
   float          vx, vy;
   AnimationState next_state;
 
-  ecs_data(ecs, ANIMATOR, &entities, (void**)&animators, &cnt);
+  ecs_raw(g_ecs, ANIMATOR, &entities, (void**)&animators, &cnt);
   for (int i = 0; i < cnt; ++i)
   {
-    if ((motion = ecs_get(ecs, entities[i], MOTION)) &&
-        (visual = ecs_get(ecs, entities[i], VISUAL)))
+    if ((motion = ecs_get(g_ecs, entities[i], MOTION)) &&
+        (visual = ecs_get(g_ecs, entities[i], VISUAL)))
     {
       vx = motion->vel.x;
       vy = motion->vel.y;

@@ -44,7 +44,7 @@ static bt_Status move_to_exec(MoveTo* self, Ecs* ecs, ecs_entity_t entity)
       (transform = ecs_get(ecs, entity, TRANSFORM)) && (motion = ecs_get(ecs, entity, MOTION)))
   {
     desired = vec2_sub(*destination, transform->pos);
-    float d = vec2_make_uvec(&desired);
+    float d = vec2_normalize(&desired);
     if (d < self->arrive_radius)
     {
       return BT_STATUS_SUCCESS;

@@ -1,7 +1,8 @@
 #include "collision_sys.h"
-
 #include "mediator.h"
+
 #include <components.h>
+#include <game_scene.h>
 #include <toolbox/toolbox.h>
 
 #define BUFF_SIZE 300
@@ -10,7 +11,9 @@ static RTree*        _rtree;
 static CollisionPair _pair_buff[BUFF_SIZE];
 static u32           _pair_cnt;
 
-extern SDL_Rect g_viewport;
+extern SDL_Rect      g_viewport;
+extern SDL_Renderer* g_renderer;
+extern Ecs*          g_ecs;
 
 static void on_component_remove(void* udata, const EcsComponentEvent* event)
 {
@@ -18,7 +21,7 @@ static void on_component_remove(void* udata, const EcsComponentEvent* event)
   if (event->type == HITBOX)
   {
     HitBox* hitbox = event->component;
-    if (hitbox->proxy_id != NULL_NODE)
+    if (hitbox->proxy_id != RTREE_NULL_NODE)
     {
       rtree_destroy_proxy(_rtree, hitbox->proxy_id);
     }
@@ -70,12 +73,12 @@ static void update_proxies(Ecs* ecs)
 
   AABB aabb;
 
-  ecs_data(ecs, HITBOX, &entites, (void**)&hitboxs, &cnt);
+  ecs_raw(ecs, HITBOX, &entites, (void**)&hitboxs, &cnt);
   for (int i = 0; i < cnt; ++i)
   {
     transform = ecs_get(ecs, entites[i], TRANSFORM);
     query_aabb(&aabb, &hitboxs[i], transform);
-    if (hitboxs[i].proxy_id == NULL_NODE)
+    if (hitboxs[i].proxy_id == RTREE_NULL_NODE)
     {
       hitboxs[i].proxy_id = rtree_create_proxy(_rtree, (void*)entites[i], &aabb);
     }
@@ -87,7 +90,7 @@ static void update_proxies(Ecs* ecs)
   }
 }
 
-typedef struct __capture01
+typedef struct
 {
   ecs_entity_t entity;
   int          proxy_id;
@@ -145,7 +148,7 @@ static void broad_phase(Ecs* ecs)
   __capture01   capture;
 
   _pair_cnt = 0;
-  ecs_data(ecs, HITBOX, &entities, (void**)&hitbox, &cnt);
+  ecs_raw(ecs, HITBOX, &entities, (void**)&hitbox, &cnt);
   for (int i = 0; i < cnt; ++i)
   {
     transform = ecs_get(ecs, entities[i], TRANSFORM);
@@ -180,16 +183,23 @@ static void narrow_phase(Ecs* ecs)
       get_bounding_box(&r2, ecs, _pair_buff[i].e2);
       if (rect_has_intersection(&r1, &r2))
       {
-        mediator_emit(SIG_COLLISION, &(SysEvt_Collision){ _pair_buff[i].e1, _pair_buff[i].e2 });
+        mediator_broadcast(SYS_SIG_COLLISION, &(SysEvt_Collision){ _pair_buff[i].e1, _pair_buff[i].e2 });
       }
     }
   }
 }
-/* public functions */
-void collision_system_init(Ecs* ecs)
+
+static void on_map_loaded(void* arg, const void* evt)
+{
+  (void)arg;
+  (void)evt;
+  ecs_connect(g_ecs, ECS_SIG_COMP_RMV, NULL, SLOT(on_component_remove));
+}
+
+void collision_system_init()
 {
   _rtree = rtree_new();
-  ecs_connect(ecs, ECS_SIG_COMP_RMV, NULL, (slot_t)on_component_remove);
+  game_scene_connect_sig(GAME_SCENE_SIG_BEGIN_LOAD_MAP, SLOT(on_map_loaded), NULL);
 }
 
 void collision_system_fini()
@@ -198,16 +208,19 @@ void collision_system_fini()
   _rtree = NULL;
 }
 
-void dbsys_rtree_update(SDL_Renderer* renderer) { rtree_draw(_rtree, renderer, &g_viewport); }
+void collision_system_render_debug()
+{
+  rtree_draw_debug(_rtree, g_renderer, &g_viewport);
+}
 
 void collision_system_query(const AABB* aabb, Callback callback)
 {
   rtree_query(_rtree, aabb, callback);
 }
 
-void sys_collision_update(Ecs* ecs)
+void collision_system_update()
 {
-  update_proxies(ecs);
-  broad_phase(ecs);
-  narrow_phase(ecs);
+  update_proxies(g_ecs);
+  broad_phase(g_ecs);
+  narrow_phase(g_ecs);
 }

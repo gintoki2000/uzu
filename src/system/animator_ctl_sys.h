@@ -1,5 +1,5 @@
 #ifndef ANIMATOR_CONTROLLER_SYSTEM_H
 #define ANIMATOR_CONTROLLER_SYSTEM_H
 #include <ecs/ecs.h>
-void sys_animator_controller_update(Ecs* ecs);
+void animator_controller_system_update(void);
 #endif //ANIMATOR_CONTROLLER_SYSTEM_H

@@ -18,15 +18,16 @@
 
 #include <ecs/ecs.h>
 
+#include "scene.h"
 #include <engine/engine.h>
 #include <engine/keyboard.h>
 
 SDL_Rect g_viewport;
 
-static const Screen* _curr_scr = NULL;
+static const Scene* _curr_scr = NULL;
 
-extern const Screen  g_gamescr;
 extern SDL_Renderer* g_renderer;
+extern SDL_Window*   g_window;
 
 static void on_game_quit();
 static BOOL on_game_init();
@@ -37,13 +38,9 @@ static void on_event(const SDL_Event* e);
 
 static BOOL on_game_init()
 {
-  /*load asserts*/
-  IMG_Init(IMG_INIT_PNG);
-  if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024) == -1)
-  {
-    ERROR("open audio failed\n");
-    return FALSE;
-  }
+  SDL_RenderSetScale(g_renderer, SCL_X, SCL_Y);
+
+  g_viewport = (SDL_Rect){ 0, 0, WIN_WIDTH, WIN_HEIGHT };
 
   if (!resources_load())
   {
@@ -51,15 +48,7 @@ static BOOL on_game_init()
     return FALSE;
   }
 
-  /*set scale*/
-  SDL_RenderSetScale(g_renderer, SCL_X, SCL_Y);
-
-  g_viewport = (SDL_Rect){ 0, 0, WIN_WIDTH, WIN_HEIGHT };
-
-  /*init keyboard*/
-  keybroad_init();
-
-  set_scr(&g_gamescr);
+  set_scene(&g_game_scene);
 
   return TRUE;
 }
@@ -69,8 +58,6 @@ static void on_game_fini()
   if (_curr_scr != NULL)
     _curr_scr->on_unload();
   resources_unload();
-  IMG_Quit();
-  Mix_Quit();
 }
 
 static void on_game_loop()
@@ -96,7 +83,7 @@ static void on_game_quit()
   engine_stop();
 }
 
-void set_scr(const Screen* newscr)
+void set_scene(const Scene* newscr)
 {
   if (_curr_scr == newscr)
     return;

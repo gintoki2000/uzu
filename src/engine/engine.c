@@ -1,45 +1,58 @@
 #include "engine.h"
+#include "keyboard.h"
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_mixer.h>
 #include <toolbox/toolbox.h>
 
-static SDL_bool      _is_running = SDL_FALSE;
-static SDL_Window*   _window;
-static SDL_Renderer* _renderer;
-static Uint32        _delay_ticks;
-static Uint32        _frame_rate;
+static SDL_bool _is_running = SDL_FALSE;
+static Uint32   _delay_ticks;
+static Uint32   _frame_rate;
+
+SDL_Window*   g_window;
+SDL_Renderer* g_renderer;
 
 static SDL_bool init(const GameSetting* setting)
 {
-  _window = SDL_CreateWindow(setting->window_title,
-                             SDL_WINDOWPOS_CENTERED,
-                             SDL_WINDOWPOS_CENTERED,
-                             setting->window_width,
-                             setting->window_height,
-                             SDL_WINDOW_SHOWN);
+  g_window = SDL_CreateWindow(setting->window_title,
+                              SDL_WINDOWPOS_CENTERED,
+                              SDL_WINDOWPOS_CENTERED,
+                              setting->window_width,
+                              setting->window_height,
+                              SDL_WINDOW_SHOWN);
 
-  if (_window == NULL)
+  if (g_window == NULL)
     return SDL_FALSE;
 
-  _renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_ACCELERATED);
-  if (_renderer == NULL)
+  g_renderer = SDL_CreateRenderer(g_window, -1, SDL_RENDERER_ACCELERATED);
+  if (g_renderer == NULL)
     return SDL_FALSE;
+  if (IMG_Init(IMG_INIT_PNG) != IMG_INIT_PNG)
+  {
+    ERROR("failed to init SDL_image\n");
+    return FALSE;
+  }
+  if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024) == -1)
+  {
+    ERROR("open audio failed\n");
+    return FALSE;
+  }
+  keybroad_init();
   engine_set_frame_rate(setting->frame_rate);
   return SDL_TRUE;
 }
 
 void engine_run(GameDelegate* game_delegate, const GameSetting* setting)
 {
-  void (*loop_fn)(void*, SDL_Renderer*);
-  void (*event_fn)(void*, const SDL_Event*);
-  void*     user_data;
+  void (*loop_fn)(void);
+  void (*event_fn)(const SDL_Event*);
   Uint32    elapsedTicks, beginingTick;
   SDL_Event event;
 
-  user_data = game_delegate->user_data;
-  loop_fn   = game_delegate->loop;
-  event_fn  = game_delegate->event;
+  loop_fn  = game_delegate->loop;
+  event_fn = game_delegate->event;
 
-  if (init(setting) && game_delegate->init(user_data))
+  if (init(setting) && game_delegate->init())
   {
     _is_running = SDL_TRUE;
 
@@ -48,9 +61,13 @@ void engine_run(GameDelegate* game_delegate, const GameSetting* setting)
       beginingTick = SDL_GetTicks();
       while (SDL_PollEvent(&event))
       {
-        event_fn(user_data, &event);
+        event_fn(&event);
       }
-      loop_fn(user_data, _renderer);
+      keybroad_update();
+      SDL_SetRenderDrawColor(g_renderer, 0, 0, 0, 0);
+      SDL_RenderClear(g_renderer);
+      loop_fn();
+      SDL_RenderPresent(g_renderer);
       elapsedTicks = SDL_GetTicks() - beginingTick;
       if (elapsedTicks < _delay_ticks)
       {
@@ -58,19 +75,21 @@ void engine_run(GameDelegate* game_delegate, const GameSetting* setting)
       }
     }
   }
-  game_delegate->fini(user_data);
-  SDL_DestroyRenderer(_renderer);
-  SDL_DestroyWindow(_window);
+  game_delegate->fini();
+  SDL_DestroyRenderer(g_renderer);
+  SDL_DestroyWindow(g_window);
+  IMG_Quit();
+  Mix_Quit();
   SDL_Quit();
 }
 
-void engine_stop() { _is_running = SDL_FALSE; }
+void engine_stop()
+{
+  _is_running = SDL_FALSE;
+}
 
 void engine_set_frame_rate(Uint32 frame_rate)
 {
-  _frame_rate = frame_rate;
+  _frame_rate  = frame_rate;
   _delay_ticks = 1000 / _frame_rate;
 }
-
-SDL_Renderer* engine_get_renderer() { return _renderer; }
-SDL_Window*   engine_get_window() { return _window; }

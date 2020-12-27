@@ -1,4 +1,4 @@
-#include "health_bar.h"
+#include "hud_system.h"
 #include <components.h>
 #include <resources.h>
 
@@ -15,7 +15,12 @@ static const SDL_Color blood_lose = (SDL_Color){ 135, 11, 23, 255 };
 #define UI_HEALTH_BAR_POSITION_X 10
 #define UI_HEALTH_BAR_POSITION_Y 20
 
-void ui_heath_bar_draw(Ecs* ecs, SDL_Renderer* renderer)
+extern Ecs*          g_ecs;
+extern SDL_Renderer* g_renderer;
+
+static void draw_player_health_bar();
+
+static void draw_player_health_bar()
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;
@@ -26,18 +31,18 @@ void ui_heath_bar_draw(Ecs* ecs, SDL_Renderer* renderer)
 
   texture = get_texture(TEX_PLAYER_HEALTH_BAR);
 
-  ecs_data(ecs, PLAYER_TAG, &entities, NULL, &cnt);
+  ecs_raw(g_ecs, PLAYER_TAG, &entities, NULL, &cnt);
 
   if (cnt > 0)
   {
 
-    health = ecs_get(ecs, entities[0], HEATH);
+    health = ecs_get(g_ecs, entities[0], HEATH);
 
     dst.x = UI_HEALTH_BAR_POSITION_X;
     dst.y = UI_HEALTH_BAR_POSITION_Y;
     dst.w = _start.w;
     dst.h = _start.h;
-    SDL_RenderCopy(renderer, texture, &_start, &dst);
+    SDL_RenderCopy(g_renderer, texture, &_start, &dst);
 
     for (int i = 0; i < health->max_hit_points; ++i)
     {
@@ -45,15 +50,15 @@ void ui_heath_bar_draw(Ecs* ecs, SDL_Renderer* renderer)
       dst.y = UI_HEALTH_BAR_POSITION_Y;
       dst.w = _body.w;
       dst.h = _body.h;
-      SDL_RenderCopy(renderer, texture, &_body, &dst);
-      SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+      SDL_RenderCopy(g_renderer, texture, &_body, &dst);
+      SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);
     }
 
     dst.x = UI_HEALTH_BAR_POSITION_X + _start.w + health->max_hit_points * _body.w;
     dst.y = UI_HEALTH_BAR_POSITION_Y;
     dst.w = _end.w;
     dst.h = _end.h;
-    SDL_RenderCopy(renderer, texture, &_end, &dst);
+    SDL_RenderCopy(g_renderer, texture, &_end, &dst);
 
     for (int i = 0; i < health->max_hit_points; ++i)
     {
@@ -63,7 +68,7 @@ void ui_heath_bar_draw(Ecs* ecs, SDL_Renderer* renderer)
       dst.h = 3;
       if (i < health->hit_points)
       {
-        SDL_SetRenderDrawColor(renderer,
+        SDL_SetRenderDrawColor(g_renderer,
                                blood_color.r,
                                blood_color.g,
                                blood_color.b,
@@ -71,9 +76,14 @@ void ui_heath_bar_draw(Ecs* ecs, SDL_Renderer* renderer)
       }
       else
       {
-        SDL_SetRenderDrawColor(renderer, blood_lose.r, blood_lose.g, blood_lose.b, blood_lose.a);
+        SDL_SetRenderDrawColor(g_renderer, blood_lose.r, blood_lose.g, blood_lose.b, blood_lose.a);
       }
-      SDL_RenderFillRect(renderer, &dst);
+      SDL_RenderFillRect(g_renderer, &dst);
     }
   }
+}
+
+void hub_system_update()
+{
+  draw_player_health_bar();
 }

@@ -1,7 +1,9 @@
 #include "system/equipment_sys.h"
 #include <components.h>
 
-void sys_equipment_update(Ecs* ecs)
+extern Ecs* g_ecs;
+
+void equipment_system_update()
 {
   ecs_entity_t* ett;
   Equipment*    equiments;
@@ -13,18 +15,18 @@ void sys_equipment_update(Ecs* ecs)
   ecs_entity_t  weapon;
   int           sign;
 
-  ecs_data(ecs, EQUIPMENT, &ett, (void**)&equiments, &cnt);
+  ecs_raw(g_ecs, EQUIPMENT, &ett, (void**)&equiments, &cnt);
   for (int i = 0; i < cnt; ++i)
   {
     weapon = equiments[i].weapon;
     if (weapon == ECS_NULL_ENT)
       continue;
 
-    transform = ecs_get(ecs, ett[i], TRANSFORM);
-    visual    = ecs_get(ecs, ett[i], VISUAL);
+    transform = ecs_get(g_ecs, ett[i], TRANSFORM);
+    visual    = ecs_get(g_ecs, ett[i], VISUAL);
 
-    weapon_transform = ecs_get(ecs, weapon, TRANSFORM);
-    weapon_visual    = ecs_get(ecs, weapon, VISUAL);
+    weapon_transform = ecs_get(g_ecs, weapon, TRANSFORM);
+    weapon_visual    = ecs_get(g_ecs, weapon, VISUAL);
 
     sign = FLIP_TO_SIGN(visual->flip);
 

@@ -287,4 +287,9 @@ void      animator_fini(Animator* animator);
 void visual_set_anchor_to_center(Visual* v);
 void ai_agent_fini(AIAgent* ai_agent);
 
+void hitbox_init(HitBox* h);
+
+void hitbox_init_center(HitBox* h, Vec2 size);
+void hitbox_init_bottom_middle(HitBox* h, Vec2 size);
+
 #endif // COMPONENTS_H

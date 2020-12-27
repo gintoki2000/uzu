@@ -1,10 +1,12 @@
-#include "health_bar_drawing_sys.h"
-
 #include <components.h>
+#include "healthbar_rendering_sys.h"
+#include <ecs/ecs.h>
 
 extern SDL_Rect g_viewport;
+extern SDL_Renderer* g_renderer;
+extern Ecs* g_ecs;
 
-void sys_health_bar_update(Ecs* ecs, SDL_Renderer* renderer)
+void healthbar_rendering_system_update()
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;
@@ -16,12 +18,12 @@ void sys_health_bar_update(Ecs* ecs, SDL_Renderer* renderer)
   SDL_Rect   border;
   SDL_Rect   inner;
 
-  ecs_data(ecs, HEAL_BAR, &entities, (void**)&heal_bars, &cnt);
+  ecs_raw(g_ecs, HEAL_BAR, &entities, (void**)&heal_bars, &cnt);
 
   for (int i = 0; i < cnt; ++i)
   {
-    transform = ecs_get(ecs, entities[i], TRANSFORM);
-    heath     = ecs_get(ecs, entities[i], HEATH);
+    transform = ecs_get(g_ecs, entities[i], TRANSFORM);
+    heath     = ecs_get(g_ecs, entities[i], HEATH);
     p         = (float)heath->hit_points / (float)heath->max_hit_points;
 
     border.x = transform->pos.x - heal_bars[i].anchor.x - g_viewport.x;
@@ -36,7 +38,7 @@ void sys_health_bar_update(Ecs* ecs, SDL_Renderer* renderer)
     inner.y = border.y + 1;
     inner.w = (border.w - 2) * p;
     inner.h = border.h - 2;
-    SDL_SetRenderDrawColor(renderer, 0, 200, 0, 255);
-    SDL_RenderFillRect(renderer, &inner);
+    SDL_SetRenderDrawColor(g_renderer, 0, 200, 0, 255);
+    SDL_RenderFillRect(g_renderer, &inner);
   }
 }

@@ -1,12 +1,12 @@
-#include "rendering_system.h"
 #include <components.h>
 #include <ecs/ecs.h>
+#include "rendering_sys.h"
 
 extern SDL_Rect      g_viewport;
 extern SDL_Renderer* g_renderer;
 extern Ecs*          g_ecs;
 
-void update_rendering_system(void)
+void rendering_system_update(void)
 {
   ecs_entity_t* entities;
   Visual*       visuals;

@@ -1,6 +1,6 @@
 #ifndef PLAYER_CONTROLLER_SYSTEM_H
 #define PLAYER_CONTROLLER_SYSTEM_H
 #include <ecs/ecs.h>
-void sys_player_controller_update(Ecs* ecs);
+void player_controller_system_update();
 
 #endif //PLAYER_CONTROLLER_SYSTEM_H

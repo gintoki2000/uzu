@@ -241,7 +241,7 @@ void ecs_each_w_filter(Ecs*             self,
   }
 }
 
-void ecs_data(Ecs*           self,
+void ecs_raw(Ecs*           self,
               ecs_size_t     type,
               ecs_entity_t** entities_ptr,
               void**         components_ptr,

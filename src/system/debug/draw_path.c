@@ -1,16 +1,18 @@
 #include "draw_path.h"
 #include <components.h>
 #include <constances.h>
-extern SDL_Rect g_viewport;
+extern SDL_Rect      g_viewport;
+extern SDL_Renderer* g_renderer;
+extern Ecs*          g_ecs;
 
-void dbsys_path_update(Ecs* ecs, SDL_Renderer* renderer)
+void path_rendering_system_update()
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;
   btv_Path*     paths;
   int           x1, y1, x2, y2;
 
-  ecs_data(ecs, BTV_PATH, &entities, (void**)&paths, &cnt);
+  ecs_raw(g_ecs, BTV_PATH, &entities, (void**)&paths, &cnt);
 
   for (int i = 0; i < cnt; ++i)
   {
@@ -23,10 +25,10 @@ void dbsys_path_update(Ecs* ecs, SDL_Renderer* renderer)
       y2 = (paths[i].nodes[j + 1].y + 0.5) * TILE_SIZE - g_viewport.y;
 
       if (j == paths[i].curr)
-        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+        SDL_SetRenderDrawColor(g_renderer, 0, 255, 0, 255);
       else
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-      SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
+        SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);
+      SDL_RenderDrawLine(g_renderer, x1, y1, x2, y2);
     }
   }
 }

@@ -2,9 +2,9 @@ subdir('engine')
 subdir('ecs')
 subdir('toolbox')
 subdir('system')
-subdir('ui')
 subdir('ai')
-source_files = files('uzu.c', 
+source_files = files(
+  'dungeon.c', 
   'components.c',
   'resources.c', 
   'entity_factory.c',
@@ -13,7 +13,8 @@ source_files = files('uzu.c',
   'graph.c',
   'generator.c', 
   'behaviour_tree.c', 
-  'path_finder.c', 'utils.c',
-  './read_all.c',
-  './map-loader.c',
-  ) + engine_source_files + ecs_source_files + toolbox_source_files + system_source_files + ui_source_files + ai_source_files
+  'path_finder.c',
+  'utils.c',
+  'read_all.c',
+  'game_scene.c',
+) + engine_source_files + ecs_source_files + toolbox_source_files + system_source_files + ai_source_files

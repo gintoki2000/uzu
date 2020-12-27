@@ -4,7 +4,7 @@ ecs_entity_t get_player(Ecs* ecs)
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;
-  ecs_data(ecs, PLAYER_TAG, &entities, NULL, &cnt);
+  ecs_raw(ecs, PLAYER_TAG, &entities, NULL, &cnt);
   return cnt > 0 ? entities[0] : ECS_NULL_ENT;
 }
 

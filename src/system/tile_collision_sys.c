@@ -6,6 +6,8 @@
 #include <map.h>
 #include <toolbox/toolbox.h>
 
+extern Ecs* g_ecs;
+
 INLINE RECT get_bounding_box(const HitBox* hitbox, const Transform* transform)
 {
   return (RECT){
@@ -16,7 +18,7 @@ INLINE RECT get_bounding_box(const HitBox* hitbox, const Transform* transform)
   };
 }
 
-void sys_tile_collision_update(Ecs* ecs)
+void tile_collision_system_update()
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;
@@ -31,11 +33,11 @@ void sys_tile_collision_update(Ecs* ecs)
   int right_tile;
   int tile_id;
 
-  ecs_data(ecs, TILE_COLLISION_TAG, &entities, NULL, &cnt);
+  ecs_raw(g_ecs, TILE_COLLISION_TAG, &entities, NULL, &cnt);
   for (int i = 0; i < cnt; ++i)
   {
-    if ((transform = ecs_get(ecs, entities[i], TRANSFORM)) &&
-        (hitbox = ecs_get(ecs, entities[i], HITBOX)))
+    if ((transform = ecs_get(g_ecs, entities[i], TRANSFORM)) &&
+        (hitbox = ecs_get(g_ecs, entities[i], HITBOX)))
     {
       obj_rect    = get_bounding_box(hitbox, transform);
       left_tile   = (int)(obj_rect.x / TILE_SIZE);
@@ -52,7 +54,7 @@ void sys_tile_collision_update(Ecs* ecs)
             transform->pos = transform->prev_pos;
           else if (tile_id >= 11 && tile_id <= 13)
           {
-            mediator_emit(SIG_HIT_TRAP,
+            mediator_broadcast(SYS_SIG_HIT_TRAP,
                           &(SysEvt_EntityHitTrap){
                               .row    = row,
                               .col    = col,

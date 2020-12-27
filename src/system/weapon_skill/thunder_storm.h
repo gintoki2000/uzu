@@ -1,5 +1,5 @@
 #ifndef THUNDER_STORM_H
 #define THUNDER_STORM_H
 #include <ecs/ecs.h>
-void sys_wpskl_thunder_storm_update(Ecs* ecs);
+void thunder_storm_weapon_skl_system_update(void);
 #endif // THUNDER_STORM_H

@@ -27,7 +27,6 @@
 #include "system/collision_sys.h"
 #include "system/dmg_sys.h"
 #include "system/draw_sys.h"
-#include "system/health_bar_drawing_sys.h"
 #include "system/health_sys.h"
 #include "system/late_destroying_sys.h"
 #include "system/life_span_sys.h"
@@ -50,6 +49,7 @@
 #include <system/weapon_skill/swing.h>
 
 #include <ui/health_bar.h>
+#include "system/healthbar_rendering_sys.h"
 
 static Ecs* _ecs;
 
@@ -223,7 +223,7 @@ static BOOL on_game_init(void* user_data)
   mediator_init();
   collision_system_init(_ecs);
   health_system_init(_ecs);
-  weapon_dealing_damage_system_init(_ecs);
+  damage_system_init(_ecs);
   collision_filter_system_init(_ecs);
   drop_system_init(_ecs);
   pickup_system_init(_ecs);
@@ -255,27 +255,27 @@ static void on_game_loop(void* user_data, SDL_Renderer* renderer)
   SDL_RenderClear(renderer);
   keybroad_update();
   map_update_animated_cells();
-  sys_ai_update(_ecs);
-  sys_player_controller_update(_ecs);
-  sys_motion_update(_ecs);
-  sys_collision_update(_ecs);
-  sys_tile_collision_update(_ecs);
-  sys_equipment_update(_ecs);
+  ai_system_update(_ecs);
+  player_controller_system_update(_ecs);
+  motion_system_update(_ecs);
+  collision_system_update(_ecs);
+  tile_collision_system_update(_ecs);
+  equipment_system_update(_ecs);
   sys_wpskl_swing_update(_ecs);
-  sys_wpskl_charge_update(_ecs);
+  charge_weapon_skl_system(_ecs);
   sys_wpskl_thunder_storm_update(_ecs);
-  sys_animator_controller_update(_ecs);
-  sys_animator_update(_ecs);
-  sys_camera_update(_ecs);
-  sys_heath_update(_ecs);
-  map_draw_layer(MAP_LAYER_FLOOR, renderer);
-  map_draw_layer(MAP_LAYER_WALL, renderer);
+  animator_controller_system_update(_ecs);
+  animator_system_update(_ecs);
+  camera_system_update(_ecs);
+  health_system_update(_ecs);
+  map_draw(MAP_LAYER_FLOOR, renderer);
+  map_draw(MAP_LAYER_WALL, renderer);
   sys_draw_update(_ecs, renderer);
-  sys_health_bar_update(_ecs, renderer);
-  map_draw_layer(MAP_LAYER_FRONT, renderer);
+  healthbar_rendering_system_update(_ecs, renderer);
+  map_draw(MAP_LAYER_FRONT, renderer);
   ui_heath_bar_draw(_ecs, renderer);
-  sys_life_span_update(_ecs);
-  dbsys_rtree_update(renderer);
+  life_span_system_update(_ecs);
+  collision_system_render_debug(renderer);
   // draw_rooms(renderer, 2);
   // draw_graph(renderer, 2);
   // draw_tree(renderer, 2);
@@ -283,7 +283,7 @@ static void on_game_loop(void* user_data, SDL_Renderer* renderer)
   // dbsys_path_update(_ecs, renderer);
   dbsys_mvto_target_update(_ecs, renderer);
   dbsys_draw_position_update(_ecs, renderer);
-  sys_late_destroying_update(_ecs);
+  late_destroying_system_update(_ecs);
   SDL_RenderPresent(renderer);
 }
 

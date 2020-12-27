@@ -1,7 +1,5 @@
 #ifndef HITBOX_DEBUG_SYSTEM_H
 #define HITBOX_DEBUG_SYSTEM_H
-#include <toolbox/toolbox.h>
 #include <ecs/ecs.h>
-
-void dbsys_hitbox_update(Ecs* ecs, SDL_Renderer* renderer);
-#endif //HITBOX_DEBUG_SYSTEM_H
+void hitbox_rendering_system_update(void);
+#endif // HITBOX_DEBUG_SYSTEM_H

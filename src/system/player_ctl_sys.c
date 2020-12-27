@@ -5,16 +5,18 @@
 #include <engine/keyboard.h>
 #include <utils.h>
 
-void sys_player_controller_update(Ecs* ecs)
+extern Ecs* g_ecs;
+
+void player_controller_system_update()
 {
 
   ecs_entity_t player;
   Controller*  controller;
 
-  if ((player = get_player(ecs)) == ECS_NULL_ENT)
+  if ((player = get_player(g_ecs)) == ECS_NULL_ENT)
     return;
 
-  controller = ecs_get(ecs, player, CONTROLLER);
+  controller = ecs_get(g_ecs, player, CONTROLLER);
 
   controller->desired_vel = VEC2_ZERO;
 
@@ -42,7 +44,6 @@ void sys_player_controller_update(Ecs* ecs)
 
   else if (key_just_pressed(KEY_B))
   {
-
     controller->action = CHARACTER_ACTION_SPECIAL_ATK;
   }
 }

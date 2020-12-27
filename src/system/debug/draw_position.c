@@ -1,21 +1,23 @@
 #include "draw_position.h"
 #include <components.h>
 
-extern SDL_Rect g_viewport;
+extern SDL_Rect      g_viewport;
+extern SDL_Renderer* g_renderer;
+extern Ecs*          g_ecs;
 
-void dbsys_draw_position_update(Ecs* ecs, SDL_Renderer* renderer)
+void position_rendering_system_update()
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;
 
   Transform* transforms;
 
-  ecs_data(ecs, TRANSFORM, &entities, (void**)&transforms, &cnt);
+  ecs_raw(g_ecs, TRANSFORM, &entities, (void**)&transforms, &cnt);
 
-  SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+  SDL_SetRenderDrawColor(g_renderer, 0, 255, 0, 255);
   for (int i = 0; i < cnt; ++i)
   {
-    SDL_RenderDrawPoint(renderer,
+    SDL_RenderDrawPoint(g_renderer,
                         transforms[i].pos.x - g_viewport.x,
                         transforms[i].pos.y - g_viewport.y);
   }

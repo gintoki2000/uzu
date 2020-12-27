@@ -22,6 +22,7 @@ enum
 #define MAP_BLUE_FOUNTAIN_BASIN_TILE 29
 
 extern SDL_Rect g_viewport;
+extern SDL_Renderer* g_renderer;
 
 static s32 _floor_layer[MAP_MAX_ROW * MAP_MAX_COL];
 static s32 _wall_layer[MAP_MAX_ROW * MAP_MAX_COL];
@@ -101,14 +102,14 @@ void map_update_animated_cells()
     tile = _animated_cell_list.cells[i].anim_tile;
     idx  = _ticks / tile->duration;
     idx  = idx % tile->cnt;
-    set_tile_at(_animated_cell_list.cells[i].layer,
+    map_set_tile_at(_animated_cell_list.cells[i].layer,
                 _animated_cell_list.cells[i].col,
                 _animated_cell_list.cells[i].row,
                 tile->tiles[idx]);
   }
 }
 
-void map_draw_layer(int layer, SDL_Renderer* renderer)
+void map_draw(int layer)
 {
   s32          start_x, start_y, end_x, end_y;
   SDL_Texture* tileset;
@@ -150,7 +151,7 @@ void map_draw_layer(int layer, SDL_Renderer* renderer)
 
       src.x = tile_id * TILE_SIZE;
 
-      SDL_RenderCopy(renderer, tileset, &src, &dst);
+      SDL_RenderCopy(g_renderer, tileset, &src, &dst);
     }
   }
 }
@@ -209,7 +210,7 @@ BOOL map_is_floor(s32 cell_x, s32 cell_y)
   return map_tile_at(MAP_LAYER_FLOOR, cell_x, cell_y) != 0;
 }
 
-void set_tile_at(s32 layer, s32 x, s32 y, s32 tile)
+void map_set_tile_at(s32 layer, s32 x, s32 y, s32 tile)
 {
   _layers[layer][x + y * _col_cnt] = tile;
 }

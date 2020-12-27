@@ -10,10 +10,9 @@ typedef struct
   ecs_entity_t e2;
 } CollisionPair;
 
-void collision_system_init(Ecs* ecs);
-void collision_system_fini();
-void dbsys_rtree_update(SDL_Renderer* renderer);
+void collision_system_init(void);
+void collision_system_fini(void);
+void collision_system_update(void);
+void collision_system_render_debug(void);
 void collision_system_query(const AABB* aabb, Callback callback);
-
-void sys_collision_update(Ecs* ecs);
 #endif // COLLISION_SYSTEM_H

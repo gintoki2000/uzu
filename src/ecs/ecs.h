@@ -67,7 +67,7 @@ void  ecs_each_w_filter(Ecs*             self,
                         void*            user_data,
                         ecs_each_ex_fn_t each_fn);
 BOOL  ecs_has_ex(Ecs* self, const ecs_size_t* types, ecs_size_t cnt);
-void  ecs_data(Ecs*           self,
+void  ecs_raw(Ecs*           self,
                ecs_size_t     type,
                ecs_entity_t** entities_ptr,
                void**         components_ptr,

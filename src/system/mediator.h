@@ -5,15 +5,15 @@
 
 enum
 {
-  SIG_ENTITY_DIED,
-  SIG_WEAPON_HIT,
-  SIG_COLLISION,
-  SIG_PROJECTILE_HIT,
-  SIG_LIFE_SPAN_END_UP,
-  SIG_DEAL_DAMAGE,
-  SIG_GET_DAMAGED,
-  SIG_PLAYER_HIT_ITEM,
-  SIG_HIT_TRAP,
+  SYS_SIG_ENTITY_DIED,
+  SYS_SIG_WEAPON_HIT,
+  SYS_SIG_COLLISION,
+  SYS_SIG_PROJECTILE_HIT,
+  SYS_SIG_FINISH_LIFE_SPAN,
+  SYS_SIG_DEAL_DAMAGE,
+  SYS_SIG_GET_DAMAGED,
+  SYS_SIG_PLAYER_HIT_ITEM,
+  SYS_SIG_HIT_TRAP,
   NUM_SYSTEM_SIGNALS,
 };
 
@@ -51,7 +51,7 @@ typedef struct
 typedef struct
 {
   ecs_entity_t entity;
-} SysEvt_LifeSpanEndUp;
+} SysEvt_FinishLifeSpan;
 
 typedef struct
 {
@@ -82,8 +82,8 @@ typedef struct
 
 void mediator_init();
 void mediator_fini();
-void mediator_connect(int sig_id, pointer_t udata, slot_t slot);
+void mediator_connect(int sig_id, pointer_t arg, slot_t slot);
 void mediator_disconnect(pointer_t func);
-void mediator_emit(int sig_id, const pointer_t event);
+void mediator_broadcast(int sig_id, const pointer_t event);
 
 #endif // MEDIATOR_H

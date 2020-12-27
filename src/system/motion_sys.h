@@ -3,8 +3,6 @@
 #include <ecs/ecs.h>
 #include <toolbox/toolbox.h>
 
-void sys_motion_update(Ecs* ecs);
-
-
+void motion_system_update();
 
 #endif

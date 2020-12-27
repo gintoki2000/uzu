@@ -62,8 +62,8 @@ typedef struct
 
 #define ABS(__x) ((__x) > 0 ? (__x) : -(__x))
 
-#define SWAP(__a, __b)                                                                             \                                                                                               \
-  ({                                                                                                \
+#define SWAP(__a, __b)                                                                             \
+  ({                                                                                               \
     typeof(__a) __tmp = (__a);                                                                     \
     __a               = __b;                                                                       \
     __b               = __tmp;                                                                     \
@@ -72,6 +72,9 @@ typedef struct
 #define SIN SDL_sin
 #define COS SDL_cos
 #define SQRTF SDL_sqrtf
+
+#define EPSILON 0.0001f
+
 typedef struct
 {
   float x;
@@ -96,24 +99,60 @@ typedef struct
   Vec2 upper_bound;
 } AABB;
 
-INLINE int   max(int a, int b) { return a > b ? a : b; }
-INLINE int   min(int a, int b) { return a < b ? a : b; }
-INLINE float maxf(float a, float b) { return a > b ? a : b; }
-INLINE float minf(float a, float b) { return a < b ? a : b; }
-INLINE Vec2  vec2_max(Vec2 a, Vec2 b) { return (Vec2){ maxf(a.x, b.x), maxf(a.y, b.y) }; }
-INLINE Vec2  vec2_min(Vec2 a, Vec2 b) { return (Vec2){ minf(a.x, b.x), minf(a.y, b.y) }; }
-INLINE float absf(float x) { return x >= 0.f ? x : -x; }
+INLINE int max(int a, int b)
+{
+  return a > b ? a : b;
+}
 
-INLINE Vec2 vec2_sub(Vec2 a, Vec2 b) { return (Vec2){ a.x - b.x, a.y - b.y }; }
+INLINE int min(int a, int b)
+{
+  return a < b ? a : b;
+}
 
-INLINE Vec2 vec2_mul(Vec2 a, float k) { return (Vec2){ a.x * k, a.y * k }; }
+INLINE float maxf(float a, float b)
+{
+  return a > b ? a : b;
+}
 
-INLINE float vec2_mag(Vec2 v) { return SQRTF(v.x * v.x + v.y * v.y); }
+INLINE float minf(float a, float b)
+{
+  return a < b ? a : b;
+}
 
-INLINE float vec2_make_uvec(Vec2* v)
+INLINE Vec2 vec2_max(Vec2 a, Vec2 b)
+{
+  return (Vec2){ maxf(a.x, b.x), maxf(a.y, b.y) };
+}
+
+INLINE Vec2 vec2_min(Vec2 a, Vec2 b)
+{
+  return (Vec2){ minf(a.x, b.x), minf(a.y, b.y) };
+}
+
+INLINE float absf(float x)
+{
+  return x >= 0.f ? x : -x;
+}
+
+INLINE Vec2 vec2_sub(Vec2 a, Vec2 b)
+{
+  return (Vec2){ a.x - b.x, a.y - b.y };
+}
+
+INLINE Vec2 vec2_mul(Vec2 a, float k)
+{
+  return (Vec2){ a.x * k, a.y * k };
+}
+
+INLINE float vec2_mag(Vec2 v)
+{
+  return SQRTF(v.x * v.x + v.y * v.y);
+}
+
+INLINE float vec2_normalize(Vec2* v)
 {
   float mag = vec2_mag(*v);
-  if (mag < 0.00001f)
+  if (mag < EPSILON)
   {
     return 0.f;
   }
@@ -125,12 +164,12 @@ INLINE float vec2_make_uvec(Vec2* v)
 
 INLINE void vec2_scale_to_length(Vec2* v, float len)
 {
-  vec2_make_uvec(v);
+  vec2_normalize(v);
   v->x *= len;
   v->y *= len;
 }
 
-INLINE Vec2 vec2_normalize(Vec2 v)
+INLINE Vec2 vec2_unit_vec(Vec2 v)
 {
   float len   = vec2_mag(v);
   float ivlen = 1.f / len;
@@ -141,7 +180,7 @@ INLINE Vec2 vec2_trunc(Vec2 v, float max_len)
 {
   if (vec2_mag(v) > max_len)
   {
-    return vec2_mul(vec2_normalize(v), max_len);
+    return vec2_mul(vec2_unit_vec(v), max_len);
   }
   return v;
 }

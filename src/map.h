@@ -28,6 +28,8 @@ enum
 #define TILE_LEFT_WALL_W_ROOF 24
 #define TILE_RIGHT_WALL_W_ROOF 25
 
+typedef u32 tile_t;
+
 typedef struct AnimatedTile
 {
   int tiles[4];
@@ -39,13 +41,12 @@ typedef struct AnimatedCell
 {
   int                 row;
   int                 col;
-  int                 curr_idx;
   int                 layer;
   const AnimatedTile* anim_tile;
 } AnimatedCell;
 
 void map_update_animated_cells();
-void map_draw_layer(int layer, SDL_Renderer* renderer);
+void map_draw(int layer);
 void map_set_size(s32 w, s32 h);
 void map_set_data(s32 layer, const s32* data, u32 cnt);
 void map_get_size(s32* w, s32* h);
@@ -53,7 +54,7 @@ s32* map_get_layer(s32 layer);
 BOOL map_is_wall(s32 cell_x, s32 cell_y);
 BOOL map_is_floor(s32 cell_x, s32 cell_y);
 s32  map_tile_at(s32 layer, s32 x, s32 y);
-void set_tile_at(s32 layer, s32 x, s32 y, s32 tile);
+void map_set_tile_at(s32 layer, s32 x, s32 y, s32 tile);
 void map_clear(s32 layer);
 
 #endif // MAP_H

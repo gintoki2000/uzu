@@ -83,7 +83,7 @@ static bt_Status follow_exec(Follow* self, Ecs* ecs, ecs_entity_t entity)
 
     target_pos = get_entity_position(ecs, *target);
     desired    = vec2_sub(target_pos, transform->pos);
-    float dist = vec2_make_uvec(&desired);
+    float dist = vec2_normalize(&desired);
     if (dist < self->arrive_radius)
     {
       return BT_STATUS_SUCCESS;

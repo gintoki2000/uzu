@@ -114,9 +114,9 @@ static void build_room(const Room* room)
     for (int x = left; x <= right; ++x)
     {
       if ((rand() % 100) < p_broken_floor)
-        set_tile_at(MAP_LAYER_FLOOR, x, y, 2);
+        map_set_tile_at(MAP_LAYER_FLOOR, x, y, 2);
       else 
-        set_tile_at(MAP_LAYER_FLOOR, x, y, 1);
+        map_set_tile_at(MAP_LAYER_FLOOR, x, y, 1);
     }
 }
 
@@ -312,36 +312,36 @@ static void build_map_from_graph()
         // is top wall
         if (!s[0] && !s[1] && !s[2] && s[3] && s[4] && s[5] && s[6] && s[7])
         {
-          set_tile_at(MAP_LAYER_WALL, j, i - 1, TILE_WALL_1);
-          set_tile_at(MAP_LAYER_WALL, j, i - 2, TILE_ROOF_1);
+          map_set_tile_at(MAP_LAYER_WALL, j, i - 1, TILE_WALL_1);
+          map_set_tile_at(MAP_LAYER_WALL, j, i - 2, TILE_ROOF_1);
         }
 
         // top-left corner
         if (!s[0] && !s[1] && !s[2] && !s[3] && s[4] && !s[5] && s[6] && s[7])
         {
-          set_tile_at(MAP_LAYER_WALL, j, i - 1, TILE_LEFT_CORNER_WALL);
-          set_tile_at(MAP_LAYER_WALL, j, i - 2, TILE_ROOF_1);
-          set_tile_at(MAP_LAYER_FRONT, j, i, TILE_ROOF_LEFT);
+          map_set_tile_at(MAP_LAYER_WALL, j, i - 1, TILE_LEFT_CORNER_WALL);
+          map_set_tile_at(MAP_LAYER_WALL, j, i - 2, TILE_ROOF_1);
+          map_set_tile_at(MAP_LAYER_FRONT, j, i, TILE_ROOF_LEFT);
         }
 
         // top-right corner
         if (!s[0] && !s[1] && !s[2] && s[3] && !s[4] && s[5] && s[6] && !s[7])
         {
-          set_tile_at(MAP_LAYER_WALL, j, i - 1, TILE_RIGHT_CORNER_WALL);
-          set_tile_at(MAP_LAYER_WALL, j, i - 2, TILE_ROOF_1);
-          set_tile_at(MAP_LAYER_FRONT, j, i, TILE_ROOF_RIGHT);
+          map_set_tile_at(MAP_LAYER_WALL, j, i - 1, TILE_RIGHT_CORNER_WALL);
+          map_set_tile_at(MAP_LAYER_WALL, j, i - 2, TILE_ROOF_1);
+          map_set_tile_at(MAP_LAYER_FRONT, j, i, TILE_ROOF_RIGHT);
         }
 
         // left-wall
         if (!s[0] && s[1] && s[2] && !s[3] && s[4] && !s[5] && s[6] && s[7])
         {
-          set_tile_at(MAP_LAYER_FRONT, j, i, TILE_ROOF_LEFT);
+          map_set_tile_at(MAP_LAYER_FRONT, j, i, TILE_ROOF_LEFT);
         }
 
         // right-wall
         if (s[0] && s[1] && !s[2] && s[3] && !s[4] && s[5] && s[6] && !s[7])
         {
-          set_tile_at(MAP_LAYER_FRONT, j, i, TILE_ROOF_RIGHT);
+          map_set_tile_at(MAP_LAYER_FRONT, j, i, TILE_ROOF_RIGHT);
         }
 
         /*
@@ -375,21 +375,21 @@ static void build_map_from_graph()
         // bottom wall
         if (s[0] && s[1] && s[2] && s[3] && s[4] && !s[5] && !s[6] && !s[7])
         {
-          set_tile_at(MAP_LAYER_FRONT, j, i, TILE_WALL_1);
-          set_tile_at(MAP_LAYER_FRONT, j, i - 1, TILE_ROOF_1);
+          map_set_tile_at(MAP_LAYER_FRONT, j, i, TILE_WALL_1);
+          map_set_tile_at(MAP_LAYER_FRONT, j, i - 1, TILE_ROOF_1);
         }
         // bottom-left corner
         if (!s[0] && s[1] && s[2] && !s[3] && s[4] && !s[5] && !s[6] && !s[7])
         {
-          set_tile_at(MAP_LAYER_FRONT, j, i, TILE_WALL_1);
-          set_tile_at(MAP_LAYER_FRONT, j, i - 1, TILE_LEFT_CORNER_ROOF);
+          map_set_tile_at(MAP_LAYER_FRONT, j, i, TILE_WALL_1);
+          map_set_tile_at(MAP_LAYER_FRONT, j, i - 1, TILE_LEFT_CORNER_ROOF);
         }
 
         // bottom-right corner
         if (s[0] && s[1] && !s[2] && s[3] && !s[4] && !s[5] && !s[6] && !s[7])
         {
-          set_tile_at(MAP_LAYER_FRONT, j, i, TILE_WALL_1);
-          set_tile_at(MAP_LAYER_FRONT, j, i - 1, TILE_RIGHT_CORNER_ROOF);
+          map_set_tile_at(MAP_LAYER_FRONT, j, i, TILE_WALL_1);
+          map_set_tile_at(MAP_LAYER_FRONT, j, i - 1, TILE_RIGHT_CORNER_ROOF);
         }
 
         /*
@@ -465,15 +465,6 @@ static void swpan_enemies(Ecs* ecs)
 
 static void swpan_player(Ecs* ecs)
 {
-  int          ri = rand() % _room_cnt;
-  ecs_entity_t player =
-      make_player(ecs, make_knight(ecs), make_golden_sword(ecs, BIT(CATEGORY_ENEMY)));
-
-  ecs_add(ecs, player, CAMERA_TARGET_TAG);
-
-  Transform* tx = ecs_get(ecs, player, TRANSFORM);
-  tx->pos.x     = (_rooms[ri].rect.x + _rooms[ri].rect.w / 2) * TILE_SIZE;
-  tx->pos.y     = (_rooms[ri].rect.y + _rooms[ri].rect.h / 2) * TILE_SIZE;
 }
 
 void generate_new_dungeon(Ecs* ecs)

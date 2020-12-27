@@ -2,7 +2,7 @@ system_source_files = files(
   './mediator.c',
 
   './motion_sys.c',
-  './draw_sys.c',
+  './rendering_sys.c',
   './ai_system.c',
   './collision_sys.c',
   './tile_collision_sys.c',
@@ -11,7 +11,7 @@ system_source_files = files(
   './animator_ctl_sys.c',
   './camera_sys.c',
   './health_sys.c',
-  './health_bar_drawing_sys.c',
+  './healthbar_rendering_sys.c',
   './late_destroying_sys.c',
   './dmg_sys.c',
   './life_span_sys.c',
@@ -19,6 +19,7 @@ system_source_files = files(
   './drop_system.c',
   './player_ctl_sys.c',
   './equipment_sys.c',
+  './hud_system.c',
 
   #weapon skill systems
   './weapon_skill/swing.c',

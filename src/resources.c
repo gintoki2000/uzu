@@ -55,9 +55,11 @@ static const char* _sfx_files[NUM_SFXS] = {
   [SFX_CLAW_HIT]    = "asserts/sound/fx/claw_hit.wav",
 };
 
+extern SDL_Renderer* g_renderer;
+
 static SDL_Texture* load_texture(const char* file)
 {
-  return IMG_LoadTexture(engine_get_renderer(), file);
+  return IMG_LoadTexture(g_renderer, file);
 }
 
 BOOL resources_load()

@@ -3,11 +3,10 @@
 #include <SDL2/SDL.h>
 typedef struct
 {
-  void* user_data;
-  SDL_bool (*init)(void*);
-  void (*loop)(void*, SDL_Renderer*);
-  void (*fini)(void*);
-  void (*event)(void*, const SDL_Event*);
+  SDL_bool (*init)();
+  void (*loop)();
+  void (*fini)();
+  void (*event)(const SDL_Event* event);
 } GameDelegate;
 
 typedef struct
@@ -18,11 +17,9 @@ typedef struct
   int         frame_rate;
 } GameSetting;
 
-void          engine_run(GameDelegate* game_delegate, const GameSetting* game_setting);
-void          engine_stop();
-void          engine_set_frame_rate(Uint32 frame_rate);
-Uint32        engine_get_frame_rate();
-SDL_Renderer* engine_get_renderer();
-SDL_Window*   engine_get_window();
+void   engine_run(GameDelegate* game_delegate, const GameSetting* game_setting);
+void   engine_stop();
+void   engine_set_frame_rate(Uint32 frame_rate);
+Uint32 engine_get_frame_rate();
 
 #endif // UZU_ENGINE_H

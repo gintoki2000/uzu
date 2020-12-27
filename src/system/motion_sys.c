@@ -2,9 +2,12 @@
 
 #include <components.h>
 #include <toolbox/toolbox.h>
+#include <ecs/ecs.h>
 #define DT 0.0166f
 
-static void set_vel_by_controller_input(Ecs* ecs)
+extern Ecs* g_ecs;
+
+static void set_vel_by_controller_input()
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;
@@ -12,12 +15,12 @@ static void set_vel_by_controller_input(Ecs* ecs)
   Controller* controllers;
   Motion*     motion;
 
-  ecs_data(ecs, CONTROLLER, &entities, (void**)&controllers, &cnt);
+  ecs_raw(g_ecs, CONTROLLER, &entities, (void**)&controllers, &cnt);
   for (int i = 0; i < cnt; ++i)
   {
     if (!controllers[i].lock_movement)
     {
-      if ((motion = ecs_get(ecs, entities[i], MOTION)))
+      if ((motion = ecs_get(g_ecs, entities[i], MOTION)))
       {
         motion->vel = controllers[i].desired_vel;
       }
@@ -25,7 +28,7 @@ static void set_vel_by_controller_input(Ecs* ecs)
   }
 }
 
-void sys_motion_update(Ecs* ecs)
+void motion_system_update()
 {
 
   ecs_entity_t* entities;
@@ -34,9 +37,9 @@ void sys_motion_update(Ecs* ecs)
   Transform* transform;
   Motion*    motion_ls;
 
-  set_vel_by_controller_input(ecs);
+  set_vel_by_controller_input(g_ecs);
 
-  ecs_data(ecs, MOTION, &entities, (void**)&motion_ls, &cnt);
+  ecs_raw(g_ecs, MOTION, &entities, (void**)&motion_ls, &cnt);
 
   for (int i = 0; i < cnt; ++i)
   {
@@ -48,7 +51,7 @@ void sys_motion_update(Ecs* ecs)
 
   for (int i = 0; i < cnt; ++i)
   {
-    transform = ecs_get(ecs, entities[i], TRANSFORM);
+    transform = ecs_get(g_ecs, entities[i], TRANSFORM);
 
     transform->prev_pos = transform->pos;
     transform->pos.x += motion_ls[i].vel.x * DT;

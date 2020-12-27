@@ -6,7 +6,9 @@
 #include <components.h>
 #include <toolbox/toolbox.h>
 
-static void on_collision(Ecs* ecs, SysEvt_Collision* event);
+extern Ecs* g_ecs;
+
+static void on_collision(void* arg, SysEvt_Collision* event);
 static void weapon_vs_entity(ecs_entity_t weapon, ecs_entity_t entity);
 static void entity_vs_weapon(ecs_entity_t entity, ecs_entity_t weapon);
 static void projectile_vs_entity(ecs_entity_t projectile, ecs_entity_t entity);
@@ -14,7 +16,7 @@ static void entity_vs_projectile(ecs_entity_t entity, ecs_entity_t projectile);
 static void player_vs_item(ecs_entity_t player, ecs_entity_t item);
 static void item_vs_player(ecs_entity_t item, ecs_entity_t player);
 
-static void (*_table[NUM_CATEGORIES][NUM_SYSTEM_SIGNALS])(ecs_entity_t, ecs_entity_t) = 
+static void (*_table[NUM_CATEGORIES][NUM_CATEGORIES])(ecs_entity_t, ecs_entity_t) =
 {
   [CATEGORY_PLAYER] = {
     [CATEGORY_WEAPON] = entity_vs_weapon,
@@ -38,19 +40,19 @@ static void (*_table[NUM_CATEGORIES][NUM_SYSTEM_SIGNALS])(ecs_entity_t, ecs_enti
   }
 };
 
-void collision_filter_system_init(Ecs* ecs)
+void collision_manager_system_init()
 {
-  mediator_connect(SIG_COLLISION, ecs, SLOT(on_collision));
+  mediator_connect(SYS_SIG_COLLISION, NULL, SLOT(on_collision));
 }
 
-static void on_collision(Ecs* ecs, SysEvt_Collision* event)
+static void on_collision(void* arg, SysEvt_Collision* event)
 {
   HitBox* hitbox1;
   HitBox* hitbox2;
   void (*fn)(ecs_entity_t, ecs_entity_t);
 
-  if ((hitbox1 = ecs_get(ecs, event->e1, HITBOX)) != NULL &&
-      (hitbox2 = ecs_get(ecs, event->e2, HITBOX)) != NULL)
+  if ((hitbox1 = ecs_get(g_ecs, event->e1, HITBOX)) != NULL &&
+      (hitbox2 = ecs_get(g_ecs, event->e2, HITBOX)) != NULL)
   {
 
     fn = _table[hitbox1->category][hitbox2->category];
@@ -61,15 +63,23 @@ static void on_collision(Ecs* ecs, SysEvt_Collision* event)
 
 static void weapon_vs_entity(ecs_entity_t weapon, ecs_entity_t entity)
 {
-  mediator_emit(SIG_WEAPON_HIT, &(SysEvt_WeaponHit){ .weapon = weapon, .entity = entity });
+  mediator_broadcast(SYS_SIG_WEAPON_HIT,
+                &(SysEvt_WeaponHit){
+                    .weapon = weapon,
+                    .entity = entity,
+                });
 }
 static void entity_vs_weapon(ecs_entity_t entity, ecs_entity_t weapon)
 {
-  mediator_emit(SIG_WEAPON_HIT, &(SysEvt_WeaponHit){ .weapon = weapon, .entity = entity });
+  mediator_broadcast(SYS_SIG_WEAPON_HIT,
+                &(SysEvt_WeaponHit){
+                    .weapon = weapon,
+                    .entity = entity,
+                });
 }
 static void projectile_vs_entity(ecs_entity_t projectile, ecs_entity_t entity)
 {
-  mediator_emit(SIG_PROJECTILE_HIT,
+  mediator_broadcast(SYS_SIG_PROJECTILE_HIT,
                 &(SysEvt_ProjectileHit){
                     .projectile = projectile,
                     .entity     = entity,
@@ -77,7 +87,7 @@ static void projectile_vs_entity(ecs_entity_t projectile, ecs_entity_t entity)
 }
 static void entity_vs_projectile(ecs_entity_t entity, ecs_entity_t projectile)
 {
-  mediator_emit(SIG_PROJECTILE_HIT,
+  mediator_broadcast(SYS_SIG_PROJECTILE_HIT,
                 &(SysEvt_ProjectileHit){
                     .projectile = projectile,
                     .entity     = entity,
@@ -86,7 +96,7 @@ static void entity_vs_projectile(ecs_entity_t entity, ecs_entity_t projectile)
 
 static void player_vs_item(ecs_entity_t player, ecs_entity_t item)
 {
-  mediator_emit(SIG_PLAYER_HIT_ITEM,
+  mediator_broadcast(SYS_SIG_PLAYER_HIT_ITEM,
                 &(SysEvt_PlayerHitItem){
                     .item   = item,
                     .player = player,
@@ -95,7 +105,7 @@ static void player_vs_item(ecs_entity_t player, ecs_entity_t item)
 
 static void item_vs_player(ecs_entity_t item, ecs_entity_t player)
 {
-  mediator_emit(SIG_PLAYER_HIT_ITEM,
+  mediator_broadcast(SYS_SIG_PLAYER_HIT_ITEM,
                 &(SysEvt_PlayerHitItem){
                     .item   = item,
                     .player = player,

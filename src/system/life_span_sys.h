@@ -3,5 +3,5 @@
 #include <toolbox/toolbox.h>
 #include <ecs/ecs.h>
 
-void sys_life_span_update(Ecs* ecs);
+void life_span_system_update(void);
 #endif //LIFE_SPAN_SYSTEM_H

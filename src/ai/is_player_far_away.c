@@ -1,9 +1,9 @@
 #include "is_player_far_away.h"
 #include <components.h>
-BT_VTBL_INST_FN(bt_Condition, is_player_far_away)
+BT_VTBL_INST_FN(BTCondition, is_player_far_away)
 BT_ALLOC_FN(IsPlayerFarAway, is_player_far_away)
 
-void is_player_far_away_vtbl_init(bt_ConditionVtbl* vtbl)
+void is_player_far_away_vtbl_init(BTConditionVtbl* vtbl)
 {
   bt_condition_vtbl_init(vtbl);
   vtbl->__parent_vtbl.parent = bt_condition_vtbl_inst();
@@ -17,7 +17,7 @@ IsPlayerFarAway* is_player_far_away_new(float radius)
 
 IsPlayerFarAway* is_player_far_away_init(IsPlayerFarAway* self, float radius)
 {
-  bt_condition_init((bt_Condition*)self, TRUE);
+  bt_condition_init((BTCondition*)self, TRUE);
   self->radius = radius;
   return self;
 }

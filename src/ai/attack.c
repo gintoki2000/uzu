@@ -4,20 +4,20 @@
 
 struct Attack
 {
-  BT_EXTEND_NODE(bt_Node)
+  BT_EXTEND_NODE(BTNode)
   BOOL is_running;
 };
 
-static void    attack_vtbl_init(bt_NodeVtbl* vtbl);
+static void    attack_vtbl_init(BTNodeVtbl* vtbl);
 static Attack* attack_init(Attack* self);
-static void    attack_finish(Attack* self, Ecs* ecs, ecs_entity_t entity, bt_Status finish_status);
+static void    attack_finish(Attack* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status);
 static void    attack_abort(Attack* self, Ecs* ecs, ecs_entity_t entity);
-static bt_Status attack_exec(Attack* self, Ecs* ecs, ecs_entity_t entity);
+static BTStatus attack_exec(Attack* self, Ecs* ecs, ecs_entity_t entity);
 
-BT_VTBL_INST_FN(bt_Node, attack)
+BT_VTBL_INST_FN(BTNode, attack)
 BT_ALLOC_FN(Attack, attack)
 
-static void attack_vtbl_init(bt_NodeVtbl* vtbl)
+static void attack_vtbl_init(BTNodeVtbl* vtbl)
 {
   bt_node_vtbl_init(vtbl);
   vtbl->parent = bt_node_vtbl_inst();
@@ -33,7 +33,7 @@ Attack* attack_new()
 
 static Attack* attack_init(Attack* self)
 {
-  bt_node_init((bt_Node*)self);
+  bt_node_init((BTNode*)self);
   self->is_running = FALSE;
   return self;
 }
@@ -45,7 +45,7 @@ static void attack_abort(Attack* self, Ecs* ecs, ecs_entity_t entity)
   self->is_running = FALSE;
 }
 
-static void attack_finish(Attack* self, Ecs* ecs, ecs_entity_t entity, bt_Status finish_status)
+static void attack_finish(Attack* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status)
 {
   (void)ecs;
   (void)entity;
@@ -53,7 +53,7 @@ static void attack_finish(Attack* self, Ecs* ecs, ecs_entity_t entity, bt_Status
   self->is_running = FALSE;
 }
 
-static bt_Status attack_exec(Attack* self, Ecs* ecs, ecs_entity_t entity)
+static BTStatus attack_exec(Attack* self, Ecs* ecs, ecs_entity_t entity)
 {
   Controller* controller;
 

@@ -3,16 +3,16 @@
 #include <components.h>
 struct Follow
 {
-  BT_EXTEND_NODE(bt_Node)
+  BT_EXTEND_NODE(BTNode)
   float arrive_radius;
 };
 
-const bt_NodeVtbl* follow_vtbl_inst();
-static void        follow_vtbl_init(bt_NodeVtbl* vtbl);
+const BTNodeVtbl* follow_vtbl_inst();
+static void        follow_vtbl_init(BTNodeVtbl* vtbl);
 static Follow*     follow_init(Follow* self, float arrive_radius);
 static void        follow_abort(Follow* self, Ecs* ecs, ecs_entity_t entity);
-static bt_Status   follow_exec(Follow* self, Ecs* ecs, ecs_entity_t entity);
-static void follow_finish(Follow* self, Ecs* ecs, ecs_entity_t entity, bt_Status finish_status);
+static BTStatus   follow_exec(Follow* self, Ecs* ecs, ecs_entity_t entity);
+static void follow_finish(Follow* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status);
 
 static Vec2 get_entity_position(Ecs* ecs, ecs_entity_t entity)
 {
@@ -20,10 +20,10 @@ static Vec2 get_entity_position(Ecs* ecs, ecs_entity_t entity)
   return transform->pos;
 }
 
-BT_VTBL_INST_FN(bt_Node, follow)
+BT_VTBL_INST_FN(BTNode, follow)
 BT_ALLOC_FN(Follow, follow)
 
-static void follow_vtbl_init(bt_NodeVtbl* vtbl)
+static void follow_vtbl_init(BTNodeVtbl* vtbl)
 {
   bt_node_vtbl_init(vtbl);
   vtbl->parent = bt_node_vtbl_inst();
@@ -34,7 +34,7 @@ static void follow_vtbl_init(bt_NodeVtbl* vtbl)
 
 static Follow* follow_init(Follow* self, float arrive_radius)
 {
-  bt_node_init((bt_Node*)self);
+  bt_node_init((BTNode*)self);
   self->arrive_radius = arrive_radius;
   return self;
 }
@@ -48,7 +48,7 @@ static void follow_abort(Follow* self, Ecs* ecs, ecs_entity_t entity)
   ecs_rmv(ecs, entity, FOLLOWING_TARGET);
 }
 
-static void follow_finish(Follow* self, Ecs* ecs, ecs_entity_t entity, bt_Status finish_status)
+static void follow_finish(Follow* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status)
 {
   (void)self;
   Motion* motion;
@@ -67,7 +67,7 @@ static void follow_finish(Follow* self, Ecs* ecs, ecs_entity_t entity, bt_Status
 
 // follow task chỉ nên gắn component cho entity và follow system sẽ lo chuyện còn lại
 
-static bt_Status follow_exec(Follow* self, Ecs* ecs, ecs_entity_t entity)
+static BTStatus follow_exec(Follow* self, Ecs* ecs, ecs_entity_t entity)
 {
   FollowingTarget* target;
   Transform*           transform;

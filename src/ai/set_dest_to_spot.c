@@ -4,18 +4,18 @@
 
 struct SetDestToSpot
 {
-  BT_EXTEND_NODE(bt_Node)
+  BT_EXTEND_NODE(BTNode)
 };
 
-const bt_NodeVtbl*    set_dest_to_spot_vtbl_inst();
-static void           set_dest_to_spot_vtbl_init(bt_NodeVtbl* vtbl);
+const BTNodeVtbl*    set_dest_to_spot_vtbl_inst();
+static void           set_dest_to_spot_vtbl_init(BTNodeVtbl* vtbl);
 static SetDestToSpot* set_dest_to_spot_init(SetDestToSpot* self);
-static bt_Status      set_dest_to_spot_exec(SetDestToSpot* self, Ecs* ecs, ecs_entity_t entity);
+static BTStatus      set_dest_to_spot_exec(SetDestToSpot* self, Ecs* ecs, ecs_entity_t entity);
 
-BT_VTBL_INST_FN(bt_Node, set_dest_to_spot)
+BT_VTBL_INST_FN(BTNode, set_dest_to_spot)
 BT_ALLOC_FN(SetDestToSpot, set_dest_to_spot)
 
-static void set_dest_to_spot_vtbl_init(bt_NodeVtbl* vtbl)
+static void set_dest_to_spot_vtbl_init(BTNodeVtbl* vtbl)
 {
   bt_node_vtbl_init(vtbl);
   vtbl->parent = bt_node_vtbl_inst();
@@ -24,11 +24,11 @@ static void set_dest_to_spot_vtbl_init(bt_NodeVtbl* vtbl)
 
 static SetDestToSpot* set_dest_to_spot_init(SetDestToSpot* self)
 {
-  bt_node_init((bt_Node*)self);
+  bt_node_init((BTNode*)self);
   return self;
 }
 
-static bt_Status set_dest_to_spot_exec(SetDestToSpot* self, Ecs* ecs, ecs_entity_t entity)
+static BTStatus set_dest_to_spot_exec(SetDestToSpot* self, Ecs* ecs, ecs_entity_t entity)
 {
   (void)self;
 

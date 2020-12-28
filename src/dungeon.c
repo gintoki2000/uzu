@@ -12,13 +12,11 @@
 #include <entity_factory.h>
 #include <generator.h>
 #include <map.h>
-#include <map_data.h>
-#include <map_loader.h>
 #include <resources.h>
+#include <scene.h>
 
 #include <ecs/ecs.h>
 
-#include "scene.h"
 #include <engine/engine.h>
 #include <engine/keyboard.h>
 

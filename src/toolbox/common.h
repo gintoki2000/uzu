@@ -30,6 +30,8 @@ typedef struct
 #define FALSE SDL_FALSE
 #define RECT SDL_Rect
 #define POINT SDL_Point
+#define COLOR SDL_Color
+#define POINT SDL_Point
 
 #define FLIP_TO_SIGN(__f) (__f == SDL_FLIP_NONE ? 1 : -1)
 

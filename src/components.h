@@ -90,6 +90,7 @@ typedef enum
   SPOT,
   LEVEL_SWITCHER,
   NAME,
+  TEXT,
   NUM_COMPONENTS
 } ComponentId;
 
@@ -113,6 +114,8 @@ typedef struct
   SDL_Point        anchor;
   SDL_RendererFlip flip;
   Sprite           sprite;
+  COLOR            color;
+  u8               opacity;
 } Visual;
 
 typedef struct
@@ -264,7 +267,7 @@ typedef struct
 
 typedef struct
 {
-  bt_Node* root;
+  BTNode* root;
 } AIAgent;
 
 //** BT Vars
@@ -289,6 +292,12 @@ typedef struct
 {
   char* value;
 } Name;
+
+typedef struct
+{
+  const char* value;
+  u8          opacity;
+} Text;
 
 Animation*
 animation_init(Animation* anim, SDL_Texture* tex, u32 x, u32 y, u32 row, u32 col, u32 sw, u32 sh);

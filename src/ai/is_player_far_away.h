@@ -3,12 +3,12 @@
 #include <behaviour_tree.h>
 typedef struct
 {
-  BT_EXTEND_NODE(bt_Condition)
+  BT_EXTEND_NODE(BTCondition)
   float radius;
 } IsPlayerFarAway;
 
-const bt_NodeVtbl* is_player_far_away_vtbl_inst();
-void               is_player_far_away_vtbl_init(bt_ConditionVtbl* vtbl);
+const BTNodeVtbl* is_player_far_away_vtbl_inst();
+void               is_player_far_away_vtbl_init(BTConditionVtbl* vtbl);
 
 IsPlayerFarAway* is_player_far_away_new(float radius);
 IsPlayerFarAway* is_player_far_away_init(IsPlayerFarAway* self, float radius);

@@ -2,19 +2,19 @@
 #include <components.h>
 #include <constances.h>
 
-const bt_NodeVtbl* move_to_vtbl_inst();
-static void        move_to_vtbl_init(bt_NodeVtbl* vtbl);
+const BTNodeVtbl* move_to_vtbl_inst();
+static void        move_to_vtbl_init(BTNodeVtbl* vtbl);
 static MoveTo*     move_to_init(MoveTo* self, float arrive_radius);
-static bt_Status   move_to_exec(MoveTo* self, Ecs* ecs, ecs_entity_t entity);
+static BTStatus   move_to_exec(MoveTo* self, Ecs* ecs, ecs_entity_t entity);
 static void        move_to_abort(MoveTo* self, Ecs* ecs, ecs_entity_t entity);
-static void move_to_finish(MoveTo* self, Ecs* ecs, ecs_entity_t entity, bt_Status finish_status);
+static void move_to_finish(MoveTo* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status);
 
 BT_ALLOC_FN(MoveTo, move_to)
-BT_VTBL_INST_FN(bt_Node, move_to)
+BT_VTBL_INST_FN(BTNode, move_to)
 
-void move_to_vtbl_init(bt_NodeVtbl* vtbl)
+void move_to_vtbl_init(BTNodeVtbl* vtbl)
 {
-  bt_node_vtbl_init((bt_NodeVtbl*)vtbl);
+  bt_node_vtbl_init((BTNodeVtbl*)vtbl);
   vtbl->parent = bt_node_vtbl_inst();
   vtbl->exec   = (bt_exec_fn_t)move_to_exec;
   vtbl->finish = (bt_finish_fn_t)move_to_finish;
@@ -28,12 +28,12 @@ MoveTo* move_to_new(float arrive_radius)
 
 static MoveTo* move_to_init(MoveTo* self, float arrive_radius)
 {
-  bt_node_init((bt_Node*)self);
+  bt_node_init((BTNode*)self);
   self->arrive_radius = arrive_radius;
   return self;
 }
 
-static bt_Status move_to_exec(MoveTo* self, Ecs* ecs, ecs_entity_t entity)
+static BTStatus move_to_exec(MoveTo* self, Ecs* ecs, ecs_entity_t entity)
 {
   Destination* destination;
   Transform*           transform;
@@ -71,7 +71,7 @@ static void move_to_abort(MoveTo* self, Ecs* ecs, ecs_entity_t entity)
   }
 }
 
-static void move_to_finish(MoveTo* self, Ecs* ecs, ecs_entity_t entity, bt_Status finish_status)
+static void move_to_finish(MoveTo* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status)
 {
 
   (void)self;

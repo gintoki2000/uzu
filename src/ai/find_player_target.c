@@ -4,15 +4,15 @@
 #include <utils.h>
 struct FindPlayerTarget
 {
-  BT_EXTEND_NODE(bt_Node)
+  BT_EXTEND_NODE(BTNode)
 };
 
-const bt_NodeVtbl*       find_player_target_vtbl_inst();
-static void              find_player_target_vtbl_init(bt_NodeVtbl* vbtl);
+const BTNodeVtbl*       find_player_target_vtbl_inst();
+static void              find_player_target_vtbl_init(BTNodeVtbl* vbtl);
 static FindPlayerTarget* find_player_target_init(FindPlayerTarget* self);
-static bt_Status         find_player_target_exec(FindPlayerTarget* self, Ecs*, ecs_entity_t);
+static BTStatus         find_player_target_exec(FindPlayerTarget* self, Ecs*, ecs_entity_t);
 
-BT_VTBL_INST_FN(bt_Node, find_player_target)
+BT_VTBL_INST_FN(BTNode, find_player_target)
 BT_ALLOC_FN(FindPlayerTarget, find_player_target)
 
 FindPlayerTarget* find_player_target_new()
@@ -20,7 +20,7 @@ FindPlayerTarget* find_player_target_new()
   return find_player_target_init(find_player_target_alloc());
 }
 
-static void find_player_target_vtbl_init(bt_NodeVtbl* vtbl)
+static void find_player_target_vtbl_init(BTNodeVtbl* vtbl)
 {
   bt_node_vtbl_init(vtbl);
   vtbl->parent = bt_node_vtbl_inst();
@@ -29,11 +29,11 @@ static void find_player_target_vtbl_init(bt_NodeVtbl* vtbl)
 
 static FindPlayerTarget* find_player_target_init(FindPlayerTarget* self)
 {
-  bt_node_init((bt_Node*)self);
+  bt_node_init((BTNode*)self);
   return self;
 }
 
-static bt_Status find_player_target_exec(FindPlayerTarget* self, Ecs* ecs, ecs_entity_t entity)
+static BTStatus find_player_target_exec(FindPlayerTarget* self, Ecs* ecs, ecs_entity_t entity)
 {
   (void)self;
   ecs_entity_t player;

@@ -15,18 +15,16 @@ static void on_entity_died(void* arg, const SysEvt_EntityDied* event)
 {
   Drop*      drop;
   Transform* transform;
-  int        r;
+  int        v;
   if ((drop = ecs_get(g_ecs, event->entity, DROP)) &&
       (transform = ecs_get(g_ecs, event->entity, TRANSFORM)))
   {
-    r = rand() % 100;
-    if (r <= drop->change1)
+    if (v = rand() % 100, v <= drop->change1)
     {
       create_fn_tbl[drop->item1](g_ecs, transform->pos);
     }
 
-    r = rand() % 100;
-    if (r <= drop->change2)
+    if (v = rand() % 100, v <= drop->change2)
     {
       create_fn_tbl[drop->item2](g_ecs, transform->pos);
     }

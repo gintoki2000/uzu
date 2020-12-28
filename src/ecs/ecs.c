@@ -7,7 +7,10 @@
 #include <string.h>
 #include <toolbox/toolbox.h>
 
-INLINE EcsPool* get_pool(Ecs* self, ecs_size_t type) { return self->pools[type]; }
+INLINE EcsPool* get_pool(Ecs* self, ecs_size_t type)
+{
+  return self->pools[type];
+}
 
 Ecs* ecs_new(const EcsType* types, ecs_size_t cnt)
 {
@@ -38,7 +41,7 @@ Ecs* ecs_init(Ecs* self, const EcsType* types, ecs_size_t cnt)
   return self;
 }
 
-static void __lamda01(void* udata, Ecs* ecs, ecs_entity_t entity)
+static void cb_clear(void* udata, Ecs* ecs, ecs_entity_t entity)
 {
   (void)udata;
   ecs_destroy(ecs, entity);
@@ -46,7 +49,7 @@ static void __lamda01(void* udata, Ecs* ecs, ecs_entity_t entity)
 
 void ecs_fini(Ecs* self)
 {
-  ecs_each(self, NULL, __lamda01);
+  ecs_each(self, NULL, cb_clear);
   for (int i = 0; i < self->type_cnt; ++i)
     ecs_pool_del(self->pools[i]);
   free(self->pools);
@@ -55,7 +58,10 @@ void ecs_fini(Ecs* self)
   dispatcher_destroy(self->dispatcher);
 }
 
-ecs_entity_t ecs_create(Ecs* self) { return ecs_entity_pool_alloc_ent(&self->entity_pool); }
+ecs_entity_t ecs_create(Ecs* self)
+{
+  return ecs_entity_pool_alloc_ent(&self->entity_pool);
+}
 
 void ecs_destroy(Ecs* self, ecs_entity_t entity)
 {
@@ -156,7 +162,7 @@ void ecs_each(Ecs* self, void* user_data, ecs_each_fn_t each_fn)
   }
   else
   {
-    for (int i = 0; i < size; ++i)
+    for (int i = size - 1; i >= 0; --i)
       if (ECS_ENT_IDX(entities[i]) == i)
         each_fn(user_data, self, entities[i]);
   }
@@ -242,10 +248,10 @@ void ecs_each_w_filter(Ecs*             self,
 }
 
 void ecs_raw(Ecs*           self,
-              ecs_size_t     type,
-              ecs_entity_t** entities_ptr,
-              void**         components_ptr,
-              ecs_size_t*    cnt_ptr)
+             ecs_size_t     type,
+             ecs_entity_t** entities_ptr,
+             void**         components_ptr,
+             ecs_size_t*    cnt_ptr)
 {
   ASSERT(type < self->type_cnt && "invalid type");
   if (entities_ptr)
@@ -263,7 +269,12 @@ SDL_bool ecs_has(Ecs* self, ecs_entity_t entity, ecs_size_t type_id)
   return ecs_pool_contains(self->pools[type_id], entity);
 }
 
-void ecs_connect(Ecs* self, int sig, void* udata, slot_t handler)
+void ecs_connect(Ecs* self, int sig, void* udata, slot_t slot)
 {
-  dispatcher_connect(self->dispatcher, sig, udata, handler);
+  dispatcher_connect(self->dispatcher, sig, udata, slot);
+}
+
+void ecs_clear(Ecs* self)
+{
+  ecs_each(self, NULL, cb_clear);
 }

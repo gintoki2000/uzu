@@ -46,36 +46,30 @@ void ecs_del(Ecs* ecs);
 Ecs* ecs_init(Ecs* self, const EcsType* types, ecs_size_t type_cnt);
 void ecs_fini(Ecs* self);
 
-/**
- * create new entity
- */
 ecs_entity_t ecs_create(Ecs* self);
-
-/**
- * remove all component and destroy given entity
- */
-void  ecs_destroy(Ecs* self, ecs_entity_t entity);
-void* ecs_add(Ecs* self, ecs_entity_t entity, ecs_size_t type_id);
-void* ecs_add_w_data(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const void* data);
-void  ecs_rmv(Ecs* self, ecs_entity_t entity, ecs_size_t type_id);
-void* ecs_get(Ecs* self, ecs_entity_t entity, ecs_size_t type_id);
-BOOL  ecs_has(Ecs* self, ecs_entity_t entity, ecs_size_t type_id);
-void  ecs_rmv_all(Ecs* self, ecs_entity_t entity);
-void  ecs_each(Ecs* self, void* user_data, ecs_each_fn_t each_fn);
-void  ecs_each_w_filter(Ecs*             self,
-                        const EcsFilter* filter,
-                        void*            user_data,
-                        ecs_each_ex_fn_t each_fn);
+void         ecs_destroy(Ecs* self, ecs_entity_t entity);
+void*        ecs_add(Ecs* self, ecs_entity_t entity, ecs_size_t type_id);
+void*        ecs_add_w_data(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const void* data);
+void         ecs_rmv(Ecs* self, ecs_entity_t entity, ecs_size_t type_id);
+void*        ecs_get(Ecs* self, ecs_entity_t entity, ecs_size_t type_id);
+BOOL         ecs_has(Ecs* self, ecs_entity_t entity, ecs_size_t type_id);
+void         ecs_rmv_all(Ecs* self, ecs_entity_t entity);
+void         ecs_each(Ecs* self, void* user_data, ecs_each_fn_t each_fn);
+void         ecs_each_w_filter(Ecs*             self,
+                               const EcsFilter* filter,
+                               void*            user_data,
+                               ecs_each_ex_fn_t each_fn);
+void         ecs_clear(Ecs* self);
 
 ecs_size_t ecs_find(Ecs* self, void* component, ecs_size_t type_id);
 
-BOOL       ecs_has_ex(Ecs* self, const ecs_size_t* types, ecs_size_t cnt);
-void       ecs_raw(Ecs*           self,
-                   ecs_size_t     type,
-                   ecs_entity_t** entities_ptr,
-                   void**         components_ptr,
-                   ecs_size_t*    cnt_ptr);
-void       ecs_connect(Ecs* ecs, int sig, void* udata, slot_t slot);
+BOOL ecs_has_ex(Ecs* self, const ecs_size_t* types, ecs_size_t cnt);
+void ecs_raw(Ecs*           self,
+             ecs_size_t     type,
+             ecs_entity_t** entities_ptr,
+             void**         components_ptr,
+             ecs_size_t*    cnt_ptr);
+void ecs_connect(Ecs* ecs, int sig, void* udata, slot_t slot);
 
 static BOOL ecs_is_valid(Ecs* self, ecs_entity_t entity)
 {

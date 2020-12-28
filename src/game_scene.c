@@ -184,13 +184,34 @@ static void load_map(const char* file)
   }
 }
 
+#define FLOOR_LAYER_NAME "floor"
+#define FRONT_WALL_LAYER_NAME "front-wall"
+#define BACK_WALL_LAYER_NAME "back-wall"
+
+static int layer_name_to_id(const char* name)
+{
+  if (strcmp(name, FLOOR_LAYER_NAME) == 0)
+  {
+    return MAP_LAYER_FLOOR;
+  }
+  else if (strcmp(name, FRONT_WALL_LAYER_NAME) == 0)
+  {
+    return MAP_LAYER_FRONT;
+  }
+  else if (strcmp(name, BACK_WALL_LAYER_NAME) == 0)
+  {
+    return MAP_LAYER_WALL;
+  }
+  return -1;
+}
+
 static int parse_tilelayer(const json_object* tilelayer_json_obj)
 {
   int*               data;
   int                datalen;
   const json_object* data_json_obj;
   const char*        name;
-  int                to_layer;
+  int                layer;
 
   data_json_obj = json_object_object_get(tilelayer_json_obj, "data");
   name          = json_object_object_get_as_string(tilelayer_json_obj, "name");
@@ -203,26 +224,9 @@ static int parse_tilelayer(const json_object* tilelayer_json_obj)
     data[i] = json_object_array_get_idx_as_int(data_json_obj, i);
   }
 
-  if (strcmp(name, "floor") == 0)
+  if ((layer = layer_name_to_id(name)) != -1)
   {
-    to_layer = MAP_LAYER_FLOOR;
-  }
-  else if (strcmp(name, "front-wall") == 0)
-  {
-    to_layer = MAP_LAYER_FRONT;
-  }
-  else if (strcmp(name, "back-wall") == 0)
-  {
-    to_layer = MAP_LAYER_WALL;
-  }
-  else
-  {
-    to_layer = -1;
-  }
-
-  if (to_layer != -1)
-  {
-    map_set_data(to_layer, data, datalen);
+    map_set_data(layer, data, datalen);
   }
 
   free(data);

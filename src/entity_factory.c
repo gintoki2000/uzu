@@ -3,6 +3,7 @@
 #include <ai/find_random_destination.h>
 #include <ai/follow.h>
 #include <ai/is_player_cross_spot.h>
+#include <ai/is_player_out_of_spot.h>
 #include <ai/move_to.h>
 #include <ai/set_dest_to_spot.h>
 #include <ai/wait.h>
@@ -186,7 +187,7 @@ ecs_entity_t make_huge_demon(Ecs* ecs)
   drop          = ecs_add(ecs, demon, DROP);
   drop->item1   = ITEM_BIG_RED_FLASK;
   drop->item2   = ITEM_RED_FLASK;
-  drop->change1 = 30;
+  drop->change1 = 70;
   drop->change2 = 40;
 
   ecs_add(ecs, demon, TILE_COLLISION_TAG);
@@ -283,69 +284,70 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 pos)
   drop          = ecs_add(ecs, entity, DROP);
   drop->item1   = ITEM_BIG_RED_FLASK;
   drop->item2   = ITEM_RED_FLASK;
-  drop->change1 = 30;
-  drop->change2 = 40;
+  drop->change1 = 100;
+  drop->change2 = 20;
 
   ecs_add(ecs, entity, TILE_COLLISION_TAG);
 
   controller                = ecs_add(ecs, entity, CONTROLLER);
   controller->lock_movement = TRUE;
 
-  bt_Root*     root;
-  bt_Sequence* chase_seq;
+  BTRoot*     root;
+  BTSequence* chase_seq;
   // FindRandomDestination* find_random_destination;
   MoveTo*            move_to;
-  Wait *             wait, *wait2;
-  bt_Selector*       hostile;
+  Wait *             wait, *wait2, *wait_a_momment;
+  BTSelector*        hostile;
   Attack*            attack;
-  bt_Sequence*       attack_seq;
+  BTSequence*        attack_seq;
   FindPlayerTarget*  find_player_target;
   Follow*            follow;
   IsPlayerCrossSpot* is_player_cross_spot;
-  bt_Sequence*       back_to_spot_seq;
+  BTSequence*        back_to_spot_seq;
   SetDestToSpot*     set_dest_to_spot;
-  bt_Selector*       selector;
+  BTSelector*        selector;
+  IsPlayerOutOfSpot* is_player_out_of_spot;
 
-  root      = bt_root_new();
-  chase_seq = bt_sequence_new();
-  // find_random_destination = find_random_destination_new();
-  // move_to                 = move_to_new(TILE_SIZE * 2, 1.f);
-  wait                 = wait_new(30);
-  wait2                = wait_new(60);
-  attack               = attack_new();
-  hostile              = bt_selector_new();
-  attack_seq           = bt_sequence_new();
-  follow               = follow_new(15.f);
-  find_player_target   = find_player_target_new();
-  is_player_cross_spot = is_player_cross_spot_new();
-  move_to              = move_to_new(2.f);
-  back_to_spot_seq     = bt_sequence_new();
-  set_dest_to_spot     = set_dest_to_spot_new();
-  selector             = bt_selector_new();
+  root                  = bt_root_new();
+  chase_seq             = bt_sequence_new();
+  wait                  = wait_new(30);
+  wait2                 = wait_new(60);
+  attack                = attack_new();
+  hostile               = bt_selector_new();
+  attack_seq            = bt_sequence_new();
+  follow                = follow_new(15.f);
+  find_player_target    = find_player_target_new();
+  is_player_cross_spot  = is_player_cross_spot_new();
+  move_to               = move_to_new(2.f);
+  back_to_spot_seq      = bt_sequence_new();
+  set_dest_to_spot      = set_dest_to_spot_new();
+  selector              = bt_selector_new();
+  is_player_out_of_spot = is_player_out_of_spot_new();
+  wait_a_momment        = wait_new(90);
 
-  bt_root_set_child(root, (bt_Node*)selector);
+  bt_root_set_child(root, (BTNode*)selector);
 
-  bt_decorator_set_child((bt_Decorator*)is_player_cross_spot, (bt_Node*)hostile);
+  bt_decorator_set_child((BTDecorator*)is_player_cross_spot, (BTNode*)hostile);
+  bt_decorator_set_child((BTDecorator*)is_player_out_of_spot, (BTNode*)back_to_spot_seq);
 
-  // bt_decorator_set_child((bt_Decorator*)is_player_far_away, (bt_Node*)chase_seq);
+  bt_sequence_add(chase_seq, (BTNode*)find_player_target);
+  bt_sequence_add(chase_seq, (BTNode*)follow);
 
-  bt_sequence_add(chase_seq, (bt_Node*)find_player_target);
-  bt_sequence_add(chase_seq, (bt_Node*)follow);
+  bt_sequence_add(attack_seq, (BTNode*)attack);
+  bt_sequence_add(attack_seq, (BTNode*)wait);
 
-  bt_sequence_add(attack_seq, (bt_Node*)attack);
-  bt_sequence_add(attack_seq, (bt_Node*)wait);
+  bt_sequence_add(back_to_spot_seq, (BTNode*)wait_a_momment);
+  bt_sequence_add(back_to_spot_seq, (BTNode*)set_dest_to_spot);
+  bt_sequence_add(back_to_spot_seq, (BTNode*)move_to);
 
-  bt_sequence_add(back_to_spot_seq, (bt_Node*)set_dest_to_spot);
-  bt_sequence_add(back_to_spot_seq, (bt_Node*)move_to);
+  bt_selector_add(hostile, (BTNode*)chase_seq);
+  bt_selector_add(hostile, (BTNode*)attack_seq);
 
-  bt_selector_add(hostile, (bt_Node*)chase_seq);
-  bt_selector_add(hostile, (bt_Node*)attack_seq);
-
-  bt_selector_add(selector, (bt_Node*)is_player_cross_spot);
-  bt_selector_add(selector, (bt_Node*)back_to_spot_seq);
+  bt_selector_add(selector, (BTNode*)is_player_cross_spot);
+  bt_selector_add(selector, (BTNode*)is_player_out_of_spot);
 
   ai_agent       = ecs_add(ecs, entity, AI_AGENT);
-  ai_agent->root = (bt_Node*)root;
+  ai_agent->root = (BTNode*)root;
 
   equipment                  = ecs_add(ecs, entity, EQUIPMENT);
   equipment->weapon          = ECS_NULL_ENT;

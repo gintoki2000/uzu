@@ -2,16 +2,16 @@
 #include <components.h>
 #include <constances.h>
 
-void      find_random_destination_vtbl_init(bt_NodeVtbl* vtbl);
-bt_Status find_random_destination_exec(FindRandomDestination* self, Ecs* ecs, ecs_entity_t entity);
+void      find_random_destination_vtbl_init(BTNodeVtbl* vtbl);
+BTStatus find_random_destination_exec(FindRandomDestination* self, Ecs* ecs, ecs_entity_t entity);
 FindRandomDestination* find_random_destination_init(FindRandomDestination* self);
 
-BT_VTBL_INST_FN(bt_Node, find_random_destination)
+BT_VTBL_INST_FN(BTNode, find_random_destination)
 BT_ALLOC_FN(FindRandomDestination, find_random_destination)
 
-void find_random_destination_vtbl_init(bt_NodeVtbl* vtbl)
+void find_random_destination_vtbl_init(BTNodeVtbl* vtbl)
 {
-  bt_node_vtbl_init((bt_NodeVtbl*)vtbl);
+  bt_node_vtbl_init((BTNodeVtbl*)vtbl);
   vtbl->parent = bt_node_vtbl_inst();
   vtbl->exec   = (bt_exec_fn_t)find_random_destination_exec;
 }
@@ -23,7 +23,7 @@ FindRandomDestination* find_random_destination_new()
 
 FindRandomDestination* find_random_destination_init(FindRandomDestination* self)
 {
-  bt_node_init((bt_Node*)self);
+  bt_node_init((BTNode*)self);
   return self;
 }
 
@@ -41,7 +41,7 @@ static Vec2 get_entity_position(Ecs* ecs, ecs_entity_t entity)
   return transform->pos;
 }
 
-bt_Status find_random_destination_exec(FindRandomDestination* self, Ecs* ecs, ecs_entity_t entity)
+BTStatus find_random_destination_exec(FindRandomDestination* self, Ecs* ecs, ecs_entity_t entity)
 {
   (void)self;
 

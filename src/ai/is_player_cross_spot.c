@@ -5,18 +5,18 @@
 #include <utils.h>
 struct IsPlayerCrossSpot
 {
-  BT_EXTEND_NODE(bt_Condition)
+  BT_EXTEND_NODE(BTCondition)
 };
 
-const bt_NodeVtbl* is_player_cross_spot_vtbl_inst();
-void               is_player_cross_spot_vtbl_init(bt_ConditionVtbl* vtbl);
+const BTNodeVtbl* is_player_cross_spot_vtbl_inst();
+void               is_player_cross_spot_vtbl_init(BTConditionVtbl* vtbl);
 IsPlayerCrossSpot* is_player_cross_spot_init(IsPlayerCrossSpot* self);
 BOOL is_player_cross_spot_pred(IsPlayerCrossSpot* self, Ecs* ecs, ecs_entity_t entity);
 
-BT_VTBL_INST_FN(bt_Condition, is_player_cross_spot)
+BT_VTBL_INST_FN(BTCondition, is_player_cross_spot)
 BT_ALLOC_FN(IsPlayerCrossSpot, is_player_cross_spot)
 
-void is_player_cross_spot_vtbl_init(bt_ConditionVtbl* vtbl)
+void is_player_cross_spot_vtbl_init(BTConditionVtbl* vtbl)
 {
   bt_condition_vtbl_init(vtbl);
   vtbl->pred = (bt_pred_fn_t)is_player_cross_spot_pred;
@@ -29,7 +29,7 @@ IsPlayerCrossSpot* is_player_cross_spot_new()
 
 IsPlayerCrossSpot* is_player_cross_spot_init(IsPlayerCrossSpot* self)
 {
-  bt_condition_init((bt_Condition*)self, TRUE);
+  bt_condition_init((BTCondition*)self, TRUE);
   return self;
 }
 

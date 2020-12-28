@@ -3,7 +3,7 @@
 #include <behaviour_tree.h>
 typedef struct
 {
-  BT_EXTEND_NODE(bt_Node) 
+  BT_EXTEND_NODE(BTNode) 
 } FindRandomDestination;
 
 FindRandomDestination* find_random_destination_new();

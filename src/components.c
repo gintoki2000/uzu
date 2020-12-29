@@ -125,6 +125,11 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
           .size    = sizeof(Name),
           .fini_fn = (ecs_comp_fini_fn_t)name_fini,
       },
+  [TEXT] =
+      (EcsType){
+          .size    = sizeof(Text),
+          .fini_fn = (ecs_comp_fini_fn_t)text_fini,
+      },
 };
 
 Animation*
@@ -196,4 +201,17 @@ void name_fini(Name* name)
 void name_init(Name* name, const char* value)
 {
   name->value = strdup(value);
+}
+
+void text_init(Text* text, const char* value, const FONT* font, COLOR color)
+{
+  text->value   = strdup(value);
+  text->opacity = 0xff;
+  text->color   = color;
+  text->font    = font;
+}
+
+void text_fini(Text* text)
+{
+  free(text->value);
 }

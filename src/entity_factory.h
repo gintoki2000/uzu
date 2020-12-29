@@ -19,8 +19,12 @@ ecs_entity_t make_red_flask(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_thunder_storm(Ecs* ecs, Vec2 center);
 ecs_entity_t make_thunder(Ecs* ecs, Vec2 pos, u16 mask_bits);
 ecs_entity_t
-             make_ladder(Ecs* ecs, const char* name, Vec2 pos, Vec2 size, const char* level, const char* dest);
-ecs_entity_t make_text_particle(Ecs* ecs, Vec2 pos, const char* text, COLOR color);
+make_ladder(Ecs* ecs, const char* name, Vec2 pos, Vec2 size, const char* level, const char* dest);
+ecs_entity_t
+make_text_particle(Ecs* ecs, const char* text, Vec2 pos, Vec2 vel, FONT* font, COLOR color);
+
+ecs_entity_t make_make_damage_indicator_particle(Ecs* ecs, Vec2 pos, int amount);
+ecs_entity_t make_item_picked_up_msg(Ecs* ecs, Vec2 pos, const char* item_name);
 
 ecs_entity_t make_player(Ecs* ecs, ecs_entity_t character, ecs_entity_t weapon);
 

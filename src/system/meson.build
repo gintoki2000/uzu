@@ -20,6 +20,7 @@ system_source_files = files(
   './player_ctl_sys.c',
   './equipment_sys.c',
   './hud_system.c',
+  './text_rendering_sys.c',
 
   #weapon skill systems
   './weapon_skill/swing.c',

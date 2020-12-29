@@ -1,5 +1,6 @@
 #ifndef COMPONENTS_H
 #define COMPONENTS_H
+#include "SDL_FontCache.h"
 #include "behaviour_tree.h"
 #include "path_finder.h"
 #include <ecs/ecs.h>
@@ -208,7 +209,7 @@ typedef int CharacterAnimatorTag;
 
 typedef struct
 {
-  ItemId item_id;
+  ItemTypeId item_id;
 } ItemTag;
 
 typedef struct
@@ -254,8 +255,8 @@ typedef struct LifeSpan
 
 typedef struct
 {
-  ItemId item1;
-  ItemId item2;
+  ItemTypeId item1;
+  ItemTypeId item2;
   int    change1;
   int    change2;
 } Drop;
@@ -295,8 +296,10 @@ typedef struct
 
 typedef struct
 {
-  const char* value;
-  u8          opacity;
+  char* value;
+  u8    opacity;
+  COLOR color;
+  FONT* font;
 } Text;
 
 Animation*
@@ -320,5 +323,8 @@ void level_switcher_fini(LevelSwitcher* sw);
 
 void name_init(Name* name, const char* value);
 void name_fini(Name* name);
+
+void text_init(Text* text, const char* value, const FONT* font, COLOR color);
+void text_fini(Text* text);
 
 #endif // COMPONENTS_H

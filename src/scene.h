@@ -1,6 +1,6 @@
 #ifndef SCENE_H
 #define SCENE_H
-#include <SDL2/SDL.h>
+#include "SDL.h"
 
 typedef struct Scene
 {

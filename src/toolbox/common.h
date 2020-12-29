@@ -1,7 +1,7 @@
 #ifndef COMMON_H
 #define COMMON_H
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_render.h>
+#include "SDL.h"
+#include "SDL_FontCache.h"
 #include <stdbool.h>
 
 typedef Sint8  s8;
@@ -32,6 +32,7 @@ typedef struct
 #define POINT SDL_Point
 #define COLOR SDL_Color
 #define POINT SDL_Point
+#define FONT FC_Font
 
 #define FLIP_TO_SIGN(__f) (__f == SDL_FLIP_NONE ? 1 : -1)
 

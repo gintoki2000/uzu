@@ -473,7 +473,7 @@ bool rtree_move_proxy(RTree* self, int proxy_id, const AABB* aabb, const Vec2 di
   ASSERT(node_is_leaf(&nodes[proxy_id]));
 
   AABB fat_aabb = *aabb;
-  aabb_extend(&fat_aabb, 5.f);
+  aabb_extend(&fat_aabb, 7.f);
 
   Vec2 d = vec2_mul(displacement, 2.f);
 

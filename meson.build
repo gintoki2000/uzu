@@ -12,6 +12,7 @@ deps = [
   dependency('SDL2_mixer', required: true), 
   dependency('cglm'),
   dependency('SDL2_gfx'),
+  dependency('SDL2_ttf'),
   dependency('json-c', static: true),
 ]
 

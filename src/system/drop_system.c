@@ -4,15 +4,16 @@
 #include <entity_factory.h>
 #include <item.h>
 
-static ecs_entity_t (*create_fn_tbl[NUM_ITEMS])(Ecs*, Vec2) = {
-  [ITEM_RED_FLASK]     = make_red_flask,
-  [ITEM_BIG_RED_FLASK] = make_big_red_flask,
+static ecs_entity_t (*create_fn_tbl[NUM_ITEM_TYPES])(Ecs*, Vec2) = {
+  [ITEM_TYPE_RED_FLASK]     = make_red_flask,
+  [ITEM_TYPE_BIG_RED_FLASK] = make_big_red_flask,
 };
 
 extern Ecs* g_ecs;
 
 static void on_entity_died(void* arg, const SysEvt_EntityDied* event)
 {
+  (void)arg;
   Drop*      drop;
   Transform* transform;
   int        v;

@@ -1,20 +1,26 @@
 #include "pickup_sys.h"
-
 #include "mediator.h"
-#include <components.h>
-#include <game_scene.h>
-#include <inventory.h>
-#include <resources.h>
+
+#include "components.h"
+#include "entity_factory.h"
+#include "game_scene.h"
+#include "inventory.h"
+#include "resources.h"
+
+extern Ecs* g_ecs;
 
 static void on_player_hit_item(void* arg, const SysEvt_PlayerHitItem* event)
 {
   (void)arg;
-  ItemTag* item_tag;
-  if ((item_tag = ecs_get(g_ecs, event->item, ITEM_TAG)) != NULL)
+  ItemTag*   item_tag;
+  Transform* transform;
+  if ((item_tag = ecs_get(g_ecs, event->item, ITEM_TAG)) != NULL &&
+      (transform = ecs_get(g_ecs, event->item, TRANSFORM)) != NULL)
   {
     if (add_to_inv(item_tag->item_id))
     {
       Mix_PlayChannel(-1, get_sfx(SFX_INTERACTION), 0);
+      make_item_picked_up_msg(g_ecs, transform->pos, g_item_types[item_tag->item_id].name);
       ecs_add(g_ecs, event->item, TAG_TO_BE_DESTROYED);
     }
   }

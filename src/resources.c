@@ -1,6 +1,7 @@
 #include "resources.h"
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_mixer.h>
+#include "SDL_image.h"
+#include "SDL_mixer.h"
+#include "SDL_ttf.h"
 #include <engine/engine.h>
 static SDL_Texture* _textures[NUM_TEXS];
 static const char*  _texture_files[NUM_TEXS] = {
@@ -55,6 +56,8 @@ static const char* _sfx_files[NUM_SFXS] = {
   [SFX_CLAW_HIT]    = "asserts/sound/fx/claw_hit.wav",
 };
 
+static FONT* _fonts[NUM_FONTS];
+
 extern SDL_Renderer* g_renderer;
 
 static SDL_Texture* load_texture(const char* file)
@@ -91,6 +94,28 @@ BOOL resources_load()
     }
   }
 
+  FONT* font = FC_CreateFont();
+
+  FC_LoadFont(font,
+              g_renderer,
+              "asserts/font/font.TTF",
+              8,
+              (COLOR){ 255, 255, 255, 255 },
+              TTF_STYLE_NORMAL);
+
+  _fonts[FONT_DAMAGE_INDICATOR] = font;
+
+  font = FC_CreateFont();
+
+  FC_LoadFont(font,
+              g_renderer,
+              "asserts/font/font.TTF",
+              8,
+              (COLOR){ 255, 255, 255, 255 },
+              TTF_STYLE_NORMAL);
+
+  _fonts[FONT_ITEM_PICKED_UP] = font;
+
   return TRUE;
 }
 
@@ -119,11 +144,20 @@ void resources_unload()
       Mix_FreeChunk(_sfx[i]);
     _sfx[i] = NULL;
   }
+
+  for (int i = 0; i < NUM_FONTS; ++i)
+  {
+    if (_fonts[i] != NULL)
+    {
+      FC_FreeFont(_fonts[i]);
+      _fonts[i] = NULL;
+    }
+  }
 }
 
-SDL_Texture* get_texture(int texture_id)
+SDL_Texture* get_texture(TextureId id)
 {
-  return _textures[texture_id];
+  return _textures[id];
 }
 
 Mix_Music* get_bg_mus(BgMusId id)
@@ -134,4 +168,9 @@ Mix_Music* get_bg_mus(BgMusId id)
 Mix_Chunk* get_sfx(SfxId id)
 {
   return _sfx[id];
+}
+
+FONT* get_font(FontId id)
+{
+  return _fonts[id];
 }

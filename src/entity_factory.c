@@ -185,8 +185,8 @@ ecs_entity_t make_huge_demon(Ecs* ecs)
   motion->max_force = 5.f;
 
   drop          = ecs_add(ecs, demon, DROP);
-  drop->item1   = ITEM_BIG_RED_FLASK;
-  drop->item2   = ITEM_RED_FLASK;
+  drop->item1   = ITEM_TYPE_BIG_RED_FLASK;
+  drop->item2   = ITEM_TYPE_RED_FLASK;
   drop->change1 = 70;
   drop->change2 = 40;
 
@@ -274,7 +274,7 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 pos)
   heath->hit_points     = 10;
 
   healthBar         = ecs_add(ecs, entity, HEAL_BAR);
-  healthBar->len    = 10;
+  healthBar->len    = 25;
   healthBar->anchor = (SDL_Point){ 20, 25 };
 
   motion            = ecs_add(ecs, entity, MOTION);
@@ -282,21 +282,20 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 pos)
   motion->max_force = 20;
 
   drop          = ecs_add(ecs, entity, DROP);
-  drop->item1   = ITEM_BIG_RED_FLASK;
-  drop->item2   = ITEM_RED_FLASK;
-  drop->change1 = 100;
-  drop->change2 = 20;
+  drop->item1   = ITEM_TYPE_BIG_RED_FLASK;
+  drop->item2   = ITEM_TYPE_RED_FLASK;
+  drop->change1 = 40;
+  drop->change2 = 60;
 
   ecs_add(ecs, entity, TILE_COLLISION_TAG);
 
   controller                = ecs_add(ecs, entity, CONTROLLER);
   controller->lock_movement = TRUE;
 
-  BTRoot*     root;
-  BTSequence* chase_seq;
-  // FindRandomDestination* find_random_destination;
+  BTRoot*            root;
+  BTSequence*        chase_seq;
   MoveTo*            move_to;
-  Wait *             wait, *wait2, *wait_a_momment;
+  Wait *             wait, *wait_a_momment;
   BTSelector*        hostile;
   Attack*            attack;
   BTSequence*        attack_seq;
@@ -311,7 +310,6 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 pos)
   root                  = bt_root_new();
   chase_seq             = bt_sequence_new();
   wait                  = wait_new(30);
-  wait2                 = wait_new(60);
   attack                = attack_new();
   hostile               = bt_selector_new();
   attack_seq            = bt_sequence_new();
@@ -641,7 +639,7 @@ ecs_entity_t make_big_red_flask(Ecs* ecs, Vec2 pos)
   hitbox->mask_bits = BIT(CATEGORY_PLAYER);
 
   tag          = ecs_add(ecs, entity, ITEM_TAG);
-  tag->item_id = ITEM_BIG_RED_FLASK;
+  tag->item_id = ITEM_TYPE_BIG_RED_FLASK;
 
   return entity;
 }
@@ -676,7 +674,7 @@ ecs_entity_t make_red_flask(Ecs* ecs, Vec2 pos)
   hitbox->mask_bits = BIT(CATEGORY_PLAYER);
 
   tag          = ecs_add(ecs, entity, ITEM_TAG);
-  tag->item_id = ITEM_RED_FLASK;
+  tag->item_id = ITEM_TYPE_RED_FLASK;
   return entity;
 }
 
@@ -759,4 +757,52 @@ make_ladder(Ecs* ecs, const char* name, Vec2 pos, Vec2 size, const char* level, 
   name_init(ecs_add(ecs, entity, NAME), name);
 
   return entity;
+}
+
+ecs_entity_t
+make_text_particle(Ecs* ecs, const char* text, Vec2 pos, Vec2 vel, FONT* font, COLOR color)
+{
+  ecs_entity_t entity;
+
+  Transform* transform;
+  Motion*    motion;
+  LifeSpan*  life_span;
+
+  entity = ecs_create(ecs);
+
+  transform      = ecs_add(ecs, entity, TRANSFORM);
+  transform->pos = pos;
+
+  motion            = ecs_add(ecs, entity, MOTION);
+  motion->vel       = vel;
+  motion->max_speed = 200.f;
+
+  text_init(ecs_add(ecs, entity, TEXT), text, font, color);
+
+  life_span            = ecs_add(ecs, entity, LIFE_SPAN);
+  life_span->remaining = 30;
+
+  return entity;
+}
+
+ecs_entity_t make_make_damage_indicator_particle(Ecs* ecs, Vec2 pos, int amount)
+{
+  char strnum[5];
+  sprintf(strnum, "%d", amount);
+  return make_text_particle(ecs,
+                            strnum,
+                            pos,
+                            VEC2(0.f, -30.f),
+                            get_font(FONT_DAMAGE_INDICATOR),
+                            (COLOR){ 252, 78, 3, 255 });
+}
+
+ecs_entity_t make_item_picked_up_msg(Ecs* ecs, Vec2 pos, const char* item_name)
+{
+  return make_text_particle(ecs,
+                            item_name,
+                            pos,
+                            VEC2(0.f, -40.f),
+                            get_font(FONT_ITEM_PICKED_UP),
+                            (COLOR){ 122, 196, 10, 255 });
 }

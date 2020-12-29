@@ -84,9 +84,11 @@ static void update_proxies(Ecs* ecs)
     }
     else
     {
-      if (absf(transform->prev_pos.x - transform->pos.x) > EPSILON ||
-          absf(transform->prev_pos.y - transform->pos.y) > EPSILON ||
-          absf(transform->rot - transform->rot) > EPSILON)
+      float dx, dy, dr;
+      dx = transform->pos.x - transform->prev_pos.x;
+      dy = transform->pos.y - transform->prev_pos.y;
+      dr = transform->rot - transform->prev_rot;
+      if (absf(dx) > EPSILON || absf(dy) > EPSILON || absf(dr) > EPSILON)
       {
         query_aabb(&aabb, &hitboxs[i], transform);
         rtree_move_proxy(_rtree, hitboxs[i].proxy_id, &aabb, VEC2(0, 0));

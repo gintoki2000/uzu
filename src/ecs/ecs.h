@@ -3,7 +3,6 @@
 #include "common.h"
 #include "entity_pool.h"
 #include "pool.h"
-#include <SDL2/SDL.h>
 #include <toolbox/toolbox.h>
 
 typedef struct Ecs

@@ -52,6 +52,13 @@ typedef enum
 
 typedef enum
 {
+  FONT_DAMAGE_INDICATOR,
+  FONT_ITEM_PICKED_UP,
+  NUM_FONTS,
+} FontId;
+
+typedef enum
+{
   SFX_SWORD_HIT,
   SFX_THUNDER,
   SFX_INTERACTION,
@@ -59,10 +66,11 @@ typedef enum
   NUM_SFXS,
 } SfxId;
 
-BOOL         resources_load();
-void         resources_unload();
-SDL_Texture* get_texture(int texture_id);
-Mix_Music*   get_bg_mus(BgMusId id);
-Mix_Chunk*   get_sfx(SfxId id);
+BOOL         resources_load    (void        );
+void         resources_unload  (void        );
+SDL_Texture* get_texture       (TextureId id);
+Mix_Music*   get_bg_mus        (BgMusId   id);
+Mix_Chunk*   get_sfx           (SfxId     id);
+FONT*        get_font          (FontId    id);
 
 #endif // RESOURCES_H

@@ -26,6 +26,7 @@
 #include "system/pickup_sys.h"
 #include "system/player_ctl_sys.h"
 #include "system/rendering_sys.h"
+#include "system/text_rendering_sys.h"
 #include "system/tile_collision_sys.h"
 
 #include "system/weapon_skill/charge.h"
@@ -139,13 +140,16 @@ static void on_update()
     rendering_system_update();
     healthbar_rendering_system_update();
     map_draw(MAP_LAYER_FRONT);
+    text_rendering_system_update();
     hub_system_update();
 
     // render debug
+#if 0
     collision_system_render_debug();
     path_rendering_system_update();
     hitbox_rendering_system_update();
     position_rendering_system_update();
+#endif
 
     // late update
     late_destroying_system_update();
@@ -156,8 +160,7 @@ static void on_update()
 static void on_player_hit_ladder(void* arg, const SysEvt_HitLadder* event)
 {
   (void)arg;
-
-  INFO("\n");
+  (void)event;
 }
 
 static void emit_signal(int sig_id, const pointer_t event)
@@ -184,24 +187,17 @@ static void load_map(const char* file)
   }
 }
 
-#define FLOOR_LAYER_NAME "floor"
-#define FRONT_WALL_LAYER_NAME "front-wall"
-#define BACK_WALL_LAYER_NAME "back-wall"
+static char* _layer_names[NUM_MAP_LAYERS] = {
+  [MAP_LAYER_FLOOR] = "floor",
+  [MAP_LAYER_WALL]  = "front-wall",
+  [MAP_LAYER_FRONT] = "back-wall",
+};
 
 static int layer_name_to_id(const char* name)
 {
-  if (strcmp(name, FLOOR_LAYER_NAME) == 0)
-  {
-    return MAP_LAYER_FLOOR;
-  }
-  else if (strcmp(name, FRONT_WALL_LAYER_NAME) == 0)
-  {
-    return MAP_LAYER_FRONT;
-  }
-  else if (strcmp(name, BACK_WALL_LAYER_NAME) == 0)
-  {
-    return MAP_LAYER_WALL;
-  }
+  for (int i = 0; i < NUM_MAP_LAYERS; ++i)
+    if (strcmp(_layer_names[i], name))
+      return i;
   return -1;
 }
 

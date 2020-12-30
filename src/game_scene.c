@@ -1,9 +1,11 @@
 #include "game_scene.h"
 #include "components.h"
+#include "constances.h"
 #include "entity_factory.h"
 #include "map.h"
 #include "read_all.h"
 #include "scene.h"
+#include "utils.h"
 
 #include "ecs/ecs.h"
 
@@ -15,6 +17,7 @@
 #include "system/collision_sys.h"
 #include "system/dmg_sys.h"
 #include "system/drop_system.h"
+#include "system/interaction_system.h"
 #include "system/equipment_sys.h"
 #include "system/health_sys.h"
 #include "system/healthbar_rendering_sys.h"
@@ -49,18 +52,22 @@
 #define json_object_array_get_idx_as_int(__jarr, __idx)                                            \
   json_object_get_int(json_object_array_get_idx(__jarr, __idx))
 
-static void         on_load();
-static void         on_unload();
+static void         on_load(void);
+static void         on_unload(void);
 static void         on_event(const SDL_Event* evt);
 static void         on_update();
 static void         on_player_hit_ladder(void* arg, const SysEvt_HitLadder* event);
+static void         on_entity_died(void* arg, const SysEvt_EntityDied* event);
 static void         emit_signal(int sig_id, const pointer_t event);
-static void         load_map(const char* filename);
+static void         load_level(const char* filename, BOOL spawn_player);
+static void         unload_current_level(void);
 static json_object* load_json_from_file(const char* filename);
 
 static int parse_tilelayer(const json_object* tilelayer_json_obj);
-static int parse_objectgroup(const json_object* object_group_json_obj);
-static int parse(const json_object* map_json_obj);
+static int parse_objectgroup(const json_object* object_group_json_obj, BOOL spawn_player);
+static int parse(const json_object* map_json_obj, BOOL spawn_player);
+
+static void cb_clear_world(void* arg, Ecs* ecs, ecs_entity_t entity);
 
 extern EcsType g_comp_types[];
 
@@ -73,12 +80,15 @@ const Scene g_game_scene = {
 
 Ecs* g_ecs;
 
-static Dispatcher* _dispatcher;
-static BOOL        _load_next_map;
+static Dispatcher*  _dispatcher;
+static BOOL         _switch_level;
+static char         _level_to_switch[100];
+static char         _spwan_location[100];
 
 static void on_load()
 {
   _dispatcher = dispatcher_new(GAME_SCENE_SIG_CNT);
+  g_ecs       = ecs_new(g_comp_types, NUM_COMPONENTS);
 
   mediator_init();
   collision_system_init();
@@ -87,10 +97,12 @@ static void on_load()
   pickup_system_init();
   damage_system_init();
   collision_manager_system_init();
+  interaction_system_init();
 
   mediator_connect(SYS_SIG_HIT_LADDER, NULL, SLOT(on_player_hit_ladder));
+  mediator_connect(SYS_SIG_ENTITY_DIED, NULL, SLOT(on_entity_died));
 
-  load_map("asserts/level/0.json");
+  load_level("asserts/level/0.json", TRUE);
 }
 
 static void on_unload()
@@ -109,10 +121,34 @@ static void on_event(const SDL_Event* evt)
 
 static void on_update()
 {
-  if (_load_next_map)
+  if (_switch_level)
   {
 
-    _load_next_map = FALSE;
+    ecs_each(g_ecs, NULL, cb_clear_world);
+    load_level(_level_to_switch, TRUE);
+
+    ecs_entity_t* entities;
+    ecs_size_t    cnt;
+
+    LevelSwitcher* switchers;
+    Name*          name;
+    Transform*     transform;
+
+    ecs_raw(g_ecs, LEVEL_SWITCHER, &entities, (void**)&switchers, &cnt);
+    for (int i = 0; i < cnt; ++i)
+    {
+      if ((name = ecs_get(g_ecs, entities[i], NAME)) &&
+          (transform = ecs_get(g_ecs, entities[i], TRANSFORM)))
+      {
+        if (strcmp(_spwan_location, name->value) == 0)
+        {
+          move_player_to(g_ecs, VEC2(transform->pos.x, transform->pos.y + 30.f));
+          break;
+        }
+      }
+    }
+
+    _switch_level = FALSE;
   }
   else
   {
@@ -128,6 +164,7 @@ static void on_update()
     health_system_update();
     camera_system_update();
     map_update_animated_cells();
+    interaction_system_update();
 
     //  skl
     swing_weapon_skl_system_update();
@@ -141,12 +178,13 @@ static void on_update()
     healthbar_rendering_system_update();
     map_draw(MAP_LAYER_FRONT);
     text_rendering_system_update();
+    interactable_pointer_rendering_system_update();
     hub_system_update();
 
+#if 1
     // render debug
-#if 0
-    collision_system_render_debug();
-    path_rendering_system_update();
+    //collision_system_render_debug();
+    //path_rendering_system_update();
     hitbox_rendering_system_update();
     position_rendering_system_update();
 #endif
@@ -160,7 +198,33 @@ static void on_update()
 static void on_player_hit_ladder(void* arg, const SysEvt_HitLadder* event)
 {
   (void)arg;
-  (void)event;
+
+  LevelSwitcher* lsw;
+
+  lsw = ecs_get(g_ecs, event->ladder, LEVEL_SWITCHER);
+
+  _switch_level = TRUE;
+
+  strcpy(_level_to_switch, "asserts/level/");
+
+  strcat(_level_to_switch, lsw->level);
+  strcat(_level_to_switch, ".json");
+  strcpy(_spwan_location, lsw->dest);
+}
+
+static void on_entity_died(void* arg, const SysEvt_EntityDied* event)
+{
+  (void)arg;
+  if (ecs_get(g_ecs, event->entity, PLAYER_TAG))
+  {
+    //
+  }
+}
+
+static void cb_clear_world(void* arg, Ecs* ecs, ecs_entity_t entity)
+{
+  (void)arg;
+  ecs_destroy(ecs, entity);
 }
 
 static void emit_signal(int sig_id, const pointer_t event)
@@ -168,35 +232,28 @@ static void emit_signal(int sig_id, const pointer_t event)
   dispatcher_emit(_dispatcher, sig_id, event);
 }
 
-static void load_map(const char* file)
+
+static void load_level(const char* file, BOOL spawn_player)
 {
   json_object* json_map = NULL;
-
-  if (g_ecs != NULL)
-  {
-    ecs_del(g_ecs);
-  }
-
-  g_ecs = ecs_new(g_comp_types, NUM_COMPONENTS);
-
   emit_signal(GAME_SCENE_SIG_BEGIN_LOAD_MAP, NULL);
   if ((json_map = load_json_from_file(file)) != NULL)
   {
-    parse(json_map);
+    parse(json_map, spawn_player);
     free(json_map);
   }
 }
 
 static char* _layer_names[NUM_MAP_LAYERS] = {
   [MAP_LAYER_FLOOR] = "floor",
-  [MAP_LAYER_WALL]  = "front-wall",
-  [MAP_LAYER_FRONT] = "back-wall",
+  [MAP_LAYER_WALL]  = "back-wall",
+  [MAP_LAYER_FRONT] = "front-wall",
 };
 
 static int layer_name_to_id(const char* name)
 {
   for (int i = 0; i < NUM_MAP_LAYERS; ++i)
-    if (strcmp(_layer_names[i], name))
+    if (strcmp(_layer_names[i], name) == 0)
       return i;
   return -1;
 }
@@ -230,7 +287,7 @@ static int parse_tilelayer(const json_object* tilelayer_json_obj)
   return 0;
 }
 
-static int parse_objectgroup(const json_object* object_group_json_obj)
+static int parse_objectgroup(const json_object* object_group_json_obj, BOOL spawn_player)
 {
   const json_object* objects_json_obj;
   const json_object* props_json_obj;
@@ -272,18 +329,21 @@ static int parse_objectgroup(const json_object* object_group_json_obj)
 
       make_ladder(g_ecs, name, pos, size, level, dest);
     }
-    else if (strcmp(objtype, "Player") == 0)
+    else if (spawn_player && strcmp(objtype, "Player") == 0)
     {
       make_player(g_ecs, make_knight(g_ecs, pos), make_golden_sword(g_ecs, BIT(CATEGORY_ENEMY)));
+    }
+    else if (strcmp(objtype, "NPC") == 0)
+    {
+      make_wizzard_npc(g_ecs, VEC2(pos.x + size.x / 2.f, pos.y + size.y));
     }
   }
   return 0;
 }
 
-static int parse_layer(const json_object* layer_json_obj)
+static int parse_layer(const json_object* layer_json_obj, BOOL spawn_player)
 {
   const char* layer_type;
-  INFO("layer name: %s\n", json_object_object_get_as_string(layer_json_obj, "name"));
 
   layer_type = json_object_object_get_as_string(layer_json_obj, "type");
   if (strcmp(layer_type, "tilelayer") == 0)
@@ -292,13 +352,13 @@ static int parse_layer(const json_object* layer_json_obj)
   }
   else if (strcmp(layer_type, "objectgroup") == 0)
   {
-    parse_objectgroup(layer_json_obj);
+    parse_objectgroup(layer_json_obj, spawn_player);
   }
 
   return 0;
 }
 
-static int parse(const json_object* map_json_obj)
+static int parse(const json_object* map_json_obj, BOOL spawn_player)
 {
   const json_object* layers_json_obj;
   const json_object* layer_json_obj;
@@ -311,7 +371,7 @@ static int parse(const json_object* map_json_obj)
   for (int i = 0; i < cnt; ++i)
   {
     layer_json_obj = json_object_array_get_idx(layers_json_obj, i);
-    parse_layer(layer_json_obj);
+    parse_layer(layer_json_obj, spawn_player);
   }
   return 0;
 }

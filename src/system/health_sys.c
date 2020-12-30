@@ -15,7 +15,7 @@ static void on_deal_damage(void* arg, const SysEvt_DealDamage* event)
   {
     health->hit_points -= event->damage;
 
-    INFO("e " ECS_ENT_FMT_PATTERN "take %d damage\n",
+    INFO("e" ECS_ENT_FMT_PATTERN " take %d damage\n",
          ECS_ENT_FMT_VARS(event->receiver),
          event->damage);
     if (health->hit_points <= 0)

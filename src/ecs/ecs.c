@@ -157,7 +157,7 @@ void ecs_each(Ecs* self, void* user_data, ecs_each_fn_t each_fn)
   entities = self->entity_pool.entities;
   if (self->entity_pool.destroyed_index == ECS_NULL_IDX)
   {
-    for (int i = 0; i < size; ++i)
+    for (int i = size - 1; i >= 0; --i)
       each_fn(user_data, self, entities[i]);
   }
   else

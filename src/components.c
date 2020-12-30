@@ -130,6 +130,10 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
           .size    = sizeof(Text),
           .fini_fn = (ecs_comp_fini_fn_t)text_fini,
       },
+  [INTERACTABLE] =
+      (EcsType){
+          .size = sizeof(Interactable),
+      },
 };
 
 Animation*

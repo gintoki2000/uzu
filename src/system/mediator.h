@@ -15,6 +15,7 @@ enum
   SYS_SIG_PLAYER_HIT_ITEM,
   SYS_SIG_HIT_TRAP,
   SYS_SIG_HIT_LADDER,
+  SYS_SIG_BEGIN_INTERACTION,
   NUM_SYSTEM_SIGNALS,
 };
 
@@ -85,6 +86,11 @@ typedef struct
 {
   ecs_entity_t ladder;
 } SysEvt_HitLadder;
+
+typedef struct
+{
+  ecs_entity_t entity;
+} SysEvt_BeginInteraction;
 
 void mediator_init();
 void mediator_fini();

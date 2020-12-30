@@ -21,7 +21,9 @@ static const char*  _texture_files[NUM_TEXS] = {
   [TEX_PLAYER_HEALTH_BAR] = "asserts/player_health_bar.png",
   [TEX_CHORT]             = "asserts/chort.png",
   [TEX_CLEAVER]           = "asserts/weapon_cleaver.png",
-  [TEX_RED_THUNDER]       = "asserts/Thunder.png"
+  [TEX_RED_THUNDER]       = "asserts/Thunder.png",
+  [TEX_WIZZARD]           = "asserts/wizzard.png",
+  [TEX_PONITER_DOWN]      = "asserts/pointer_down.png",
 };
 
 static Mix_Music*  _bg_musics[NUM_BG_MUSICS];

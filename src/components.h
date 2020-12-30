@@ -25,12 +25,13 @@ typedef enum
 
 enum
 {
-  CATEGORY_PLAYER,
-  CATEGORY_PROJECTILE,
-  CATEGORY_ENEMY,
-  CATEGORY_WEAPON,
-  CATEGORY_ITEM,
-  CATEGORY_LADDER,
+  CATEGORY_PLAYER,      // 0
+  CATEGORY_PROJECTILE,  // 1
+  CATEGORY_ENEMY,       // 2
+  CATEGORY_WEAPON,      // 3
+  CATEGORY_ITEM,        // 4
+  CATEGORY_LADDER,      // 5
+  CATEGORY_INTERACABLE, // 6
   NUM_CATEGORIES,
 };
 
@@ -91,6 +92,7 @@ typedef enum
   SPOT,
   LEVEL_SWITCHER,
   NAME,
+  INTERACTABLE,
   TEXT,
   NUM_COMPONENTS
 } ComponentId;
@@ -203,6 +205,8 @@ typedef int TileCollisionTag;
 
 typedef int ProjectileTag;
 
+typedef int NpcTag;
+
 typedef int TagToBeDestroyed;
 
 typedef int CharacterAnimatorTag;
@@ -257,8 +261,8 @@ typedef struct
 {
   ItemTypeId item1;
   ItemTypeId item2;
-  int    change1;
-  int    change2;
+  int        change1;
+  int        change2;
 } Drop;
 
 typedef struct
@@ -285,8 +289,9 @@ typedef ecs_entity_t FollowingTarget;
 
 typedef struct
 {
-  char* level;
-  char* dest;
+  char*     level;
+  char*     dest;
+  Direction exit_direction;
 } LevelSwitcher;
 
 typedef struct
@@ -301,6 +306,12 @@ typedef struct
   COLOR color;
   FONT* font;
 } Text;
+
+typedef struct
+{
+  char text[5][10];
+  int  cnt;
+} Interactable;
 
 Animation*
 animation_init(Animation* anim, SDL_Texture* tex, u32 x, u32 y, u32 row, u32 col, u32 sw, u32 sh);

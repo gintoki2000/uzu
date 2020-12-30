@@ -19,7 +19,10 @@ EcsEntityPool* ecs_entity_pool_init(EcsEntityPool* self)
   return self;
 }
 
-void ecs_entity_pool_fini(EcsEntityPool* self) { free(self->entities); }
+void ecs_entity_pool_fini(EcsEntityPool* self)
+{
+  free(self->entities);
+}
 
 ecs_entity_t ecs_entity_pool_alloc_ent(EcsEntityPool* self)
 {
@@ -43,6 +46,7 @@ ecs_entity_t ecs_entity_pool_alloc_ent(EcsEntityPool* self)
   ver                   = ECS_ENT_VER(self->entities[idx]);
   self->destroyed_index = ECS_ENT_IDX(self->entities[idx]);
   self->entities[idx]   = ECS_ENT(idx, ver);
+  self->cnt++;
 
   return ECS_ENT(idx, ver);
 }
@@ -57,4 +61,5 @@ void ecs_entity_pool_free_ent(EcsEntityPool* self, ecs_entity_t e)
 
   self->entities[ent_idx] = ECS_ENT(self->destroyed_index, ent_ver + 1);
   self->destroyed_index   = ent_idx;
+  self->cnt--;
 }

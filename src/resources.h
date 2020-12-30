@@ -22,6 +22,8 @@ typedef enum
   TEX_PLAYER_HEALTH_BAR,
   TEX_CHORT,
   TEX_CLEAVER,
+  TEX_WIZZARD,
+  TEX_PONITER_DOWN,
   NUM_TEXS
 } TextureId;
 

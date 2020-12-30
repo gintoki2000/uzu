@@ -26,6 +26,7 @@ Rect* rect_init_full(Rect* rect, float x, float y, float w, float h, float cx, f
   return rect;
 }
 
+
 INLINE float rect_min_x(const Rect* r)
 {
   float minx;

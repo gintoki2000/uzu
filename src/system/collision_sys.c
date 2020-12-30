@@ -15,9 +15,9 @@ extern SDL_Rect      g_viewport;
 extern SDL_Renderer* g_renderer;
 extern Ecs*          g_ecs;
 
-static void on_component_remove(void* udata, const EcsComponentEvent* event)
+static void on_component_remove(void* arg, const EcsComponentEvent* event)
 {
-  (void)udata;
+  (void)arg;
   if (event->type == HITBOX)
   {
     HitBox* hitbox = event->component;
@@ -28,30 +28,8 @@ static void on_component_remove(void* udata, const EcsComponentEvent* event)
   }
 }
 
-static AABB* query_aabb(AABB* aabb, const HitBox* hitbox, const Transform* transform)
+static Rect* get_bounding_rect(Rect* r, const HitBox* hitbox, const Transform* transform)
 {
-  Rect rect;
-
-  rect_init_full(&rect,
-                 transform->pos.x - hitbox->anchor.x,
-                 transform->pos.y - hitbox->anchor.y,
-                 hitbox->size.x,
-                 hitbox->size.y,
-                 hitbox->anchor.x,
-                 hitbox->anchor.y,
-                 transform->rot);
-  return rect_get_aabb(&rect, aabb);
-}
-
-static Rect* get_bounding_box(Rect* r, Ecs* ecs, ecs_entity_t entity)
-{
-
-  Transform* transform;
-  HitBox*    hitbox;
-
-  transform = ecs_get(ecs, entity, TRANSFORM);
-  hitbox    = ecs_get(ecs, entity, HITBOX);
-
   rect_init_full(r,
                  transform->pos.x - hitbox->anchor.x,
                  transform->pos.y - hitbox->anchor.y,
@@ -61,6 +39,13 @@ static Rect* get_bounding_box(Rect* r, Ecs* ecs, ecs_entity_t entity)
                  hitbox->anchor.y,
                  transform->rot);
   return r;
+}
+
+static AABB* get_aabb(AABB* aabb, const HitBox* hitbox, const Transform* transform)
+{
+  Rect rect;
+  get_bounding_rect(&rect, hitbox, transform);
+  return rect_get_aabb(&rect, aabb);
 }
 
 static void update_proxies(Ecs* ecs)
@@ -79,7 +64,7 @@ static void update_proxies(Ecs* ecs)
     transform = ecs_get(ecs, entites[i], TRANSFORM);
     if (hitboxs[i].proxy_id == RTREE_NULL_NODE)
     {
-      query_aabb(&aabb, &hitboxs[i], transform);
+      get_aabb(&aabb, &hitboxs[i], transform);
       hitboxs[i].proxy_id = rtree_create_proxy(_rtree, (void*)entites[i], &aabb);
     }
     else
@@ -90,7 +75,7 @@ static void update_proxies(Ecs* ecs)
       dr = transform->rot - transform->prev_rot;
       if (absf(dx) > EPSILON || absf(dy) > EPSILON || absf(dr) > EPSILON)
       {
-        query_aabb(&aabb, &hitboxs[i], transform);
+        get_aabb(&aabb, &hitboxs[i], transform);
         rtree_move_proxy(_rtree, hitboxs[i].proxy_id, &aabb, VEC2(0, 0));
       }
     }
@@ -101,9 +86,9 @@ typedef struct
 {
   ecs_entity_t entity;
   int          proxy_id;
-} __capture01;
+} CBBroadPhaseQueryVars;
 
-static void __lamda01(__capture01* capture, int proxy_id)
+static BOOL cb_broard_phase_query(CBBroadPhaseQueryVars* capture, int proxy_id)
 {
   if (capture->proxy_id != proxy_id)
   {
@@ -114,6 +99,7 @@ static void __lamda01(__capture01* capture, int proxy_id)
       MIN(capture->entity, entity),
     };
   }
+  return TRUE;
 }
 
 static int compr_pair(const CollisionPair* p1, const CollisionPair* p2)
@@ -147,22 +133,22 @@ static int remove_duplicate_pairs(CollisionPair* pairs, int cnt)
 
 static void broad_phase(Ecs* ecs)
 {
-  ecs_entity_t* entities;
-  ecs_size_t    cnt;
-  HitBox*       hitbox;
-  Transform*    transform;
-  AABB          aabb;
-  __capture01   capture;
+  ecs_entity_t*         entities;
+  ecs_size_t            cnt;
+  HitBox*               hitbox;
+  Transform*            transform;
+  AABB                  aabb;
+  CBBroadPhaseQueryVars capture;
 
   _pair_cnt = 0;
   ecs_raw(ecs, HITBOX, &entities, (void**)&hitbox, &cnt);
   for (int i = 0; i < cnt; ++i)
   {
     transform = ecs_get(ecs, entities[i], TRANSFORM);
-    query_aabb(&aabb, &hitbox[i], transform);
+    get_aabb(&aabb, &hitbox[i], transform);
     capture.proxy_id = hitbox[i].proxy_id;
     capture.entity   = entities[i];
-    rtree_query(_rtree, &aabb, CALLBACK_1(&capture, __lamda01));
+    rtree_query(_rtree, &aabb, CALLBACK_1(&capture, cb_broard_phase_query));
   }
 }
 
@@ -172,8 +158,9 @@ static void narrow_phase(Ecs* ecs)
   if (_pair_cnt == 0)
     return;
 
-  Rect    r1, r2;
-  HitBox *hitbox1, *hitbox2;
+  Rect       r1, r2;
+  HitBox *   hitbox1, *hitbox2;
+  Transform *transform1, *transform2;
 
   qsort(_pair_buff, _pair_cnt, sizeof(CollisionPair), (__compar_fn_t)compr_pair);
 
@@ -186,28 +173,26 @@ static void narrow_phase(Ecs* ecs)
     if ((BIT(hitbox1->category) & hitbox2->mask_bits) &&
         (BIT(hitbox2->category) & hitbox1->mask_bits))
     {
-      get_bounding_box(&r1, ecs, _pair_buff[i].e1);
-      get_bounding_box(&r2, ecs, _pair_buff[i].e2);
+      transform1 = ecs_get(g_ecs, _pair_buff[i].e1, TRANSFORM);
+      transform2 = ecs_get(g_ecs, _pair_buff[i].e2, TRANSFORM);
+      get_bounding_rect(&r1, hitbox1, transform1);
+      get_bounding_rect(&r2, hitbox2, transform2);
       if (rect_has_intersection(&r1, &r2))
       {
         mediator_broadcast(SYS_SIG_COLLISION,
-                           &(SysEvt_Collision){ _pair_buff[i].e1, _pair_buff[i].e2 });
+                           &(SysEvt_Collision){
+                               _pair_buff[i].e1,
+                               _pair_buff[i].e2,
+                           });
       }
     }
   }
 }
 
-static void on_map_loaded(void* arg, const void* evt)
-{
-  (void)arg;
-  (void)evt;
-  ecs_connect(g_ecs, ECS_SIG_COMP_RMV, NULL, SLOT(on_component_remove));
-}
-
 void collision_system_init()
 {
   _rtree = rtree_new();
-  game_scene_connect_sig(GAME_SCENE_SIG_BEGIN_LOAD_MAP, SLOT(on_map_loaded), NULL);
+  ecs_connect(g_ecs, ECS_SIG_COMP_RMV, NULL, SLOT(on_component_remove));
 }
 
 void collision_system_fini()
@@ -231,4 +216,70 @@ void collision_system_update()
   update_proxies(g_ecs);
   broad_phase(g_ecs);
   narrow_phase(g_ecs);
+}
+
+typedef struct
+{
+  // input
+  const Rect* rect;
+  u16         mask_bits;
+  u16         max;
+
+  // output
+
+  u16*          cnt;
+  ecs_entity_t* entities;
+} CBQueryExVars;
+
+static BOOL cb_query_ex(CBQueryExVars* vars, int proxy_id)
+{
+  ecs_entity_t entity;
+  Transform*   transform;
+  HitBox*      hitbox;
+  Rect         bounding_rect;
+
+  if (*vars->cnt == vars->max)
+    return FALSE;
+
+  entity = (ecs_entity_t)rtree_get_user_data(_rtree, proxy_id);
+
+  transform = ecs_get(g_ecs, entity, TRANSFORM);
+  hitbox    = ecs_get(g_ecs, entity, HITBOX);
+
+  if (BIT(hitbox->category) & vars->mask_bits)
+  {
+    get_bounding_rect(&bounding_rect, hitbox, transform);
+    if (rect_has_intersection(vars->rect, &bounding_rect))
+    {
+      vars->entities[(*vars->cnt)++] = entity;
+    }
+  }
+  return TRUE;
+}
+
+void collision_system_query_ex(const RECT*   rect,
+                               u16           mask_bits,
+                               ecs_entity_t* entities,
+                               u16*          cnt,
+                               u16           max)
+{
+  AABB aabb;
+  Rect _rect;
+
+  aabb.lower_bound.x = rect->x;
+  aabb.lower_bound.y = rect->y;
+  aabb.upper_bound.x = rect->x + rect->w;
+  aabb.upper_bound.y = rect->y + rect->h;
+
+  rect_init(&_rect, rect->x, rect->y, rect->w, rect->h, 0.0);
+  rtree_query(_rtree,
+              &aabb,
+              CALLBACK_1((&(CBQueryExVars){
+                             .rect      = &_rect,
+                             .mask_bits = mask_bits,
+                             .max       = max,
+                             .entities  = entities,
+                             .cnt       = cnt,
+                         }),
+                         cb_query_ex));
 }

@@ -166,6 +166,28 @@
                  "width":16,
                  "x":566,
                  "y":1007.33
+                }, 
+                {
+                 "height":16,
+                 "id":14,
+                 "name":"luca",
+                 "rotation":0,
+                 "type":"NPC",
+                 "visible":true,
+                 "width":16,
+                 "x":344.667,
+                 "y":109
+                }, 
+                {
+                 "height":16,
+                 "id":16,
+                 "name":"nina",
+                 "rotation":0,
+                 "type":"NPC",
+                 "visible":true,
+                 "width":16,
+                 "x":314.667,
+                 "y":80
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -184,7 +206,7 @@
          "x":0,
          "y":0
         }],
- "nextobjectid":14,
+ "nextobjectid":17,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.0.3",

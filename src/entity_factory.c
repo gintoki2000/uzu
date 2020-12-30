@@ -59,9 +59,12 @@ ecs_entity_t make_anime_sword(Ecs* ecs)
   return sword;
 }
 
-ecs_entity_t make_knight(Ecs* ecs, Vec2 pos)
+#define CHARACTER_SPRITE_WIDTH 16
+#define CHARACTER_SPRITE_HEIGHT 28
+
+ecs_entity_t make_character(Ecs* ecs, Vec2 pos, TextureId texture_id)
 {
-  ecs_entity_t knight;
+  ecs_entity_t entity;
   SDL_Texture* texture;
   Animation    anims[NUM_ANIM_STATES];
 
@@ -75,7 +78,7 @@ ecs_entity_t make_knight(Ecs* ecs, Vec2 pos)
   Motion*     motion;
   Heath*      heath;
 
-  texture = get_texture(TEX_KNIGHT);
+  texture = get_texture(texture_id);
   animation_init(&anims[ANIM_STATE_HIT], texture, 0, 0, 1, 1, 16, 28);
   animation_init(&anims[ANIM_STATE_IDLE], texture, 16 * 1, 0, 1, 4, 16, 28);
   animation_init(&anims[ANIM_STATE_RUN], texture, 16 * 5, 0, 1, 4, 16, 28);
@@ -83,46 +86,54 @@ ecs_entity_t make_knight(Ecs* ecs, Vec2 pos)
   anims[ANIM_STATE_IDLE].frame_duration = 8;
   anims[ANIM_STATE_RUN].frame_duration  = 4;
 
-  knight = ecs_create(ecs);
+  entity = ecs_create(ecs);
 
-  transform      = ecs_add(ecs, knight, TRANSFORM);
+  transform      = ecs_add(ecs, entity, TRANSFORM);
   transform->pos = pos;
 
-  INFO("pos=(%2.f, %2.f)", pos.x, pos.y);
-
-  visual = ecs_add(ecs, knight, VISUAL);
+  visual = ecs_add(ecs, entity, VISUAL);
 
   visual->anchor.x = 16 / 2;
   visual->anchor.y = 28;
 
-  equipment                  = ecs_add(ecs, knight, EQUIPMENT);
+  equipment                  = ecs_add(ecs, entity, EQUIPMENT);
   equipment->weapon          = ECS_NULL_ENT;
   equipment->weapon_anchor.x = 16 / 2;
   equipment->weapon_anchor.y = -7;
 
-  controller = ecs_add(ecs, knight, CONTROLLER);
+  controller = ecs_add(ecs, entity, CONTROLLER);
 
-  animator = ecs_add(ecs, knight, ANIMATOR);
+  animator = ecs_add(ecs, entity, ANIMATOR);
   animator_init(animator, anims, NUM_ANIM_STATES);
   animator->current_anim = ANIM_STATE_IDLE;
   animator->elapsed      = 0;
 
-  hitbox           = ecs_add(ecs, knight, HITBOX);
+  hitbox           = ecs_add(ecs, entity, HITBOX);
   hitbox->size     = VEC2(6.f, 10.f);
   hitbox->anchor   = VEC2(3.f, 10.f);
   hitbox->proxy_id = RTREE_NULL_NODE;
 
-  motion            = ecs_add(ecs, knight, MOTION);
+  motion            = ecs_add(ecs, entity, MOTION);
   motion->max_speed = 150;
   motion->max_force = 10;
 
-  heath                 = ecs_add(ecs, knight, HEATH);
+  heath                 = ecs_add(ecs, entity, HEATH);
   heath->hit_points     = 40;
   heath->max_hit_points = 40;
 
-  ecs_add(ecs, knight, TILE_COLLISION_TAG);
+  ecs_add(ecs, entity, TILE_COLLISION_TAG);
 
-  return knight;
+  return entity;
+}
+
+ecs_entity_t make_knight(Ecs* ecs, Vec2 pos)
+{
+  return make_character(ecs, pos, TEX_KNIGHT);
+}
+
+ecs_entity_t make_wizzard(Ecs* ecs, Vec2 pos)
+{
+  return make_character(ecs, pos, TEX_WIZZARD);
 }
 
 ecs_entity_t make_huge_demon(Ecs* ecs)
@@ -805,4 +816,23 @@ ecs_entity_t make_item_picked_up_msg(Ecs* ecs, Vec2 pos, const char* item_name)
                             VEC2(0.f, -40.f),
                             get_font(FONT_ITEM_PICKED_UP),
                             (COLOR){ 122, 196, 10, 255 });
+}
+
+ecs_entity_t make_npc(Ecs* ecs, ecs_entity_t character_base)
+{
+  Interactable* interactable;
+  HitBox*       hitbox;
+  interactable = ecs_add(ecs, character_base, INTERACTABLE);
+
+  interactable->cnt = 1;
+  strcpy(interactable->text[0], "TALK");
+
+  hitbox           = ecs_get(ecs, character_base, HITBOX);
+  hitbox->category = CATEGORY_INTERACABLE;
+  return character_base;
+}
+
+ecs_entity_t make_wizzard_npc(Ecs* ecs, Vec2 pos)
+{
+  return make_npc(ecs, make_wizzard(ecs, pos));
 }

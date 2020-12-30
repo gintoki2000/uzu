@@ -42,7 +42,10 @@ static RTree* rtree_init(RTree* self)
   return self;
 }
 
-static bool node_is_leaf(const TreeNode* node) { return node->child1 == -1; }
+static bool node_is_leaf(const TreeNode* node)
+{
+  return node->child1 == -1;
+}
 
 static void rtree_finalize(RTree* self)
 {
@@ -401,7 +404,10 @@ static void stack_init(__Stack* s)
   s->items    = calloc(n, sizeof(int));
 }
 
-static void stack_finalize(__Stack* s) { free(s->items); }
+static void stack_finalize(__Stack* s)
+{
+  free(s->items);
+}
 
 static void stack_grow(__Stack* s)
 {
@@ -422,11 +428,17 @@ static int stack_pop(__Stack* s)
   ASSERT(s->count > 0 && "stack empty");
   return s->items[--s->count];
 }
-static bool stack_empty(__Stack* s) { return s->count == 0; }
+static bool stack_empty(__Stack* s)
+{
+  return s->count == 0;
+}
 
 /********************************************************************/
 
-RTree* rtree_new() { return rtree_init(malloc(sizeof(RTree))); }
+RTree* rtree_new()
+{
+  return rtree_init(malloc(sizeof(RTree)));
+}
 
 void rtree_delete(RTree* self)
 {
@@ -519,11 +531,11 @@ bool rtree_move_proxy(RTree* self, int proxy_id, const AABB* aabb, const Vec2 di
 void rtree_query(RTree* self, const AABB* aabb, Callback cb)
 {
   __Stack stack;
-  void (*callback_fn)(void*, int);
+  BOOL (*callback_fn)(void*, int);
   TreeNode* nodes;
 
-  nodes = self->nodes;
-  callback_fn    = (void (*)(void*, int))cb.func;
+  nodes       = self->nodes;
+  callback_fn = (BOOL(*)(void*, int))cb.func;
   stack_init(&stack);
   stack_push(&stack, self->root);
   while (!stack_empty(&stack))
@@ -539,7 +551,8 @@ void rtree_query(RTree* self, const AABB* aabb, Callback cb)
     {
       if (node_is_leaf(node))
       {
-        callback_fn(cb.user_data, id);
+        if (!callback_fn(cb.user_data, id))
+          break;
       }
       else
       {
@@ -567,7 +580,7 @@ const AABB* rtree_get_fat_aabb(RTree* self, int proxy_id)
 
 void rtree_draw_debug(RTree* self, SDL_Renderer* renderer, const SDL_Rect* viewport)
 {
-  __Stack     stack;
+  __Stack   stack;
   SDL_Rect  rect;
   TreeNode* node;
   if (self->root == RTREE_NULL_NODE)

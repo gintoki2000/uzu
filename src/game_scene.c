@@ -181,7 +181,7 @@ static void on_update()
     interactable_pointer_rendering_system_update();
     hub_system_update();
 
-#if 1
+#if 0
     // render debug
     //collision_system_render_debug();
     //path_rendering_system_update();

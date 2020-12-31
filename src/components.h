@@ -94,6 +94,7 @@ typedef enum
   NAME,
   INTERACTABLE,
   TEXT,
+  DIALOGUE,
   NUM_COMPONENTS
 } ComponentId;
 
@@ -313,6 +314,11 @@ typedef struct
   int  cnt;
 } Interactable;
 
+typedef struct
+{
+  PtrArray* sentences;
+} Dialogue;
+
 Animation*
 animation_init(Animation* anim, SDL_Texture* tex, u32 x, u32 y, u32 row, u32 col, u32 sw, u32 sh);
 
@@ -337,5 +343,9 @@ void name_fini(Name* name);
 
 void text_init(Text* text, const char* value, const FONT* font, COLOR color);
 void text_fini(Text* text);
+
+void dialogue_init(Dialogue* dialogue);
+void dialogue_fini(Dialogue* dialogue);
+void dialogue_add(Dialogue* dialogue, const char* sentence);
 
 #endif // COMPONENTS_H

@@ -1,13 +1,18 @@
 #include "game_scene.h"
+#include "SDL_mixer.h"
 #include "components.h"
 #include "constances.h"
 #include "entity_factory.h"
 #include "map.h"
 #include "read_all.h"
+#include "resources.h"
 #include "scene.h"
+#include "ui_list.h"
 #include "utils.h"
 
 #include "ecs/ecs.h"
+
+#include "engine/keyboard.h"
 
 #include "system/ai_system.h"
 #include "system/animator_ctl_sys.h"
@@ -15,13 +20,14 @@
 #include "system/camera_sys.h"
 #include "system/collision_mgr_sys.h"
 #include "system/collision_sys.h"
+#include "system/dialogue_sys.h"
 #include "system/dmg_sys.h"
 #include "system/drop_system.h"
-#include "system/interaction_system.h"
 #include "system/equipment_sys.h"
 #include "system/health_sys.h"
 #include "system/healthbar_rendering_sys.h"
 #include "system/hud_system.h"
+#include "system/interaction_system.h"
 #include "system/late_destroying_sys.h"
 #include "system/life_span_sys.h"
 #include "system/mediator.h"
@@ -56,8 +62,8 @@ static void         on_load(void);
 static void         on_unload(void);
 static void         on_event(const SDL_Event* evt);
 static void         on_update();
-static void         on_player_hit_ladder(void* arg, const SysEvt_HitLadder* event);
-static void         on_entity_died(void* arg, const SysEvt_EntityDied* event);
+static void         on_player_hit_ladder(pointer_t arg, const SysEvt_HitLadder* event);
+static void         on_entity_died(pointer_t arg, const SysEvt_EntityDied* event);
 static void         emit_signal(int sig_id, const pointer_t event);
 static void         load_level(const char* filename, BOOL spawn_player);
 static void         unload_current_level(void);
@@ -67,7 +73,7 @@ static int parse_tilelayer(const json_object* tilelayer_json_obj);
 static int parse_objectgroup(const json_object* object_group_json_obj, BOOL spawn_player);
 static int parse(const json_object* map_json_obj, BOOL spawn_player);
 
-static void cb_clear_world(void* arg, Ecs* ecs, ecs_entity_t entity);
+static void cb_clear_world(pointer_t arg, Ecs* ecs, ecs_entity_t entity);
 
 extern EcsType g_comp_types[];
 
@@ -80,10 +86,10 @@ const Scene g_game_scene = {
 
 Ecs* g_ecs;
 
-static Dispatcher*  _dispatcher;
-static BOOL         _switch_level;
-static char         _level_to_switch[100];
-static char         _spwan_location[100];
+static Dispatcher* _dispatcher;
+static BOOL        _switch_level;
+static char        _level_to_switch[100];
+static char        _spwan_location[100];
 
 static void on_load()
 {
@@ -98,17 +104,24 @@ static void on_load()
   damage_system_init();
   collision_manager_system_init();
   interaction_system_init();
+  dialogue_system_init();
 
   mediator_connect(SYS_SIG_HIT_LADDER, NULL, SLOT(on_player_hit_ladder));
   mediator_connect(SYS_SIG_ENTITY_DIED, NULL, SLOT(on_entity_died));
 
+  keybroad_push_state(player_controller_system_update);
+
   load_level("asserts/level/0.json", TRUE);
+
+  Mix_PlayMusic(get_bg_mus(BG_MUS_THE_ESSENSE_OF_GOOD_THINGS), -1);
 }
 
 static void on_unload()
 {
+  dialogue_system_fini();
   ecs_del(g_ecs);
   dispatcher_destroy(_dispatcher);
+  mediator_fini();
 
   g_ecs       = NULL;
   _dispatcher = NULL;
@@ -124,28 +137,16 @@ static void on_update()
   if (_switch_level)
   {
 
-    ecs_each(g_ecs, NULL, cb_clear_world);
+    unload_current_level();
     load_level(_level_to_switch, TRUE);
 
-    ecs_entity_t* entities;
-    ecs_size_t    cnt;
+    ecs_entity_t ladder;
+    Transform*   transform;
 
-    LevelSwitcher* switchers;
-    Name*          name;
-    Transform*     transform;
-
-    ecs_raw(g_ecs, LEVEL_SWITCHER, &entities, (void**)&switchers, &cnt);
-    for (int i = 0; i < cnt; ++i)
+    if ((ladder = find_ladder(g_ecs, _spwan_location)) != ECS_NULL_ENT)
     {
-      if ((name = ecs_get(g_ecs, entities[i], NAME)) &&
-          (transform = ecs_get(g_ecs, entities[i], TRANSFORM)))
-      {
-        if (strcmp(_spwan_location, name->value) == 0)
-        {
-          move_player_to(g_ecs, VEC2(transform->pos.x, transform->pos.y + 30.f));
-          break;
-        }
-      }
+      transform = ecs_get(g_ecs, ladder, TRANSFORM);
+      move_player_to(g_ecs, VEC2(transform->pos.x + 8, transform->pos.y + 30));
     }
 
     _switch_level = FALSE;
@@ -153,7 +154,6 @@ static void on_update()
   else
   {
     // update
-    player_controller_system_update();
     motion_system_update();
     tile_collision_system_update();
     collision_system_update();
@@ -180,6 +180,8 @@ static void on_update()
     text_rendering_system_update();
     interactable_pointer_rendering_system_update();
     hub_system_update();
+    ui_list_draw();
+    dialogue_system_update();
 
 #if 0
     // render debug
@@ -195,7 +197,7 @@ static void on_update()
   }
 }
 
-static void on_player_hit_ladder(void* arg, const SysEvt_HitLadder* event)
+static void on_player_hit_ladder(pointer_t arg, const SysEvt_HitLadder* event)
 {
   (void)arg;
 
@@ -212,7 +214,7 @@ static void on_player_hit_ladder(void* arg, const SysEvt_HitLadder* event)
   strcpy(_spwan_location, lsw->dest);
 }
 
-static void on_entity_died(void* arg, const SysEvt_EntityDied* event)
+static void on_entity_died(pointer_t arg, const SysEvt_EntityDied* event)
 {
   (void)arg;
   if (ecs_get(g_ecs, event->entity, PLAYER_TAG))
@@ -221,7 +223,7 @@ static void on_entity_died(void* arg, const SysEvt_EntityDied* event)
   }
 }
 
-static void cb_clear_world(void* arg, Ecs* ecs, ecs_entity_t entity)
+static void cb_clear_world(pointer_t arg, Ecs* ecs, ecs_entity_t entity)
 {
   (void)arg;
   ecs_destroy(ecs, entity);
@@ -232,7 +234,6 @@ static void emit_signal(int sig_id, const pointer_t event)
   dispatcher_emit(_dispatcher, sig_id, event);
 }
 
-
 static void load_level(const char* file, BOOL spawn_player)
 {
   json_object* json_map = NULL;
@@ -242,6 +243,11 @@ static void load_level(const char* file, BOOL spawn_player)
     parse(json_map, spawn_player);
     free(json_map);
   }
+}
+
+static void unload_current_level()
+{
+  ecs_each(g_ecs, NULL, cb_clear_world);
 }
 
 static char* _layer_names[NUM_MAP_LAYERS] = {

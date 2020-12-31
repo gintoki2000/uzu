@@ -18,5 +18,7 @@ source_files = files(
   'read_all.c',
   'game_scene.c',
   'item.c',
-  'SDL_FontCache.c'
+  'SDL_FontCache.c',
+  'ui_list.c',
+  'ui_helper.c',
 ) + engine_source_files + ecs_source_files + toolbox_source_files + system_source_files + ai_source_files

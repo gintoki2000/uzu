@@ -9,6 +9,7 @@
 extern Ecs* g_ecs;
 
 extern ecs_entity_t g_curr_iteractable_entity;
+extern BOOL         g_interacting;
 
 void player_controller_system_update()
 {
@@ -54,6 +55,7 @@ void player_controller_system_update()
   }
   else
   {
+
     if (key_just_pressed(KEY_A))
       mediator_broadcast(SYS_SIG_BEGIN_INTERACTION,
                          &(SysEvt_BeginInteraction){ g_curr_iteractable_entity });

@@ -65,6 +65,7 @@ typedef enum
   SFX_THUNDER,
   SFX_INTERACTION,
   SFX_CLAW_HIT,
+  SFX_BUTTON,
   NUM_SFXS,
 } SfxId;
 

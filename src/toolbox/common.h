@@ -22,7 +22,7 @@ typedef bool (*bicomsume_fn_t)(pointer_t user_data, pointer_t, pointer_t);
 typedef struct
 {
   pointer_t user_data;
-  pointer_t func;
+  void (*func)(void);
 } Callback;
 
 #define BOOL SDL_bool
@@ -41,9 +41,9 @@ typedef struct
 #define CALLBACK_1(_user_data, _func)                                                              \
   ((Callback){                                                                                     \
       .user_data = (void*)_user_data,                                                              \
-      .func      = (void*)_func,                                                                   \
+      .func      = (void (*)(void))_func,                                                          \
   })
-#define CALLBACK_2(_func) ((Callback){ .func = _func })
+#define CALLBACK_2(_func) ((Callback){ .func = (void (*)(void))_func })
 #define INLINE static inline
 
 #define DEG_TO_RAD 0.0174532925

@@ -15,7 +15,9 @@ enum
   SYS_SIG_PLAYER_HIT_ITEM,
   SYS_SIG_HIT_TRAP,
   SYS_SIG_HIT_LADDER,
+  SYS_SIG_END_INTERACTION,
   SYS_SIG_BEGIN_INTERACTION,
+  SYS_SIG_EXEC_INTERACTION_CMD,
   NUM_SYSTEM_SIGNALS,
 };
 
@@ -91,6 +93,17 @@ typedef struct
 {
   ecs_entity_t entity;
 } SysEvt_BeginInteraction;
+
+typedef struct
+{
+  ecs_entity_t entity;
+} SysEvt_EndInteraction;
+
+typedef struct
+{
+  ecs_entity_t entity;
+  const char*  cmd;
+} SysEvt_ExecInteractionCmd;
 
 void mediator_init();
 void mediator_fini();

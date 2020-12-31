@@ -134,6 +134,12 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
       (EcsType){
           .size = sizeof(Interactable),
       },
+  [DIALOGUE] =
+      (EcsType){
+          .size    = sizeof(Dialogue),
+          .init_fn = (ecs_comp_init_fn_t)dialogue_init,
+          .fini_fn = (ecs_comp_fini_fn_t)dialogue_fini,
+      },
 };
 
 Animation*
@@ -218,4 +224,22 @@ void text_init(Text* text, const char* value, const FONT* font, COLOR color)
 void text_fini(Text* text)
 {
   free(text->value);
+}
+
+void dialogue_init(Dialogue* dialogue)
+{
+  dialogue->sentences = ptr_array_new(NULL);
+}
+
+void dialogue_fini(Dialogue* dialogue)
+{
+  for (int i = 0; i < dialogue->sentences->cnt; ++i)
+  {
+    free(dialogue->sentences->storage[i]);
+  }
+}
+
+void dialogue_add(Dialogue* dialogue, const char* sentence)
+{
+  ptr_array_add(dialogue->sentences, strdup(sentence));
 }

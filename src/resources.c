@@ -56,6 +56,7 @@ static const char* _sfx_files[NUM_SFXS] = {
   [SFX_THUNDER]     = "asserts/sound/fx/thunder_2v.wav",
   [SFX_INTERACTION] = "asserts/sound/fx/interaction1_0.75v.wav",
   [SFX_CLAW_HIT]    = "asserts/sound/fx/claw_hit.wav",
+  [SFX_BUTTON]      = "asserts/sound/fx/button1.wav",
 };
 
 static FONT* _fonts[NUM_FONTS];

@@ -26,3 +26,24 @@ Vec2 get_entity_position(Ecs* ecs, ecs_entity_t entity)
   return ((Transform*)ecs_get(ecs, entity, TRANSFORM))->pos;
 }
 
+ecs_entity_t find_ladder(Ecs* ecs, const char* _name)
+{
+  ecs_entity_t* entities;
+  ecs_size_t    cnt;
+
+  LevelSwitcher* switchers;
+  Name*          name;
+
+  ecs_raw(ecs, LEVEL_SWITCHER, &entities, (pointer_t*)&switchers, &cnt);
+  for (int i = 0; i < cnt; ++i)
+  {
+    if ((name = ecs_get(ecs, entities[i], NAME)))
+    {
+      if (strcmp(_name, name->value) == 0)
+      {
+        return entities[i];
+      }
+    }
+  }
+  return ECS_NULL_ENT;
+}

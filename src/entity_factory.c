@@ -822,7 +822,8 @@ ecs_entity_t make_npc(Ecs* ecs, ecs_entity_t character_base)
 {
   Interactable* interactable;
   HitBox*       hitbox;
-  Dialogue*    dialogue;
+  Dialogue*     dialogue;
+
   interactable = ecs_add(ecs, character_base, INTERACTABLE);
 
   interactable->cnt = 3;
@@ -833,6 +834,8 @@ ecs_entity_t make_npc(Ecs* ecs, ecs_entity_t character_base)
   dialogue = ecs_add(ecs, character_base, DIALOGUE);
   dialogue_add(dialogue, "mua do khong ban oi");
   dialogue_add(dialogue, "hang real nha ^_^");
+
+  name_init(ecs_add(ecs, character_base, NAME), "luca");
 
   hitbox           = ecs_get(ecs, character_base, HITBOX);
   hitbox->category = CATEGORY_INTERACABLE;

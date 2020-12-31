@@ -12,15 +12,17 @@ extern SDL_Rect      g_viewport;
 static Queue       _queue;
 static const char* _current_sentence;
 static FONT*       _font;
-
+static const char* _name;
 static const COLOR _background_color = { 210, 189, 167, 255 };
 static const COLOR _border_color     = { 169, 139, 121, 255 };
 static const COLOR _text_color       = { 74, 61, 60, 255 };
 static int         _box_x;
 static int         _box_y;
 
-#define DIALOGUE_BOX_WIDTH 60
-#define DIALOGUE_BOX_HEIGHT 40
+#define NAME_PLACEHOLER_WIDTH 30
+#define NAME_PLACEHOLER_HEIGHT 12
+#define DIALOGUE_BOX_WIDTH 100
+#define DIALOGUE_BOX_HEIGHT 50
 
 static void trigger_dialogue(ecs_entity_t entity);
 static void next_sentence(void);
@@ -31,12 +33,17 @@ static void trigger_dialogue(ecs_entity_t entity)
 {
   Dialogue*  dialogue;
   Transform* transform;
+  Name*      name;
 
   dialogue  = ecs_get(g_ecs, entity, DIALOGUE);
   transform = ecs_get(g_ecs, entity, TRANSFORM);
+  name      = ecs_get(g_ecs, entity, NAME);
 
   _box_x = (int)transform->pos.x - DIALOGUE_BOX_WIDTH / 2;
   _box_y = (int)transform->pos.y - DIALOGUE_BOX_HEIGHT - 40;
+
+  if (name != NULL)
+    _name = name->value;
 
   queue_clear(&_queue);
   for (int i = 0; i < dialogue->sentences->cnt; ++i)
@@ -63,6 +70,7 @@ static void next_sentence(void)
 static void end_dialogue(void)
 {
   _current_sentence = NULL;
+  _name             = NULL;
   keybroad_pop_state();
 }
 
@@ -114,11 +122,33 @@ void dialogue_system_update()
                     g_renderer,
                     (RECT){
                         _box_x - g_viewport.x + 3,
-                        _box_y - g_viewport.y + 3,
+                        _box_y - g_viewport.y + 10,
                         DIALOGUE_BOX_WIDTH - 6,
-                        DIALOGUE_BOX_HEIGHT - 6,
+                        DIALOGUE_BOX_HEIGHT - 13,
                     },
                     _text_color,
                     _current_sentence);
+  }
+  if (_name != NULL)
+  {
+    draw_box_w_border(
+        &(RECT){
+            _box_x - g_viewport.x - NAME_PLACEHOLER_WIDTH / 2,
+            _box_y - g_viewport.y - 6,
+            NAME_PLACEHOLER_WIDTH,
+            NAME_PLACEHOLER_HEIGHT,
+        },
+        _background_color,
+        _border_color);
+    FC_DrawBoxColor(_font,
+                    g_renderer,
+                    (RECT){
+                        _box_x - g_viewport.x - NAME_PLACEHOLER_WIDTH / 2 + 3,
+                        _box_y - g_viewport.y - 3,
+                        NAME_PLACEHOLER_WIDTH - 6,
+                        NAME_PLACEHOLER_HEIGHT - 6,
+                    },
+                    _text_color,
+                    _name);
   }
 }

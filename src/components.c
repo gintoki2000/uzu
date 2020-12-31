@@ -140,6 +140,10 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
           .init_fn = (ecs_comp_init_fn_t)dialogue_init,
           .fini_fn = (ecs_comp_fini_fn_t)dialogue_fini,
       },
+  [ITEM_TAG] =
+      (EcsType){
+          .size = sizeof(ItemTag),
+      },
 };
 
 Animation*

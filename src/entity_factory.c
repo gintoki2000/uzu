@@ -294,8 +294,8 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 pos)
 
   drop          = ecs_add(ecs, entity, DROP);
   drop->item1   = ITEM_TYPE_BIG_RED_FLASK;
-  drop->item2   = ITEM_TYPE_RED_FLASK;
-  drop->change1 = 40;
+  drop->item2   = ITEM_TYPE_BLUE_FLASK;
+  drop->change1 = 70;
   drop->change2 = 60;
 
   ecs_add(ecs, entity, TILE_COLLISION_TAG);
@@ -623,41 +623,21 @@ ecs_entity_t make_golden_cross_hit_effect(Ecs* ecs, Vec2 pos)
 
 ecs_entity_t make_big_red_flask(Ecs* ecs, Vec2 pos)
 {
-  ecs_entity_t entity;
-  SDL_Texture* texture;
-
-  Visual*    visual;
-  Transform* transform;
-  HitBox*    hitbox;
-  ItemTag*   tag;
-
-  texture = get_texture(TEX_FLASK_RED_BIG);
-
-  entity = ecs_create(ecs);
-
-  visual = ecs_add(ecs, entity, VISUAL);
-  sprite_init(&visual->sprite, texture);
-  visual_set_anchor_to_center(visual);
-
-  transform      = ecs_add(ecs, entity, TRANSFORM);
-  transform->pos = pos;
-
-  hitbox            = ecs_add(ecs, entity, HITBOX);
-  hitbox->size      = VEC2(visual->sprite.rect.w, visual->sprite.rect.h);
-  hitbox->anchor    = VEC2(hitbox->size.x / 2.f, hitbox->size.y / 2.f);
-  hitbox->proxy_id  = RTREE_NULL_NODE;
-  hitbox->category  = CATEGORY_ITEM;
-  hitbox->mask_bits = BIT(CATEGORY_PLAYER);
-
-  tag          = ecs_add(ecs, entity, ITEM_TAG);
-  tag->item_id = ITEM_TYPE_BIG_RED_FLASK;
-
-  return entity;
+  return make_flask_base(ecs, TEX_FLASK_RED_BIG, ITEM_TYPE_BIG_RED_FLASK, pos);
 }
 
 ecs_entity_t make_red_flask(Ecs* ecs, Vec2 pos)
 {
+  return make_flask_base(ecs, TEX_FLASK_RED, ITEM_TYPE_RED_FLASK, pos);
+}
 
+ecs_entity_t make_blue_flask(Ecs* ecs, Vec2 pos)
+{
+  return make_flask_base(ecs, TEX_BLUE_FLASK, ITEM_TYPE_BLUE_FLASK, pos);
+}
+
+ecs_entity_t make_flask_base(Ecs* ecs, TextureId texture_id, ItemTypeId item_type_id, Vec2 pos)
+{
   ecs_entity_t entity;
   SDL_Texture* texture;
 
@@ -666,7 +646,7 @@ ecs_entity_t make_red_flask(Ecs* ecs, Vec2 pos)
   HitBox*    hitbox;
   ItemTag*   tag;
 
-  texture = get_texture(TEX_FLASK_RED);
+  texture = get_texture(texture_id);
 
   entity = ecs_create(ecs);
 
@@ -685,7 +665,7 @@ ecs_entity_t make_red_flask(Ecs* ecs, Vec2 pos)
   hitbox->mask_bits = BIT(CATEGORY_PLAYER);
 
   tag          = ecs_add(ecs, entity, ITEM_TAG);
-  tag->item_id = ITEM_TYPE_RED_FLASK;
+  tag->item_id = item_type_id;
   return entity;
 }
 

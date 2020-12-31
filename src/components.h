@@ -104,6 +104,7 @@ typedef struct
   Vec2  acc;
   float max_speed;
   float max_force;
+  float friction;
 } Motion;
 typedef struct
 {

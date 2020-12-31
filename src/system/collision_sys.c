@@ -88,15 +88,15 @@ typedef struct
   int          proxy_id;
 } CBBroadPhaseQueryVars;
 
-static BOOL cb_broard_phase_query(CBBroadPhaseQueryVars* capture, int proxy_id)
+static BOOL cb_broard_phase_query(CBBroadPhaseQueryVars* vars, int proxy_id)
 {
-  if (capture->proxy_id != proxy_id)
+  if (vars->proxy_id != proxy_id)
   {
     ASSERT(_pair_cnt < BUFF_SIZE);
     ecs_entity_t entity     = (ecs_entity_t)rtree_get_user_data(_rtree, proxy_id);
     _pair_buff[_pair_cnt++] = (CollisionPair){
-      MAX(capture->entity, entity),
-      MIN(capture->entity, entity),
+      MAX(vars->entity, entity),
+      MIN(vars->entity, entity),
     };
   }
   return TRUE;
@@ -138,7 +138,7 @@ static void broad_phase(Ecs* ecs)
   HitBox*               hitbox;
   Transform*            transform;
   AABB                  aabb;
-  CBBroadPhaseQueryVars capture;
+  CBBroadPhaseQueryVars vars;
 
   _pair_cnt = 0;
   ecs_raw(ecs, HITBOX, &entities, (void**)&hitbox, &cnt);
@@ -146,9 +146,9 @@ static void broad_phase(Ecs* ecs)
   {
     transform = ecs_get(ecs, entities[i], TRANSFORM);
     get_aabb(&aabb, &hitbox[i], transform);
-    capture.proxy_id = hitbox[i].proxy_id;
-    capture.entity   = entities[i];
-    rtree_query(_rtree, &aabb, CALLBACK_1(&capture, cb_broard_phase_query));
+    vars.proxy_id = hitbox[i].proxy_id;
+    vars.entity   = entities[i];
+    rtree_query(_rtree, &aabb, CALLBACK_1(&vars, cb_broard_phase_query));
   }
 }
 

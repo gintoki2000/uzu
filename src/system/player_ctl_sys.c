@@ -1,5 +1,6 @@
 #include "player_ctl_sys.h"
 #include "mediator.h"
+#include "inventory.h"
 
 #include <components.h>
 #include <ecs/ecs.h>
@@ -39,6 +40,12 @@ void player_controller_system_update()
   if (key_pressed(KEY_RIGHT))
   {
     controller->desired_vel.x += 1 * 100;
+  }
+
+  if (key_just_pressed(KEY_SELECT))
+  {
+    inventory_display();
+    return;
   }
 
   if (g_curr_iteractable_entity == ECS_NULL_ENT)

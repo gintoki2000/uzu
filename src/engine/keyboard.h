@@ -9,6 +9,7 @@ typedef enum
   KEY_DOWN,
   KEY_LEFT,
   KEY_RIGHT,
+  KEY_SELECT,
   NUM_KEYS
 } Key;
 
@@ -20,4 +21,5 @@ SDL_bool key_pressed(Key k);
 SDL_bool key_just_pressed(Key k);
 void     keybroad_push_state(key_handle_fn_t key_handle_fn);
 void     keybroad_pop_state();
-#endif // KEYBOARD_H
+
+#endif

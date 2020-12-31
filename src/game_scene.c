@@ -5,6 +5,7 @@
 #include "entity_factory.h"
 #include "map.h"
 #include "read_all.h"
+#include "inventory.h"
 #include "resources.h"
 #include "scene.h"
 #include "ui_list.h"
@@ -113,7 +114,7 @@ static void on_load()
 
   load_level("asserts/level/0.json", TRUE);
 
-  Mix_PlayMusic(get_bg_mus(BG_MUS_THE_ESSENSE_OF_GOOD_THINGS), -1);
+  //Mix_PlayMusic(get_bg_mus(BG_MUS_THE_ESSENSE_OF_GOOD_THINGS), -1);
 }
 
 static void on_unload()
@@ -182,6 +183,7 @@ static void on_update()
     hub_system_update();
     ui_list_draw();
     dialogue_system_update();
+    inventory_draw();
 
 #if 0
     // render debug

@@ -35,18 +35,18 @@ void motion_system_update()
   ecs_size_t    cnt;
 
   Transform* transform;
-  Motion*    motion_ls;
+  Motion*    motion_raw_array;
 
   set_vel_by_controller_input();
 
-  ecs_raw(g_ecs, MOTION, &entities, (void**)&motion_ls, &cnt);
+  ecs_raw(g_ecs, MOTION, &entities, (void**)&motion_raw_array, &cnt);
 
   for (int i = 0; i < cnt; ++i)
   {
-    motion_ls[i].vel.x += motion_ls[i].acc.x;
-    motion_ls[i].vel.y += motion_ls[i].acc.y;
-    motion_ls[i].vel = vec2_trunc(motion_ls[i].vel, motion_ls[i].max_speed);
-    motion_ls[i].acc = VEC2_ZERO;
+    motion_raw_array[i].vel.x += motion_raw_array[i].acc.x;
+    motion_raw_array[i].vel.y += motion_raw_array[i].acc.y;
+    motion_raw_array[i].vel = vec2_trunc(motion_raw_array[i].vel, motion_raw_array[i].max_speed);
+    motion_raw_array[i].acc = VEC2_ZERO;
   }
 
   for (int i = 0; i < cnt; ++i)
@@ -55,7 +55,12 @@ void motion_system_update()
 
     transform->prev_rot = transform->rot;
     transform->prev_pos = transform->pos;
-    transform->pos.x += motion_ls[i].vel.x * DT;
-    transform->pos.y += motion_ls[i].vel.y * DT;
+    transform->pos.x += motion_raw_array[i].vel.x * DT;
+    transform->pos.y += motion_raw_array[i].vel.y * DT;
+  }
+
+  for (int i = 0; i < cnt; ++i)
+  {
+    motion_raw_array[i].vel = vec2_mul(motion_raw_array[i].vel, 1.f - motion_raw_array[i].friction);
   }
 }

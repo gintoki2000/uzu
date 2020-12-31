@@ -2,9 +2,11 @@
 #include <string.h>
 #include <toolbox/toolbox.h>
 
-static const int KEY_TO_SANCODE[] = {
-  [KEY_A] = SDL_SCANCODE_A,       [KEY_B] = SDL_SCANCODE_S,       [KEY_UP] = SDL_SCANCODE_UP,
-  [KEY_DOWN] = SDL_SCANCODE_DOWN, [KEY_LEFT] = SDL_SCANCODE_LEFT, [KEY_RIGHT] = SDL_SCANCODE_RIGHT,
+static const int KEY_TO_SANCODE[NUM_KEYS] = {
+  [KEY_A] = SDL_SCANCODE_A,          [KEY_B] = SDL_SCANCODE_S,
+  [KEY_UP] = SDL_SCANCODE_UP,        [KEY_DOWN] = SDL_SCANCODE_DOWN,
+  [KEY_LEFT] = SDL_SCANCODE_LEFT,    [KEY_RIGHT] = SDL_SCANCODE_RIGHT,
+  [KEY_SELECT] = SDL_SCANCODE_SPACE,
 };
 
 static int _curr_state[NUM_KEYS];

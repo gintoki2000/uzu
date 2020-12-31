@@ -2,25 +2,37 @@
 #define ITEMS_H
 #include <toolbox/toolbox.h>
 
+#define ITEM_MAX_STACK 255
+
 typedef enum
 {
   ITEM_TYPE_RED_FLASK,
   ITEM_TYPE_BIG_RED_FLASK,
+  ITEM_TYPE_BLUE_FLASK,
   NUM_ITEM_TYPES,
 } ItemTypeId;
 
+typedef enum
+{
+  ITEM_CATEGORY_CONSUMABLE,
+  ITEM_CATEGORY_EQUIPMENT,
+  NUM_ITEM_CATEGORIES,
+} ItemCategory;
+
 typedef struct
 {
-  const char* name;
-  const char* description;
-  Sprite      sprite;
-  BOOL        stackable;
+  const char*  name;
+  const char*  description;
+  Sprite       sprite;
+  BOOL         stackable;
+  ItemCategory category;
+
 } ItemType;
 
 typedef struct
 {
   ItemTypeId type_id;
-  int        cnt;
+  u8         cnt;
 } Item;
 
 extern ItemType g_item_types[];

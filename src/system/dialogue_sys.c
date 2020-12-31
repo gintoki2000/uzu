@@ -79,6 +79,7 @@ static void process_key_input(void)
   if (key_just_pressed(KEY_A))
   {
     next_sentence();
+    Mix_PlayChannel(-1, get_sfx(SFX_BUTTON), 0);
   }
 }
 

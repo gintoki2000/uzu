@@ -22,3 +22,8 @@ void mediator_broadcast(int sig_id, const pointer_t event)
 {
   dispatcher_emit(_dispatcher, sig_id, event);
 }
+
+void mediator_disconnect(int sig_id, pointer_t func)
+{
+  dispatcher_disconnect(_dispatcher, sig_id, (slot_t)func);
+}

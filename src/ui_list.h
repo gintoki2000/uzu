@@ -2,10 +2,6 @@
 #define UI_LIST_H
 #include "toolbox/toolbox.h"
 
-extern BOOL g_ui_list_visible;
-extern int  g_ui_list_pos_x;
-extern int  g_ui_list_pos_y;
-
 enum
 {
   UI_LIST_ON_CLOSE,
@@ -16,7 +12,7 @@ enum
 void ui_list_display(const char* items[], u32 cnt);
 void ui_list_close(void);
 void ui_list_hook(u32 event_id, Callback callback);
-
 void ui_list_draw(void);
+void ui_list_set_pos(s32 x, s32 y);
 
 #endif // UI_LIST_H

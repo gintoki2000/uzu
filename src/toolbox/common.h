@@ -18,11 +18,12 @@ typedef int (*hash_fn_t)(const pointer_t p);
 typedef bool (*equal_fn_t)(const pointer_t lhs, const pointer_t rhs);
 typedef bool (*consume_fn_t)(pointer_t user_data, pointer_t val);
 typedef bool (*bicomsume_fn_t)(pointer_t user_data, pointer_t, pointer_t);
+typedef void (*funcptr_t)();
 
 typedef struct
 {
   pointer_t user_data;
-  void (*func)(void);
+  funcptr_t func;
 } Callback;
 
 #define BOOL SDL_bool
@@ -40,10 +41,17 @@ typedef struct
 
 #define CALLBACK_1(_user_data, _func)                                                              \
   ((Callback){                                                                                     \
-      .user_data = (void*)_user_data,                                                              \
-      .func      = (void (*)(void))_func,                                                          \
+      .user_data = (pointer_t)_user_data,                                                          \
+      .func      = (funcptr_t)_func,                                                               \
   })
-#define CALLBACK_2(_func) ((Callback){ .func = (void (*)(void))_func })
+#define CALLBACK_2(__func) ((Callback){ .func = (funcptr_t)__func })
+
+#define INVOKE_CALLBACK(__callback, __return_type, ...)                                            \
+  (((__return_type(*)())(__callback).func)((__callback).user_data, __VA_ARGS__))
+
+#define INVOKE_CALLBACK_NOARGS(__callback, __return_type)                                          \
+  (((__return_type(*)())(__callback).func)((__callback).user_data))
+
 #define INLINE static inline
 
 #define DEG_TO_RAD 0.0174532925

@@ -3,9 +3,9 @@
 #include "components.h"
 #include "constances.h"
 #include "entity_factory.h"
+#include "inventory.h"
 #include "map.h"
 #include "read_all.h"
-#include "inventory.h"
 #include "resources.h"
 #include "scene.h"
 #include "ui_list.h"
@@ -43,10 +43,13 @@
 #include "system/weapon_skill/swing.h"
 #include "system/weapon_skill/thunder_storm.h"
 
+#include "system/game_event/luca.h"
+
 #include "system/debug/draw_hitbox.h"
 #include "system/debug/draw_path.h"
 #include "system/debug/draw_position.h"
 #include "system/debug/draw_target.h"
+
 
 #include <json-c/json.h>
 
@@ -91,6 +94,7 @@ static Dispatcher* _dispatcher;
 static BOOL        _switch_level;
 static char        _level_to_switch[100];
 static char        _spwan_location[100];
+static BOOL        _paused;
 
 static void on_load()
 {
@@ -104,8 +108,8 @@ static void on_load()
   pickup_system_init();
   damage_system_init();
   collision_manager_system_init();
-  interaction_system_init();
   dialogue_system_init();
+  game_event_luca_init();
 
   mediator_connect(SYS_SIG_HIT_LADDER, NULL, SLOT(on_player_hit_ladder));
   mediator_connect(SYS_SIG_ENTITY_DIED, NULL, SLOT(on_entity_died));
@@ -114,7 +118,7 @@ static void on_load()
 
   load_level("asserts/level/0.json", TRUE);
 
-  //Mix_PlayMusic(get_bg_mus(BG_MUS_THE_ESSENSE_OF_GOOD_THINGS), -1);
+  // Mix_PlayMusic(get_bg_mus(BG_MUS_THE_ESSENSE_OF_GOOD_THINGS), -1);
 }
 
 static void on_unload()
@@ -155,22 +159,24 @@ static void on_update()
   else
   {
     // update
-    motion_system_update();
-    tile_collision_system_update();
-    collision_system_update();
-    equipment_system_update();
-    animator_controller_system_update();
-    animator_system_update();
-    ai_system_update();
-    health_system_update();
-    camera_system_update();
-    map_update_animated_cells();
-    interaction_system_update();
+    if (!_paused)
+    {
+      motion_system_update();
+      tile_collision_system_update();
+      collision_system_update();
+      equipment_system_update();
+      animator_controller_system_update();
+      animator_system_update();
+      ai_system_update();
+      health_system_update();
+      camera_system_update();
+      map_update_animated_cells();
 
-    //  skl
-    swing_weapon_skl_system_update();
-    charge_weapon_skl_system();
-    thunder_storm_weapon_skl_system_update();
+      //  skl
+      swing_weapon_skl_system_update();
+      charge_weapon_skl_system();
+      thunder_storm_weapon_skl_system_update();
+    }
 
     // render
     map_draw(MAP_LAYER_FLOOR);
@@ -243,7 +249,7 @@ static void load_level(const char* file, BOOL spawn_player)
   if ((json_map = load_json_from_file(file)) != NULL)
   {
     parse(json_map, spawn_player);
-    free(json_map);
+    json_object_put(json_map);
   }
 }
 
@@ -406,4 +412,14 @@ static json_object* load_json_from_file(const char* filename)
 void game_scene_connect_sig(int sig_id, slot_t slot, pointer_t arg)
 {
   dispatcher_connect(_dispatcher, sig_id, arg, slot);
+}
+
+void game_scene_pause()
+{
+  _paused = TRUE;
+}
+
+void game_scene_resume()
+{
+  _paused = FALSE;
 }

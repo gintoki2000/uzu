@@ -21,4 +21,5 @@ source_files = files(
   'SDL_FontCache.c',
   'ui_list.c',
   'ui_helper.c',
+  'constances.c',
 ) + engine_source_files + ecs_source_files + toolbox_source_files + system_source_files + ai_source_files

@@ -2,7 +2,10 @@
 #include <assert.h>
 #include <stdlib.h>
 
-INLINE PtrArray* ptr_array_alloc() { return (PtrArray*)malloc(sizeof(PtrArray)); }
+INLINE PtrArray* ptr_array_alloc()
+{
+  return (PtrArray*)malloc(sizeof(PtrArray));
+}
 
 PtrArray* ptr_array_new(destroy_fn_t destroy_fn)
 {
@@ -112,7 +115,10 @@ int ptr_array_idx_of(PtrArray* self, pointer_t p)
   return -1;
 }
 
-BOOL ptr_array_contains(PtrArray* self, pointer_t p) { return ptr_array_idx_of(self, p) != -1; }
+BOOL ptr_array_contains(PtrArray* self, pointer_t p)
+{
+  return ptr_array_idx_of(self, p) != -1;
+}
 
 void ptr_array_reserve(PtrArray* self, s32 n)
 {
@@ -135,4 +141,16 @@ void ptr_array_foreach(PtrArray* self, consume_fn_t consume_fn, pointer_t user_d
   for (int i = 0; i < cnt; ++i)
     if (consume_fn(user_data, storage[i]))
       break;
+}
+
+void ptr_array_clear(PtrArray* self)
+{
+  if (self->destroy_fn != NULL)
+  {
+    for (s32 i = 0; i < self->cnt; ++i)
+    {
+      self->destroy_fn(self->storage[i]);
+    }
+  }
+  self->cnt = 0;
 }

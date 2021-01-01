@@ -1,5 +1,6 @@
 #include "dialogue_sys.h"
 #include "components.h"
+#include "constances.h"
 #include "ecs/ecs.h"
 #include "engine/keyboard.h"
 #include "mediator.h"
@@ -9,15 +10,14 @@ extern Ecs*          g_ecs;
 extern SDL_Renderer* g_renderer;
 extern SDL_Rect      g_viewport;
 
-static Queue       _queue;
-static const char* _current_sentence;
-static FONT*       _font;
-static const char* _name;
-static const COLOR _background_color = { 210, 189, 167, 255 };
-static const COLOR _border_color     = { 169, 139, 121, 255 };
-static const COLOR _text_color       = { 74, 61, 60, 255 };
-static int         _box_x;
-static int         _box_y;
+static Queue        _queue;
+static const char*  _current_sentence;
+static FONT*        _font;
+static const char*  _npc_name;
+static const char*  _conversation_name;
+static int          _box_x;
+static int          _box_y;
+static ecs_entity_t _npc = ECS_NULL_ENT; // current npc who player speak with
 
 #define NAME_PLACEHOLER_WIDTH 30
 #define NAME_PLACEHOLER_HEIGHT 12
@@ -35,6 +35,8 @@ static void trigger_dialogue(ecs_entity_t entity)
   Transform* transform;
   Name*      name;
 
+  _npc = entity;
+
   dialogue  = ecs_get(g_ecs, entity, DIALOGUE);
   transform = ecs_get(g_ecs, entity, TRANSFORM);
   name      = ecs_get(g_ecs, entity, NAME);
@@ -43,7 +45,9 @@ static void trigger_dialogue(ecs_entity_t entity)
   _box_y = (int)transform->pos.y - DIALOGUE_BOX_HEIGHT - 40;
 
   if (name != NULL)
-    _name = name->value;
+    _npc_name = name->value;
+
+  _conversation_name = dialogue->name;
 
   queue_clear(&_queue);
   for (int i = 0; i < dialogue->sentences->cnt; ++i)
@@ -69,14 +73,21 @@ static void next_sentence(void)
 
 static void end_dialogue(void)
 {
-  _current_sentence = NULL;
-  _name             = NULL;
   keybroad_pop_state();
+  mediator_broadcast(SYS_SIG_FINISH_CONVERSATION,
+                     &(SysEvt_FinishConversation){
+                         .npc               = _npc,
+                         .npc_name          = _npc_name,
+                         .conversation_name = _conversation_name,
+                     });
+  _current_sentence = NULL;
+  _npc_name         = NULL;
+  _npc              = ECS_NULL_ENT;
 }
 
 static void process_key_input(void)
 {
-  if (key_just_pressed(KEY_A))
+  if (key_just_pressed(KEY_A) || key_just_pressed(KEY_B))
   {
     next_sentence();
     Mix_PlayChannel(-1, get_sfx(SFX_BUTTON), 0);
@@ -116,8 +127,8 @@ void dialogue_system_update()
             DIALOGUE_BOX_WIDTH,
             DIALOGUE_BOX_HEIGHT,
         },
-        _background_color,
-        _border_color);
+        COLOR_BLACK,
+        COLOR_WHITE);
 
     FC_DrawBoxColor(_font,
                     g_renderer,
@@ -127,29 +138,29 @@ void dialogue_system_update()
                         DIALOGUE_BOX_WIDTH - 6,
                         DIALOGUE_BOX_HEIGHT - 13,
                     },
-                    _text_color,
+                    COLOR_WHITE,
                     _current_sentence);
   }
-  if (_name != NULL)
+  if (_npc_name != NULL)
   {
     draw_box_w_border(
         &(RECT){
-            _box_x - g_viewport.x - NAME_PLACEHOLER_WIDTH / 2,
+            _box_x - g_viewport.x - 10,
             _box_y - g_viewport.y - 6,
             NAME_PLACEHOLER_WIDTH,
             NAME_PLACEHOLER_HEIGHT,
         },
-        _background_color,
-        _border_color);
+        COLOR_BLACK,
+        COLOR_WHITE);
     FC_DrawBoxColor(_font,
                     g_renderer,
                     (RECT){
-                        _box_x - g_viewport.x - NAME_PLACEHOLER_WIDTH / 2 + 3,
+                        _box_x - g_viewport.x - 7,
                         _box_y - g_viewport.y - 3,
                         NAME_PLACEHOLER_WIDTH - 6,
                         NAME_PLACEHOLER_HEIGHT - 6,
                     },
-                    _text_color,
-                    _name);
+                    COLOR_WHITE,
+                    _npc_name);
   }
 }

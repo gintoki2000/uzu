@@ -1,5 +1,6 @@
 #include "ui_list.h"
 #include "SDL_mixer.h"
+#include "constances.h"
 #include "engine/keyboard.h"
 #include "resources.h"
 #include "ui_helper.h"
@@ -9,33 +10,28 @@
 static char     _items[5][10];
 static s32      _cnt;
 static Callback _callback[UI_LIST_NUM_EVENTS];
+static BOOL     _visible;
+static int      _pos_x;
+static int      _pos_y;
+static int      _selected;
 
 extern SDL_Renderer* g_renderer;
-
-BOOL     g_ui_list_visible;
-int      g_ui_list_pos_x;
-int      g_ui_list_pos_y;
-Callback g_ui_list_on_sellect_cb;
-int      g_ui_list_curr_idx;
-
-typedef void (*ui_list_on_close_fn_t)(void*);
-typedef void (*ui_list_on_select_fn_t)(void*, const char*, int);
 
 static void process_key_input()
 {
   if (key_just_pressed(KEY_UP))
   {
-    g_ui_list_curr_idx--;
-    if (g_ui_list_curr_idx < 0)
-      g_ui_list_curr_idx = _cnt - 1;
+    _selected--;
+    if (_selected < 0)
+      _selected = _cnt - 1;
     Mix_PlayChannel(-1, get_sfx(SFX_BUTTON), 0);
   }
 
   if (key_just_pressed(KEY_DOWN))
   {
-    g_ui_list_curr_idx++;
-    if (g_ui_list_curr_idx > _cnt - 1)
-      g_ui_list_curr_idx = 0;
+    _selected++;
+    if (_selected > _cnt - 1)
+      _selected = 0;
     Mix_PlayChannel(-1, get_sfx(SFX_BUTTON), 0);
   }
 
@@ -47,16 +43,15 @@ static void process_key_input()
   if (key_just_pressed(KEY_A))
   {
     ui_list_close();
-    ui_list_on_select_fn_t callback_fn = (ui_list_on_select_fn_t)_callback[UI_LIST_ON_SELECT].func;
-    callback_fn(_callback[UI_LIST_ON_SELECT].user_data,
-                _items[g_ui_list_curr_idx],
-                g_ui_list_curr_idx);
+
+    if (_callback[UI_LIST_ON_SELECT].func != NULL)
+      INVOKE_CALLBACK(_callback[UI_LIST_ON_SELECT], void, _items[_selected]);
   }
 }
 
 void ui_list_display(const char** items, u32 cnt)
 {
-  g_ui_list_visible = TRUE;
+  _visible = TRUE;
 
   _cnt = min(cnt, 5);
 
@@ -65,7 +60,7 @@ void ui_list_display(const char** items, u32 cnt)
     strcpy(_items[i], items[i]);
   }
 
-  g_ui_list_curr_idx = 0;
+  _selected = 0;
 
   keybroad_push_state(process_key_input);
   Mix_PlayChannel(-1, get_sfx(SFX_INTERACTION), 0);
@@ -73,22 +68,22 @@ void ui_list_display(const char** items, u32 cnt)
 
 void ui_list_draw()
 {
-  if (!g_ui_list_visible)
+  if (!_visible)
     return;
 
-  draw_box_w_border(&(RECT){ g_ui_list_pos_x, g_ui_list_pos_y, UI_LIST_WIDTH, _cnt * 20 },
-                    (COLOR){ 0, 0, 0, 0 },
-                    (COLOR){ 255, 255, 255, 255 });
+  draw_box_w_border(&(RECT){ _pos_x, _pos_y, UI_LIST_WIDTH, _cnt * 20 },
+                    UI_COLOR_BG,
+                    UI_COLOR_BORDER);
 
   COLOR color;
   for (int i = 0; i < _cnt; ++i)
   {
-    color = i != g_ui_list_curr_idx ? (COLOR){ 255, 255, 255, 255 } : (COLOR){ 247, 161, 0, 255 };
+    color = i != _selected ? UI_COLOR_TEXT : UI_COLOR_TEXT_SELECT;
 
     FC_DrawEffect(get_font(FONT_ITEM_PICKED_UP),
                   g_renderer,
-                  g_ui_list_pos_x + UI_LIST_WIDTH / 2,
-                  g_ui_list_pos_y + i * 20 + 7,
+                  _pos_x + UI_LIST_WIDTH / 2,
+                  _pos_y + i * 20 + 7,
                   (FC_Effect){
                       .color     = color,
                       .scale     = (FC_Scale){ 1.f, 1.f },
@@ -100,15 +95,14 @@ void ui_list_draw()
 
 void ui_list_close()
 {
-  if (g_ui_list_visible)
+  if (_visible)
   {
     keybroad_pop_state();
-    g_ui_list_visible = FALSE;
+    _visible = FALSE;
 
-    ui_list_on_close_fn_t callback_fn = (ui_list_on_close_fn_t)_callback[UI_LIST_ON_CLOSE].func;
-    void*                 arg         = _callback[UI_LIST_ON_CLOSE].user_data;
+    if (_callback[UI_LIST_ON_CLOSE].func != NULL)
+      INVOKE_CALLBACK_NOARGS(_callback[UI_LIST_ON_CLOSE], void);
 
-    callback_fn(arg);
     Mix_PlayChannel(-1, get_sfx(SFX_INTERACTION), 0);
   }
 }
@@ -117,4 +111,10 @@ void ui_list_hook(u32 event_id, Callback callback)
 {
   ASSERT(event_id < UI_LIST_NUM_EVENTS && "invalid event_id");
   _callback[event_id] = callback;
+}
+
+void ui_list_set_pos(s32 x, s32 y)
+{
+  _pos_x = x;
+  _pos_y = y;
 }

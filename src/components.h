@@ -317,7 +317,9 @@ typedef struct
 
 typedef struct
 {
+  char*     name;
   PtrArray* sentences;
+  PtrArray* responses;
 } Dialogue;
 
 Animation*
@@ -342,11 +344,16 @@ void level_switcher_fini(LevelSwitcher* sw);
 void name_init(Name* name, const char* value);
 void name_fini(Name* name);
 
-void text_init(Text* text, const char* value, const FONT* font, COLOR color);
+void text_init(Text* text, const char* value, FONT* font, COLOR color);
 void text_fini(Text* text);
+
+void interacable_set_cmd(Interactable* interactable, int index, const char* cmd);
 
 void dialogue_init(Dialogue* dialogue);
 void dialogue_fini(Dialogue* dialogue);
-void dialogue_add(Dialogue* dialogue, const char* sentence);
+void dialogue_add_sentence(Dialogue* dialogue, const char* sentence);
+void dialogue_add_response(Dialogue* dialogue, const char* response);
+void dialogue_set_name(Dialogue* dialogue, const char* name);
+void dialogue_clear(Dialogue* dialogue);
 
 #endif // COMPONENTS_H

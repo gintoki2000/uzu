@@ -38,6 +38,8 @@ static BOOL on_game_init()
 {
   SDL_RenderSetScale(g_renderer, SCL_X, SCL_Y);
 
+  srand(SDL_GetTicks());
+
   g_viewport = (SDL_Rect){ 0, 0, WIN_WIDTH, WIN_HEIGHT };
 
   if (!resources_load())
@@ -104,8 +106,8 @@ static GameDelegate delegate = {
 static GameSetting setting = {
   .frame_rate    = 50,
   .window_title  = "dungeon II",
-  .window_width  = 480 * 2,
-  .window_height = 320 * 2,
+  .window_width  = WIN_WIDTH * SCL_X,
+  .window_height = WIN_HEIGHT * SCL_Y,
 };
 
 int main()

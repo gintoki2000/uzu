@@ -18,4 +18,5 @@ extern Ecs* g_ecs;
 
 void game_scene_connect_sig(int sig_id, slot_t slot, pointer_t arg);
 void game_scene_pause(void);
+void game_scene_resume(void);
 #endif // GAMESCR_H

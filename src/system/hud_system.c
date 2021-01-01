@@ -13,8 +13,8 @@ static const SDL_Color blood_color = { 237, 19, 41, 255 };
 
 static const SDL_Color blood_lose = { 135, 11, 23, 255 };
 
-#define UI_HEALTH_BAR_POSITION_X 10
-#define UI_HEALTH_BAR_POSITION_Y 20
+#define UI_HEALTH_BAR_POSITION_X 5
+#define UI_HEALTH_BAR_POSITION_Y 5
 
 extern Ecs*          g_ecs;
 extern SDL_Renderer* g_renderer;

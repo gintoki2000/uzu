@@ -34,6 +34,8 @@ void ptr_array_shink_to_fit(PtrArray* self);
 void ptr_array_sort(PtrArray* self, __compar_fn_t comp);
 void ptr_array_foreach(PtrArray* self, consume_fn_t consume_fn, pointer_t user_data);
 
+void ptr_array_clear(PtrArray* self);
+
 #define ptr_array_storage(__T, __self) ((__T**)(__self)->storage)
 #define ptr_array_at(__self, idx) ((__self)->storage[(idx)])
 

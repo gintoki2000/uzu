@@ -17,6 +17,7 @@ enum
   SYS_SIG_HIT_LADDER,
   SYS_SIG_END_INTERACTION,
   SYS_SIG_BEGIN_INTERACTION,
+  SYS_SIG_FINISH_CONVERSATION,
   SYS_SIG_EXEC_INTERACTION_CMD,
   NUM_SYSTEM_SIGNALS,
 };
@@ -105,10 +106,17 @@ typedef struct
   const char*  cmd;
 } SysEvt_ExecInteractionCmd;
 
+typedef struct
+{
+  ecs_entity_t npc;
+  const char*  npc_name;
+  const char*  conversation_name;
+} SysEvt_FinishConversation;
+
 void mediator_init();
 void mediator_fini();
 void mediator_connect(int sig_id, pointer_t arg, slot_t slot);
-void mediator_disconnect(pointer_t func);
+void mediator_disconnect(int sig_id, pointer_t func_or_instance);
 void mediator_broadcast(int sig_id, const pointer_t event);
 
 #endif // MEDIATOR_H

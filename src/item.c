@@ -19,7 +19,7 @@ ItemType g_item_types[NUM_ITEM_TYPES] = {
   [ITEM_TYPE_BLUE_FLASK] =
       (ItemType){
           .name        = "blue flask",
-          .description = "restore a large amount of hp",
+          .description = "restore a small amount of mp",
           .stackable   = TRUE,
           .category    = ITEM_CATEGORY_CONSUMABLE,
       },

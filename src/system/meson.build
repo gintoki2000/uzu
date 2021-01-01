@@ -34,4 +34,7 @@ system_source_files = files(
   './debug/draw_hitbox.c',
   './debug/draw_target.c',
   './debug/draw_position.c',
+
+  #game events
+  './game_event/luca.c'
 )

@@ -806,14 +806,14 @@ ecs_entity_t make_npc(Ecs* ecs, ecs_entity_t character_base)
 
   interactable = ecs_add(ecs, character_base, INTERACTABLE);
 
-  interactable->cnt = 3;
+  interactable->cnt = 1;
   strcpy(interactable->text[0], "TALK");
-  strcpy(interactable->text[1], "BUY SPELL");
-  strcpy(interactable->text[2], "GIVE");
 
   dialogue = ecs_add(ecs, character_base, DIALOGUE);
-  dialogue_add(dialogue, "mua do khong ban oi");
-  dialogue_add(dialogue, "hang real nha ^_^");
+  dialogue_add_sentence(dialogue, "Hello there. Glad to see you alive.");
+  dialogue_add_sentence(dialogue, "Hmmm... It seems you've come quite a way. Excellent.");
+  dialogue_add_sentence(dialogue, "You are certainly ready. I shall teach you sorceries.");
+  dialogue_set_name(dialogue, "luca_greeting");
 
   name_init(ecs_add(ecs, character_base, NAME), "luca");
 

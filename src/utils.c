@@ -47,3 +47,39 @@ ecs_entity_t find_ladder(Ecs* ecs, const char* _name)
   }
   return ECS_NULL_ENT;
 }
+
+BOOL equip(Ecs* ecs, ecs_entity_t entity, ecs_entity_t weapon)
+{
+  Equipment*  equipment;
+  WeaponCore* weapon_core;
+
+  if (entity == ECS_NULL_ENT || weapon == ECS_NULL_ENT)
+    return FALSE;
+
+  equipment   = ecs_get(ecs, entity, EQUIPMENT);
+  weapon_core = ecs_get(ecs, weapon, WEAPON_CORE);
+
+  if (weapon_core == NULL)
+    return FALSE;
+  equipment->weapon   = weapon;
+  weapon_core->wearer = entity;
+
+  return TRUE;
+}
+
+ecs_entity_t find_entity(Ecs* ecs, const char* name)
+{
+  ecs_entity_t* entities;
+  ecs_size_t    cnt;
+  Name*         names;
+
+  ecs_raw(ecs, NAME, &entities, (pointer_t*)&names, &cnt);
+  for (int i = 0; i < cnt; ++i)
+  {
+    if (strcmp(names[i].value, name) == 0)
+    {
+      return entities[i];
+    }
+  }
+  return ECS_NULL_ENT;
+}

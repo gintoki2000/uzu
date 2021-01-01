@@ -43,7 +43,7 @@
 #include "system/weapon_skill/swing.h"
 #include "system/weapon_skill/thunder_storm.h"
 
-#include "system/game_event/luca.h"
+#include "system/game_event/game_event.h"
 
 #include "system/debug/draw_hitbox.h"
 #include "system/debug/draw_path.h"
@@ -109,7 +109,7 @@ static void on_load()
   damage_system_init();
   collision_manager_system_init();
   dialogue_system_init();
-  game_event_luca_init();
+  game_event_init();
 
   mediator_connect(SYS_SIG_HIT_LADDER, NULL, SLOT(on_player_hit_ladder));
   mediator_connect(SYS_SIG_ENTITY_DIED, NULL, SLOT(on_entity_died));
@@ -245,7 +245,7 @@ static void emit_signal(int sig_id, const pointer_t event)
 static void load_level(const char* file, BOOL spawn_player)
 {
   json_object* json_map = NULL;
-  emit_signal(GAME_SCENE_SIG_BEGIN_LOAD_MAP, NULL);
+  emit_signal(GAME_SCENE_SIG_MAP_LOADED, NULL);
   if ((json_map = load_json_from_file(file)) != NULL)
   {
     parse(json_map, spawn_player);
@@ -345,7 +345,7 @@ static int parse_objectgroup(const json_object* object_group_json_obj, BOOL spaw
     }
     else if (spawn_player && strcmp(objtype, "Player") == 0)
     {
-      make_player(g_ecs, make_knight(g_ecs, pos), make_golden_sword(g_ecs, BIT(CATEGORY_ENEMY)));
+      make_player(g_ecs, make_knight(g_ecs, pos), ECS_NULL_ENT);
     }
     else if (strcmp(objtype, "NPC") == 0)
     {

@@ -19,6 +19,7 @@ enum
   SYS_SIG_BEGIN_INTERACTION,
   SYS_SIG_FINISH_CONVERSATION,
   SYS_SIG_EXEC_INTERACTION_CMD,
+  SYS_SIG_FINISH_EVENT,
   NUM_SYSTEM_SIGNALS,
 };
 
@@ -112,6 +113,11 @@ typedef struct
   const char*  npc_name;
   const char*  conversation_name;
 } SysEvt_FinishConversation;
+
+typedef struct
+{
+  int event_code;
+} SysEvt_FinishEvent;
 
 void mediator_init();
 void mediator_fini();

@@ -36,5 +36,7 @@ system_source_files = files(
   './debug/draw_position.c',
 
   #game events
-  './game_event/luca.c'
+  './game_event/game_event.c',
+  './game_event/get_weapon.c',
+  './game_event/kill_monsters.c',
 )

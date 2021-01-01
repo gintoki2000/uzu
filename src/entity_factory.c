@@ -13,21 +13,7 @@
 #include <ecs/ecs.h>
 #include <entity_factory.h>
 #include <resources.h>
-
-static BOOL equip(Ecs* ecs, ecs_entity_t entity, ecs_entity_t weapon)
-{
-  Equipment*  equipment;
-  WeaponCore* weapon_core;
-  equipment   = ecs_get(ecs, entity, EQUIPMENT);
-  weapon_core = ecs_get(ecs, weapon, WEAPON_CORE);
-
-  if (weapon_core == NULL)
-    return FALSE;
-  equipment->weapon   = weapon;
-  weapon_core->wearer = entity;
-
-  return TRUE;
-}
+#include <utils.h>
 
 ecs_entity_t make_anime_sword(Ecs* ecs)
 {
@@ -293,7 +279,7 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 pos)
   motion->max_force = 20;
 
   drop          = ecs_add(ecs, entity, DROP);
-  drop->item1   = ITEM_TYPE_BIG_RED_FLASK;
+  drop->item1   = ITEM_TYPE_RED_FLASK;
   drop->item2   = ITEM_TYPE_BLUE_FLASK;
   drop->change1 = 70;
   drop->change2 = 60;
@@ -810,10 +796,9 @@ ecs_entity_t make_npc(Ecs* ecs, ecs_entity_t character_base)
   strcpy(interactable->text[0], "TALK");
 
   dialogue = ecs_add(ecs, character_base, DIALOGUE);
-  dialogue_add_sentence(dialogue, "Hello there. Glad to see you alive.");
-  dialogue_add_sentence(dialogue, "Hmmm... It seems you've come quite a way. Excellent.");
-  dialogue_add_sentence(dialogue, "You are certainly ready. I shall teach you sorceries.");
-  dialogue_set_name(dialogue, "luca_greeting");
+  dialogue_add_sentence(dialogue, "This world is fill of monsters.");
+  dialogue_add_sentence(dialogue, "They hunt and eat any one which they see.");
+  dialogue_set_name(dialogue, "conversation 1");
 
   name_init(ecs_add(ecs, character_base, NAME), "luca");
 

@@ -112,6 +112,7 @@ typedef struct
   ecs_entity_t npc;
   const char*  npc_name;
   const char*  conversation_name;
+  const char*  response;
 } SysEvt_FinishConversation;
 
 typedef struct

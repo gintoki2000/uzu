@@ -9,8 +9,8 @@ extern Ecs* g_ecs;
 static void on_deal_damage(void* arg, const SysEvt_DealDamage* event)
 {
   (void)arg;
-  Heath* health;
-  if ((health = ecs_get(g_ecs, event->receiver, HEATH)) != NULL &&
+  Health* health;
+  if ((health = ecs_get(g_ecs, event->receiver, HEALTH)) != NULL &&
       !ecs_has(g_ecs, event->receiver, INVULNERABLE))
   {
     health->hit_points -= event->damage;

@@ -13,7 +13,7 @@ void healthbar_rendering_system_update()
 
   Transform* transform;
   HealthBar* heal_bars;
-  Heath*     heath;
+  Health*     heath;
   float      p;
   SDL_Rect   border;
   SDL_Rect   inner;
@@ -23,7 +23,7 @@ void healthbar_rendering_system_update()
   for (int i = 0; i < cnt; ++i)
   {
     transform = ecs_get(g_ecs, entities[i], TRANSFORM);
-    heath     = ecs_get(g_ecs, entities[i], HEATH);
+    heath     = ecs_get(g_ecs, entities[i], HEALTH);
     p         = (float)heath->hit_points / (float)heath->max_hit_points;
 
     border.x = transform->pos.x - heal_bars[i].anchor.x - g_viewport.x;

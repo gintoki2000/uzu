@@ -18,13 +18,13 @@ void GE_get_weapon_init(void)
 static void on_finish_conversation(pointer_t arg, const SysEvt_FinishConversation* event)
 {
   (void)arg;
-  if (strcmp(event->conversation_name, "demo1") == 0)
+  if (strcmp(event->conversation_name, "demo1") == 0 && strcmp(event->response, "yes") == 0)
   {
 
     // thay đổi lời thoại của NPC
     Dialogue* dialogue;
 
-    dialogue = ecs_get(g_ecs, event->npc, DIALOGUE);
+    dialogue                  = ecs_get(g_ecs, event->npc, DIALOGUE);
     dialogue->conversation_id = CONVERSATION_DEMO2;
 
     //đưa vũ khí cho player

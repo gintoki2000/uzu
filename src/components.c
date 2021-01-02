@@ -5,141 +5,141 @@
 
 const EcsType g_comp_types[NUM_COMPONENTS] = {
   [VISUAL] =
-      (EcsType){
+      {
           .size = sizeof(Visual),
       },
   [TRANSFORM] =
-      (EcsType){
+      {
           .size = sizeof(Transform),
       },
   [ANIMATOR] =
-      (EcsType){
+      {
           .size    = sizeof(Animator),
           .fini_fn = (ecs_comp_fini_fn_t)animator_fini,
       },
   [PLAYER_TAG] =
-      (EcsType){
+      {
           .size = sizeof(PlayerTag),
       },
   [CONTROLLER] =
-      (EcsType){
+      {
           .size = sizeof(Controller),
       },
   [EQUIPMENT] =
-      (EcsType){
+      {
           .size = sizeof(Equipment),
       },
-  [HEATH] =
-      (EcsType){
-          .size = sizeof(Heath),
+  [HEALTH] =
+      {
+          .size = sizeof(Health),
       },
   [HITBOX] =
-      (EcsType){
+      {
           .size    = sizeof(HitBox),
           .init_fn = (ecs_comp_init_fn_t)hitbox_init,
       },
   [ENEMY_TAG] =
-      (EcsType){
+      {
           .size = sizeof(EnemyTag),
       },
   [HEAL_BAR] =
-      (EcsType){
+      {
           .size = sizeof(HealthBar),
       },
   [LIFE_SPAN] =
-      (EcsType){
+      {
           .size = sizeof(LifeSpan),
       },
   [MOTION] =
-      (EcsType){
+      {
           .size = sizeof(Motion),
       },
   [PROJECTILE] =
-      (EcsType){
+      {
           .size = sizeof(Projectile),
       },
   [TAG_TO_BE_DESTROYED] =
-      (EcsType){
+      {
           .size = sizeof(TagToBeDestroyed),
       },
   [WEAPON_CORE] =
-      (EcsType){
+      {
           .size = sizeof(WeaponCore),
       },
   [DAMAGE_OUTPUT] =
-      (EcsType){
+      {
           .size = sizeof(DamageOutput),
       },
   [WEAPON_SKILL_SWING] =
-      (EcsType){
+      {
           .size = sizeof(wpskl_Swing),
       },
   [WEAPON_SKILL_CHARGE] =
-      (EcsType){
+      {
           .size = sizeof(wpskl_Charge),
       },
   [DROP] =
-      (EcsType){
+      {
           .size = sizeof(Drop),
       },
   [INVULNERABLE] =
-      (EcsType){
+      {
           .size = sizeof(Invulnerable),
       },
   [CAMERA_TARGET_TAG] =
-      (EcsType){
+      {
           .size = sizeof(CameraTargetTag),
       },
   [AI_AGENT] =
-      (EcsType){
+      {
           .size    = sizeof(AIAgent),
           .fini_fn = (ecs_comp_fini_fn_t)ai_agent_fini,
       },
   [DESTINATION] =
-      (EcsType){
+      {
           .size = sizeof(Destination),
       },
   [PATH] =
-      (EcsType){
+      {
           .size = sizeof(Path),
       },
   [FOLLOWING_TARGET] =
-      (EcsType){
+      {
           .size = sizeof(FollowingTarget),
       },
   [SPOT] =
-      (EcsType){
+      {
           .size = sizeof(Spot),
       },
   [WEAPON_SKILL_THUNDER_STORM] =
-      (EcsType){
+      {
           .size = sizeof(wpskl_ThunderStorm),
       },
   [LEVEL_SWITCHER] =
-      (EcsType){
+      {
           .size    = sizeof(LevelSwitcher),
           .fini_fn = (ecs_comp_fini_fn_t)level_switcher_fini,
       },
   [NAME] =
-      (EcsType){
+      {
           .size    = sizeof(Name),
           .fini_fn = (ecs_comp_fini_fn_t)name_fini,
       },
   [TEXT] =
-      (EcsType){
+      {
           .size    = sizeof(Text),
           .fini_fn = (ecs_comp_fini_fn_t)text_fini,
       },
   [INTERACTABLE] =
-      (EcsType){
+      {
           .size = sizeof(Interactable),
       },
   [DIALOGUE] =
-      (EcsType){
+      {
           .size = sizeof(Dialogue),
       },
   [ITEM_TAG] =
-      (EcsType){
+      {
           .size = sizeof(ItemTag),
       },
 };

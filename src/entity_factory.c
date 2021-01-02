@@ -62,7 +62,7 @@ ecs_entity_t make_character(Ecs* ecs, Vec2 pos, TextureId texture_id)
   Animator*   animator;
   HitBox*     hitbox;
   Motion*     motion;
-  Heath*      heath;
+  Health*      heath;
 
   texture = get_texture(texture_id);
   animation_init(&anims[ANIM_STATE_HIT], texture, 0, 0, 1, 1, 16, 28);
@@ -103,7 +103,7 @@ ecs_entity_t make_character(Ecs* ecs, Vec2 pos, TextureId texture_id)
   motion->max_speed = 150;
   motion->max_force = 10;
 
-  heath                 = ecs_add(ecs, entity, HEATH);
+  heath                 = ecs_add(ecs, entity, HEALTH);
   heath->hit_points     = 40;
   heath->max_hit_points = 40;
 
@@ -133,7 +133,7 @@ ecs_entity_t make_huge_demon(Ecs* ecs)
   Visual*    visual;
   Animator*  animator;
   HitBox*    hitbox;
-  Heath*     heath;
+  Health*     heath;
   HealthBar* healthBar;
   Motion*    motion;
   Drop*      drop;
@@ -169,7 +169,7 @@ ecs_entity_t make_huge_demon(Ecs* ecs)
 
   ecs_add(ecs, demon, ENEMY_TAG);
 
-  heath                 = ecs_add(ecs, demon, HEATH);
+  heath                 = ecs_add(ecs, demon, HEALTH);
   heath->max_hit_points = 100;
   heath->hit_points     = 60;
 
@@ -222,7 +222,7 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 pos)
   Visual*     visual;
   Animator*   animator;
   HitBox*     hitbox;
-  Heath*      heath;
+  Health*      heath;
   HealthBar*  healthBar;
   Motion*     motion;
   Drop*       drop;
@@ -266,7 +266,7 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 pos)
 
   ecs_add(ecs, entity, ENEMY_TAG);
 
-  heath                 = ecs_add(ecs, entity, HEATH);
+  heath                 = ecs_add(ecs, entity, HEALTH);
   heath->max_hit_points = 10;
   heath->hit_points     = 10;
 

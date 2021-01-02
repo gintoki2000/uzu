@@ -6,38 +6,43 @@
 #include "mediator.h"
 #include "resources.h"
 #include "ui_helper.h"
+#include "ui_list.h"
+
 extern Ecs*          g_ecs;
 extern SDL_Renderer* g_renderer;
 extern SDL_Rect      g_viewport;
 
-static Queue        _queue;
-static const char*  _current_sentence;
-static FONT*        _font;
-static const char*  _npc_name;
-static const char*  _conversation_name;
-static int          _box_x;
-static int          _box_y;
-static ecs_entity_t _npc = ECS_NULL_ENT; // current npc who player speak with
+static Queue               _queue;
+static const char*         _current_sentence;
+static FONT*               _font;
+static const char*         _npc_name;
+static int                 _box_x;
+static int                 _box_y;
+static ecs_entity_t        _npc = ECS_NULL_ENT; // current npc who player speak with
+static const Conversation* _conversation;
 
 #define NAME_PLACEHOLER_WIDTH 30
 #define NAME_PLACEHOLER_HEIGHT 12
 #define DIALOGUE_BOX_WIDTH 100
 #define DIALOGUE_BOX_HEIGHT 50
 
-static void trigger_dialogue(ecs_entity_t entity);
+static void begin_conversation(ecs_entity_t entity);
 static void next_sentence(void);
-static void end_dialogue(void);
+static void end_conversation(const char* response);
 static void process_key_input(void);
+static void display_responses(void);
 
+//<-------------------------------------event callbacks---------------------------------->//
+static void on_exec_interaction_cmd(pointer_t arg, const SysEvt_ExecInteractionCmd* event);
+static void on_list_selected(pointer_t arg, const char* item);
 
+//<======================================================================================>//
 
-static void trigger_dialogue(ecs_entity_t entity)
+static void begin_conversation(ecs_entity_t entity)
 {
   Dialogue*  dialogue;
   Transform* transform;
   Name*      name;
-  
-  Conversation* conversation;
 
   _npc = entity;
 
@@ -51,13 +56,12 @@ static void trigger_dialogue(ecs_entity_t entity)
   if (name != NULL)
     _npc_name = name->value;
 
-  conversation = get_conversation(dialogue->conversation_id);
-  _conversation_name = conversation->name;
+  _conversation = get_conversation(dialogue->conversation_id);
 
   queue_clear(&_queue);
-  for (int i = 0; i < conversation->sentences->cnt; ++i)
+  for (int i = 0; i < _conversation->sentences->cnt; ++i)
   {
-    queue_offer(&_queue, conversation->sentences->storage[i]);
+    queue_offer(&_queue, _conversation->sentences->storage[i]);
   }
   keybroad_push_state(process_key_input);
   next_sentence();
@@ -72,18 +76,19 @@ static void next_sentence(void)
   }
   else
   {
-    end_dialogue();
+    display_responses();
   }
 }
 
-static void end_dialogue(void)
+static void end_conversation(const char* response)
 {
   keybroad_pop_state();
   mediator_broadcast(SYS_SIG_FINISH_CONVERSATION,
                      &(SysEvt_FinishConversation){
                          .npc               = _npc,
                          .npc_name          = _npc_name,
-                         .conversation_name = _conversation_name,
+                         .conversation_name = _conversation->name,
+                         .response          = response,
                      });
   _current_sentence = NULL;
   _npc_name         = NULL;
@@ -99,13 +104,32 @@ static void process_key_input(void)
   }
 }
 
+static void display_responses(void)
+{
+  if (_conversation->responses->cnt > 0)
+  {
+    ui_list_display((const char**)_conversation->responses->storage, _conversation->responses->cnt);
+    ui_list_hook(UI_LIST_ON_SELECT, CALLBACK_2(on_list_selected));
+  }
+  else
+  {
+    end_conversation(NULL);
+  }
+}
+
 static void on_exec_interaction_cmd(pointer_t arg, const SysEvt_ExecInteractionCmd* event)
 {
   (void)arg;
   if (strcmp(event->cmd, "TALK") == 0)
   {
-    trigger_dialogue(event->entity);
+    begin_conversation(event->entity);
   }
+}
+
+static void on_list_selected(pointer_t arg, const char* item)
+{
+  (void)arg;
+  end_conversation(item);
 }
 
 void dialogue_system_init()

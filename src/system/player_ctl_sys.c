@@ -105,10 +105,9 @@ static void begin_interact(ecs_entity_t entity)
     items[i] = interactable->text[i];
   }
 
-  ui_list_display(items, interactable->cnt);
+  ui_list_display((const char**)items, interactable->cnt);
   ui_list_set_pos(120, 120);
   ui_list_hook(UI_LIST_ON_SELECT, CALLBACK_2(on_list_select));
-
 }
 
 void player_controller_system_update()

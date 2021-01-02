@@ -26,14 +26,14 @@ static void draw_player_health_bar()
   ecs_entity_t player;
   SDL_Texture* texture;
   SDL_Rect     dst;
-  Heath*       health;
+  Health*       health;
 
   texture = get_texture(TEX_PLAYER_HEALTH_BAR);
 
   if ((player = get_player(g_ecs)) != ECS_NULL_ENT)
   {
 
-    health = ecs_get(g_ecs, player, HEATH);
+    health = ecs_get(g_ecs, player, HEALTH);
 
     dst.x = UI_HEALTH_BAR_POSITION_X;
     dst.y = UI_HEALTH_BAR_POSITION_Y;

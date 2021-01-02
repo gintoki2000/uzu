@@ -6,8 +6,9 @@
 #include "ui_helper.h"
 
 #define UI_LIST_WIDTH 100
+#define UI_LIST_MAX_ITEMS 10
 
-static char     _items[5][10];
+static char*    _items[UI_LIST_MAX_ITEMS];
 static s32      _cnt;
 static Callback _callback[UI_LIST_NUM_EVENTS];
 static BOOL     _visible;
@@ -53,11 +54,17 @@ void ui_list_display(const char** items, u32 cnt)
 {
   _visible = TRUE;
 
-  _cnt = min(cnt, 5);
-
-  for (u32 i = 0; i < cnt && i < 5; ++i)
+  for (int i = 0; i < _cnt; ++i)
   {
-    strcpy(_items[i], items[i]);
+    free(_items[i]);
+    _items[i] = NULL;
+  }
+
+  _cnt = min(cnt, UI_LIST_MAX_ITEMS);
+
+  for (s32 i = 0; i < _cnt; ++i)
+  {
+    _items[i] = strdup(items[i]);
   }
 
   _selected = 0;

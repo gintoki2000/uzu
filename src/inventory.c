@@ -5,6 +5,8 @@
 #include "item.h"
 #include "resources.h"
 #include "ui_helper.h"
+#include "ui_list.h"
+#include "utils.h"
 
 #define INV_CELL_SIZE 16
 #define INV_CELL_GAP 1
@@ -15,15 +17,27 @@
 #define INV_MAX_SLOT 25
 extern SDL_Renderer* g_renderer;
 
-static Item _items[NUM_ITEM_CATEGORIES][INV_MAX_SLOT];
-static u32  _cnt[NUM_ITEM_CATEGORIES];
-static s32  _curr_col, _curr_row;
+static Item         _items[NUM_ITEM_CATEGORIES][INV_MAX_SLOT];
+static u32          _cnt[NUM_ITEM_CATEGORIES];
+static s32          _curr_col, _curr_row;
+static BOOL         _visible;
+static ItemCategory _category = ITEM_CATEGORY_CONSUMABLE;
 
-static BOOL _visible;
+static const RECT _description_rect = { 100, INV_Y, 100, 25 };
 
-static const RECT description_rect = { 100, INV_Y, 100, 25 };
+static const char        USE_OP_TEXT[]  = "USE";
+static const char        DROP_OP_TEXT[] = "DROP";
+static const char* const OPTIONS[]      = { USE_OP_TEXT, DROP_OP_TEXT };
 
+//<----------------------------------event callbacks--------------------------->//
 static void process_key_input(void);
+static void on_list_selected(pointer_t arg, const char* item);
+//<============================================================================>//
+
+static Item* current_item(void)
+{
+  return &_items[_category][_curr_row * INV_COL + _curr_col];
+}
 
 static int find_item(Item* items, u32 cnt, ItemTypeId type_id)
 {
@@ -60,10 +74,34 @@ static void process_key_input(void)
     _curr_row = max(0, _curr_row - 1);
     play_sound(SFX_BUTTON);
   }
+
+  if (key_just_pressed(KEY_A) && current_item()->cnt > 0)
+  {
+    play_sound(SFX_INTERACTION);
+    ui_list_display((const char**)OPTIONS, 2);
+    ui_list_hook(UI_LIST_ON_SELECT, CALLBACK_2(on_list_selected));
+  }
+
   if (key_just_pressed(KEY_B))
   {
     inventory_close();
     play_sound(SFX_INTERACTION);
+  }
+}
+
+static void on_list_selected(pointer_t arg, const char* item)
+{
+  (void)arg;
+  Item* it = current_item();
+
+  if (strcmp(item, USE_OP_TEXT) == 0)
+  {
+    it->cnt--;
+    g_item_types[it->type_id].on_use(g_ecs, get_player(g_ecs));
+  }
+  else if (strcmp(item, DROP_OP_TEXT) == 0)
+  {
+    it->cnt = 0;
   }
 }
 
@@ -152,27 +190,18 @@ void inventory_draw()
     }
   }
 
-  SDL_SetRenderDrawColor(g_renderer, 0xff, 0xff, 0xff, 0xff);
-  SDL_RenderDrawRect(g_renderer,
-                     &(RECT){
-                         INV_X,
-                         INV_Y,
-                         INV_COL * (INV_CELL_SIZE) + 1,
-                         INV_ROW * (INV_CELL_SIZE) + 1,
-                     });
-
   idx = _curr_col + _curr_row * INV_COL;
 
-  draw_box_w_border(&description_rect, UI_COLOR_BG, UI_COLOR_BORDER);
+  draw_box_w_border(&_description_rect, UI_COLOR_BG, UI_COLOR_BORDER);
   if (items[idx].cnt > 0)
   {
     FC_DrawBoxColor(get_font(FONT_DAMAGE_INDICATOR),
                     g_renderer,
                     (RECT){
-                        description_rect.x + 3,
-                        description_rect.y + 2,
-                        description_rect.w - 4,
-                        description_rect.h - 5,
+                        _description_rect.x + 3,
+                        _description_rect.y + 2,
+                        _description_rect.w - 4,
+                        _description_rect.h - 5,
                     },
                     UI_COLOR_TEXT,
                     g_item_types[items[idx].type_id].description);

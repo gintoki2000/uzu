@@ -66,7 +66,7 @@ typedef enum
   CONTROLLER,
   EQUIPMENT,
   WEAPON_ACTION,
-  HEATH,
+  HEALTH,
   HITBOX,
   PROJECTILE,
   HEAL_BAR,
@@ -227,7 +227,7 @@ typedef struct
 {
   s32 hit_points;
   s32 max_hit_points;
-} Heath;
+} Health;
 
 typedef struct
 {

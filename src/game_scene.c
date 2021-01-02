@@ -49,20 +49,19 @@
 #include "system/debug/draw_position.h"
 #include "system/debug/draw_target.h"
 
-
 #include <json-c/json.h>
 
 #include "json_helper.h"
 
-static void         on_load(void);
-static void         on_unload(void);
-static void         on_event(const SDL_Event* evt);
-static void         on_update();
-static void         on_player_hit_ladder(pointer_t arg, const SysEvt_HitLadder* event);
-static void         on_entity_died(pointer_t arg, const SysEvt_EntityDied* event);
-static void         emit_signal(int sig_id, const pointer_t event);
-static void         load_level(const char* filename, BOOL spawn_player);
-static void         unload_current_level(void);
+static void on_load(void);
+static void on_unload(void);
+static void on_event(const SDL_Event* evt);
+static void on_update();
+static void on_player_hit_ladder(pointer_t arg, const SysEvt_HitLadder* event);
+static void on_entity_died(pointer_t arg, const SysEvt_EntityDied* event);
+static void emit_signal(int sig_id, const pointer_t event);
+static void load_level(const char* filename, BOOL spawn_player);
+static void unload_current_level(void);
 
 static int parse_tilelayer(const json_object* tilelayer_json_obj);
 static int parse_objectgroup(const json_object* object_group_json_obj, BOOL spawn_player);
@@ -114,6 +113,7 @@ static void on_load()
 
 static void on_unload()
 {
+  emit_signal(GAME_SCENE_UNLOAD, NULL);
   dialogue_system_fini();
   ecs_del(g_ecs);
   dispatcher_destroy(_dispatcher);
@@ -380,7 +380,6 @@ static int parse(const json_object* map_json_obj, BOOL spawn_player)
   }
   return 0;
 }
-
 
 void game_scene_connect_sig(int sig_id, slot_t slot, pointer_t arg)
 {

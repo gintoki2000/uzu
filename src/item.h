@@ -1,5 +1,6 @@
 #ifndef ITEMS_H
 #define ITEMS_H
+#include "ecs/ecs.h"
 #include <toolbox/toolbox.h>
 
 #define ITEM_MAX_STACK 255
@@ -26,6 +27,7 @@ typedef struct
   Sprite       sprite;
   BOOL         stackable;
   ItemCategory category;
+  void (*on_use)(Ecs*, ecs_entity_t);
 
 } ItemType;
 

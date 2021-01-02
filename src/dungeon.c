@@ -10,7 +10,6 @@
 #include <constances.h>
 #include <dungeon.h>
 #include <entity_factory.h>
-#include <generator.h>
 #include <map.h>
 #include <resources.h>
 #include <scene.h>

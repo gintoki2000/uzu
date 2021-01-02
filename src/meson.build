@@ -10,8 +10,6 @@ source_files = files(
   'entity_factory.c',
   'map.c', 
   'inventory.c',
-  'graph.c',
-  'generator.c', 
   'behaviour_tree.c', 
   'path_finder.c',
   'utils.c',
@@ -22,4 +20,7 @@ source_files = files(
   'ui_list.c',
   'ui_helper.c',
   'constances.c',
+  'json_helper.c',
+  'struct_meta_data.c',
+  'types.c',
 ) + engine_source_files + ecs_source_files + toolbox_source_files + system_source_files + ai_source_files

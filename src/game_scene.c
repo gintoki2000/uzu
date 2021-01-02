@@ -5,7 +5,6 @@
 #include "entity_factory.h"
 #include "inventory.h"
 #include "map.h"
-#include "read_all.h"
 #include "resources.h"
 #include "scene.h"
 #include "ui_list.h"
@@ -53,14 +52,7 @@
 
 #include <json-c/json.h>
 
-#define json_object_object_get_as_string(__jobj, __key)                                            \
-  json_object_get_string(json_object_object_get(__jobj, __key))
-#define json_object_object_get_as_double(__jobj, __key)                                            \
-  json_object_get_double(json_object_object_get(__jobj, __key))
-#define json_object_object_get_as_int(__jobj, __key)                                               \
-  json_object_get_int(json_object_object_get(__jobj, __key))
-#define json_object_array_get_idx_as_int(__jarr, __idx)                                            \
-  json_object_get_int(json_object_array_get_idx(__jarr, __idx))
+#include "json_helper.h"
 
 static void         on_load(void);
 static void         on_unload(void);
@@ -71,7 +63,6 @@ static void         on_entity_died(pointer_t arg, const SysEvt_EntityDied* event
 static void         emit_signal(int sig_id, const pointer_t event);
 static void         load_level(const char* filename, BOOL spawn_player);
 static void         unload_current_level(void);
-static json_object* load_json_from_file(const char* filename);
 
 static int parse_tilelayer(const json_object* tilelayer_json_obj);
 static int parse_objectgroup(const json_object* object_group_json_obj, BOOL spawn_player);
@@ -390,24 +381,6 @@ static int parse(const json_object* map_json_obj, BOOL spawn_player)
   return 0;
 }
 
-static json_object* load_json_from_file(const char* filename)
-{
-  FILE*        file;
-  char*        filedata = NULL;
-  size_t       len;
-  json_object* json_obj = NULL;
-
-  if ((file = fopen(filename, "r")) != NULL)
-  {
-    if (readall(file, &filedata, &len) == READALL_OK)
-    {
-      json_obj = json_tokener_parse(filedata);
-      free(filedata);
-    }
-    fclose(file);
-  }
-  return json_obj;
-}
 
 void game_scene_connect_sig(int sig_id, slot_t slot, pointer_t arg)
 {

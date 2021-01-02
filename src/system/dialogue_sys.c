@@ -29,11 +29,15 @@ static void next_sentence(void);
 static void end_dialogue(void);
 static void process_key_input(void);
 
+
+
 static void trigger_dialogue(ecs_entity_t entity)
 {
   Dialogue*  dialogue;
   Transform* transform;
   Name*      name;
+  
+  Conversation* conversation;
 
   _npc = entity;
 
@@ -47,12 +51,13 @@ static void trigger_dialogue(ecs_entity_t entity)
   if (name != NULL)
     _npc_name = name->value;
 
-  _conversation_name = dialogue->name;
+  conversation = get_conversation(dialogue->conversation_id);
+  _conversation_name = conversation->name;
 
   queue_clear(&_queue);
-  for (int i = 0; i < dialogue->sentences->cnt; ++i)
+  for (int i = 0; i < conversation->sentences->cnt; ++i)
   {
-    queue_offer(&_queue, dialogue->sentences->storage[i]);
+    queue_offer(&_queue, conversation->sentences->storage[i]);
   }
   keybroad_push_state(process_key_input);
   next_sentence();

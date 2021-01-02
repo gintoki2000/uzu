@@ -136,9 +136,7 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
       },
   [DIALOGUE] =
       (EcsType){
-          .size    = sizeof(Dialogue),
-          .init_fn = (ecs_comp_init_fn_t)dialogue_init,
-          .fini_fn = (ecs_comp_fini_fn_t)dialogue_fini,
+          .size = sizeof(Dialogue),
       },
   [ITEM_TAG] =
       (EcsType){
@@ -229,44 +227,6 @@ void text_fini(Text* text)
 {
   free(text->value);
 }
-
-void dialogue_init(Dialogue* dialogue)
-{
-  dialogue->name      = NULL;
-  dialogue->sentences = ptr_array_new(free);
-  dialogue->responses = ptr_array_new(free);
-}
-
-void dialogue_fini(Dialogue* dialogue)
-{
-  ptr_array_delete(dialogue->responses);
-  ptr_array_delete(dialogue->sentences);
-  free(dialogue->name);
-}
-
-void dialogue_add_sentence(Dialogue* dialogue, const char* sentence)
-{
-  ptr_array_add(dialogue->sentences, strdup(sentence));
-}
-
-void dialogue_add_response(Dialogue* dialogue, const char* response)
-{
-  ptr_array_add(dialogue->responses, strdup(response));
-}
-
-void dialogue_set_name(Dialogue* dialogue, const char* name)
-{
-  if (dialogue->name != NULL)
-    free(dialogue->name);
-  dialogue->name = strdup(name);
-}
-
-void dialogue_clear(Dialogue* dialogue)
-{
-  ptr_array_clear(dialogue->sentences);
-  ptr_array_clear(dialogue->responses);
-}
-
 void interacable_set_cmd(Interactable* interactable, int index, const char* cmd)
 {
   strncpy(interactable->text[index], cmd, 10);

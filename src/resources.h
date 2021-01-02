@@ -1,8 +1,9 @@
 #ifndef RESOURCES_H
 #define RESOURCES_H
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_mixer.h>
-#include <toolbox/toolbox.h>
+#include "SDL.h"
+#include "SDL_mixer.h"
+#include "toolbox/toolbox.h"
+#include "types.h"
 typedef enum
 {
   TEX_BIG_DEMON,
@@ -70,11 +71,20 @@ typedef enum
   NUM_SFXS,
 } SfxId;
 
-BOOL         resources_load    (void        );
-void         resources_unload  (void        );
-SDL_Texture* get_texture       (TextureId id);
-Mix_Music*   get_bg_mus        (BgMusId   id);
-Mix_Chunk*   get_sfx           (SfxId     id);
-FONT*        get_font          (FontId    id);
+typedef enum
+{
+  CONVERSATION_DEMO1,
+  CONVERSATION_DEMO2,
+  CONVERSATION_DEMO3,
+  NUM_CONVERSATIONS,
+} ConversationId;
+
+BOOL          resources_load(void);
+void          resources_unload(void);
+SDL_Texture*  get_texture(TextureId id);
+Mix_Music*    get_bg_mus(BgMusId id);
+Mix_Chunk*    get_sfx(SfxId id);
+FONT*         get_font(FontId id);
+Conversation* get_conversation(ConversationId id);
 
 #endif // RESOURCES_H

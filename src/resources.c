@@ -2,6 +2,8 @@
 #include "SDL_image.h"
 #include "SDL_mixer.h"
 #include "SDL_ttf.h"
+#include "json_helper.h"
+#include "struct_meta_data.h"
 #include <engine/engine.h>
 static SDL_Texture* _textures[NUM_TEXS];
 static const char*  _texture_files[NUM_TEXS] = {
@@ -62,6 +64,13 @@ static const char* _sfx_files[NUM_SFXS] = {
 
 static FONT* _fonts[NUM_FONTS];
 
+static Conversation _conversations[NUM_CONVERSATIONS];
+static char*        _conversation_files[NUM_CONVERSATIONS] = {
+  [CONVERSATION_DEMO1] = "asserts/conversation/demo1.json",
+  [CONVERSATION_DEMO2] = "asserts/conversation/demo2.json",
+  [CONVERSATION_DEMO3] = "asserts/conversation/demo3.json",
+};
+
 extern SDL_Renderer* g_renderer;
 
 static SDL_Texture* load_texture(const char* file)
@@ -120,6 +129,15 @@ BOOL resources_load()
 
   _fonts[FONT_ITEM_PICKED_UP] = font;
 
+  const FieldMetaData* conversation_fmd =
+      STRUCT_META_DATA_TBL[STRUCT_META_DATA_CONVERSATION].fields;
+  for (int i = 0; i < NUM_CONVERSATIONS; ++i)
+  {
+    struct json_object* json = load_json_from_file(_conversation_files[i]);
+    parse_struct(conversation_fmd, &_conversations[i], json);
+    json_object_put(json);
+  }
+
   return TRUE;
 }
 
@@ -157,6 +175,11 @@ void resources_unload()
       _fonts[i] = NULL;
     }
   }
+
+  for (int i = 0; i < NUM_CONVERSATIONS; ++i)
+  {
+    conversation_fini(&_conversations[i]);
+  }
 }
 
 SDL_Texture* get_texture(TextureId id)
@@ -177,4 +200,9 @@ Mix_Chunk* get_sfx(SfxId id)
 FONT* get_font(FontId id)
 {
   return _fonts[id];
+}
+
+Conversation* get_conversation(ConversationId id)
+{
+  return _conversations + id;
 }

@@ -795,10 +795,8 @@ ecs_entity_t make_npc(Ecs* ecs, ecs_entity_t character_base)
   interactable->cnt = 1;
   strcpy(interactable->text[0], "TALK");
 
-  dialogue = ecs_add(ecs, character_base, DIALOGUE);
-  dialogue_add_sentence(dialogue, "This world is fill of monsters.");
-  dialogue_add_sentence(dialogue, "They hunt and eat any one which they see.");
-  dialogue_set_name(dialogue, "conversation 1");
+  dialogue                  = ecs_add(ecs, character_base, DIALOGUE);
+  dialogue->conversation_id = CONVERSATION_DEMO1;
 
   name_init(ecs_add(ecs, character_base, NAME), "luca");
 

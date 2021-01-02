@@ -1,4 +1,5 @@
 #include "game_event.h"
+#include "resources.h"
 #include <components.h>
 #include <inventory.h>
 #include <system/mediator.h>
@@ -34,11 +35,8 @@ static void on_entity_died(pointer_t arg, const SysEvt_EntityDied* event)
       luca = find_entity(g_ecs, "luca");
       ASSERT(luca != ECS_NULL_ENT);
 
-      dialogue = ecs_get(g_ecs, luca, DIALOGUE);
-      dialogue_clear(dialogue);
-      dialogue_set_name(dialogue, "c3");
-      dialogue_add_sentence(dialogue, "good job! I'll give some red flask.");
-      dialogue_add_sentence(dialogue, "when your hp is low use it to restore some hp.");
+      dialogue                  = ecs_get(g_ecs, luca, DIALOGUE);
+      dialogue->conversation_id = CONVERSATION_DEMO3;
 
       mediator_disconnect(SYS_SIG_ENTITY_DIED, (pointer_t)on_entity_died);
       mediator_connect(SYS_SIG_FINISH_CONVERSATION, NULL, SLOT(on_finish_conversation));
@@ -60,7 +58,7 @@ static void on_finish_conversation(pointer_t arg, const SysEvt_FinishConversatio
 {
   (void)arg;
 
-  if (strcmp(event->conversation_name, "c3") == 0)
+  if (strcmp(event->conversation_name, "demo3") == 0)
   {
     add_to_inv(ITEM_TYPE_BIG_RED_FLASK);
 

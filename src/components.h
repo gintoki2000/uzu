@@ -317,9 +317,7 @@ typedef struct
 
 typedef struct
 {
-  char*     name;
-  PtrArray* sentences;
-  PtrArray* responses;
+  int conversation_id;
 } Dialogue;
 
 Animation*
@@ -349,11 +347,5 @@ void text_fini(Text* text);
 
 void interacable_set_cmd(Interactable* interactable, int index, const char* cmd);
 
-void dialogue_init(Dialogue* dialogue);
-void dialogue_fini(Dialogue* dialogue);
-void dialogue_add_sentence(Dialogue* dialogue, const char* sentence);
-void dialogue_add_response(Dialogue* dialogue, const char* response);
-void dialogue_set_name(Dialogue* dialogue, const char* name);
-void dialogue_clear(Dialogue* dialogue);
 
 #endif // COMPONENTS_H

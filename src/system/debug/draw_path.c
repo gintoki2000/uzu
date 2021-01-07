@@ -9,14 +9,14 @@ void path_rendering_system_update()
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;
-  Path*     paths;
+  Path*         paths;
   int           x1, y1, x2, y2;
 
   ecs_raw(g_ecs, PATH, &entities, (void**)&paths, &cnt);
 
   for (int i = 0; i < cnt; ++i)
   {
-    for (int j = 0; j < paths[i].cnt - 1; ++j)
+    for (int j = 0; j < paths[i].num_nodes - 1; ++j)
     {
       x1 = (paths[i].nodes[j].x + 0.5) * TILE_SIZE - g_viewport.x;
       y1 = (paths[i].nodes[j].y + 0.5) * TILE_SIZE - g_viewport.y;

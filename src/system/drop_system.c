@@ -2,7 +2,7 @@
 #include "mediator.h"
 #include <components.h>
 #include <entity_factory.h>
-#include <item.h>
+#include <types.h>
 
 static ecs_entity_t (*create_fn_tbl[NUM_ITEM_TYPES])(Ecs*, Vec2) = {
   [ITEM_TYPE_RED_FLASK]     = make_red_flask,

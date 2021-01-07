@@ -23,6 +23,7 @@ system_source_files = files(
   './text_rendering_sys.c',
   './interaction_system.c',
   './dialogue_sys.c',
+  './merchant_sys.c',
 
   #weapon skill systems
   './weapon_skill/swing.c',

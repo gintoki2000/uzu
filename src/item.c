@@ -1,6 +1,6 @@
-#include "item.h"
 #include "components.h"
 #include "resources.h"
+#include "types.h"
 
 static void red_flask_on_use(Ecs* ecs, ecs_entity_t entity);
 static void big_red_flask_on_use(Ecs* ecs, ecs_entity_t entity);
@@ -33,13 +33,6 @@ ItemType g_item_types[NUM_ITEM_TYPES] = {
       },
 };
 
-void item_types_init()
-{
-  sprite_init(&g_item_types[ITEM_TYPE_RED_FLASK].sprite, get_texture(TEX_FLASK_RED));
-  sprite_init(&g_item_types[ITEM_TYPE_BIG_RED_FLASK].sprite, get_texture(TEX_FLASK_RED_BIG));
-  sprite_init(&g_item_types[ITEM_TYPE_BLUE_FLASK].sprite, get_texture(TEX_BLUE_FLASK));
-}
-
 static void red_flask_on_use(Ecs* ecs, ecs_entity_t entity)
 {
   Health* health = ecs_get(ecs, entity, HEALTH);
@@ -63,4 +56,11 @@ static void blue_flask_on_use(Ecs* ecs, ecs_entity_t entity)
   (void)ecs;
   (void)entity;
   INFO("nothing happen...\n");
+}
+
+void item_types_init()
+{
+  sprite_init(&g_item_types[ITEM_TYPE_RED_FLASK].sprite, get_texture(TEX_FLASK_RED));
+  sprite_init(&g_item_types[ITEM_TYPE_BIG_RED_FLASK].sprite, get_texture(TEX_FLASK_RED_BIG));
+  sprite_init(&g_item_types[ITEM_TYPE_BLUE_FLASK].sprite, get_texture(TEX_BLUE_FLASK));
 }

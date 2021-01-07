@@ -3,145 +3,51 @@
 #include <string.h>
 #include <toolbox/sprite-sheet.h>
 
+#define ECS_TYPE(__T)                                                                              \
+  {                                                                                                \
+    .size = sizeof(__T)                                                                            \
+  }
+#define ECS_TYPE_EX(__T, __init_fn, __fini_fn)                                                     \
+  {                                                                                                \
+    .size = sizeof(__T), .init_fn = (ecs_comp_init_fn_t)__init_fn,                                 \
+    .fini_fn = (ecs_comp_fini_fn_t)__fini_fn                                                       \
+  }
+
 const EcsType g_comp_types[NUM_COMPONENTS] = {
-  [VISUAL] =
-      {
-          .size = sizeof(Visual),
-      },
-  [TRANSFORM] =
-      {
-          .size = sizeof(Transform),
-      },
-  [ANIMATOR] =
-      {
-          .size    = sizeof(Animator),
-          .fini_fn = (ecs_comp_fini_fn_t)animator_fini,
-      },
-  [PLAYER_TAG] =
-      {
-          .size = sizeof(PlayerTag),
-      },
-  [CONTROLLER] =
-      {
-          .size = sizeof(Controller),
-      },
-  [EQUIPMENT] =
-      {
-          .size = sizeof(Equipment),
-      },
-  [HEALTH] =
-      {
-          .size = sizeof(Health),
-      },
-  [HITBOX] =
-      {
-          .size    = sizeof(HitBox),
-          .init_fn = (ecs_comp_init_fn_t)hitbox_init,
-      },
-  [ENEMY_TAG] =
-      {
-          .size = sizeof(EnemyTag),
-      },
-  [HEAL_BAR] =
-      {
-          .size = sizeof(HealthBar),
-      },
-  [LIFE_SPAN] =
-      {
-          .size = sizeof(LifeSpan),
-      },
-  [MOTION] =
-      {
-          .size = sizeof(Motion),
-      },
-  [PROJECTILE] =
-      {
-          .size = sizeof(Projectile),
-      },
-  [TAG_TO_BE_DESTROYED] =
-      {
-          .size = sizeof(TagToBeDestroyed),
-      },
-  [WEAPON_CORE] =
-      {
-          .size = sizeof(WeaponCore),
-      },
-  [DAMAGE_OUTPUT] =
-      {
-          .size = sizeof(DamageOutput),
-      },
-  [WEAPON_SKILL_SWING] =
-      {
-          .size = sizeof(wpskl_Swing),
-      },
-  [WEAPON_SKILL_CHARGE] =
-      {
-          .size = sizeof(wpskl_Charge),
-      },
-  [DROP] =
-      {
-          .size = sizeof(Drop),
-      },
-  [INVULNERABLE] =
-      {
-          .size = sizeof(Invulnerable),
-      },
-  [CAMERA_TARGET_TAG] =
-      {
-          .size = sizeof(CameraTargetTag),
-      },
-  [AI_AGENT] =
-      {
-          .size    = sizeof(AIAgent),
-          .fini_fn = (ecs_comp_fini_fn_t)ai_agent_fini,
-      },
-  [DESTINATION] =
-      {
-          .size = sizeof(Destination),
-      },
-  [PATH] =
-      {
-          .size = sizeof(Path),
-      },
-  [FOLLOWING_TARGET] =
-      {
-          .size = sizeof(FollowingTarget),
-      },
-  [SPOT] =
-      {
-          .size = sizeof(Spot),
-      },
-  [WEAPON_SKILL_THUNDER_STORM] =
-      {
-          .size = sizeof(wpskl_ThunderStorm),
-      },
-  [LEVEL_SWITCHER] =
-      {
-          .size    = sizeof(LevelSwitcher),
-          .fini_fn = (ecs_comp_fini_fn_t)level_switcher_fini,
-      },
-  [NAME] =
-      {
-          .size    = sizeof(Name),
-          .fini_fn = (ecs_comp_fini_fn_t)name_fini,
-      },
-  [TEXT] =
-      {
-          .size    = sizeof(Text),
-          .fini_fn = (ecs_comp_fini_fn_t)text_fini,
-      },
-  [INTERACTABLE] =
-      {
-          .size = sizeof(Interactable),
-      },
-  [DIALOGUE] =
-      {
-          .size = sizeof(Dialogue),
-      },
-  [ITEM_TAG] =
-      {
-          .size = sizeof(ItemTag),
-      },
+  [VISUAL]                     = ECS_TYPE(Visual),
+  [TRANSFORM]                  = ECS_TYPE(Transform),
+  [ANIMATOR]                   = ECS_TYPE_EX(Animator, NULL, animator_fini),
+  [PLAYER_TAG]                 = ECS_TYPE(PlayerTag),
+  [CONTROLLER]                 = ECS_TYPE(Controller),
+  [EQUIPMENT]                  = ECS_TYPE(Equipment),
+  [HEALTH]                     = ECS_TYPE(Health),
+  [HITBOX]                     = ECS_TYPE_EX(HitBox, hitbox_init, NULL),
+  [ENEMY_TAG]                  = ECS_TYPE(PlayerTag),
+  [HEAL_BAR]                   = ECS_TYPE(HealthBar),
+  [LIFE_SPAN]                  = ECS_TYPE(LifeSpan),
+  [MOTION]                     = ECS_TYPE(Motion),
+  [PROJECTILE]                 = ECS_TYPE(Projectile),
+  [TAG_TO_BE_DESTROYED]        = ECS_TYPE(TagToBeDestroyed),
+  [WEAPON_CORE]                = ECS_TYPE(WeaponCore),
+  [DAMAGE_OUTPUT]              = ECS_TYPE(DamageOutput),
+  [WEAPON_SKILL_SWING]         = ECS_TYPE(wpskl_Swing),
+  [WEAPON_SKILL_CHARGE]        = ECS_TYPE(wpskl_Charge),
+  [DROP]                       = ECS_TYPE(Drop),
+  [INVULNERABLE]               = ECS_TYPE(Invulnerable),
+  [CAMERA_TARGET_TAG]          = ECS_TYPE(CameraTargetTag),
+  [AI_AGENT]                   = ECS_TYPE_EX(AIAgent, NULL, ai_agent_fini),
+  [DESTINATION]                = ECS_TYPE(Destination),
+  [PATH]                       = ECS_TYPE(Path),
+  [FOLLOWING_TARGET]           = ECS_TYPE(FollowingTarget),
+  [SPOT]                       = ECS_TYPE(Spot),
+  [WEAPON_SKILL_THUNDER_STORM] = ECS_TYPE(wpskl_ThunderStorm),
+  [LEVEL_SWITCHER]             = ECS_TYPE_EX(LevelSwitcher, NULL, level_switcher_fini),
+  [NAME]                       = { .size = sizeof(Name), .fini_fn = (ecs_comp_fini_fn_t)name_fini },
+  [TEXT]                       = { .size = sizeof(Text), .fini_fn = (ecs_comp_fini_fn_t)text_fini },
+  [INTERACTABLE]               = { .size = sizeof(Interactable) },
+  [DIALOGUE]                   = { .size = sizeof(Dialogue) },
+  [ITEM_TAG]                   = { .size = sizeof(ItemTag) },
+  [MERCHANT]                   = { .size = sizeof(Merchant) }
 };
 
 Animation*
@@ -226,8 +132,4 @@ void text_init(Text* text, const char* value, FONT* font, COLOR color)
 void text_fini(Text* text)
 {
   free(text->value);
-}
-void interacable_set_cmd(Interactable* interactable, int index, const char* cmd)
-{
-  strncpy(interactable->text[index], cmd, 10);
 }

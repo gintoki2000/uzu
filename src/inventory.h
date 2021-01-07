@@ -1,6 +1,6 @@
 #ifndef INVENTORY_H
 #define INVENTORY_H
-#include "item.h"
+#include "types.h"
 void  inventory_init();
 BOOL  add_to_inv(ItemTypeId type_id);
 

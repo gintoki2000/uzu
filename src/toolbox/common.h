@@ -11,6 +11,8 @@ typedef Uint16 u16;
 typedef Sint32 s32;
 typedef Uint32 u32;
 
+typedef const char* cstr_t;
+
 typedef void* pointer_t;
 typedef int (*compare_fn_t)(const pointer_t lhs, const pointer_t rhs);
 typedef void (*destroy_fn_t)(pointer_t p);

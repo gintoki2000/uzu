@@ -18,9 +18,7 @@ extern Ecs* g_ecs;
 
 ecs_entity_t g_curr_iteractable_entity = ECS_NULL_ENT;
 
-extern Ecs*          g_ecs;
-extern SDL_Renderer* g_renderer;
-extern SDL_Rect      g_viewport;
+extern Ecs* g_ecs;
 
 //<--------------------------------event callbacks----------------------------------->//
 
@@ -33,8 +31,8 @@ static void on_list_select(pointer_t arg, const char* item)
   (void)arg;
   INFO("you selected %s\n", item);
 
-  mediator_broadcast(SYS_SIG_EXEC_INTERACTION_CMD,
-                     &(SysEvt_ExecInteractionCmd){
+  mediator_broadcast(SYS_SIG_COMANND_SELECTED,
+                     &(SysEvt_CommandSelected){
                          g_curr_iteractable_entity,
                          item,
                      });
@@ -93,19 +91,13 @@ static void update_pointed_entity()
 static void begin_interact(ecs_entity_t entity)
 {
   Interactable* interactable;
-  char*         items[5];
   INFO("begin interact with e" ECS_ENT_FMT_PATTERN "\n", ECS_ENT_FMT_VARS(entity));
 
   mediator_broadcast(SYS_SIG_BEGIN_INTERACTION, &(SysEvt_BeginInteraction){ entity });
 
   interactable = ecs_get(g_ecs, entity, INTERACTABLE);
 
-  for (int i = 0; i < interactable->cnt; ++i)
-  {
-    items[i] = interactable->text[i];
-  }
-
-  ui_list_display((const char**)items, interactable->cnt);
+  ui_list_display((const char**)interactable->commands, interactable->num_commands);
   ui_list_set_pos(120, 120);
   ui_list_hook(UI_LIST_ON_SELECT, CALLBACK_2(on_list_select));
 }

@@ -62,7 +62,7 @@ ecs_entity_t make_character(Ecs* ecs, Vec2 pos, TextureId texture_id)
   Animator*   animator;
   HitBox*     hitbox;
   Motion*     motion;
-  Health*      heath;
+  Health*     heath;
 
   texture = get_texture(texture_id);
   animation_init(&anims[ANIM_STATE_HIT], texture, 0, 0, 1, 1, 16, 28);
@@ -133,7 +133,7 @@ ecs_entity_t make_huge_demon(Ecs* ecs)
   Visual*    visual;
   Animator*  animator;
   HitBox*    hitbox;
-  Health*     heath;
+  Health*    heath;
   HealthBar* healthBar;
   Motion*    motion;
   Drop*      drop;
@@ -222,7 +222,7 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 pos)
   Visual*     visual;
   Animator*   animator;
   HitBox*     hitbox;
-  Health*      heath;
+  Health*     heath;
   HealthBar*  healthBar;
   Motion*     motion;
   Drop*       drop;
@@ -789,14 +789,28 @@ ecs_entity_t make_npc(Ecs* ecs, ecs_entity_t character_base)
   Interactable* interactable;
   HitBox*       hitbox;
   Dialogue*     dialogue;
+  Merchant*     merchant;
 
   interactable = ecs_add(ecs, character_base, INTERACTABLE);
 
-  interactable->cnt = 1;
-  strcpy(interactable->text[0], "TALK");
+  const char* commands[] = { TEXT_COMMAND_TALK, TEXT_COMMAND_BUY };
+
+  memcpy(interactable->commands, commands, sizeof(commands));
+  interactable->num_commands = sizeof(commands) / sizeof(const char*);
 
   dialogue                  = ecs_add(ecs, character_base, DIALOGUE);
   dialogue->conversation_id = CONVERSATION_DEMO1;
+
+  merchant = ecs_add(ecs, character_base, MERCHANT);
+
+  ItemPayload payloads[] = {
+    { ITEM_TYPE_RED_FLASK, 10, 1 },  { ITEM_TYPE_BLUE_FLASK, MERCHANT_INIFINTE, 1 },
+    { ITEM_TYPE_BLUE_FLASK, MERCHANT_INIFINTE, 1 }, { ITEM_TYPE_BLUE_FLASK, MERCHANT_INIFINTE, 1 },
+    { ITEM_TYPE_BLUE_FLASK, MERCHANT_INIFINTE, 1 }, { ITEM_TYPE_BLUE_FLASK, MERCHANT_INIFINTE, 1 },
+  };
+
+  merchant->num_payloads = sizeof(payloads) / sizeof(ItemPayload);
+  memcpy(merchant->payloads, payloads, sizeof(payloads));
 
   name_init(ecs_add(ecs, character_base, NAME), "luca");
 

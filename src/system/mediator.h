@@ -5,21 +5,22 @@
 
 enum
 {
-  SYS_SIG_ENTITY_DIED,
-  SYS_SIG_WEAPON_HIT,
-  SYS_SIG_COLLISION,
+  SYS_SIG_ENTITY_DIED, // entity hết máu
+  SYS_SIG_WEAPON_HIT, //vũ khí chạm vào entity
+  SYS_SIG_COLLISION, // va chạm giữa hai entity
   SYS_SIG_PROJECTILE_HIT,
-  SYS_SIG_FINISH_LIFE_SPAN,
-  SYS_SIG_DEAL_DAMAGE,
-  SYS_SIG_GET_DAMAGED,
-  SYS_SIG_PLAYER_HIT_ITEM,
-  SYS_SIG_HIT_TRAP,
-  SYS_SIG_HIT_LADDER,
-  SYS_SIG_END_INTERACTION,
-  SYS_SIG_BEGIN_INTERACTION,
-  SYS_SIG_FINISH_CONVERSATION,
-  SYS_SIG_EXEC_INTERACTION_CMD,
-  SYS_SIG_FINISH_EVENT,
+  SYS_SIG_LIFE_SPAN_FINISHED, //kết thúc thời gian sống
+  SYS_SIG_DEAL_DAMAGE, // gây ra sát thương
+  SYS_SIG_GET_DAMAGED, // entity nhận sát thương
+  SYS_SIG_PLAYER_HIT_ITEM, // player chạm item
+  SYS_SIG_HIT_TRAP, // player chạm phải bẩy
+  SYS_SIG_HIT_LADDER, // player chạm vào cầu thang (chuyển map)
+  SYS_SIG_END_INTERACTION, // kết thúc tương tác với interactable entity
+  SYS_SIG_BEGIN_INTERACTION, // bắt đầu tương tác với interactable entity
+  SYS_SIG_CONVERSATION_FINISHED, // một đoạn hội thoại đã hoàng thành
+  SYS_SIG_COMANND_SELECTED, // player chọn một cmd các system lắng nghe và thực thi
+  SYS_SIG_EVENT_FINISHED, // một sự kiện(cốt truyện) trong game hoàn thành
+  SYS_SIG_ITEM_USED, // item đã được sử dụng
   NUM_SYSTEM_SIGNALS,
 };
 
@@ -57,7 +58,7 @@ typedef struct
 typedef struct
 {
   ecs_entity_t entity;
-} SysEvt_FinishLifeSpan;
+} SysEvt_LifeSpanFinished;
 
 typedef struct
 {
@@ -105,7 +106,7 @@ typedef struct
 {
   ecs_entity_t entity;
   const char*  cmd;
-} SysEvt_ExecInteractionCmd;
+} SysEvt_CommandSelected;
 
 typedef struct
 {
@@ -113,12 +114,12 @@ typedef struct
   const char*  npc_name;
   const char*  conversation_name;
   const char*  response;
-} SysEvt_FinishConversation;
+} SysEvt_ConversationFinished;
 
 typedef struct
 {
   int event_code;
-} SysEvt_FinishEvent;
+} SysEvt_EventFinished;
 
 void mediator_init();
 void mediator_fini();

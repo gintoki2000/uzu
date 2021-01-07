@@ -2,8 +2,8 @@
 #include "constances.h"
 #include "engine/keyboard.h"
 #include "game_scene.h"
-#include "item.h"
 #include "resources.h"
+#include "types.h"
 #include "ui_helper.h"
 #include "ui_list.h"
 #include "utils.h"
@@ -14,20 +14,19 @@
 #define INV_Y 32
 #define INV_COL 5
 #define INV_ROW 5
-#define INV_MAX_SLOT 25
+#define INV_MAX_SLOTS 25
 extern SDL_Renderer* g_renderer;
 
-static Item         _items[NUM_ITEM_CATEGORIES][INV_MAX_SLOT];
-static u32          _cnt[NUM_ITEM_CATEGORIES];
+static Item         _items[NUM_ITEM_CATEGORIES][INV_MAX_SLOTS];
 static s32          _curr_col, _curr_row;
 static BOOL         _visible;
 static ItemCategory _category = ITEM_CATEGORY_CONSUMABLE;
 
 static const RECT _description_rect = { 100, INV_Y, 100, 25 };
 
-static const char        USE_OP_TEXT[]  = "USE";
-static const char        DROP_OP_TEXT[] = "DROP";
-static const char* const OPTIONS[]      = { USE_OP_TEXT, DROP_OP_TEXT };
+static const char        INV_TEXT_USE[]  = "USE";
+static const char        INV_TEXT_DROP[] = "DROP";
+static const char* const INV_OPTIONS[]   = { INV_TEXT_USE, INV_TEXT_DROP };
 
 //<----------------------------------event callbacks--------------------------->//
 static void process_key_input(void);
@@ -39,10 +38,18 @@ static Item* current_item(void)
   return &_items[_category][_curr_row * INV_COL + _curr_col];
 }
 
-static int find_item(Item* items, u32 cnt, ItemTypeId type_id)
+static int find_item(ItemTypeId type_id)
 {
-  for (u32 i = 0; i < cnt; ++i)
-    if (items[i].type_id == type_id)
+  for (u32 i = 0; i < INV_MAX_SLOTS; ++i)
+    if (_items[_category][i].type_id == type_id)
+      return i;
+  return -1;
+}
+
+static int find_empty_slot()
+{
+  for (u32 i = 0; i < INV_MAX_SLOTS; ++i)
+    if (_items[_category][i].num_items == 0)
       return i;
   return -1;
 }
@@ -75,10 +82,10 @@ static void process_key_input(void)
     play_sound(SFX_BUTTON);
   }
 
-  if (key_just_pressed(KEY_A) && current_item()->cnt > 0)
+  if (key_just_pressed(KEY_A) && current_item()->num_items > 0)
   {
     play_sound(SFX_INTERACTION);
-    ui_list_display((const char**)OPTIONS, 2);
+    ui_list_display((const char**)INV_OPTIONS, 2);
     ui_list_hook(UI_LIST_ON_SELECT, CALLBACK_2(on_list_selected));
   }
 
@@ -94,14 +101,14 @@ static void on_list_selected(pointer_t arg, const char* item)
   (void)arg;
   Item* it = current_item();
 
-  if (strcmp(item, USE_OP_TEXT) == 0)
+  if (strcmp(item, INV_TEXT_USE) == 0)
   {
-    it->cnt--;
+    it->num_items--;
     g_item_types[it->type_id].on_use(g_ecs, get_player(g_ecs));
   }
-  else if (strcmp(item, DROP_OP_TEXT) == 0)
+  else if (strcmp(item, INV_TEXT_DROP) == 0)
   {
-    it->cnt = 0;
+    it->num_items = 0;
   }
 }
 
@@ -109,23 +116,24 @@ BOOL add_to_inv(ItemTypeId type_id)
 {
   ItemCategory cat   = g_item_types[type_id].category;
   Item*        items = _items[cat];
-  u32*         cnt   = &_cnt[cat];
-  int          idx   = find_item(items, *cnt, type_id);
+  int          idx   = find_item(type_id);
+  int          empty_slot;
 
   if (idx == -1)
   {
-    if (*cnt < INV_MAX_SLOT)
+    empty_slot = find_empty_slot();
+    if (empty_slot != -1)
     {
-      items[(*cnt)++] = (Item){ .type_id = type_id, .cnt = 1 };
+      items[empty_slot] = (Item){ .type_id = type_id, .num_items = 1 };
       return TRUE;
     }
     return FALSE;
   }
   else
   {
-    if (items[idx].cnt < ITEM_MAX_STACK)
+    if (items[idx].num_items < ITEM_MAX_STACK)
     {
-      items[idx].cnt++;
+      items[idx].num_items++;
       return TRUE;
     }
     return FALSE;
@@ -155,7 +163,7 @@ void inventory_draw()
   RECT cell_rect;
   int  idx;
 
-  Item*  items = _items[ITEM_CATEGORY_CONSUMABLE];
+  Item*  items = _items[_category];
   Sprite sprite;
 
   for (int i = 0; i < INV_ROW; ++i)
@@ -176,7 +184,7 @@ void inventory_draw()
       idx    = i * INV_COL + j;
       sprite = g_item_types[items[idx].type_id].sprite;
 
-      if (items[idx].cnt > 0)
+      if (items[idx].num_items > 0)
       {
         SDL_RenderCopy(g_renderer, sprite.tex, &sprite.rect, &cell_rect);
         FC_DrawColor(get_font(FONT_DAMAGE_INDICATOR),
@@ -185,7 +193,7 @@ void inventory_draw()
                      cell_rect.y + 3,
                      (COLOR){ 232, 39, 194, 255 },
                      "%d",
-                     items[idx].cnt);
+                     items[idx].num_items);
       }
     }
   }
@@ -193,7 +201,7 @@ void inventory_draw()
   idx = _curr_col + _curr_row * INV_COL;
 
   draw_box_w_border(&_description_rect, UI_COLOR_BG, UI_COLOR_BORDER);
-  if (items[idx].cnt > 0)
+  if (items[idx].num_items > 0)
   {
     FC_DrawBoxColor(get_font(FONT_DAMAGE_INDICATOR),
                     g_renderer,

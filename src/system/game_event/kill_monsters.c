@@ -1,10 +1,11 @@
 #include "game_event.h"
 #include "game_scene.h"
-#include "resources.h"
+#include <resources.h>
 #include <components.h>
 #include <inventory.h>
 #include <system/mediator.h>
 #include <utils.h>
+#include <ui_msgbox.h>
 
 static u8 _state; // INACTIVE, INPROGRESS, FINISHED
 static u8 _killed_monster_cnt;
@@ -13,8 +14,8 @@ extern Ecs* g_ecs;
 
 //<--------------------------event callback----------------------------->//
 static void on_entity_died(pointer_t arg, const SysEvt_EntityDied* event);
-static void on_game_event_finished(pointer_t arg, const SysEvt_FinishEvent* event);
-static void on_finish_conversation(pointer_t arg, const SysEvt_FinishConversation* event);
+static void on_game_event_finished(pointer_t arg, const SysEvt_EventFinished* event);
+static void on_conversation_finished(pointer_t arg, const SysEvt_ConversationFinished* event);
 static void on_game_scene_unload(pointer_t arg, const pointer_t event);
 //<=====================================================================>//
 
@@ -39,7 +40,7 @@ void GE_kill_monsters_init(void)
     _killed_monster_cnt = 0;
   }
 
-  mediator_connect(SYS_SIG_FINISH_EVENT, NULL, SLOT(on_game_event_finished));
+  mediator_connect(SYS_SIG_EVENT_FINISHED, NULL, SLOT(on_game_event_finished));
   game_scene_connect_sig(GAME_SCENE_UNLOAD, on_game_scene_unload, NULL);
 }
 
@@ -62,31 +63,31 @@ static void on_entity_died(pointer_t arg, const SysEvt_EntityDied* event)
       dialogue->conversation_id = CONVERSATION_DEMO3;
 
       mediator_disconnect(SYS_SIG_ENTITY_DIED, (pointer_t)on_entity_died);
-      mediator_connect(SYS_SIG_FINISH_CONVERSATION, NULL, SLOT(on_finish_conversation));
+      mediator_connect(SYS_SIG_CONVERSATION_FINISHED, NULL, SLOT(on_conversation_finished));
     }
   }
 }
 
-static void on_game_event_finished(pointer_t arg, const SysEvt_FinishEvent* event)
+static void on_game_event_finished(pointer_t arg, const SysEvt_EventFinished* event)
 {
   (void)arg;
   if (event->event_code == GAME_EVENT_GET_WEAPON)
   {
-    mediator_disconnect(SYS_SIG_FINISH_EVENT, (pointer_t)on_game_event_finished);
+    mediator_disconnect(SYS_SIG_EVENT_FINISHED, (pointer_t)on_game_event_finished);
     mediator_connect(SYS_SIG_ENTITY_DIED, NULL, SLOT(on_entity_died));
   }
 }
 
-static void on_finish_conversation(pointer_t arg, const SysEvt_FinishConversation* event)
+static void on_conversation_finished(pointer_t arg, const SysEvt_ConversationFinished* event)
 {
   (void)arg;
 
   if (strcmp(event->conversation_name, "demo3") == 0)
   {
     add_to_inv(ITEM_TYPE_BIG_RED_FLASK);
-
-    mediator_disconnect(SYS_SIG_FINISH_CONVERSATION, (pointer_t)on_finish_conversation);
-    mediator_broadcast(SYS_SIG_FINISH_EVENT, &(SysEvt_FinishEvent){ GAME_EVENT_KILL_MONSTER });
+    ui_msgbox_display("you got x1 BIG RED FLASK");
+    mediator_disconnect(SYS_SIG_CONVERSATION_FINISHED, (pointer_t)on_conversation_finished);
+    mediator_broadcast(SYS_SIG_EVENT_FINISHED, &(SysEvt_EventFinished){ GAME_EVENT_KILL_MONSTER });
   }
 }
 

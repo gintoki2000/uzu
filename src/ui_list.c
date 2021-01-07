@@ -39,6 +39,12 @@ static void process_key_input()
   if (key_just_pressed(KEY_B))
   {
     ui_list_close();
+    for (int i = 0; i < _cnt; ++i)
+    {
+      free(_items[i]);
+      _items[i] = NULL;
+    }
+    _cnt = 0;
   }
 
   if (key_just_pressed(KEY_A))
@@ -47,18 +53,19 @@ static void process_key_input()
 
     if (_callback[UI_LIST_ON_SELECT].func != NULL)
       INVOKE_CALLBACK(_callback[UI_LIST_ON_SELECT], void, _items[_selected]);
+
+    for (int i = 0; i < _cnt; ++i)
+    {
+      free(_items[i]);
+      _items[i] = NULL;
+    }
+    _cnt = 0;
   }
 }
 
 void ui_list_display(const char** items, u32 cnt)
 {
   _visible = TRUE;
-
-  for (int i = 0; i < _cnt; ++i)
-  {
-    free(_items[i]);
-    _items[i] = NULL;
-  }
 
   _cnt = min(cnt, UI_LIST_MAX_ITEMS);
 
@@ -106,9 +113,6 @@ void ui_list_close()
   {
     keybroad_pop_state();
     _visible = FALSE;
-
-    if (_callback[UI_LIST_ON_CLOSE].func != NULL)
-      INVOKE_CALLBACK_NOARGS(_callback[UI_LIST_ON_CLOSE], void);
 
     Mix_PlayChannel(-1, get_sfx(SFX_INTERACTION), 0);
   }

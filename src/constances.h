@@ -18,4 +18,10 @@ extern const COLOR UI_COLOR_TEXT_SELECT;
 extern const COLOR COLOR_BLACK;
 extern const COLOR COLOR_WHITE;
 
+extern const char TEXT_COMMAND_TALK[];
+extern const char TEXT_COMMAND_SELL[];
+extern const char TEXT_COMMAND_BUY[];
+extern const char TEXT_COMMAND_EXAMINE[];
+extern const char TEXT_COMMAND_OPEN[];
+
 #endif // CONSTANCES_H

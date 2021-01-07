@@ -8,9 +8,9 @@ typedef struct
   Vec2i end;
 } PathFindingInput;
 
-typedef struct
+typedef struct PathFindingOutput
 {
-  int    cnt;
+  int    num_nodes;
   int    max_dist;
   Vec2i* nodes;
 } PathFindingOutput;

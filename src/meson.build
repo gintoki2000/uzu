@@ -19,6 +19,8 @@ source_files = files(
   'SDL_FontCache.c',
   'ui_list.c',
   'ui_helper.c',
+  'ui_msgbox.c',
+  'ui_quality.c',
   'constances.c',
   'json_helper.c',
   'struct_meta_data.c',

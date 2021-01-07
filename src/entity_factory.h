@@ -3,7 +3,6 @@
 #include <ecs/ecs.h>
 #include <toolbox/toolbox.h>
 #include "resources.h"
-#include "item.h"
 
 ecs_entity_t make_anime_sword(Ecs* ecs);
 ecs_entity_t make_axe(Ecs* ecs);

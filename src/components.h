@@ -3,59 +3,8 @@
 #include "SDL_FontCache.h"
 #include "behaviour_tree.h"
 #include "path_finder.h"
-#include <ecs/ecs.h>
-#include <item.h>
 #include <toolbox/toolbox.h>
-
-typedef enum
-{
-  NONE,
-  UP,
-  DOWN,
-  LEFT,
-  RIGHT
-} Direction;
-
-typedef enum
-{
-  CHARACTER_ACTION_NONE,
-  CHARACTER_ACTION_REGULAR_ATK,
-  CHARACTER_ACTION_SPECIAL_ATK,
-} CharacterAction;
-
-enum
-{
-  CATEGORY_PLAYER,      // 0
-  CATEGORY_PROJECTILE,  // 1
-  CATEGORY_ENEMY,       // 2
-  CATEGORY_WEAPON,      // 3
-  CATEGORY_ITEM,        // 4
-  CATEGORY_LADDER,      // 5
-  CATEGORY_INTERACABLE, // 6
-  NUM_CATEGORIES,
-};
-
-typedef enum
-{
-  DAMAGE_TYPE_STRIKE,
-  DAMAGE_TYPE_THUST,
-  DAMAGE_TYPE_FIRE,
-  DAMAGE_TYPE_LIGHTNING,
-} DamageType;
-
-typedef enum
-{
-  ENEMY_TYPE_HUGE_DEMON,
-  ENEMY_TYPE_CHORT,
-} EnemyType;
-
-typedef enum
-{
-  ANIM_STATE_IDLE,
-  ANIM_STATE_RUN,
-  ANIM_STATE_HIT,
-  NUM_ANIM_STATES,
-} AnimationState;
+#include <types.h>
 
 typedef enum
 {
@@ -95,6 +44,7 @@ typedef enum
   INTERACTABLE,
   TEXT,
   DIALOGUE,
+  MERCHANT,
   NUM_COMPONENTS
 } ComponentId;
 
@@ -280,10 +230,12 @@ typedef struct
 //** BT Vars
 
 typedef Vec2 Destination;
-typedef struct
+
+#define PATH_MAX_NUM_NODES 100
+typedef struct Path
 {
-  Vec2i nodes[100];
-  int   cnt;
+  Vec2i nodes[PATH_MAX_NUM_NODES];
+  int   num_nodes;
   int   curr;
 } Path;
 
@@ -309,16 +261,25 @@ typedef struct
   FONT* font;
 } Text;
 
-typedef struct
+#define INTERACTABLE_MAX_COMMANDS 5
+typedef struct Interatcable
 {
-  char text[5][10];
-  int  cnt;
+  cstr_t commands[INTERACTABLE_MAX_COMMANDS];
+  int    num_commands;
 } Interactable;
 
 typedef struct
 {
   int conversation_id;
 } Dialogue;
+
+#define MERCHANT_MAX_PAYLOADS 100
+#define MERCHANT_INIFINTE -1
+typedef struct Merchant
+{
+  ItemPayload payloads[MERCHANT_MAX_PAYLOADS];
+  u32         num_payloads;
+} Merchant;
 
 Animation*
 animation_init(Animation* anim, SDL_Texture* tex, u32 x, u32 y, u32 row, u32 col, u32 sw, u32 sh);
@@ -344,8 +305,5 @@ void name_fini(Name* name);
 
 void text_init(Text* text, const char* value, FONT* font, COLOR color);
 void text_fini(Text* text);
-
-void interacable_set_cmd(Interactable* interactable, int index, const char* cmd);
-
 
 #endif // COMPONENTS_H

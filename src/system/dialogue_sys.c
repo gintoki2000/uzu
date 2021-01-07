@@ -33,7 +33,7 @@ static void process_key_input(void);
 static void display_responses(void);
 
 //<-------------------------------------event callbacks---------------------------------->//
-static void on_exec_interaction_cmd(pointer_t arg, const SysEvt_ExecInteractionCmd* event);
+static void on_command_selected(pointer_t arg, const SysEvt_CommandSelected* event);
 static void on_list_selected(pointer_t arg, const char* item);
 
 //<======================================================================================>//
@@ -83,8 +83,8 @@ static void next_sentence(void)
 static void end_conversation(const char* response)
 {
   keybroad_pop_state();
-  mediator_broadcast(SYS_SIG_FINISH_CONVERSATION,
-                     &(SysEvt_FinishConversation){
+  mediator_broadcast(SYS_SIG_CONVERSATION_FINISHED,
+                     &(SysEvt_ConversationFinished){
                          .npc               = _npc,
                          .npc_name          = _npc_name,
                          .conversation_name = _conversation->name,
@@ -117,10 +117,10 @@ static void display_responses(void)
   }
 }
 
-static void on_exec_interaction_cmd(pointer_t arg, const SysEvt_ExecInteractionCmd* event)
+static void on_command_selected(pointer_t arg, const SysEvt_CommandSelected* event)
 {
   (void)arg;
-  if (strcmp(event->cmd, "TALK") == 0)
+  if (strcmp(event->cmd, TEXT_COMMAND_TALK) == 0)
   {
     begin_conversation(event->entity);
   }
@@ -135,7 +135,7 @@ static void on_list_selected(pointer_t arg, const char* item)
 void dialogue_system_init()
 {
   queue_init(&_queue, 32);
-  mediator_connect(SYS_SIG_EXEC_INTERACTION_CMD, NULL, SLOT(on_exec_interaction_cmd));
+  mediator_connect(SYS_SIG_COMANND_SELECTED, NULL, SLOT(on_command_selected));
   _font = get_font(FONT_ITEM_PICKED_UP);
 }
 

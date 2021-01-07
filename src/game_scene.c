@@ -8,6 +8,8 @@
 #include "resources.h"
 #include "scene.h"
 #include "ui_list.h"
+#include "ui_msgbox.h"
+#include "ui_quality.h"
 #include "utils.h"
 
 #include "ecs/ecs.h"
@@ -31,6 +33,7 @@
 #include "system/late_destroying_sys.h"
 #include "system/life_span_sys.h"
 #include "system/mediator.h"
+#include "system/merchant_sys.h"
 #include "system/motion_sys.h"
 #include "system/pickup_sys.h"
 #include "system/player_ctl_sys.h"
@@ -100,6 +103,7 @@ static void on_load()
   collision_manager_system_init();
   dialogue_system_init();
   game_event_init();
+  merchant_system_init();
 
   mediator_connect(SYS_SIG_HIT_LADDER, NULL, SLOT(on_player_hit_ladder));
   mediator_connect(SYS_SIG_ENTITY_DIED, NULL, SLOT(on_entity_died));
@@ -181,6 +185,9 @@ static void on_update()
     ui_list_draw();
     dialogue_system_update();
     inventory_draw();
+    merchant_system_update();
+    ui_msgbox_draw();
+    ui_quality_draw();
 
 #if 0
     // render debug

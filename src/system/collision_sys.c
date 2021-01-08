@@ -1,9 +1,8 @@
 #include "collision_sys.h"
-#include "mediator.h"
-
 #include <components.h>
 #include <game_scene.h>
 #include <toolbox/toolbox.h>
+#include "event_messaging_sys.h"
 
 #define BUFF_SIZE 300
 
@@ -179,8 +178,8 @@ static void narrow_phase(Ecs* ecs)
       get_bounding_rect(&r2, hitbox2, transform2);
       if (rect_has_intersection(&r1, &r2))
       {
-        mediator_broadcast(SYS_SIG_COLLISION,
-                           &(SysEvt_Collision){
+        ems_broadcast(MSG_COLLISION,
+                           &(MSG_Collision){
                                _pair_buff[i].e1,
                                _pair_buff[i].e2,
                            });

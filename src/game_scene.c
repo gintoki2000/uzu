@@ -32,7 +32,6 @@
 #include "system/interaction_system.h"
 #include "system/late_destroying_sys.h"
 #include "system/life_span_sys.h"
-#include "system/mediator.h"
 #include "system/merchant_sys.h"
 #include "system/motion_sys.h"
 #include "system/pickup_sys.h"
@@ -55,14 +54,14 @@
 #include <json-c/json.h>
 
 #include "json_helper.h"
+#include "system/event_messaging_sys.h"
 
 static void on_load(void);
 static void on_unload(void);
 static void on_event(const SDL_Event* evt);
 static void on_update();
-static void on_player_hit_ladder(pointer_t arg, const SysEvt_HitLadder* event);
-static void on_entity_died(pointer_t arg, const SysEvt_EntityDied* event);
-static void emit_signal(int sig_id, const pointer_t event);
+static void on_player_hit_ladder(pointer_t arg, const MSG_HitLadder* event);
+static void on_entity_died(pointer_t arg, const MSG_EntityDied* event);
 static void load_level(const char* filename, BOOL spawn_player);
 static void unload_current_level(void);
 
@@ -91,10 +90,9 @@ static BOOL        _paused;
 
 static void on_load()
 {
-  _dispatcher = dispatcher_new(GAME_SCENE_SIG_CNT);
-  g_ecs       = ecs_new(g_comp_types, NUM_COMPONENTS);
+  g_ecs = ecs_new(g_comp_types, NUM_COMPONENTS);
 
-  mediator_init();
+  ems_init();
   collision_system_init();
   health_system_init();
   drop_system_init();
@@ -105,8 +103,8 @@ static void on_load()
   game_event_init();
   merchant_system_init();
 
-  mediator_connect(SYS_SIG_HIT_LADDER, NULL, SLOT(on_player_hit_ladder));
-  mediator_connect(SYS_SIG_ENTITY_DIED, NULL, SLOT(on_entity_died));
+  ems_connect(MSG_HIT_LADDER, NULL, on_player_hit_ladder);
+  ems_connect(MSG_ENTITY_DIED, NULL, on_entity_died);
 
   keybroad_push_state(player_controller_system_update);
 
@@ -117,11 +115,10 @@ static void on_load()
 
 static void on_unload()
 {
-  emit_signal(GAME_SCENE_UNLOAD, NULL);
   dialogue_system_fini();
   ecs_del(g_ecs);
   dispatcher_destroy(_dispatcher);
-  mediator_fini();
+  ems_fini();
 
   g_ecs       = NULL;
   _dispatcher = NULL;
@@ -203,7 +200,7 @@ static void on_update()
   }
 }
 
-static void on_player_hit_ladder(pointer_t arg, const SysEvt_HitLadder* event)
+static void on_player_hit_ladder(pointer_t arg, const MSG_HitLadder* event)
 {
   (void)arg;
 
@@ -220,7 +217,7 @@ static void on_player_hit_ladder(pointer_t arg, const SysEvt_HitLadder* event)
   strcpy(_spwan_location, lsw->dest);
 }
 
-static void on_entity_died(pointer_t arg, const SysEvt_EntityDied* event)
+static void on_entity_died(pointer_t arg, const MSG_EntityDied* event)
 {
   (void)arg;
   if (ecs_get(g_ecs, event->entity, PLAYER_TAG))
@@ -235,18 +232,13 @@ static void cb_clear_world(pointer_t arg, Ecs* ecs, ecs_entity_t entity)
   ecs_destroy(ecs, entity);
 }
 
-static void emit_signal(int sig_id, const pointer_t event)
-{
-  dispatcher_emit(_dispatcher, sig_id, event);
-}
-
 static void load_level(const char* file, BOOL spawn_player)
 {
   json_object* json_map = NULL;
-  emit_signal(GAME_SCENE_SIG_MAP_LOADED, NULL);
   if ((json_map = load_json_from_file(file)) != NULL)
   {
     parse(json_map, spawn_player);
+    ems_broadcast(MSG_GAME_SCENE_LOADED, NULL);
     json_object_put(json_map);
   }
 }
@@ -386,11 +378,6 @@ static int parse(const json_object* map_json_obj, BOOL spawn_player)
     parse_layer(layer_json_obj, spawn_player);
   }
   return 0;
-}
-
-void game_scene_connect_sig(int sig_id, slot_t slot, pointer_t arg)
-{
-  dispatcher_connect(_dispatcher, sig_id, arg, slot);
 }
 
 void game_scene_pause()

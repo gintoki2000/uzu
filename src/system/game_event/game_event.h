@@ -9,5 +9,6 @@ typedef enum
 
 void game_event_init(void);
 void game_event_fini(void);
+void notify_game_event_is_finished(GameEventCode event_code);
 
 #endif //GAME_EVENT_H

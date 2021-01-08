@@ -3,7 +3,7 @@
 #include "constances.h"
 #include "ecs/ecs.h"
 #include "engine/keyboard.h"
-#include "mediator.h"
+#include "event_messaging_sys.h"
 #include "resources.h"
 #include "ui_helper.h"
 #include "ui_list.h"
@@ -33,7 +33,7 @@ static void process_key_input(void);
 static void display_responses(void);
 
 //<-------------------------------------event callbacks---------------------------------->//
-static void on_command_selected(pointer_t arg, const SysEvt_CommandSelected* event);
+static void on_command_selected(pointer_t arg, const MSG_CommandSelected* event);
 static void on_list_selected(pointer_t arg, const char* item);
 
 //<======================================================================================>//
@@ -83,8 +83,8 @@ static void next_sentence(void)
 static void end_conversation(const char* response)
 {
   keybroad_pop_state();
-  mediator_broadcast(SYS_SIG_CONVERSATION_FINISHED,
-                     &(SysEvt_ConversationFinished){
+  ems_broadcast(MSG_CONVERSATION_FINISHED,
+                     &(MSG_ConversationFinished){
                          .npc               = _npc,
                          .npc_name          = _npc_name,
                          .conversation_name = _conversation->name,
@@ -117,7 +117,7 @@ static void display_responses(void)
   }
 }
 
-static void on_command_selected(pointer_t arg, const SysEvt_CommandSelected* event)
+static void on_command_selected(pointer_t arg, const MSG_CommandSelected* event)
 {
   (void)arg;
   if (strcmp(event->cmd, TEXT_COMMAND_TALK) == 0)
@@ -135,7 +135,7 @@ static void on_list_selected(pointer_t arg, const char* item)
 void dialogue_system_init()
 {
   queue_init(&_queue, 32);
-  mediator_connect(SYS_SIG_COMANND_SELECTED, NULL, SLOT(on_command_selected));
+  ems_connect(MSG_COMANND_SELECTED, NULL, on_command_selected);
   _font = get_font(FONT_ITEM_PICKED_UP);
 }
 

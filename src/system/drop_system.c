@@ -1,8 +1,8 @@
 #include "drop_system.h"
-#include "mediator.h"
 #include <components.h>
 #include <entity_factory.h>
 #include <types.h>
+#include "event_messaging_sys.h"
 
 static ecs_entity_t (*create_fn_tbl[NUM_ITEM_TYPES])(Ecs*, Vec2) = {
   [ITEM_TYPE_RED_FLASK]     = make_red_flask,
@@ -12,7 +12,7 @@ static ecs_entity_t (*create_fn_tbl[NUM_ITEM_TYPES])(Ecs*, Vec2) = {
 
 extern Ecs* g_ecs;
 
-static void on_entity_died(void* arg, const SysEvt_EntityDied* event)
+static void on_entity_died(void* arg, const MSG_EntityDied* event)
 {
   (void)arg;
   Drop*      drop;
@@ -37,5 +37,5 @@ static void on_entity_died(void* arg, const SysEvt_EntityDied* event)
 
 void drop_system_init()
 {
-  mediator_connect(SYS_SIG_ENTITY_DIED, NULL, SLOT(on_entity_died));
+  ems_connect(MSG_ENTITY_DIED, NULL, on_entity_died);
 }

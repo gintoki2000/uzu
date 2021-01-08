@@ -1,10 +1,9 @@
 #include "tile_collision_sys.h"
-#include "mediator.h"
-
 #include <components.h>
 #include <constances.h>
 #include <map.h>
 #include <toolbox/toolbox.h>
+#include "event_messaging_sys.h"
 
 extern Ecs* g_ecs;
 
@@ -54,8 +53,8 @@ void tile_collision_system_update()
             transform->pos = transform->prev_pos;
           else if (tile_id >= 11 && tile_id <= 13)
           {
-            mediator_broadcast(SYS_SIG_HIT_TRAP,
-                          &(SysEvt_EntityHitTrap){
+            ems_broadcast(MSG_HIT_TRAP,
+                          &(MSG_EntityHitTrap){
                               .row    = row,
                               .col    = col,
                               .entity = entities[i],

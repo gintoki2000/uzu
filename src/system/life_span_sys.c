@@ -1,7 +1,7 @@
 #include "life_span_sys.h"
 
-#include "mediator.h"
 #include <components.h>
+#include "event_messaging_sys.h"
 
 extern Ecs* g_ecs;
 
@@ -18,7 +18,7 @@ void life_span_system_update()
     if (--life_span[i].remaining == 0)
     {
       INFO("e"ECS_ENT_FMT_PATTERN" finished life span\n", ECS_ENT_FMT_VARS(entities[i]));
-      mediator_broadcast(SYS_SIG_LIFE_SPAN_FINISHED, &(SysEvt_LifeSpanFinished){ entities[i] });
+      ems_broadcast(MSG_LIFE_SPAN_FINISHED, &(MSG_LifeSpanFinished){ entities[i] });
       ecs_destroy(g_ecs, entities[i]);
     }
   }

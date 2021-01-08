@@ -1,21 +1,23 @@
+#include "../event_messaging_sys.h"
 #include "game_event.h"
 #include "game_scene.h"
-#include <resources.h>
 #include <components.h>
 #include <inventory.h>
-#include <system/mediator.h>
-#include <utils.h>
+#include <resources.h>
 #include <ui_msgbox.h>
+#include <utils.h>
 
 static u8 _state; // INACTIVE, INPROGRESS, FINISHED
 static u8 _killed_monster_cnt;
 
 extern Ecs* g_ecs;
 
+
+
 //<--------------------------event callback----------------------------->//
-static void on_entity_died(pointer_t arg, const SysEvt_EntityDied* event);
-static void on_game_event_finished(pointer_t arg, const SysEvt_EventFinished* event);
-static void on_conversation_finished(pointer_t arg, const SysEvt_ConversationFinished* event);
+static void on_entity_died(pointer_t arg, const MSG_EntityDied* event);
+static void on_game_event_finished(pointer_t arg, const MSG_EventFinished* event);
+static void on_conversation_finished(pointer_t arg, const MSG_ConversationFinished* event);
 static void on_game_scene_unload(pointer_t arg, const pointer_t event);
 //<=====================================================================>//
 
@@ -40,11 +42,11 @@ void GE_kill_monsters_init(void)
     _killed_monster_cnt = 0;
   }
 
-  mediator_connect(SYS_SIG_EVENT_FINISHED, NULL, SLOT(on_game_event_finished));
-  game_scene_connect_sig(GAME_SCENE_UNLOAD, on_game_scene_unload, NULL);
+  ems_connect(MSG_EVENT_FINISHED, NULL, on_game_event_finished);
+  ems_connect(MSG_GAME_SCENE_UNLOAD, NULL, on_game_scene_unload);
 }
 
-static void on_entity_died(pointer_t arg, const SysEvt_EntityDied* event)
+static void on_entity_died(pointer_t arg, const MSG_EntityDied* event)
 {
   (void)arg;
   if (ecs_has(g_ecs, event->entity, ENEMY_TAG))
@@ -62,23 +64,23 @@ static void on_entity_died(pointer_t arg, const SysEvt_EntityDied* event)
       dialogue                  = ecs_get(g_ecs, luca, DIALOGUE);
       dialogue->conversation_id = CONVERSATION_DEMO3;
 
-      mediator_disconnect(SYS_SIG_ENTITY_DIED, (pointer_t)on_entity_died);
-      mediator_connect(SYS_SIG_CONVERSATION_FINISHED, NULL, SLOT(on_conversation_finished));
+      ems_disconnect(MSG_ENTITY_DIED, (pointer_t)on_entity_died);
+      ems_connect(MSG_CONVERSATION_FINISHED, NULL, on_conversation_finished);
     }
   }
 }
 
-static void on_game_event_finished(pointer_t arg, const SysEvt_EventFinished* event)
+static void on_game_event_finished(pointer_t arg, const MSG_EventFinished* event)
 {
   (void)arg;
   if (event->event_code == GAME_EVENT_GET_WEAPON)
   {
-    mediator_disconnect(SYS_SIG_EVENT_FINISHED, (pointer_t)on_game_event_finished);
-    mediator_connect(SYS_SIG_ENTITY_DIED, NULL, SLOT(on_entity_died));
+    ems_disconnect(MSG_EVENT_FINISHED, (pointer_t)on_game_event_finished);
+    ems_connect(MSG_ENTITY_DIED, NULL, on_entity_died);
   }
 }
 
-static void on_conversation_finished(pointer_t arg, const SysEvt_ConversationFinished* event)
+static void on_conversation_finished(pointer_t arg, const MSG_ConversationFinished* event)
 {
   (void)arg;
 
@@ -86,8 +88,8 @@ static void on_conversation_finished(pointer_t arg, const SysEvt_ConversationFin
   {
     add_to_inv(ITEM_TYPE_BIG_RED_FLASK);
     ui_msgbox_display("you got x1 BIG RED FLASK");
-    mediator_disconnect(SYS_SIG_CONVERSATION_FINISHED, (pointer_t)on_conversation_finished);
-    mediator_broadcast(SYS_SIG_EVENT_FINISHED, &(SysEvt_EventFinished){ GAME_EVENT_KILL_MONSTER });
+    ems_disconnect(MSG_CONVERSATION_FINISHED, (pointer_t)on_conversation_finished);
+    notify_game_event_is_finished(GAME_EVENT_KILL_MONSTER);
   }
 }
 

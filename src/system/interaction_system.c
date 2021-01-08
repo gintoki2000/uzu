@@ -1,12 +1,12 @@
 #include "interaction_system.h"
 #include "collision_sys.h"
-#include "mediator.h"
 #include <components.h>
 #include <constances.h>
 #include <ecs/ecs.h>
 #include <resources.h>
 #include <ui_list.h>
 #include <utils.h>
+#include "event_messaging_sys.h"
 
 #define INTERACTABLE_DISTANCE TILE_SIZE * 4
 #define POINTER_DOWN_WIDTH 6

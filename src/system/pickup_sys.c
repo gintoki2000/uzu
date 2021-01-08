@@ -1,15 +1,14 @@
 #include "pickup_sys.h"
-#include "mediator.h"
-
 #include "components.h"
 #include "entity_factory.h"
+#include "event_messaging_sys.h"
 #include "game_scene.h"
 #include "inventory.h"
 #include "resources.h"
 
 extern Ecs* g_ecs;
 
-static void on_player_hit_item(void* arg, const SysEvt_PlayerHitItem* event)
+static void on_player_hit_item(void* arg, const MSG_PlayerHitItem* event)
 {
   (void)arg;
   ItemTag*   item_tag;
@@ -30,5 +29,5 @@ static void on_player_hit_item(void* arg, const SysEvt_PlayerHitItem* event)
 
 void pickup_system_init()
 {
-  mediator_connect(SYS_SIG_PLAYER_HIT_ITEM, NULL, SLOT(on_player_hit_item));
+  ems_connect(MSG_PLAYER_HIT_ITEM, NULL, on_player_hit_item);
 }

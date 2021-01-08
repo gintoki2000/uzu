@@ -2,13 +2,13 @@
 #include "constances.h"
 #include "engine/keyboard.h"
 #include "resources.h"
-#include "system/mediator.h"
 #include "ui_quality.h"
 #include <components.h>
 #include <ecs/ecs.h>
 #include <inventory.h>
 #include <types.h>
 #include <ui_helper.h>
+#include "event_messaging_sys.h"
 
 extern Ecs*          g_ecs;
 extern SDL_Renderer* g_renderer;
@@ -23,7 +23,7 @@ static ecs_entity_t _merchant = ECS_NULL_ENT;
 
 //<-------------------------event callback------------------------>//
 
-static void on_command_selected(pointer_t arg, const SysEvt_CommandSelected* event);
+static void on_command_selected(pointer_t arg, const MSG_CommandSelected* event);
 static void on_quality_selected(pointer_t arg, u32 value);
 
 //<===============================================================>//
@@ -34,7 +34,7 @@ static void process_key_input();
 
 void merchant_system_init()
 {
-  mediator_connect(SYS_SIG_COMANND_SELECTED, NULL, (slot_t)on_command_selected);
+  ems_connect(MSG_COMANND_SELECTED, NULL, (slot_t)on_command_selected);
 }
 
 void merchant_system_update()
@@ -117,7 +117,7 @@ static void draw_item(const ItemPayload* payload, s32 x, s32 y, BOOL selected)
   }
 }
 
-static void on_command_selected(pointer_t arg, const SysEvt_CommandSelected* event)
+static void on_command_selected(pointer_t arg, const MSG_CommandSelected* event)
 {
   (void)arg;
   if (strcmp(event->cmd, "BUY") == 0)

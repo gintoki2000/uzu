@@ -1,6 +1,6 @@
 #include "swing.h"
-#include "../mediator.h"
 #include <components.h>
+#include "../event_messaging_sys.h"
 
 #define SWINGING_SYSTEM_STEP 8
 #define SWINGING_SYSTEM_INTERVAL 1

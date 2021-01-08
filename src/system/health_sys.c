@@ -1,12 +1,12 @@
 #include "health_sys.h"
 
 #include "entity_factory.h"
-#include "mediator.h"
+#include "event_messaging_sys.h"
 #include <components.h>
 
 extern Ecs* g_ecs;
 
-static void on_deal_damage(void* arg, const SysEvt_DealDamage* event)
+static void on_deal_damage(void* arg, const MSG_DealDamage* event)
 {
   (void)arg;
   Health* health;
@@ -21,26 +21,26 @@ static void on_deal_damage(void* arg, const SysEvt_DealDamage* event)
     if (health->hit_points <= 0)
     {
       health->hit_points = 0;
-      mediator_broadcast(SYS_SIG_ENTITY_DIED, &(SysEvt_EntityDied){ event->receiver });
+      ems_broadcast(MSG_ENTITY_DIED, &(MSG_EntityDied){ event->receiver });
       ecs_add(g_ecs, event->receiver, TAG_TO_BE_DESTROYED);
     }
     else
     {
       Invulnerable* invulnerable;
-      mediator_broadcast(SYS_SIG_GET_DAMAGED,
-                         &(SysEvt_GetDamaged){
-                             .dealer  = event->dealer,
-                             .damagee = event->receiver,
-                             .damage  = event->damage,
-                             .type    = event->type,
-                         });
+      ems_broadcast(MSG_GET_DAMAGED,
+                    &(MSG_GetDamaged){
+                        .dealer  = event->dealer,
+                        .damagee = event->receiver,
+                        .damage  = event->damage,
+                        .type    = event->type,
+                    });
       invulnerable            = ecs_add(g_ecs, event->receiver, INVULNERABLE);
       invulnerable->remaining = 10;
     }
   }
 }
 
-static void on_get_damaged(void* arg, const SysEvt_GetDamaged* event)
+static void on_get_damaged(void* arg, const MSG_GetDamaged* event)
 {
   (void)arg;
   Transform* transform;
@@ -55,8 +55,8 @@ static void on_get_damaged(void* arg, const SysEvt_GetDamaged* event)
 
 void health_system_init()
 {
-  mediator_connect(SYS_SIG_DEAL_DAMAGE, NULL, SLOT(on_deal_damage));
-  mediator_connect(SYS_SIG_GET_DAMAGED, NULL, SLOT(on_get_damaged));
+  ems_connect(MSG_DEAL_DAMAGE, NULL, on_deal_damage);
+  ems_connect(MSG_GET_DAMAGED, NULL, on_get_damaged);
 }
 
 void health_system_update()

@@ -2,13 +2,13 @@
 #include "collision_sys.h"
 #include "constances.h"
 #include "inventory.h"
-#include "mediator.h"
 #include "ui_list.h"
 
 #include <components.h>
 #include <ecs/ecs.h>
 #include <engine/keyboard.h>
 #include <utils.h>
+#include "event_messaging_sys.h"
 
 extern Ecs* g_ecs;
 
@@ -31,8 +31,8 @@ static void on_list_select(pointer_t arg, const char* item)
   (void)arg;
   INFO("you selected %s\n", item);
 
-  mediator_broadcast(SYS_SIG_COMANND_SELECTED,
-                     &(SysEvt_CommandSelected){
+  ems_broadcast(MSG_COMANND_SELECTED,
+                     &(MSG_CommandSelected){
                          g_curr_iteractable_entity,
                          item,
                      });
@@ -93,7 +93,7 @@ static void begin_interact(ecs_entity_t entity)
   Interactable* interactable;
   INFO("begin interact with e" ECS_ENT_FMT_PATTERN "\n", ECS_ENT_FMT_VARS(entity));
 
-  mediator_broadcast(SYS_SIG_BEGIN_INTERACTION, &(SysEvt_BeginInteraction){ entity });
+  ems_broadcast(MSG_BEGIN_INTERACTION, &(MSG_BeginInteraction){ entity });
 
   interactable = ecs_get(g_ecs, entity, INTERACTABLE);
 

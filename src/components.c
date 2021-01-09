@@ -102,8 +102,8 @@ void hitbox_init(HitBox* h)
 
 void level_switcher_init(LevelSwitcher* sw, const char* level, const char* dest)
 {
-  sw->level = strdup(level);
-  sw->dest  = strdup(dest);
+  sw->level = SDL_strdup(level);
+  sw->dest  = SDL_strdup(dest);
 }
 
 void level_switcher_fini(LevelSwitcher* sw)
@@ -119,12 +119,12 @@ void name_fini(Name* name)
 
 void name_init(Name* name, const char* value)
 {
-  name->value = strdup(value);
+  name->value = SDL_strdup(value);
 }
 
 void text_init(Text* text, const char* value, FONT* font, COLOR color)
 {
-  text->value   = strdup(value);
+  text->value   = SDL_strdup(value);
   text->opacity = 0xff;
   text->color   = color;
   text->font    = font;

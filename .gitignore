@@ -5,3 +5,5 @@ dist/
 .cproject
 .project
 .settings/
+
+.vscode/c_cpp_properties.json

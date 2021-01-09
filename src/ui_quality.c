@@ -68,7 +68,7 @@ static void process_key_input()
 void ui_quality_display(const char* title, u32 initial_val, u32 min_val, u32 max_val)
 {
   _visible = TRUE;
-  _title   = strdup(title);
+  _title   = SDL_strdup(title);
   _val     = initial_val;
   _max_val = max_val;
   _min_val = min_val;

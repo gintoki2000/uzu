@@ -40,7 +40,7 @@ static void json_to_int(void* field, struct json_object* json)
 
 static void json_to_string(void* field, struct json_object* json)
 {
-  *((char**)field) = json != NULL ? strdup(json_object_get_string(json)) : NULL;
+  *((char**)field) = json != NULL ? SDL_strdup(json_object_get_string(json)) : NULL;
 }
 
 static void json_to_string_array(void* field, struct json_object* json)
@@ -60,7 +60,7 @@ static void json_to_string_array(void* field, struct json_object* json)
   for (int i = 0; i < cnt; ++i)
   {
     str = json_object_array_get_idx_as_string(json, i);
-    ptr_array_add(array, strdup(str));
+    ptr_array_add(array, SDL_strdup(str));
   }
   *((PtrArray**)field) = array;
 }

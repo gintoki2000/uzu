@@ -71,7 +71,7 @@ void ui_list_display(const char** items, u32 cnt)
 
   for (s32 i = 0; i < _cnt; ++i)
   {
-    _items[i] = strdup(items[i]);
+    _items[i] = SDL_strdup(items[i]);
   }
 
   _selected = 0;

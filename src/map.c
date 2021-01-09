@@ -40,32 +40,32 @@ static struct
 
 static AnimatedTile _animated_tile_list[ANIMATED_TILE_CNT] = {
   [ANIMATED_TILE_TRAP] =
-      (AnimatedTile){
+      {
           .tiles    = { 10, 11, 12, 13 },
           .cnt      = 4,
           .duration = 40,
       },
   [ANIMATED_TILE_BLUE_FOUNTAIN_MID] =
-      (AnimatedTile){
+      {
           .tiles    = { 35, 36, 37 },
           .cnt      = 3,
           .duration = 20,
       },
   [ANIMATED_TILE_BLUE_FOUNTAIN_BASIN] =
-      (AnimatedTile){
+      {
           .tiles    = { 29, 30, 31 },
           .cnt      = 3,
           .duration = 20,
       },
   [ANIMATED_TILE_RED_FOUNTAIN_MID] =
-      (AnimatedTile){
+      {
           .tiles    = { 38, 39, 40 },
           .cnt      = 3,
           .duration = 20,
 
       },
   [ANIMATED_TILE_RED_FOUNTAIN_BASIN] =
-      (AnimatedTile){
+      {
           .tiles    = { 32, 33, 34 },
           .cnt      = 3,
           .duration = 20,

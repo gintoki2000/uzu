@@ -84,7 +84,7 @@ typedef struct
 
 #define SWAP(__a, __b)                                                                             \
   ({                                                                                               \
-    typeof(__a) __tmp = (__a);                                                                     \
+    __auto_type __tmp = (__a);                                                                     \
     __a               = __b;                                                                       \
     __b               = __tmp;                                                                     \
   })

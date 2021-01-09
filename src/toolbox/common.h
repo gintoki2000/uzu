@@ -36,6 +36,8 @@ typedef struct
 #define COLOR SDL_Color
 #define POINT SDL_Point
 #define FONT FC_Font
+#define RENDERER SDL_Renderer
+#define TEXTURE SDL_Texture
 
 #define FLIP_TO_SIGN(__f) (__f == SDL_FLIP_NONE ? 1 : -1)
 

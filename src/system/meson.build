@@ -1,5 +1,5 @@
 system_source_files = files(
-  './mediator.c',
+  './event_messaging_sys.c',
 
   './motion_sys.c',
   './rendering_sys.c',

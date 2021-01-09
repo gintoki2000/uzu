@@ -17,7 +17,7 @@
 
 ecs_entity_t make_anime_sword(Ecs* ecs)
 {
-  SDL_Texture* texture;
+  TEXTURE* texture;
   ecs_entity_t sword;
 
   /*component*/
@@ -51,7 +51,7 @@ ecs_entity_t make_anime_sword(Ecs* ecs)
 ecs_entity_t make_character(Ecs* ecs, Vec2 pos, TextureId texture_id)
 {
   ecs_entity_t entity;
-  SDL_Texture* texture;
+  TEXTURE* texture;
   Animation    anims[NUM_ANIM_STATES];
 
   /*components */
@@ -125,7 +125,7 @@ ecs_entity_t make_wizzard(Ecs* ecs, Vec2 pos)
 ecs_entity_t make_huge_demon(Ecs* ecs)
 {
   ecs_entity_t demon;
-  SDL_Texture* texture;
+  TEXTURE* texture;
   Animation    anims[NUM_ANIM_STATES];
 
   /*components */
@@ -214,7 +214,7 @@ ecs_entity_t make_huge_demon(Ecs* ecs)
 ecs_entity_t make_chort(Ecs* ecs, Vec2 pos)
 {
   ecs_entity_t entity;
-  SDL_Texture* texture;
+  TEXTURE* texture;
   Animation    anims[NUM_ANIM_STATES];
 
   /*components */
@@ -358,7 +358,7 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 pos)
 
 ecs_entity_t make_axe(Ecs* ecs)
 {
-  SDL_Texture* texture;
+  TEXTURE* texture;
   ecs_entity_t axe;
 
   /*component*/
@@ -384,7 +384,7 @@ ecs_entity_t make_cleaver(Ecs* ecs, u16 mask_bits)
 
   ecs_entity_t entity;
 
-  SDL_Texture* texture;
+  TEXTURE* texture;
 
   entity  = ecs_create(ecs);
   texture = get_texture(TEX_CLEAVER);
@@ -436,7 +436,7 @@ ecs_entity_t make_blood_stain_effect(Ecs* ecs, Vec2 pos)
   LifeSpan*  life_span;
 
   Animation    animation;
-  SDL_Texture* texture;
+  TEXTURE* texture;
   texture = get_texture(TEX_BLOOD);
   animation_init(&animation, texture, 0, 0, 1, 4, 16, 16);
 
@@ -464,7 +464,7 @@ ecs_entity_t make_bow(Ecs* ecs)
   Visual*    visual;
   Transform* transform;
 
-  SDL_Texture* texture;
+  TEXTURE* texture;
   texture = get_texture(TEX_BOW);
 
   bow = ecs_create(ecs);
@@ -481,7 +481,7 @@ ecs_entity_t make_bow(Ecs* ecs)
 
 ecs_entity_t make_arrow(Ecs* ecs, Vec2 pos, Vec2 vel)
 {
-  SDL_Texture* texture;
+  TEXTURE* texture;
   ecs_entity_t arrow;
 
   Transform*  transform;
@@ -523,7 +523,7 @@ ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
 {
   ecs_entity_t entity;
 
-  SDL_Texture* texture;
+  TEXTURE* texture;
 
   entity  = ecs_create(ecs);
   texture = get_texture(TEX_GOLDEN_SWORD);
@@ -579,7 +579,7 @@ ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
 ecs_entity_t make_golden_cross_hit_effect(Ecs* ecs, Vec2 pos)
 {
   ecs_entity_t entity;
-  SDL_Texture* texture;
+  TEXTURE* texture;
   Animation    animation;
 
   Transform* transform;
@@ -625,7 +625,7 @@ ecs_entity_t make_blue_flask(Ecs* ecs, Vec2 pos)
 ecs_entity_t make_flask_base(Ecs* ecs, TextureId texture_id, ItemTypeId item_type_id, Vec2 pos)
 {
   ecs_entity_t entity;
-  SDL_Texture* texture;
+  TEXTURE* texture;
 
   Visual*    visual;
   Transform* transform;
@@ -822,4 +822,20 @@ ecs_entity_t make_npc(Ecs* ecs, ecs_entity_t character_base)
 ecs_entity_t make_wizzard_npc(Ecs* ecs, Vec2 pos)
 {
   return make_npc(ecs, make_wizzard(ecs, pos));
+}
+
+ecs_entity_t make_chest(Ecs *ecs, Vec2 pos)
+{
+  ecs_entity_t entity;
+
+  TEXTURE* texture;
+  Animation animation[2];
+
+  Transform* transform;
+  Visual* visual;
+  Animator* animator;
+
+  texture = get_texture(TEX_CHEST);
+
+
 }

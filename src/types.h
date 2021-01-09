@@ -107,6 +107,21 @@ typedef struct
   u16        price;
 } ItemPayload;
 
+typedef enum
+{
+  ANIM_PLAY_MODE_NORMAL,
+  ANIM_PLAY_MODE_LOOP,
+} AnimationPlayMode;
+
+typedef struct
+{
+  u16         frame_duration;
+  u16         mode;
+  SpriteSheet sheet;
+} Animation;
+
+
+
 extern ItemType g_item_types[];
 
 void item_types_init(void);

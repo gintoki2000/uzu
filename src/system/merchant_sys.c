@@ -1,6 +1,7 @@
 #include "merchant_sys.h"
 #include "constances.h"
 #include "engine/keyboard.h"
+#include "event_messaging_sys.h"
 #include "resources.h"
 #include "ui_quality.h"
 #include <components.h>
@@ -8,7 +9,6 @@
 #include <inventory.h>
 #include <types.h>
 #include <ui_helper.h>
-#include "event_messaging_sys.h"
 
 extern Ecs*          g_ecs;
 extern SDL_Renderer* g_renderer;
@@ -90,7 +90,10 @@ static void draw_item(const ItemPayload* payload, s32 x, s32 y, BOOL selected)
 
   char name[MAX_LENGTH_OF_ITEM_NAME];
 
-  SDL_RenderCopy(g_renderer, item_type->sprite.tex, &item_type->sprite.rect, &dst);
+  SDL_RenderCopy(g_renderer,
+                 get_texture(item_type->sprite.texture_id),
+                 &item_type->sprite.rect,
+                 &dst);
 
   if (payload->available == MERCHANT_INIFINTE)
   {

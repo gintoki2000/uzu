@@ -86,7 +86,7 @@ static void on_conversation_finished(pointer_t arg, const MSG_ConversationFinish
 
   if (strcmp(event->conversation_name, "demo3") == 0)
   {
-    add_to_inv(ITEM_TYPE_BIG_RED_FLASK);
+    add_to_inv(ITEM_TYPE_BIG_RED_FLASK, 3);
     ui_msgbox_display("you got x1 BIG RED FLASK");
     ems_disconnect(MSG_CONVERSATION_FINISHED, (pointer_t)on_conversation_finished);
     notify_game_event_is_finished(GAME_EVENT_KILL_MONSTER);

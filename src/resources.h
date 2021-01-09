@@ -26,6 +26,7 @@ typedef enum
   TEX_WIZZARD,
   TEX_PONITER_DOWN,
   TEX_BLUE_FLASK,
+  TEX_CHEST,
   NUM_TEXS
 } TextureId;
 

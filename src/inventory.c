@@ -112,7 +112,7 @@ static void on_list_selected(pointer_t arg, const char* item)
   }
 }
 
-BOOL add_to_inv(ItemTypeId type_id)
+BOOL add_to_inv(ItemTypeId type_id, u8 quality)
 {
   ItemCategory cat   = g_item_types[type_id].category;
   Item*        items = _items[cat];
@@ -124,7 +124,7 @@ BOOL add_to_inv(ItemTypeId type_id)
     empty_slot = find_empty_slot();
     if (empty_slot != -1)
     {
-      items[empty_slot] = (Item){ .type_id = type_id, .num_items = 1 };
+      items[empty_slot] = (Item){ .type_id = type_id, .num_items = quality };
       return TRUE;
     }
     return FALSE;
@@ -133,7 +133,7 @@ BOOL add_to_inv(ItemTypeId type_id)
   {
     if (items[idx].num_items < ITEM_MAX_STACK)
     {
-      items[idx].num_items++;
+      items[idx].num_items = min(items[idx].num_items + quality, ITEM_MAX_STACK);
       return TRUE;
     }
     return FALSE;
@@ -163,8 +163,8 @@ void inventory_draw()
   RECT cell_rect;
   int  idx;
 
-  Item*  items = _items[_category];
-  Sprite sprite;
+  Item*     items = _items[_category];
+  ItemType* tp;
 
   for (int i = 0; i < INV_ROW; ++i)
   {
@@ -181,12 +181,16 @@ void inventory_draw()
                         i == _curr_row && j == _curr_col ? UI_COLOR_BORDER_SELECT
                                                          : UI_COLOR_BORDER);
 
-      idx    = i * INV_COL + j;
-      sprite = g_item_types[items[idx].type_id].sprite;
+      idx = i * INV_COL + j;
+
+      tp = &g_item_types[items[idx].type_id];
 
       if (items[idx].num_items > 0)
       {
-        SDL_RenderCopy(g_renderer, sprite.tex, &sprite.rect, &cell_rect);
+        SDL_RenderCopy(g_renderer,
+                       get_texture(tp->sprite.texture_id),
+                       &tp->sprite.rect,
+                       &cell_rect);
         FC_DrawColor(get_font(FONT_DAMAGE_INDICATOR),
                      g_renderer,
                      cell_rect.x + 3,

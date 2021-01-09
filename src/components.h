@@ -45,6 +45,7 @@ typedef enum
   TEXT,
   DIALOGUE,
   MERCHANT,
+  CHEST,
   NUM_COMPONENTS
 } ComponentId;
 
@@ -73,11 +74,6 @@ typedef struct
   u8               opacity;
 } Visual;
 
-typedef struct
-{
-  s32         frame_duration;
-  SpriteSheet sheet;
-} Animation;
 
 typedef struct
 {
@@ -280,6 +276,19 @@ typedef struct Merchant
   ItemPayload payloads[MERCHANT_MAX_PAYLOADS];
   u32         num_payloads;
 } Merchant;
+
+#define CHEST_MAX_ITEMS 5
+
+typedef enum {
+  CHEST_ANIM_CLOSE,
+  CHEST_ANIM_OPEN,
+} ChestAnimId;
+
+typedef struct
+{
+  Item items[CHEST_MAX_ITEMS];
+  u8   num_items;
+} Chest;
 
 Animation*
 animation_init(Animation* anim, SDL_Texture* tex, u32 x, u32 y, u32 row, u32 col, u32 sw, u32 sh);

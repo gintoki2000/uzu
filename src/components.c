@@ -47,7 +47,8 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
   [INTERACTABLE]               = { .size = sizeof(Interactable) },
   [DIALOGUE]                   = { .size = sizeof(Dialogue) },
   [ITEM_TAG]                   = { .size = sizeof(ItemTag) },
-  [MERCHANT]                   = { .size = sizeof(Merchant) }
+  [MERCHANT]                   = { .size = sizeof(Merchant) },
+  [CHEST]                      = ECS_TYPE(Chest)
 };
 
 Animation*

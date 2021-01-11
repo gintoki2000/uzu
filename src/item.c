@@ -14,6 +14,7 @@ ItemType g_item_types[NUM_ITEM_TYPES] = {
           .stackable   = TRUE,
           .category    = ITEM_CATEGORY_CONSUMABLE,
           .on_use      = red_flask_on_use,
+          .sprite      = {.texture_id = TEX_FLASK_RED, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_BIG_RED_FLASK] =
       {
@@ -22,6 +23,7 @@ ItemType g_item_types[NUM_ITEM_TYPES] = {
           .stackable   = TRUE,
           .category    = ITEM_CATEGORY_CONSUMABLE,
           .on_use      = big_red_flask_on_use,
+          .sprite      = {.texture_id = TEX_FLASK_RED_BIG, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_BLUE_FLASK] =
       {
@@ -30,6 +32,7 @@ ItemType g_item_types[NUM_ITEM_TYPES] = {
           .stackable   = TRUE,
           .category    = ITEM_CATEGORY_CONSUMABLE,
           .on_use      = blue_flask_on_use,
+          .sprite      = {.texture_id =  TEX_BLUE_FLASK, .rect = {0, 0, 16, 16}},
       },
 };
 
@@ -60,7 +63,4 @@ static void blue_flask_on_use(Ecs* ecs, ecs_entity_t entity)
 
 void item_types_init()
 {
-  sprite_init(&g_item_types[ITEM_TYPE_RED_FLASK].sprite, get_texture(TEX_FLASK_RED));
-  sprite_init(&g_item_types[ITEM_TYPE_BIG_RED_FLASK].sprite, get_texture(TEX_FLASK_RED_BIG));
-  sprite_init(&g_item_types[ITEM_TYPE_BLUE_FLASK].sprite, get_texture(TEX_BLUE_FLASK));
 }

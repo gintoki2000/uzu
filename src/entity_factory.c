@@ -17,7 +17,7 @@
 
 ecs_entity_t make_anime_sword(Ecs* ecs)
 {
-  TEXTURE* texture;
+  TEXTURE*     texture;
   ecs_entity_t sword;
 
   /*component*/
@@ -51,7 +51,7 @@ ecs_entity_t make_anime_sword(Ecs* ecs)
 ecs_entity_t make_character(Ecs* ecs, Vec2 pos, TextureId texture_id)
 {
   ecs_entity_t entity;
-  TEXTURE* texture;
+  TEXTURE*     texture;
   Animation    anims[NUM_ANIM_STATES];
 
   /*components */
@@ -125,7 +125,7 @@ ecs_entity_t make_wizzard(Ecs* ecs, Vec2 pos)
 ecs_entity_t make_huge_demon(Ecs* ecs)
 {
   ecs_entity_t demon;
-  TEXTURE* texture;
+  TEXTURE*     texture;
   Animation    anims[NUM_ANIM_STATES];
 
   /*components */
@@ -214,7 +214,7 @@ ecs_entity_t make_huge_demon(Ecs* ecs)
 ecs_entity_t make_chort(Ecs* ecs, Vec2 pos)
 {
   ecs_entity_t entity;
-  TEXTURE* texture;
+  TEXTURE*     texture;
   Animation    anims[NUM_ANIM_STATES];
 
   /*components */
@@ -358,7 +358,7 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 pos)
 
 ecs_entity_t make_axe(Ecs* ecs)
 {
-  TEXTURE* texture;
+  TEXTURE*     texture;
   ecs_entity_t axe;
 
   /*component*/
@@ -435,8 +435,8 @@ ecs_entity_t make_blood_stain_effect(Ecs* ecs, Vec2 pos)
   Transform* transform;
   LifeSpan*  life_span;
 
-  Animation    animation;
-  TEXTURE* texture;
+  Animation animation;
+  TEXTURE*  texture;
   texture = get_texture(TEX_BLOOD);
   animation_init(&animation, texture, 0, 0, 1, 4, 16, 16);
 
@@ -481,7 +481,7 @@ ecs_entity_t make_bow(Ecs* ecs)
 
 ecs_entity_t make_arrow(Ecs* ecs, Vec2 pos, Vec2 vel)
 {
-  TEXTURE* texture;
+  TEXTURE*     texture;
   ecs_entity_t arrow;
 
   Transform*  transform;
@@ -579,7 +579,7 @@ ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
 ecs_entity_t make_golden_cross_hit_effect(Ecs* ecs, Vec2 pos)
 {
   ecs_entity_t entity;
-  TEXTURE* texture;
+  TEXTURE*     texture;
   Animation    animation;
 
   Transform* transform;
@@ -625,7 +625,7 @@ ecs_entity_t make_blue_flask(Ecs* ecs, Vec2 pos)
 ecs_entity_t make_flask_base(Ecs* ecs, TextureId texture_id, ItemTypeId item_type_id, Vec2 pos)
 {
   ecs_entity_t entity;
-  TEXTURE* texture;
+  TEXTURE*     texture;
 
   Visual*    visual;
   Transform* transform;
@@ -803,11 +803,9 @@ ecs_entity_t make_npc(Ecs* ecs, ecs_entity_t character_base)
 
   merchant = ecs_add(ecs, character_base, MERCHANT);
 
-  ItemPayload payloads[] = {
-    { ITEM_TYPE_RED_FLASK, 10, 1 },  { ITEM_TYPE_BLUE_FLASK, MERCHANT_INIFINTE, 1 },
-    { ITEM_TYPE_BLUE_FLASK, MERCHANT_INIFINTE, 1 }, { ITEM_TYPE_BLUE_FLASK, MERCHANT_INIFINTE, 1 },
-    { ITEM_TYPE_BLUE_FLASK, MERCHANT_INIFINTE, 1 }, { ITEM_TYPE_BLUE_FLASK, MERCHANT_INIFINTE, 1 },
-  };
+  ItemPayload payloads[] = { { ITEM_TYPE_RED_FLASK, 10, 1 },
+                             { ITEM_TYPE_BIG_RED_FLASK, 5, 3 },
+                             { ITEM_TYPE_BLUE_FLASK, 10, 2 } };
 
   merchant->num_payloads = sizeof(payloads) / sizeof(ItemPayload);
   memcpy(merchant->payloads, payloads, sizeof(payloads));
@@ -824,18 +822,16 @@ ecs_entity_t make_wizzard_npc(Ecs* ecs, Vec2 pos)
   return make_npc(ecs, make_wizzard(ecs, pos));
 }
 
-ecs_entity_t make_chest(Ecs *ecs, Vec2 pos)
+ecs_entity_t make_chest(Ecs* ecs, Vec2 pos)
 {
   ecs_entity_t entity;
 
-  TEXTURE* texture;
+  TEXTURE*  texture;
   Animation animation[2];
 
   Transform* transform;
-  Visual* visual;
-  Animator* animator;
+  Visual*    visual;
+  Animator*  animator;
 
   texture = get_texture(TEX_CHEST);
-
-
 }

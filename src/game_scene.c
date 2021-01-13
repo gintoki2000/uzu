@@ -26,6 +26,7 @@
 #include "system/dmg_sys.h"
 #include "system/drop_system.h"
 #include "system/equipment_sys.h"
+#include "system/following_system.h"
 #include "system/health_sys.h"
 #include "system/healthbar_rendering_sys.h"
 #include "system/hud_system.h"
@@ -48,6 +49,7 @@
 #include "system/game_event/game_event.h"
 
 #include "system/debug/draw_hitbox.h"
+#include "system/debug/draw_target.h"
 #include "system/debug/draw_path.h"
 #include "system/debug/draw_position.h"
 #include "system/debug/draw_target.h"
@@ -164,6 +166,7 @@ static void on_update()
       health_system_update();
       camera_system_update();
       map_update_animated_cells();
+      following_system_update();
 
       //  skl
       swing_weapon_skl_system_update();
@@ -189,10 +192,11 @@ static void on_update()
     ui_msgbox_draw();
     ui_quality_draw();
 
-#if 0
+#if 1
     // render debug
     //collision_system_render_debug();
     //path_rendering_system_update();
+    move_target_rendering_system_update();
     hitbox_rendering_system_update();
     position_rendering_system_update();
 #endif

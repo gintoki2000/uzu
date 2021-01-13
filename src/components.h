@@ -241,7 +241,11 @@ typedef struct Path
   int   curr;
 } Path;
 
-typedef ecs_entity_t FollowingTarget;
+typedef struct
+{
+  ecs_entity_t entity;
+  float        radius;
+} FollowingTarget;
 
 typedef struct
 {

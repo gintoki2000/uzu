@@ -120,9 +120,34 @@ typedef struct
   SpriteSheet sheet;
 } Animation;
 
-extern ItemType g_item_types[];
+typedef struct
+{
+  const char* name;
+  void (*cast_fn)(Ecs* ecs, ecs_entity_t caster);
+  u16 cost;
+  u16 cast_spd;
+} Spell;
 
-void item_types_init(void);
+enum
+{
+  WEAPON_SPEAR,
+  WEAPON_CLEAVER,
+  WEAPON_LAVIS_SWORD,
+  NUM_WEAPONS,
+} WeaponType;
+
+enum
+{
+  CLASS_KNIGHT,
+  CLASS_DRAGON,
+  CLASS_WIZZARD,
+  CLASS_HUNTER,
+  NUM_CLASSES,
+} ClassType;
+
+extern ecs_entity_t (*const g_weapon_tbl[NUM_WEAPONS])(Ecs*, u16);
+extern ecs_entity_t (*const g_class_tbl[NUM_CLASSES])(Ecs*);
+extern const ItemType g_item_types[];
 
 Conversation* conversation_init(Conversation* self);
 void          conversation_fini(Conversation* self);

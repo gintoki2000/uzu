@@ -11,7 +11,7 @@ void thunder_storm_weapon_skl_system_update(void)
   ecs_size_t    cnt;
 
   wpskl_ThunderStorm* skills;
-  WeaponCore*         weapon_core;
+  WeaponBase*         weapon_core;
   Controller*         wearer_ctl;
   Transform*          transform;
 
@@ -32,13 +32,13 @@ void thunder_storm_weapon_skl_system_update(void)
         make_thunder(g_ecs, VEC2(rx, ry), 0);
         if (--skills[i].remaining == 0)
         {
-          weapon_core           = ecs_get(g_ecs, entities[i], WEAPON_CORE);
+          weapon_core           = ecs_get(g_ecs, entities[i], WEAPON_BASE);
           wearer_ctl            = ecs_get(g_ecs, weapon_core->wearer, CONTROLLER);
           wearer_ctl->in_action = FALSE;
         }
       }
     }
-    if ((weapon_core = ecs_get(g_ecs, entities[i], WEAPON_CORE)) &&
+    if ((weapon_core = ecs_get(g_ecs, entities[i], WEAPON_BASE)) &&
         (wearer_ctl = ecs_get(g_ecs, weapon_core->wearer, CONTROLLER)) &&
         (transform = ecs_get(g_ecs, entities[i], TRANSFORM)))
     {

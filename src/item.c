@@ -6,7 +6,7 @@ static void red_flask_on_use(Ecs* ecs, ecs_entity_t entity);
 static void big_red_flask_on_use(Ecs* ecs, ecs_entity_t entity);
 static void blue_flask_on_use(Ecs* ecs, ecs_entity_t entity);
 
-ItemType g_item_types[NUM_ITEM_TYPES] = {
+const ItemType g_item_types[NUM_ITEM_TYPES] = {
   [ITEM_TYPE_RED_FLASK] =
       {
           .name        = "red flask",
@@ -59,8 +59,4 @@ static void blue_flask_on_use(Ecs* ecs, ecs_entity_t entity)
   (void)ecs;
   (void)entity;
   INFO("nothing happen...\n");
-}
-
-void item_types_init()
-{
 }

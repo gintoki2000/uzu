@@ -23,9 +23,10 @@ typedef enum
   TAG_TO_BE_DESTROYED,
   WEAPON_SKILL_SWING,
   WEAPON_SKILL_CHARGE,
+  WEAPON_SKILL_THUST,
   WEAPON_SKILL_THUNDER_STORM,
   DAMAGE_OUTPUT,
-  WEAPON_CORE,
+  WEAPON_BASE,
   DROP,
   ITEM_TAG,
   INVULNERABLE,
@@ -46,6 +47,9 @@ typedef enum
   DIALOGUE,
   MERCHANT,
   CHEST,
+  ATTUNEMENT_SLOT,
+  CASTABLE,
+  MANA_POOL,
   NUM_COMPONENTS
 } ComponentId;
 
@@ -84,7 +88,7 @@ typedef struct
 {
   Direction desired_dir;
   Vec2      desired_vel;
-  int       action;
+  u16       action;
   BOOL      in_action;
   BOOL      lock_dir;
   BOOL      lock_movement;
@@ -94,6 +98,7 @@ typedef struct
 {
   ecs_entity_t weapon;
   Vec2         weapon_anchor;
+  Vec2         d;
 } Equipment;
 
 typedef struct
@@ -101,7 +106,7 @@ typedef struct
   ecs_entity_t wearer;
   s32          atk;
   const char*  name;
-} WeaponCore;
+} WeaponBase;
 
 /*Weapon skills*/
 typedef struct
@@ -114,19 +119,21 @@ typedef struct
 
 typedef struct
 {
-  int  on_action;
-  int  timer;
+  u16  on_action;
+  u16  timer;
   BOOL is_active;
 } wpskl_Charge;
 
 typedef struct
 {
-  int on_action;
+  u16 on_action;
+  u16 timer;
+  u8  state;
 } wpskl_Thust;
 
 typedef struct
 {
-  int on_action;
+  u16 on_action;
   u16 remaining;
   u16 interval;
   u16 total;
@@ -281,7 +288,6 @@ typedef struct Merchant
 } Merchant;
 
 #define CHEST_MAX_ITEMS 5
-
 typedef enum
 {
   CHEST_ANIM_CLOSE,
@@ -293,6 +299,22 @@ typedef struct
   Item items[CHEST_MAX_ITEMS];
   u8   num_items;
 } Chest;
+
+typedef struct
+{
+  u16 mana_points;
+  u16 max_mana_points;
+} ManaPool;
+
+typedef struct
+{
+  u16 spell_id;
+} AttunementSlot;
+
+typedef struct
+{
+  int timer;
+} Castable;
 
 Animation*
 animation_init(Animation* anim, SDL_Texture* tex, u32 x, u32 y, u32 row, u32 col, u32 sw, u32 sh);

@@ -1,8 +1,8 @@
 #ifndef ENTITY_FACTORY_H
 #define ENTITY_FACTORY_H
+#include "resources.h"
 #include <ecs/ecs.h>
 #include <toolbox/toolbox.h>
-#include "resources.h"
 
 ecs_entity_t make_anime_sword(Ecs* ecs);
 ecs_entity_t make_axe(Ecs* ecs);
@@ -34,4 +34,7 @@ ecs_entity_t make_player(Ecs* ecs, ecs_entity_t character, ecs_entity_t weapon);
 ecs_entity_t make_npc(Ecs* ecs, ecs_entity_t character_base);
 ecs_entity_t make_wizzard_npc(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_chest(Ecs* ecs, Vec2 pos);
+ecs_entity_t make_spear(Ecs* ecs, u16 mask);
+
+
 #endif // ENTITY_FACTORY_H

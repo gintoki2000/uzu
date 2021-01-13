@@ -1,6 +1,6 @@
 #include "swing.h"
-#include <components.h>
 #include "../event_messaging_sys.h"
+#include <components.h>
 
 #define SWINGING_SYSTEM_STEP 8
 #define SWINGING_SYSTEM_INTERVAL 1
@@ -12,34 +12,34 @@ void swing_weapon_skl_system_update(void)
   ecs_entity_t* entities;
   ecs_size_t    cnt;
 
-  wpskl_Swing*  wpskl_swing;
+  wpskl_Swing*  skl;
   DamageOutput* damage_output;
-  WeaponCore*   weapon_core;
+  WeaponBase*   base;
   Visual*       visual;
   Transform*    transform;
   Controller*   wearer_controller;
 
-  ecs_raw(g_ecs, WEAPON_SKILL_SWING, &entities, (void**)&wpskl_swing, &cnt);
+  ecs_raw(g_ecs, WEAPON_SKILL_SWING, &entities, (void**)&skl, &cnt);
 
   for (int i = 0; i < cnt; ++i)
   {
-    if (wpskl_swing[i].is_active)
+    if (skl[i].is_active)
     {
-      if (++wpskl_swing[i].timer == SWINGING_SYSTEM_INTERVAL)
+      if (++skl[i].timer == SWINGING_SYSTEM_INTERVAL)
       {
-        wpskl_swing[i].timer = 0;
-        if (++wpskl_swing[i].step == SWINGING_SYSTEM_STEP)
+        skl[i].timer = 0;
+        if (++skl[i].step == SWINGING_SYSTEM_STEP)
         {
           if ((transform = ecs_get(g_ecs, entities[i], TRANSFORM)) &&
               (damage_output = ecs_get(g_ecs, entities[i], DAMAGE_OUTPUT)) &&
-              (weapon_core = ecs_get(g_ecs, entities[i], WEAPON_CORE)) &&
-              (wearer_controller = ecs_get(g_ecs, weapon_core->wearer, CONTROLLER)))
+              (base = ecs_get(g_ecs, entities[i], WEAPON_BASE)) &&
+              (wearer_controller = ecs_get(g_ecs, base->wearer, CONTROLLER)))
           {
 
             wearer_controller->in_action = FALSE;
             damage_output->atk           = 0;
             transform->rot               = 0.0;
-            wpskl_swing[i].is_active     = FALSE;
+            skl[i].is_active             = FALSE;
           }
         }
         else
@@ -47,25 +47,24 @@ void swing_weapon_skl_system_update(void)
           if ((visual = ecs_get(g_ecs, entities[i], VISUAL)) &&
               (transform = ecs_get(g_ecs, entities[i], TRANSFORM)))
           {
-            transform->rot         = wpskl_swing[i].step * 20.0 * FLIP_TO_SIGN(visual->flip);
+            transform->rot = skl[i].step * 20.0 * FLIP_TO_SIGN(visual->flip);
           }
         }
       }
     }
     else
     {
-      if ((weapon_core = ecs_get(g_ecs, entities[i], WEAPON_CORE)) &&
-          (wearer_controller = ecs_get(g_ecs, weapon_core->wearer, CONTROLLER)) &&
+      if ((base = ecs_get(g_ecs, entities[i], WEAPON_BASE)) &&
+          (wearer_controller = ecs_get(g_ecs, base->wearer, CONTROLLER)) &&
           (damage_output = ecs_get(g_ecs, entities[i], DAMAGE_OUTPUT)))
       {
 
-        if (!wearer_controller->in_action &&
-            (wpskl_swing[i].on_action == wearer_controller->action))
+        if (!wearer_controller->in_action && (skl[i].on_action == wearer_controller->action))
         {
-          wpskl_swing[i].timer         = 0;
-          wpskl_swing[i].is_active     = TRUE;
-          wpskl_swing[i].step          = 0;
-          damage_output->atk           = weapon_core->atk * SWINGING_SYSTEM_DAMAGE_ADJ;
+          skl[i].timer                 = 0;
+          skl[i].is_active             = TRUE;
+          skl[i].step                  = 0;
+          damage_output->atk           = base->atk * SWINGING_SYSTEM_DAMAGE_ADJ;
           damage_output->type          = DAMAGE_TYPE_STRIKE;
           wearer_controller->action    = CHARACTER_ACTION_NONE;
           wearer_controller->in_action = TRUE;

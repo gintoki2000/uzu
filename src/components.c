@@ -28,7 +28,7 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
   [MOTION]                     = ECS_TYPE(Motion),
   [PROJECTILE]                 = ECS_TYPE(Projectile),
   [TAG_TO_BE_DESTROYED]        = ECS_TYPE(TagToBeDestroyed),
-  [WEAPON_CORE]                = ECS_TYPE(WeaponCore),
+  [WEAPON_BASE]                = ECS_TYPE(WeaponBase),
   [DAMAGE_OUTPUT]              = ECS_TYPE(DamageOutput),
   [WEAPON_SKILL_SWING]         = ECS_TYPE(wpskl_Swing),
   [WEAPON_SKILL_CHARGE]        = ECS_TYPE(wpskl_Charge),
@@ -48,7 +48,11 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
   [DIALOGUE]                   = { .size = sizeof(Dialogue) },
   [ITEM_TAG]                   = { .size = sizeof(ItemTag) },
   [MERCHANT]                   = { .size = sizeof(Merchant) },
-  [CHEST]                      = ECS_TYPE(Chest)
+  [CHEST]                      = ECS_TYPE(Chest),
+  [ATTUNEMENT_SLOT]            = ECS_TYPE(AttunementSlot),
+  [CASTABLE]                   = ECS_TYPE(Castable),
+  [MANA_POOL]                  = ECS_TYPE(ManaPool),
+  [WEAPON_SKILL_THUST]         = ECS_TYPE(wpskl_Thust),
 };
 
 Animation*

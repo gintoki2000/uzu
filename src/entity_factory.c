@@ -392,7 +392,7 @@ ecs_entity_t make_cleaver(Ecs* ecs, u16 mask_bits)
   Transform*    transform;
   Visual*       visual;
   HitBox*       hitbox;
-  WeaponCore*   core;
+  WeaponBase*   core;
   DamageOutput* damage_output;
   wpskl_Swing*  wpskl_swing;
 
@@ -410,7 +410,7 @@ ecs_entity_t make_cleaver(Ecs* ecs, u16 mask_bits)
   hitbox->category  = CATEGORY_WEAPON;
   hitbox->mask_bits = mask_bits;
 
-  core       = ecs_add(ecs, entity, WEAPON_CORE);
+  core       = ecs_add(ecs, entity, WEAPON_BASE);
   core->atk  = 2;
   core->name = "cleaver";
 
@@ -531,7 +531,7 @@ ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
   Transform*          transform;
   Visual*             visual;
   HitBox*             hitbox;
-  WeaponCore*         core;
+  WeaponBase*         core;
   DamageOutput*       damage_output;
   wpskl_Swing*        wpskl_swing;
   wpskl_ThunderStorm* wpskl_thunder_storm;
@@ -550,7 +550,7 @@ ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
   hitbox->category  = CATEGORY_WEAPON;
   hitbox->mask_bits = mask_bits;
 
-  core       = ecs_add(ecs, entity, WEAPON_CORE);
+  core       = ecs_add(ecs, entity, WEAPON_BASE);
   core->atk  = 2;
   core->name = "golden sword";
 
@@ -824,14 +824,48 @@ ecs_entity_t make_wizzard_npc(Ecs* ecs, Vec2 pos)
 
 ecs_entity_t make_chest(Ecs* ecs, Vec2 pos)
 {
+  (void)ecs;
+  (void)pos;
+  return ECS_NULL_ENT;
+}
+
+ecs_entity_t make_spear(Ecs* ecs, u16 mask)
+{
   ecs_entity_t entity;
 
-  TEXTURE*  texture;
-  Animation animation[2];
+  Visual*       visual;
+  Transform*    transform;
+  HitBox*       hitbox;
+  DamageOutput* damage_output;
+  wpskl_Thust*  thust;
+  WeaponBase*   weapon_base;
 
-  Transform* transform;
-  Visual*    visual;
-  Animator*  animator;
+  entity = ecs_create(ecs);
 
-  texture = get_texture(TEX_CHEST);
+  visual = ecs_add(ecs, entity, VISUAL);
+  sprite_init(&visual->sprite, get_texture(TEX_SPEAR));
+  visual->anchor.x = visual->sprite.rect.w / 2;
+  visual->anchor.y = 20;
+
+  transform      = ecs_add(ecs, entity, TRANSFORM);
+  transform->rot = 90;
+
+  hitbox            = ecs_add(ecs, entity, HITBOX);
+  hitbox->size.x    = 6;
+  hitbox->size.y    = 30;
+  hitbox->anchor.x  = 3;
+  hitbox->category  = CATEGORY_WEAPON;
+  hitbox->anchor.y  = 20;
+  hitbox->mask_bits = mask;
+  hitbox->proxy_id  = RTREE_NULL_NODE;
+
+  damage_output = ecs_add(ecs, entity, DAMAGE_OUTPUT);
+
+  thust            = ecs_add(ecs, entity, WEAPON_SKILL_THUST);
+  thust->on_action = CHARACTER_ACTION_REGULAR_ATK;
+
+  weapon_base = ecs_add(ecs, entity, WEAPON_BASE);
+  weapon_base->wearer = ECS_NULL_ENT;
+
+  return entity;
 }

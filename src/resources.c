@@ -28,6 +28,9 @@ static const char*  _texture_files[NUM_TEXS] = {
   [TEX_PONITER_DOWN]      = "asserts/pointer_down.png",
   [TEX_BLUE_FLASK]        = "asserts/flask_blue.png",
   [TEX_CHEST]             = "asserts/chest.png",
+  [TEX_SWING_EFFECT]      = "asserts/fx/weapon_anime_sword_effect.png",
+  [TEX_RED_STAFF]         = "asserts/weapon_red_magic_staff.png",
+  [TEX_SPEAR]             = "asserts/weapon_spear.png",
 };
 
 static Mix_Music*  _bg_musics[NUM_BG_MUSICS];

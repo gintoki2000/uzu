@@ -43,6 +43,7 @@
 #include "system/weapon_skill/charge.h"
 #include "system/weapon_skill/swing.h"
 #include "system/weapon_skill/thunder_storm.h"
+#include "system/weapon_skill/thust.h"
 
 #include "system/game_event/game_event.h"
 
@@ -167,6 +168,8 @@ static void on_update()
       //  skl
       swing_weapon_skl_system_update();
       charge_weapon_skl_system();
+
+      weapon_skill_thust_update();
       thunder_storm_weapon_skl_system_update();
     }
 
@@ -248,7 +251,7 @@ static void unload_current_level()
   ecs_each(g_ecs, NULL, cb_clear_world);
 }
 
-static char* _layer_names[NUM_MAP_LAYERS] = {
+static char* _layer_name_tbl[NUM_MAP_LAYERS] = {
   [MAP_LAYER_FLOOR] = "floor",
   [MAP_LAYER_WALL]  = "back-wall",
   [MAP_LAYER_FRONT] = "front-wall",
@@ -257,7 +260,7 @@ static char* _layer_names[NUM_MAP_LAYERS] = {
 static int layer_name_to_id(const char* name)
 {
   for (int i = 0; i < NUM_MAP_LAYERS; ++i)
-    if (strcmp(_layer_names[i], name) == 0)
+    if (strcmp(_layer_name_tbl[i], name) == 0)
       return i;
   return -1;
 }
@@ -335,7 +338,7 @@ static int parse_objectgroup(const json_object* object_group_json_obj, BOOL spaw
     }
     else if (spawn_player && strcmp(objtype, "Player") == 0)
     {
-      make_player(g_ecs, make_knight(g_ecs, pos), ECS_NULL_ENT);
+      make_player(g_ecs, make_knight(g_ecs, pos), make_spear(g_ecs, BIT(CATEGORY_ENEMY)));
     }
     else if (strcmp(objtype, "NPC") == 0)
     {

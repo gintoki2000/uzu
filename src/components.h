@@ -74,7 +74,6 @@ typedef struct
   u8               opacity;
 } Visual;
 
-
 typedef struct
 {
   Vec2  pos;
@@ -235,7 +234,11 @@ typedef struct Path
   int   curr;
 } Path;
 
-typedef ecs_entity_t FollowingTarget;
+typedef struct
+{
+  ecs_entity_t entity;
+  float        radius;
+} FollowingTarget;
 
 typedef struct
 {
@@ -279,7 +282,8 @@ typedef struct Merchant
 
 #define CHEST_MAX_ITEMS 5
 
-typedef enum {
+typedef enum
+{
   CHEST_ANIM_CLOSE,
   CHEST_ANIM_OPEN,
 } ChestAnimId;

@@ -1,7 +1,6 @@
 #include <ai/attack.h>
-#include <ai/find_player_target.h>
 #include <ai/find_random_destination.h>
-#include <ai/follow.h>
+#include <ai/follow_player.h>
 #include <ai/is_player_cross_spot.h>
 #include <ai/is_player_out_of_spot.h>
 #include <ai/move_to.h>
@@ -17,7 +16,7 @@
 
 ecs_entity_t make_anime_sword(Ecs* ecs)
 {
-  TEXTURE* texture;
+  TEXTURE*     texture;
   ecs_entity_t sword;
 
   /*component*/
@@ -51,7 +50,7 @@ ecs_entity_t make_anime_sword(Ecs* ecs)
 ecs_entity_t make_character(Ecs* ecs, Vec2 pos, TextureId texture_id)
 {
   ecs_entity_t entity;
-  TEXTURE* texture;
+  TEXTURE*     texture;
   Animation    anims[NUM_ANIM_STATES];
 
   /*components */
@@ -125,7 +124,7 @@ ecs_entity_t make_wizzard(Ecs* ecs, Vec2 pos)
 ecs_entity_t make_huge_demon(Ecs* ecs)
 {
   ecs_entity_t demon;
-  TEXTURE* texture;
+  TEXTURE*     texture;
   Animation    anims[NUM_ANIM_STATES];
 
   /*components */
@@ -214,7 +213,7 @@ ecs_entity_t make_huge_demon(Ecs* ecs)
 ecs_entity_t make_chort(Ecs* ecs, Vec2 pos)
 {
   ecs_entity_t entity;
-  TEXTURE* texture;
+  TEXTURE*     texture;
   Animation    anims[NUM_ANIM_STATES];
 
   /*components */
@@ -289,44 +288,36 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 pos)
   controller                = ecs_add(ecs, entity, CONTROLLER);
   controller->lock_movement = TRUE;
 
-  BTRoot*            root;
-  BTSequence*        chase_seq;
-  MoveTo*            move_to;
-  Wait *             wait, *wait_a_momment;
-  BTSelector*        hostile;
-  Attack*            attack;
-  BTSequence*        attack_seq;
-  FindPlayerTarget*  find_player_target;
-  Follow*            follow;
-  IsPlayerCrossSpot* is_player_cross_spot;
-  BTSequence*        back_to_spot_seq;
-  SetDestToSpot*     set_dest_to_spot;
-  BTSelector*        selector;
-  IsPlayerOutOfSpot* is_player_out_of_spot;
+  BTRoot*              root;
+  MoveTo*              move_to;
+  Wait *               wait, *wait_a_momment;
+  BTSelector*          hostile;
+  Attack*              attack;
+  BTSequence*          attack_seq;
+  IsPlayerCrossSpot*   is_player_cross_spot;
+  BTSequence*          back_to_spot_seq;
+  SetDestToSpot*       set_dest_to_spot;
+  BTSelector*          selector;
+  IsPlayerOutOfSpot*   is_player_out_of_spot;
+  BTTask_FollowPlayer* chase;
 
   root                  = bt_root_new();
-  chase_seq             = bt_sequence_new();
   wait                  = wait_new(30);
   attack                = attack_new();
   hostile               = bt_selector_new();
   attack_seq            = bt_sequence_new();
-  follow                = follow_new(15.f);
-  find_player_target    = find_player_target_new();
   is_player_cross_spot  = is_player_cross_spot_new();
   move_to               = move_to_new(2.f);
   back_to_spot_seq      = bt_sequence_new();
   set_dest_to_spot      = set_dest_to_spot_new();
   selector              = bt_selector_new();
   is_player_out_of_spot = is_player_out_of_spot_new();
-  wait_a_momment        = wait_new(90);
-
+  wait_a_momment        = wait_new(50);
+  chase                 = bt_task_follow_player_new(16.f);
   bt_root_set_child(root, (BTNode*)selector);
 
   bt_decorator_set_child((BTDecorator*)is_player_cross_spot, (BTNode*)hostile);
   bt_decorator_set_child((BTDecorator*)is_player_out_of_spot, (BTNode*)back_to_spot_seq);
-
-  bt_sequence_add(chase_seq, (BTNode*)find_player_target);
-  bt_sequence_add(chase_seq, (BTNode*)follow);
 
   bt_sequence_add(attack_seq, (BTNode*)attack);
   bt_sequence_add(attack_seq, (BTNode*)wait);
@@ -335,7 +326,7 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 pos)
   bt_sequence_add(back_to_spot_seq, (BTNode*)set_dest_to_spot);
   bt_sequence_add(back_to_spot_seq, (BTNode*)move_to);
 
-  bt_selector_add(hostile, (BTNode*)chase_seq);
+  bt_selector_add(hostile, (BTNode*)chase);
   bt_selector_add(hostile, (BTNode*)attack_seq);
 
   bt_selector_add(selector, (BTNode*)is_player_cross_spot);
@@ -358,7 +349,7 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 pos)
 
 ecs_entity_t make_axe(Ecs* ecs)
 {
-  TEXTURE* texture;
+  TEXTURE*     texture;
   ecs_entity_t axe;
 
   /*component*/
@@ -435,8 +426,8 @@ ecs_entity_t make_blood_stain_effect(Ecs* ecs, Vec2 pos)
   Transform* transform;
   LifeSpan*  life_span;
 
-  Animation    animation;
-  TEXTURE* texture;
+  Animation animation;
+  TEXTURE*  texture;
   texture = get_texture(TEX_BLOOD);
   animation_init(&animation, texture, 0, 0, 1, 4, 16, 16);
 
@@ -481,7 +472,7 @@ ecs_entity_t make_bow(Ecs* ecs)
 
 ecs_entity_t make_arrow(Ecs* ecs, Vec2 pos, Vec2 vel)
 {
-  TEXTURE* texture;
+  TEXTURE*     texture;
   ecs_entity_t arrow;
 
   Transform*  transform;
@@ -579,7 +570,7 @@ ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
 ecs_entity_t make_golden_cross_hit_effect(Ecs* ecs, Vec2 pos)
 {
   ecs_entity_t entity;
-  TEXTURE* texture;
+  TEXTURE*     texture;
   Animation    animation;
 
   Transform* transform;
@@ -625,7 +616,7 @@ ecs_entity_t make_blue_flask(Ecs* ecs, Vec2 pos)
 ecs_entity_t make_flask_base(Ecs* ecs, TextureId texture_id, ItemTypeId item_type_id, Vec2 pos)
 {
   ecs_entity_t entity;
-  TEXTURE* texture;
+  TEXTURE*     texture;
 
   Visual*    visual;
   Transform* transform;
@@ -803,11 +794,9 @@ ecs_entity_t make_npc(Ecs* ecs, ecs_entity_t character_base)
 
   merchant = ecs_add(ecs, character_base, MERCHANT);
 
-  ItemPayload payloads[] = {
-    { ITEM_TYPE_RED_FLASK, 10, 1 },  { ITEM_TYPE_BLUE_FLASK, MERCHANT_INIFINTE, 1 },
-    { ITEM_TYPE_BLUE_FLASK, MERCHANT_INIFINTE, 1 }, { ITEM_TYPE_BLUE_FLASK, MERCHANT_INIFINTE, 1 },
-    { ITEM_TYPE_BLUE_FLASK, MERCHANT_INIFINTE, 1 }, { ITEM_TYPE_BLUE_FLASK, MERCHANT_INIFINTE, 1 },
-  };
+  ItemPayload payloads[] = { { ITEM_TYPE_RED_FLASK, 10, 1 },
+                             { ITEM_TYPE_BIG_RED_FLASK, 5, 3 },
+                             { ITEM_TYPE_BLUE_FLASK, 10, 2 } };
 
   merchant->num_payloads = sizeof(payloads) / sizeof(ItemPayload);
   memcpy(merchant->payloads, payloads, sizeof(payloads));
@@ -824,18 +813,16 @@ ecs_entity_t make_wizzard_npc(Ecs* ecs, Vec2 pos)
   return make_npc(ecs, make_wizzard(ecs, pos));
 }
 
-ecs_entity_t make_chest(Ecs *ecs, Vec2 pos)
+ecs_entity_t make_chest(Ecs* ecs, Vec2 pos)
 {
   ecs_entity_t entity;
 
-  TEXTURE* texture;
+  TEXTURE*  texture;
   Animation animation[2];
 
   Transform* transform;
-  Visual* visual;
-  Animator* animator;
+  Visual*    visual;
+  Animator*  animator;
 
   texture = get_texture(TEX_CHEST);
-
-
 }

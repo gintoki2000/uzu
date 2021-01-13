@@ -120,8 +120,6 @@ typedef struct
   SpriteSheet sheet;
 } Animation;
 
-
-
 extern ItemType g_item_types[];
 
 void item_types_init(void);

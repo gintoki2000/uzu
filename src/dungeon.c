@@ -47,8 +47,6 @@ static BOOL on_game_init()
     return FALSE;
   }
 
-  item_types_init();
-
   set_scene(&g_game_scene);
 
   return TRUE;

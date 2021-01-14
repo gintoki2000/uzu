@@ -30,6 +30,8 @@ typedef enum
   TEX_SWING_EFFECT,
   TEX_RED_STAFF,
   TEX_SPEAR,
+  TEX_UI_MAIN_MENU,
+  TEX_UI_MAIN_MENU_POINTER,
   NUM_TEXS
 } TextureId;
 

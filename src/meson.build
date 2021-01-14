@@ -25,4 +25,5 @@ source_files = files(
   'json_helper.c',
   'struct_meta_data.c',
   'types.c',
+  'main_menu.c',
 ) + engine_source_files + ecs_source_files + toolbox_source_files + system_source_files + ai_source_files

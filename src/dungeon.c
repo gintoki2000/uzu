@@ -18,6 +18,7 @@
 
 #include <engine/engine.h>
 #include <engine/keyboard.h>
+#include "main_menu.h"
 
 SDL_Rect g_viewport;
 

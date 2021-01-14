@@ -105,3 +105,8 @@ float get_distance_between_two_entities(Ecs* ecs, ecs_entity_t e1, ecs_entity_t 
   p2 = get_entity_position(ecs, e2);
   return vec2_mag(vec2_sub(p1, p2));
 }
+
+void set_entity_hit_points(Ecs* ecs, ecs_entity_t entity, u16 hit_points)
+{
+  ((Health*)ecs_get(ecs, entity, HEALTH))->hit_points = hit_points;
+}

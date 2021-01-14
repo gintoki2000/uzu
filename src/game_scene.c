@@ -81,7 +81,7 @@ const Scene g_game_scene = {
 
 Ecs* g_ecs;
 
-static BOOL _switch_level;
+static BOOL _has_next_level;
 static char _next_level[100];
 static char _spwan_location[100];
 static BOOL _paused;
@@ -94,7 +94,9 @@ static void spawn_player(Vec2 pos)
   player = g_char_create_fn_tbl[g_session.job](g_ecs, pos);
   weapon = g_weapon_create_fn_tbl[g_session.weapon](g_ecs, BIT(CATEGORY_ENEMY));
 
-  equip(g_ecs, player, weapon);
+  make_player(g_ecs, player, weapon);
+
+  set_entity_hit_points(g_ecs, player, g_session.hp);
 }
 static void on_load()
 {
@@ -121,12 +123,13 @@ static void on_load()
     load_level("0");
     ems_broadcast(MSG_NEW_GAME, NULL);
     ems_broadcast(MSG_LEVEL_LOADED, &(MSG_LevelLoaded){ "0" });
-    spawn_player((Vec2){16 * 5, 16 * 3});
+    spawn_player(g_session.pos);
   }
   else
   {
     load_level(g_session.level);
     ems_broadcast(MSG_LEVEL_LOADED, &(MSG_LevelLoaded){ g_session.level });
+    spawn_player(g_session.pos);
   }
 }
 
@@ -144,10 +147,9 @@ static void on_event(const SDL_Event* evt)
   (void)evt;
 }
 
-
 static void on_update()
 {
-  if (_switch_level)
+  if (_has_next_level)
   {
 
     unload_current_level();
@@ -163,7 +165,7 @@ static void on_update()
       spawn_player(pos);
     }
 
-    _switch_level = FALSE;
+    _has_next_level = FALSE;
   }
   else
   {
@@ -229,7 +231,7 @@ static void on_player_hit_ladder(pointer_t arg, const MSG_HitLadder* event)
 
   lsw = ecs_get(g_ecs, event->ladder, LEVEL_SWITCHER);
 
-  _switch_level = TRUE;
+  _has_next_level = TRUE;
 
   strcpy(_next_level, lsw->level);
   strcpy(_spwan_location, lsw->dest);

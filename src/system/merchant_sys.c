@@ -143,7 +143,6 @@ static void process_key_input()
 
   if (key_just_pressed(KEY_DOWN))
   {
-
     if (_current < merchant->num_payloads - 1)
     {
       _current++;

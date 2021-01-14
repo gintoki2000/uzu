@@ -18,6 +18,7 @@
 
 #include <engine/engine.h>
 #include <engine/keyboard.h>
+#include <session.h>
 
 SDL_Rect g_viewport;
 
@@ -47,6 +48,7 @@ static BOOL on_game_init()
     return FALSE;
   }
 
+  new_game(JOB_KNIGHT);
   set_scene(&g_game_scene);
 
   return TRUE;
@@ -101,7 +103,7 @@ static GameDelegate delegate = {
 };
 
 static GameSetting setting = {
-  .frame_rate    = 50,
+  .frame_rate    = 60,
   .window_title  = "dungeon II",
   .window_width  = WIN_WIDTH * SCL_X,
   .window_height = WIN_HEIGHT * SCL_Y,

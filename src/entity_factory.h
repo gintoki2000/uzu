@@ -6,19 +6,12 @@
 
 ecs_entity_t make_anime_sword(Ecs* ecs);
 ecs_entity_t make_axe(Ecs* ecs);
-ecs_entity_t make_cleaver(Ecs* ecs, u16 mask_bits);
-ecs_entity_t make_knight(Ecs* ecs, Vec2 pos);
-ecs_entity_t make_wizzard(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_huge_demon(Ecs* ecs);
 ecs_entity_t make_chort(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_blood_stain_effect(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_bow(Ecs* ecs);
 ecs_entity_t make_arrow(Ecs* ecs, Vec2 pos, Vec2 vel);
-ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits);
 ecs_entity_t make_golden_cross_hit_effect(Ecs* ecs, Vec2 pos);
-ecs_entity_t make_big_red_flask(Ecs* ecs, Vec2 pos);
-ecs_entity_t make_red_flask(Ecs* ecs, Vec2 pos);
-ecs_entity_t make_blue_flask(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_flask_base(Ecs* ecs, TextureId texture_id, ItemTypeId item_type_id, Vec2 pos);
 ecs_entity_t make_thunder_storm(Ecs* ecs, Vec2 center);
 ecs_entity_t make_thunder(Ecs* ecs, Vec2 pos, u16 mask_bits);
@@ -34,7 +27,21 @@ ecs_entity_t make_player(Ecs* ecs, ecs_entity_t character, ecs_entity_t weapon);
 ecs_entity_t make_npc(Ecs* ecs, ecs_entity_t character_base);
 ecs_entity_t make_wizzard_npc(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_chest(Ecs* ecs, Vec2 pos);
-ecs_entity_t make_spear(Ecs* ecs, u16 mask);
 
+// weapons
+ecs_entity_t make_spear(Ecs* ecs, u16 mask);
+ecs_entity_t make_cleaver(Ecs* ecs, u16 bits);
+ecs_entity_t make_golden_sword(Ecs* ecs, u16 bits);
+
+// chars
+ecs_entity_t make_wizzard(Ecs* ecs, Vec2 pos);
+ecs_entity_t make_knight(Ecs* ecs, Vec2 pos);
+ecs_entity_t make_hunter(Ecs* ecs, Vec2 pos);
+ecs_entity_t make_dragon(Ecs* ecs, Vec2 pos);
+
+// pickups
+ecs_entity_t make_big_red_flask(Ecs* ecs, Vec2 pos);
+ecs_entity_t make_red_flask(Ecs* ecs, Vec2 pos);
+ecs_entity_t make_blue_flask(Ecs* ecs, Vec2 pos);
 
 #endif // ENTITY_FACTORY_H

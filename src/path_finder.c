@@ -18,7 +18,7 @@ INLINE float distance(int x1, int y1, int x2, int y2)
   return SDL_sqrtf(a * a + b * b);
 }*/
 
-INLINE float heuristic(int x1, int y1, int x2, int y2) { return ABS(x1 - x2) + ABS(y1 - y2); }
+INLINE float heuristic(int x1, int y1, int x2, int y2) { return abs(x1 - x2) + abs(y1 - y2); }
 
 static int compare_node_priority(const GirdNode* a, const GirdNode* b)
 {

@@ -1,23 +1,28 @@
 #include "session.h"
-#include "entity_factory.h"
-u16 g_weapon;
-u16 g_hit_points;
-u16 g_mana_points;
-u16 g_class;
-BOOL g_is_new_game;
+#include "types.h"
+
+struct Session g_session;
 
 void new_game(u16 starting_class)
 {
-  g_class = starting_class;
-  g_hit_points = 20;
-  g_mana_points = 20;
-  
-  switch (starting_class) {
-    case CLASS_DRAGON:
-      g_weapon = WEAPON_SPEAR;
-      break;
-    case CLASS_HUNTER:
+  g_session.job      = starting_class;
+  g_session.hp       = 20;
+  g_session.mp       = 20;
+  g_session.new_game = TRUE;
+
+  switch (starting_class)
+  {
+  case JOB_DRAGON:
+    g_session.weapon = WEAPON_SPEAR;
+    break;
+  case JOB_HUNTER:
+    g_session.weapon = WEAPON_BOW;
+    break;
+  case JOB_KNIGHT:
+    g_session.weapon = WEAPON_ANIME_SWORD;
+    break;
+  case JOB_WIZZARD:
+    g_session.weapon = WEAPON_STAFF;
+    break;
   }
 }
-
-

@@ -4,9 +4,11 @@
 #include "constances.h"
 #include "entity_factory.h"
 #include "inventory.h"
+#include "level_loader.h"
 #include "map.h"
 #include "resources.h"
 #include "scene.h"
+#include "session.h"
 #include "ui_list.h"
 #include "ui_msgbox.h"
 #include "ui_quality.h"
@@ -49,7 +51,6 @@
 #include "system/game_event/game_event.h"
 
 #include "system/debug/draw_hitbox.h"
-#include "system/debug/draw_target.h"
 #include "system/debug/draw_path.h"
 #include "system/debug/draw_position.h"
 #include "system/debug/draw_target.h"
@@ -65,12 +66,7 @@ static void on_event(const SDL_Event* evt);
 static void on_update();
 static void on_player_hit_ladder(pointer_t arg, const MSG_HitLadder* event);
 static void on_entity_died(pointer_t arg, const MSG_EntityDied* event);
-static void load_level(const char* filename, BOOL spawn_player);
 static void unload_current_level(void);
-
-static int parse_tilelayer(const json_object* tilelayer_json_obj);
-static int parse_objectgroup(const json_object* object_group_json_obj, BOOL spawn_player);
-static int parse(const json_object* map_json_obj, BOOL spawn_player);
 
 static void cb_clear_world(pointer_t arg, Ecs* ecs, ecs_entity_t entity);
 
@@ -85,12 +81,21 @@ const Scene g_game_scene = {
 
 Ecs* g_ecs;
 
-static Dispatcher* _dispatcher;
-static BOOL        _switch_level;
-static char        _level_to_switch[100];
-static char        _spwan_location[100];
-static BOOL        _paused;
+static BOOL _switch_level;
+static char _next_level[100];
+static char _spwan_location[100];
+static BOOL _paused;
 
+static void spawn_player(Vec2 pos)
+{
+  ecs_entity_t player;
+  ecs_entity_t weapon;
+
+  player = g_char_create_fn_tbl[g_session.job](g_ecs, pos);
+  weapon = g_weapon_create_fn_tbl[g_session.weapon](g_ecs, BIT(CATEGORY_ENEMY));
+
+  equip(g_ecs, player, weapon);
+}
 static void on_load()
 {
   g_ecs = ecs_new(g_comp_types, NUM_COMPONENTS);
@@ -111,20 +116,27 @@ static void on_load()
 
   keybroad_push_state(player_controller_system_update);
 
-  load_level("asserts/level/0.json", TRUE);
-
-  // Mix_PlayMusic(get_bg_mus(BG_MUS_THE_ESSENSE_OF_GOOD_THINGS), -1);
+  if (g_session.new_game)
+  {
+    load_level("0");
+    ems_broadcast(MSG_NEW_GAME, NULL);
+    ems_broadcast(MSG_LEVEL_LOADED, &(MSG_LevelLoaded){ "0" });
+    spawn_player((Vec2){16 * 5, 16 * 3});
+  }
+  else
+  {
+    load_level(g_session.level);
+    ems_broadcast(MSG_LEVEL_LOADED, &(MSG_LevelLoaded){ g_session.level });
+  }
 }
 
 static void on_unload()
 {
   dialogue_system_fini();
   ecs_del(g_ecs);
-  dispatcher_destroy(_dispatcher);
   ems_fini();
 
-  g_ecs       = NULL;
-  _dispatcher = NULL;
+  g_ecs = NULL;
 }
 
 static void on_event(const SDL_Event* evt)
@@ -132,21 +144,23 @@ static void on_event(const SDL_Event* evt)
   (void)evt;
 }
 
+
 static void on_update()
 {
   if (_switch_level)
   {
 
     unload_current_level();
-    load_level(_level_to_switch, TRUE);
+    load_level(_next_level);
 
     ecs_entity_t ladder;
-    Transform*   transform;
 
     if ((ladder = find_ladder(g_ecs, _spwan_location)) != ECS_NULL_ENT)
     {
-      transform = ecs_get(g_ecs, ladder, TRANSFORM);
-      move_player_to(g_ecs, VEC2(transform->pos.x + 8, transform->pos.y + 30));
+      Vec2 pos = get_entity_position(g_ecs, ladder);
+      pos.x += 8;
+      pos.y += 30;
+      spawn_player(pos);
     }
 
     _switch_level = FALSE;
@@ -194,8 +208,8 @@ static void on_update()
 
 #if 1
     // render debug
-    //collision_system_render_debug();
-    //path_rendering_system_update();
+    // collision_system_render_debug();
+    // path_rendering_system_update();
     move_target_rendering_system_update();
     hitbox_rendering_system_update();
     position_rendering_system_update();
@@ -217,10 +231,7 @@ static void on_player_hit_ladder(pointer_t arg, const MSG_HitLadder* event)
 
   _switch_level = TRUE;
 
-  strcpy(_level_to_switch, "asserts/level/");
-
-  strcat(_level_to_switch, lsw->level);
-  strcat(_level_to_switch, ".json");
+  strcpy(_next_level, lsw->level);
   strcpy(_spwan_location, lsw->dest);
 }
 
@@ -239,152 +250,9 @@ static void cb_clear_world(pointer_t arg, Ecs* ecs, ecs_entity_t entity)
   ecs_destroy(ecs, entity);
 }
 
-static void load_level(const char* file, BOOL spawn_player)
-{
-  json_object* json_map = NULL;
-  if ((json_map = load_json_from_file(file)) != NULL)
-  {
-    parse(json_map, spawn_player);
-    ems_broadcast(MSG_GAME_SCENE_LOADED, NULL);
-    json_object_put(json_map);
-  }
-}
-
 static void unload_current_level()
 {
   ecs_each(g_ecs, NULL, cb_clear_world);
-}
-
-static char* _layer_name_tbl[NUM_MAP_LAYERS] = {
-  [MAP_LAYER_FLOOR] = "floor",
-  [MAP_LAYER_WALL]  = "back-wall",
-  [MAP_LAYER_FRONT] = "front-wall",
-};
-
-static int layer_name_to_id(const char* name)
-{
-  for (int i = 0; i < NUM_MAP_LAYERS; ++i)
-    if (strcmp(_layer_name_tbl[i], name) == 0)
-      return i;
-  return -1;
-}
-
-static int parse_tilelayer(const json_object* tilelayer_json_obj)
-{
-  int*               data;
-  int                datalen;
-  const json_object* data_json_obj;
-  const char*        name;
-  int                layer;
-
-  data_json_obj = json_object_object_get(tilelayer_json_obj, "data");
-  name          = json_object_object_get_as_string(tilelayer_json_obj, "name");
-  datalen       = json_object_array_length(data_json_obj);
-
-  data = malloc(datalen * sizeof(int));
-
-  for (int i = 0; i < datalen; ++i)
-  {
-    data[i] = json_object_array_get_idx_as_int(data_json_obj, i);
-  }
-
-  if ((layer = layer_name_to_id(name)) != -1)
-  {
-    map_set_data(layer, data, datalen);
-  }
-
-  free(data);
-
-  return 0;
-}
-
-static int parse_objectgroup(const json_object* object_group_json_obj, BOOL spawn_player)
-{
-  const json_object* objects_json_obj;
-  const json_object* props_json_obj;
-  int                objcnt;
-  const char*        objtype;
-  const json_object* obj_json_obj;
-  Vec2               pos;
-  Vec2               size;
-  const char*        name;
-
-  objects_json_obj = json_object_object_get(object_group_json_obj, "objects");
-  objcnt           = json_object_array_length(objects_json_obj);
-
-  for (int i = 0; i < objcnt; ++i)
-  {
-    obj_json_obj = json_object_array_get_idx(objects_json_obj, i);
-
-    // common attributes
-    objtype = json_object_object_get_as_string(obj_json_obj, "type");
-    pos.x   = json_object_object_get_as_double(obj_json_obj, "x");
-    pos.y   = json_object_object_get_as_double(obj_json_obj, "y");
-    size.x  = json_object_object_get_as_double(obj_json_obj, "width");
-    size.y  = json_object_object_get_as_double(obj_json_obj, "height");
-    name    = json_object_object_get_as_string(obj_json_obj, "name");
-
-    if (strcmp(objtype, "Chort") == 0)
-    {
-      make_chort(g_ecs, pos);
-    }
-    else if (strcmp(objtype, "Ladder") == 0)
-    {
-      const char* level;
-      const char* dest;
-
-      props_json_obj = json_object_object_get(obj_json_obj, "properties");
-
-      level = json_object_object_get_as_string(props_json_obj, "level");
-      dest  = json_object_object_get_as_string(props_json_obj, "dest");
-
-      make_ladder(g_ecs, name, pos, size, level, dest);
-    }
-    else if (spawn_player && strcmp(objtype, "Player") == 0)
-    {
-      make_player(g_ecs, make_knight(g_ecs, pos), make_spear(g_ecs, BIT(CATEGORY_ENEMY)));
-    }
-    else if (strcmp(objtype, "NPC") == 0)
-    {
-      make_wizzard_npc(g_ecs, VEC2(pos.x + size.x / 2.f, pos.y + size.y));
-    }
-  }
-  return 0;
-}
-
-static int parse_layer(const json_object* layer_json_obj, BOOL spawn_player)
-{
-  const char* layer_type;
-
-  layer_type = json_object_object_get_as_string(layer_json_obj, "type");
-  if (strcmp(layer_type, "tilelayer") == 0)
-  {
-    parse_tilelayer(layer_json_obj);
-  }
-  else if (strcmp(layer_type, "objectgroup") == 0)
-  {
-    parse_objectgroup(layer_json_obj, spawn_player);
-  }
-
-  return 0;
-}
-
-static int parse(const json_object* map_json_obj, BOOL spawn_player)
-{
-  const json_object* layers_json_obj;
-  const json_object* layer_json_obj;
-  int                cnt, w, h;
-  layers_json_obj = json_object_object_get(map_json_obj, "layers");
-  cnt             = json_object_array_length(layers_json_obj);
-  w               = json_object_object_get_as_int(map_json_obj, "width");
-  h               = json_object_object_get_as_int(map_json_obj, "height");
-  map_set_size(w, h);
-  for (int i = 0; i < cnt; ++i)
-  {
-    layer_json_obj = json_object_array_get_idx(layers_json_obj, i);
-    parse_layer(layer_json_obj, spawn_player);
-  }
-  return 0;
 }
 
 void game_scene_pause()

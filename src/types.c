@@ -1,6 +1,21 @@
 #include "types.h"
 #include "json_helper.h"
+#include "entity_factory.h"
 
+ecs_entity_t (*const g_weapon_create_fn_tbl[NUM_WEAPONS])(Ecs*, u16) = {
+  NULL,
+  make_cleaver,
+  make_golden_sword,
+  make_anime_sword,
+  NULL,
+  NULL,
+};
+ecs_entity_t (*const g_char_create_fn_tbl[NUM_CLASSES])(Ecs*, Vec2)  = {
+  make_knight,
+  NULL,
+  make_wizzard,
+  NULL,
+};
 Conversation* conversation_init(Conversation* self)
 {
   self->name      = NULL;
@@ -11,7 +26,8 @@ Conversation* conversation_init(Conversation* self)
 
 void conversation_fini(Conversation* self)
 {
-  if (self->name != NULL){
+  if (self->name != NULL)
+  {
     free(self->name);
     self->name = NULL;
   }

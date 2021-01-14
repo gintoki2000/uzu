@@ -133,20 +133,24 @@ enum
   WEAPON_SPEAR,
   WEAPON_CLEAVER,
   WEAPON_LAVIS_SWORD,
+  WEAPON_ANIME_SWORD,
+  WEAPON_STAFF,
+  WEAPON_BOW,
   NUM_WEAPONS,
 } WeaponType;
 
 enum
 {
-  CLASS_KNIGHT,
-  CLASS_DRAGON,
-  CLASS_WIZZARD,
-  CLASS_HUNTER,
+  JOB_KNIGHT,
+  JOB_DRAGON,
+  JOB_WIZZARD,
+  JOB_HUNTER,
   NUM_CLASSES,
-} ClassType;
+} JobType;
 
-extern ecs_entity_t (*const g_weapon_tbl[NUM_WEAPONS])(Ecs*, u16);
-extern ecs_entity_t (*const g_class_tbl[NUM_CLASSES])(Ecs*);
+extern ecs_entity_t (*const g_weapon_create_fn_tbl[NUM_WEAPONS])(Ecs*, u16);
+extern ecs_entity_t (*const g_char_create_fn_tbl[NUM_CLASSES])(Ecs*, Vec2);
+extern ecs_entity_t (*const g_item_create_fn_tbl[NUM_ITEM_TYPES])(Ecs*, Vec2 pos);
 extern const ItemType g_item_types[];
 
 Conversation* conversation_init(Conversation* self);

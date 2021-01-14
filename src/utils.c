@@ -13,17 +13,31 @@ Vec2 get_player_position(Ecs* ecs)
   return get_entity_position(ecs, get_player(ecs));
 }
 
-void move_player_to(Ecs* ecs, Vec2 dest)
-{
-  ecs_entity_t player = get_player(ecs);
-  ASSERT(player != ECS_NULL_ENT);
-  Transform* transform = ecs_get(ecs, player, TRANSFORM);
-  transform->pos       = dest;
-}
-
 Vec2 get_entity_position(Ecs* ecs, ecs_entity_t entity)
 {
   return ((Transform*)ecs_get(ecs, entity, TRANSFORM))->pos;
+}
+
+BOOL set_entity_position(Ecs* ecs, ecs_entity_t entity, Vec2 pos)
+{
+  Transform* transform;
+  if ((transform = ecs_get(ecs, entity, TRANSFORM)))
+  {
+    transform->pos = pos;
+    return TRUE;
+  }
+  return FALSE;
+}
+
+BOOL set_entity_velocity(Ecs* ecs, ecs_entity_t entity, Vec2 vel)
+{
+  Motion* motion;
+  if ((motion = ecs_get(ecs, entity, MOTION)))
+  {
+    motion->vel = vel;
+    return TRUE;
+  }
+  return FALSE;
 }
 
 ecs_entity_t find_ladder(Ecs* ecs, const char* _name)
@@ -82,4 +96,12 @@ ecs_entity_t find_entity(Ecs* ecs, const char* name)
     }
   }
   return ECS_NULL_ENT;
+}
+
+float get_distance_between_two_entities(Ecs* ecs, ecs_entity_t e1, ecs_entity_t e2)
+{
+  Vec2 p1, p2;
+  p1 = get_entity_position(ecs, e1);
+  p2 = get_entity_position(ecs, e2);
+  return vec2_mag(vec2_sub(p1, p2));
 }

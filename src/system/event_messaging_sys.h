@@ -6,21 +6,21 @@
 enum
 {
   MSG_ENTITY_DIED, // entity hết máu
-  MSG_WEAPON_HIT, //vũ khí chạm vào entity
-  MSG_COLLISION, // va chạm giữa hai entity
+  MSG_WEAPON_HIT,  // vũ khí chạm vào entity
+  MSG_COLLISION,   // va chạm giữa hai entity
   MSG_PROJECTILE_HIT,
-  MSG_LIFE_SPAN_FINISHED, //kết thúc thời gian sống
-  MSG_DEAL_DAMAGE, // gây ra sát thương
-  MSG_GET_DAMAGED, // entity nhận sát thương
-  MSG_PLAYER_HIT_ITEM, // player chạm item
-  MSG_HIT_TRAP, // player chạm phải bẩy
-  MSG_HIT_LADDER, // player chạm vào cầu thang (chuyển map)
-  MSG_END_INTERACTION, // kết thúc tương tác với interactable entity
-  MSG_BEGIN_INTERACTION, // bắt đầu tương tác với interactable entity
+  MSG_LIFE_SPAN_FINISHED,    // kết thúc thời gian sống
+  MSG_DEAL_DAMAGE,           // gây ra sát thương
+  MSG_GET_DAMAGED,           // entity nhận sát thương
+  MSG_PLAYER_HIT_ITEM,       // player chạm item
+  MSG_HIT_TRAP,              // player chạm phải bẩy
+  MSG_HIT_LADDER,            // player chạm vào cầu thang (chuyển map)
+  MSG_END_INTERACTION,       // kết thúc tương tác với interactable entity
+  MSG_BEGIN_INTERACTION,     // bắt đầu tương tác với interactable entity
   MSG_CONVERSATION_FINISHED, // một đoạn hội thoại đã hoàng thành
-  MSG_COMANND_SELECTED, // player chọn một cmd các system lắng nghe và thực thi
-  MSG_EVENT_FINISHED, // một sự kiện(cốt truyện) trong game hoàn thành
-  MSG_ITEM_USED, // item đã được sử dụng
+  MSG_COMANND_SELECTED,      // player chọn một cmd các system lắng nghe và thực thi
+  MSG_EVENT_FINISHED,        // một sự kiện(cốt truyện) trong game hoàn thành
+  MSG_ITEM_USED,             // item đã được sử dụng
   MSG_NEW_GAME,
   MSG_LEVEL_LOADED,
   MSG_GAME_SCENE_UNLOAD,
@@ -124,6 +124,11 @@ typedef struct
 {
   int event_code;
 } MSG_EventFinished;
+
+typedef struct
+{
+  const char* level_name;
+} MSG_LevelLoaded;
 
 void ems_init();
 void ems_fini();

@@ -9,7 +9,7 @@ static void
 static void     __abort(BTTask_FollowPlayer* self, Ecs* ecs, ecs_entity_t entity);
 static BTStatus __exec(BTTask_FollowPlayer* self, Ecs* ecs, ecs_entity_t entity);
 
-BT_VTBL_INST_FN(BTNode, _)
+BT_STATIC_VTBL_INST_FN(BTNode, _)
 BT_ALLOC_FN(BTTask_FollowPlayer, _)
 
 BTTask_FollowPlayer* bt_task_follow_player_new(float radius)
@@ -45,7 +45,6 @@ __finish(BTTask_FollowPlayer* self, Ecs* ecs, ecs_entity_t entity, BTStatus fini
 
 static void __abort(BTTask_FollowPlayer* self, Ecs* ecs, ecs_entity_t entity)
 {
-
   ecs_rmv(ecs, entity, FOLLOWING_TARGET);
   self->is_running                             = FALSE;
   ((Motion*)ecs_get(ecs, entity, MOTION))->vel = VEC2_ZERO;
@@ -55,19 +54,15 @@ static BTStatus __exec(BTTask_FollowPlayer* self, Ecs* ecs, ecs_entity_t entity)
 {
   if (self->is_running)
   {
-    return (ecs_has(ecs, entity, FOLLOWING_TARGET)) ? BT_STATUS_RUNNING : BT_STATUS_SUCCESS;
+    return ecs_has(ecs, entity, FOLLOWING_TARGET) ? BT_STATUS_RUNNING : BT_STATUS_SUCCESS;
   }
   else
   {
     ecs_entity_t player;
     if ((player = get_player(ecs)) != ECS_NULL_ENT)
     {
-      Vec2             pos;
-      Vec2             target_pos;
       FollowingTarget* target;
-      pos        = get_entity_position(ecs, entity);
-      target_pos = get_entity_position(ecs, player);
-      if (vec2_mag(vec2_sub(target_pos, pos)) <= self->radius)
+      if (get_distance_between_two_entities(ecs, player, entity) <= self->radius)
         return BT_STATUS_FAILURE;
       target           = ecs_add(ecs, entity, FOLLOWING_TARGET);
       target->entity   = player;

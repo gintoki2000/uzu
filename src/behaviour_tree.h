@@ -39,6 +39,19 @@ typedef struct BTNodeVtbl
     return (BTNodeVtbl*)&vtbl;                                                                     \
   }
 
+#define BT_STATIC_VTBL_INST_FN(__TName, __tname)                                                   \
+  static const BTNodeVtbl* __tname##_vtbl_inst()                                                   \
+  {                                                                                                \
+    static __TName##Vtbl vtbl;                                                                     \
+    static BOOL          initialized = FALSE;                                                      \
+    if (!initialized)                                                                              \
+    {                                                                                              \
+      __tname##_vtbl_init(&vtbl);                                                                  \
+      initialized = TRUE;                                                                          \
+    }                                                                                              \
+    return (BTNodeVtbl*)&vtbl;                                                                     \
+  }
+
 const BTNodeVtbl* bt_node_vtbl_inst();
 void              bt_node_vtbl_init(BTNodeVtbl* vtbl);
 
@@ -72,7 +85,7 @@ struct BTNode
   (BT_NODE(__node)->vtbl->finish(BT_NODE(__node), __ecs, __entity, __finish_status))
 
 #define BT_ALLOC_FN(__TName, __tname)                                                              \
-  __TName* __tname##_alloc()                                                                       \
+  static __TName* __tname##_alloc()                                                                \
   {                                                                                                \
     __TName* ret       = malloc(sizeof(__TName));                                                  \
     BT_NODE(ret)->vtbl = __tname##_vtbl_inst();                                                    \

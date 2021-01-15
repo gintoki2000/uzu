@@ -18,7 +18,6 @@
 
 #include <engine/engine.h>
 #include <engine/keyboard.h>
-#include "main_menu.h"
 #include <session.h>
 
 SDL_Rect g_viewport;
@@ -50,7 +49,7 @@ static BOOL on_game_init()
   }
 
   new_game(JOB_KNIGHT);
-  set_scene(&g_game_scene);
+  set_scene(&g_main_menu);
 
   return TRUE;
 }

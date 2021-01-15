@@ -12,4 +12,5 @@ typedef struct Scene
 
 extern const Scene g_game_scene;
 extern const Scene g_title_scene;
+extern const Scene g_main_menu;
 #endif // SCENE_H

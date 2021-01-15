@@ -2,7 +2,7 @@
 #include <string.h>
 #include <toolbox/toolbox.h>
 
-static const int KEY_TO_SANCODE[NUM_KEYS] = {
+static const int _key_to_scancode_tbl[NUM_KEYS] = {
   [KEY_A] = SDL_SCANCODE_A,          [KEY_B] = SDL_SCANCODE_S,
   [KEY_UP] = SDL_SCANCODE_UP,        [KEY_DOWN] = SDL_SCANCODE_DOWN,
   [KEY_LEFT] = SDL_SCANCODE_LEFT,    [KEY_RIGHT] = SDL_SCANCODE_RIGHT,
@@ -29,7 +29,7 @@ void keybroad_update()
   memcpy(_prev_state, _curr_state, NUM_KEYS * sizeof(int));
   for (int i = 0; i < NUM_KEYS; ++i)
   {
-    _curr_state[i] = keyboard_state[KEY_TO_SANCODE[i]];
+    _curr_state[i] = keyboard_state[_key_to_scancode_tbl[i]];
   }
 
   if (_key_handle_fn_stack_cnt > 0)

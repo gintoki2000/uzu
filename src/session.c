@@ -7,8 +7,8 @@ struct Session g_session;
 void new_game(u16 starting_job)
 {
   g_session.job      = starting_job;
-  g_session.hp       = 20;
-  g_session.mp       = 20;
+  g_session.hp       = 40;
+  g_session.mp       = 40;
   g_session.new_game = TRUE;
   g_session.pos.x    = TILE_SIZE * 5;
   g_session.pos.y    = TILE_SIZE * 7;

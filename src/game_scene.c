@@ -135,6 +135,7 @@ static void on_load()
 
 static void on_unload()
 {
+  ems_broadcast(MSG_GAME_SCENE_UNLOAD, NULL);
   dialogue_system_fini();
   ecs_del(g_ecs);
   ems_fini();
@@ -164,6 +165,7 @@ static void on_update()
       pos.y += 30;
       spawn_player(pos);
     }
+    ems_broadcast(MSG_LEVEL_LOADED, _next_level);
 
     _has_next_level = FALSE;
   }
@@ -254,6 +256,7 @@ static void cb_clear_world(pointer_t arg, Ecs* ecs, ecs_entity_t entity)
 
 static void unload_current_level()
 {
+  g_session.hp = get_entity_hit_points(g_ecs, get_player(g_ecs));
   ecs_each(g_ecs, NULL, cb_clear_world);
 }
 

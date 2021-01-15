@@ -110,3 +110,8 @@ void set_entity_hit_points(Ecs* ecs, ecs_entity_t entity, u16 hit_points)
 {
   ((Health*)ecs_get(ecs, entity, HEALTH))->hit_points = hit_points;
 }
+
+u16 get_entity_hit_points(Ecs* ecs, ecs_entity_t entity)
+{
+  return ((Health*)ecs_get(ecs, entity, HEALTH))->hit_points;
+}

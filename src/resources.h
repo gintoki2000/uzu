@@ -32,6 +32,7 @@ typedef enum
   TEX_SPEAR,
   TEX_UI_MAIN_MENU,
   TEX_UI_MAIN_MENU_POINTER,
+  TEX_UI_DIALOGUE,
   NUM_TEXS
 } TextureId;
 

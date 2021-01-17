@@ -5,7 +5,7 @@ const COLOR UI_COLOR_BORDER_SELECT = { 0xa8, 0x32, 0xb9, 0xff };
 const COLOR UI_COLOR_TEXT          = { 0x4a, 0x3d, 0x3c, 0xff };
 const COLOR UI_COLOR_TEXT_SELECT   = { 0x06, 0x18, 0xba, 0xff };
 const COLOR COLOR_WHITE            = { 0xff, 0xff, 0xff, 0xff };
-const COLOR COLOR_BLACK            = { 0x00, 0x00, 0x00, 0x00 };
+const COLOR COLOR_BLACK            = { 0x00, 0x00, 0x00, 0xff };
 
 const char TEXT_COMMAND_TALK[] = "TALK";
 const char TEXT_COMMAND_BUY[]  = "BUY";

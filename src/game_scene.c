@@ -12,6 +12,7 @@
 #include "ui_list.h"
 #include "ui_msgbox.h"
 #include "ui_quality.h"
+#include "ui_dialogue.h"
 #include "utils.h"
 
 #include "ecs/ecs.h"
@@ -113,6 +114,9 @@ static void on_load()
   game_event_init();
   merchant_system_init();
 
+  //init ui
+  ui_dialogue_init();
+
   ems_connect(MSG_HIT_LADDER, NULL, on_player_hit_ladder);
   ems_connect(MSG_ENTITY_DIED, NULL, on_entity_died);
 
@@ -135,6 +139,7 @@ static void on_load()
 
 static void on_unload()
 {
+  ui_dialogue_fini();
   ems_broadcast(MSG_GAME_SCENE_UNLOAD, NULL);
   dialogue_system_fini();
   ecs_del(g_ecs);
@@ -192,7 +197,9 @@ static void on_update()
 
       weapon_skill_thust_update();
       thunder_storm_weapon_skl_system_update();
+
     }
+    ui_dialogue_update();
 
     // render
     map_draw(MAP_LAYER_FLOOR);
@@ -208,7 +215,9 @@ static void on_update()
     inventory_draw();
     merchant_system_update();
     ui_msgbox_draw();
+    ui_dialogue_draw();
     ui_quality_draw();
+    
 
 #if 1
     // render debug

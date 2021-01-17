@@ -10,7 +10,7 @@
 
 static char*    _items[UI_LIST_MAX_ITEMS];
 static s32      _cnt;
-static Callback _callback[UI_LIST_NUM_EVENTS];
+static Callback _events[UI_LIST_NUM_EVENTS];
 static BOOL     _visible;
 static int      _pos_x;
 static int      _pos_y;
@@ -51,8 +51,8 @@ static void process_key_input()
   {
     ui_list_close();
 
-    if (_callback[UI_LIST_ON_SELECT].func != NULL)
-      INVOKE_CALLBACK(_callback[UI_LIST_ON_SELECT], void, _items[_selected]);
+    if (_events[UI_LIST_ON_SELECT].func != NULL)
+      INVOKE_CALLBACK(_events[UI_LIST_ON_SELECT], void, _items[_selected]);
 
     for (int i = 0; i < _cnt; ++i)
     {
@@ -121,7 +121,7 @@ void ui_list_close()
 void ui_list_hook(u32 event_id, Callback callback)
 {
   ASSERT(event_id < UI_LIST_NUM_EVENTS && "invalid event_id");
-  _callback[event_id] = callback;
+  _events[event_id] = callback;
 }
 
 void ui_list_set_pos(s32 x, s32 y)

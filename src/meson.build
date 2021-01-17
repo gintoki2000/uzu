@@ -28,4 +28,5 @@ source_files = files(
   'main_menu.c',
   'session.c',
   'level_loader.c',
+  'ui_dialogue.c',
 ) + engine_source_files + ecs_source_files + toolbox_source_files + system_source_files + ai_source_files

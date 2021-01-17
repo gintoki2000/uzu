@@ -115,3 +115,13 @@ u16 get_entity_hit_points(Ecs* ecs, ecs_entity_t entity)
 {
   return ((Health*)ecs_get(ecs, entity, HEALTH))->hit_points;
 }
+
+u16 get_entity_conversation(Ecs* ecs, ecs_entity_t entity)
+{
+  return ((Dialogue*)ecs_get(ecs, entity, DIALOGUE))->conversation_id;
+}
+
+const char* get_entity_name(Ecs* ecs, ecs_entity_t entity)
+{
+  return ((Name*)ecs_get(ecs, entity, NAME))->value;
+}

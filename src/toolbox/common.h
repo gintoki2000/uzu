@@ -95,6 +95,8 @@ typedef struct
 
 #define EPSILON 0.001f
 
+#define play_sound_effect(__sound_id) Mix_PlayChannel(-1, get_sfx(__sound_id), 0)
+
 typedef struct
 {
   float x;

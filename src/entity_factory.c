@@ -121,6 +121,7 @@ ecs_entity_t make_wizzard(Ecs* ecs, Vec2 pos)
   return make_character(ecs, pos, TEX_WIZZARD);
 }
 
+
 ecs_entity_t make_huge_demon(Ecs* ecs)
 {
   ecs_entity_t demon;

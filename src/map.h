@@ -56,6 +56,6 @@ BOOL map_is_wall(s32 cell_x, s32 cell_y);
 BOOL map_is_floor(s32 cell_x, s32 cell_y);
 s32  map_tile_at(s32 layer, s32 x, s32 y);
 void map_set_tile_at(s32 layer, s32 x, s32 y, s32 tile);
-void map_clear(s32 layer);
+void map_clear();
 
 #endif // MAP_H

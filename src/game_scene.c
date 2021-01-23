@@ -267,6 +267,7 @@ static void unload_current_level()
 {
   g_session.hp = get_entity_hit_points(g_ecs, get_player(g_ecs));
   ecs_each(g_ecs, NULL, cb_clear_world);
+  map_clear();
 }
 
 void game_scene_pause()

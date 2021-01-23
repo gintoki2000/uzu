@@ -5,6 +5,7 @@
 #include "json_helper.h"
 #include "map.h"
 #include "types.h"
+#include "utils.h"
 
 extern Ecs* g_ecs;
 
@@ -99,6 +100,11 @@ static int parse_objectgroup(const json_object* object_group_json_obj)
       dest  = json_object_object_get_as_string(props_json_obj, "dest");
 
       make_ladder(g_ecs, name, pos, size, level, dest);
+    }
+    else if (strcmp(objtype, "BigDemon") == 0)
+    {
+      
+      set_entity_position(g_ecs, make_huge_demon(g_ecs), pos);
     }
     else if (strcmp(objtype, "NPC") == 0)
     {

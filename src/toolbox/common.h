@@ -184,6 +184,16 @@ INLINE float vec2_normalize(Vec2* v)
   return mag;
 }
 
+INLINE float invsqrt(float x)
+{
+  float xhalf = 0.5f * x;
+  int   i     = *(int*)&x;                  // store floating-point bits in integer
+  i           = 0x5f3759df - (i >> 1);      // initial guess for Newton's method
+  x           = *(float*)&i;                // convert new bits into float
+  x           = x * (1.5f - xhalf * x * x); // One round of Newton's method
+  return x;
+}
+
 INLINE void vec2_scale_to_length(Vec2* v, float len)
 {
   vec2_normalize(v);
@@ -191,10 +201,15 @@ INLINE void vec2_scale_to_length(Vec2* v, float len)
   v->y *= len;
 }
 
+INLINE float vec2_mag2(Vec2 v)
+{
+  return v.x * v.x + v.y * v.y;
+}
+
 INLINE Vec2 vec2_unit_vec(Vec2 v)
 {
-  float len   = vec2_mag(v);
-  float ivlen = 1.f / len;
+  float len2   = vec2_mag2(v);
+  float ivlen = invsqrt( len2 );
   return VEC2(v.x * ivlen, v.y * ivlen);
 }
 

@@ -42,8 +42,10 @@ ecs_entity_t make_big_red_flask(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_red_flask(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_blue_flask(Ecs* ecs, Vec2 pos);
 
-//monsters
-ecs_entity_t make_huge_demon(Ecs* ecs);
+// monsters
+ecs_entity_t make_huge_demon(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_chort(Ecs* ecs, Vec2 pos);
+ecs_entity_t make_wogol(Ecs* ecs, Vec2 pos);
+ecs_entity_t make_imp(Ecs* ecs, Vec2 pos);
 
 #endif // ENTITY_FACTORY_H

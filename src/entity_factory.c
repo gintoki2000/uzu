@@ -47,7 +47,7 @@ ecs_entity_t make_anime_sword(Ecs* ecs)
 #define CHARACTER_SPRITE_WIDTH 16
 #define CHARACTER_SPRITE_HEIGHT 28
 
-ecs_entity_t make_character(Ecs* ecs, Vec2 pos, TextureId texture_id)
+ecs_entity_t make_character_base(Ecs* ecs, Vec2 pos, u16 texture_id)
 {
   ecs_entity_t entity;
   TEXTURE*     texture;
@@ -113,20 +113,20 @@ ecs_entity_t make_character(Ecs* ecs, Vec2 pos, TextureId texture_id)
 
 ecs_entity_t make_knight(Ecs* ecs, Vec2 pos)
 {
-  return make_character(ecs, pos, TEX_KNIGHT);
+  return make_character_base(ecs, pos, TEX_KNIGHT);
 }
 
 ecs_entity_t make_wizzard(Ecs* ecs, Vec2 pos)
 {
-  return make_character(ecs, pos, TEX_WIZZARD);
+  return make_character_base(ecs, pos, TEX_WIZZARD);
 }
 
-
-ecs_entity_t make_huge_demon(Ecs* ecs)
+ecs_entity_t make_monster_base(Ecs* ecs, Vec2 pos, u16 texture_id)
 {
-  ecs_entity_t demon;
-  TEXTURE*     texture;
-  Animation    anims[NUM_ANIM_STATES];
+  ecs_entity_t entity;
+
+  TEXTURE*  texture;
+  Animation anims[NUM_ANIM_STATES];
 
   /*components */
   Transform* transform;
@@ -134,81 +134,102 @@ ecs_entity_t make_huge_demon(Ecs* ecs)
   Animator*  animator;
   HitBox*    hitbox;
   Health*    heath;
-  HealthBar* healthBar;
+  HealthBar* health_bar;
   Motion*    motion;
   Drop*      drop;
 
-  texture = get_texture(TEX_BIG_DEMON);
-  animation_init(&anims[ANIM_STATE_HIT], texture, 32 * 6, 0, 1, 1, 32, 36);
-  animation_init(&anims[ANIM_STATE_IDLE], texture, 0, 0, 1, 4, 32, 36);
-  animation_init(&anims[ANIM_STATE_RUN], texture, 4 * 32, 0, 1, 4, 32, 36);
+  int texture_width;
+  int texture_height;
+  int sprite_width;
+  int sprite_height;
+
+  texture = get_texture(texture_id);
+
+  SDL_QueryTexture(texture, NULL, NULL, &texture_width, &texture_height);
+
+  sprite_height = texture_height;
+  sprite_width  = texture_width / 8;
+
+  animation_init(&anims[ANIM_STATE_HIT],
+                 texture,
+                 6 * sprite_width,
+                 0,
+                 1,
+                 1,
+                 sprite_width,
+                 sprite_height);
+  animation_init(&anims[ANIM_STATE_IDLE], texture, 0, 0, 1, 4, sprite_width, sprite_height);
+  animation_init(&anims[ANIM_STATE_RUN],
+                 texture,
+                 4 * sprite_width,
+                 0,
+                 1,
+                 4,
+                 sprite_width,
+                 sprite_height);
 
   anims[ANIM_STATE_IDLE].frame_duration = 8;
   anims[ANIM_STATE_RUN].frame_duration  = 6;
 
-  demon = ecs_create(ecs);
+  entity = ecs_create(ecs);
 
-  transform = ecs_add(ecs, demon, TRANSFORM);
+  transform      = ecs_add(ecs, entity, TRANSFORM);
+  transform->pos = pos;
 
-  visual = ecs_add(ecs, demon, VISUAL);
+  visual = ecs_add(ecs, entity, VISUAL);
 
-  visual->anchor.x = 32 / 2;
-  visual->anchor.y = 36;
+  visual->anchor.x = sprite_width / 2;
+  visual->anchor.y = sprite_height;
 
-  animator = ecs_add(ecs, demon, ANIMATOR);
+  animator = ecs_add(ecs, entity, ANIMATOR);
   animator_init(animator, anims, NUM_ANIM_STATES);
   animator->current_anim = ANIM_STATE_RUN;
   animator->elapsed      = 0;
 
-  hitbox            = ecs_add(ecs, demon, HITBOX);
-  hitbox->size      = VEC2(20.f, 36.f);
-  hitbox->anchor    = VEC2(10.f, 36.f);
+  hitbox            = ecs_add(ecs, entity, HITBOX);
+  hitbox->size      = VEC2(sprite_width, sprite_height);
+  hitbox->anchor    = VEC2(sprite_width / 2.f, sprite_height);
   hitbox->proxy_id  = RTREE_NULL_NODE;
   hitbox->mask_bits = BIT(CATEGORY_WEAPON) | BIT(CATEGORY_PROJECTILE);
   hitbox->category  = CATEGORY_ENEMY;
 
-  ecs_add(ecs, demon, ENEMY_TAG);
+  ecs_add(ecs, entity, ENEMY_TAG);
 
-  heath                 = ecs_add(ecs, demon, HEALTH);
+  heath                 = ecs_add(ecs, entity, HEALTH);
   heath->max_hit_points = 100;
-  heath->hit_points     = 60;
+  heath->hit_points     = 100;
 
-  healthBar         = ecs_add(ecs, demon, HEAL_BAR);
-  healthBar->len    = 40;
-  healthBar->anchor = (SDL_Point){ 20, 25 };
+  health_bar         = ecs_add(ecs, entity, HEAL_BAR);
+  health_bar->len    = sprite_width;
+  health_bar->anchor = (SDL_Point){ sprite_width / 2, sprite_height };
 
-  motion            = ecs_add(ecs, demon, MOTION);
+  motion            = ecs_add(ecs, entity, MOTION);
   motion->max_speed = 60.f;
   motion->max_force = 5.f;
 
-  drop          = ecs_add(ecs, demon, DROP);
+  drop          = ecs_add(ecs, entity, DROP);
   drop->item1   = ITEM_TYPE_BIG_RED_FLASK;
   drop->item2   = ITEM_TYPE_RED_FLASK;
   drop->change1 = 70;
   drop->change2 = 40;
 
-  ecs_add(ecs, demon, TILE_COLLISION_TAG);
+  ecs_add(ecs, entity, TILE_COLLISION_TAG);
+  return entity;
+}
 
-  /*
-  buid behaviour tree
-  bt_Repeater*            root;
-  bt_Sequence*            chase_seq;
-  btt_FindRandomLocation* find_location_task;
-  btt_MoveTo*             move_to_task;
-  btt_Wait*               wait_task;
+ecs_entity_t make_huge_demon(Ecs* ecs, Vec2 pos)
+{
+  return make_monster_base(ecs, pos, TEX_BIG_DEMON);
+}
 
-  find_location_task = btt_find_random_location_new();
-  move_to_task       = btt_move_to_new();
-  wait_task          = btt_wait_new(120);
-  chase_seq           = bt_sequence_new();
-  root               = bt_repeater_new((bt_Node*)chase_seq, -1);
+ecs_entity_t make_imp(Ecs* ecs, Vec2 pos)
+{
+  return make_monster_base(ecs, pos, TEX_IMP);
+}
 
-  bt_sequence_add(chase_seq, (bt_Node*)find_location_task);
-  bt_sequence_add(chase_seq, (bt_Node*)move_to_task);
-  bt_sequence_add(chase_seq, (bt_Node*)wait_task);
-  */
-
-  return demon;
+ecs_entity_t make_wogol(Ecs* ecs, Vec2 pos)
+{
+  return make_monster_base(ecs, pos, TEX_WOGOL);
 }
 
 ecs_entity_t make_chort(Ecs* ecs, Vec2 pos)
@@ -223,7 +244,7 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 pos)
   Animator*   animator;
   HitBox*     hitbox;
   Health*     heath;
-  HealthBar*  healthBar;
+  HealthBar*  health_bar;
   Motion*     motion;
   Drop*       drop;
   AIAgent*    ai_agent;
@@ -270,9 +291,9 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 pos)
   heath->max_hit_points = 10;
   heath->hit_points     = 10;
 
-  healthBar         = ecs_add(ecs, entity, HEAL_BAR);
-  healthBar->len    = 25;
-  healthBar->anchor = (SDL_Point){ 20, 25 };
+  health_bar         = ecs_add(ecs, entity, HEAL_BAR);
+  health_bar->len    = 25;
+  health_bar->anchor = (SDL_Point){ 20, 25 };
 
   motion            = ecs_add(ecs, entity, MOTION);
   motion->max_speed = 65;
@@ -795,9 +816,9 @@ ecs_entity_t make_npc(Ecs* ecs, ecs_entity_t character_base)
 
   merchant = ecs_add(ecs, character_base, MERCHANT);
 
-  ItemPayload payloads[] = { { ITEM_TYPE_RED_FLASK, 10, 1 },
-                             { ITEM_TYPE_BIG_RED_FLASK, 5, 3 },
-                             { ITEM_TYPE_BLUE_FLASK, 10, 2 } };
+  ItemPayload payloads[] = { { ITEM_TYPE_RED_FLASK,     10, 1 },
+                             { ITEM_TYPE_BIG_RED_FLASK, 5,  3 },
+                             { ITEM_TYPE_BLUE_FLASK,    10, 2 } };
 
   merchant->num_payloads = sizeof(payloads) / sizeof(ItemPayload);
   memcpy(merchant->payloads, payloads, sizeof(payloads));
@@ -856,7 +877,7 @@ ecs_entity_t make_spear(Ecs* ecs, u16 mask)
   thust            = ecs_add(ecs, entity, WEAPON_SKILL_THUST);
   thust->on_action = CHARACTER_ACTION_REGULAR_ATK;
 
-  weapon_base = ecs_add(ecs, entity, WEAPON_BASE);
+  weapon_base         = ecs_add(ecs, entity, WEAPON_BASE);
   weapon_base->wearer = ECS_NULL_ENT;
 
   return entity;

@@ -103,12 +103,15 @@ static int parse_objectgroup(const json_object* object_group_json_obj)
     }
     else if (strcmp(objtype, "BigDemon") == 0)
     {
-      
-      set_entity_position(g_ecs, make_huge_demon(g_ecs), pos);
+      make_huge_demon(g_ecs, pos);
     }
     else if (strcmp(objtype, "NPC") == 0)
     {
       make_wizzard_npc(g_ecs, VEC2(pos.x + size.x / 2.f, pos.y + size.y));
+    }
+    else if (strcmp(objtype, "Wogol") == 0)
+    {
+      make_wogol(g_ecs, pos);
     }
   }
   return 0;

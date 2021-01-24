@@ -23,6 +23,7 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
   [HEALTH]                     = ECS_TYPE(Health),
   [HITBOX]                     = ECS_TYPE_EX(HitBox, hitbox_init, NULL),
   [ENEMY_TAG]                  = ECS_TYPE(PlayerTag),
+  [TILE_COLLISION_TAG]         = ECS_TYPE(TileCollisionTag),
   [HEAL_BAR]                   = ECS_TYPE(HealthBar),
   [LIFE_SPAN]                  = ECS_TYPE(LifeSpan),
   [MOTION]                     = ECS_TYPE(Motion),

@@ -43,14 +43,14 @@ static void on_collided_w_wall(RECT* obj_rect, int tile_x, int tile_y, int axis,
   {
     if (dy < 0.f)
       obj_rect->y = (tile_y + 1) * TILE_SIZE - obj_rect->h + 1;
-    else if (dy > 0.f)
+    else
       obj_rect->y = tile_y * TILE_SIZE - obj_rect->h - 1;
   }
   else
   {
     if (dx < 0.f)
-      obj_rect->x = (tile_x + 1) * TILE_SIZE;
-    else if (dy > 0.f)
+      obj_rect->x = (tile_x + 1) * TILE_SIZE + 1;
+    else
       obj_rect->x = tile_x * TILE_SIZE - obj_rect->w - 1;
   }
 }
@@ -77,7 +77,7 @@ void tile_collision_system_update()
   float dx;
   float dy;
   BOOL  has_any_collision;
-  BOOL  is_standing_on_floor;
+  BOOL  is_floor_tile;
 
   ecs_raw(g_ecs, TILE_COLLISION_TAG, &entities, NULL, &cnt);
   for (int ie = 0; ie < cnt; ++ie)
@@ -93,10 +93,10 @@ void tile_collision_system_update()
       for (tile_x = to_tile_coord(obj_rect.x); tile_x <= to_tile_coord(obj_rect.x + obj_rect.w);
            ++tile_x)
       {
-        tile_y               = to_tile_coord(obj_rect.y + obj_rect.h);
-        tile_id              = map_tile_at(MAP_LAYER_FLOOR, tile_x, tile_y);
-        is_standing_on_floor = tile_id != 0;
-        if (!is_standing_on_floor)
+        tile_y        = to_tile_coord(obj_rect.y + obj_rect.h);
+        tile_id       = map_tile_at(MAP_LAYER_FLOOR, tile_x, tile_y);
+        is_floor_tile = tile_id != 0;
+        if (!is_floor_tile)
         {
           has_any_collision = TRUE;
           axis              = get_axis(transform->prev_pos, to_world_coords(tile_x, tile_y));

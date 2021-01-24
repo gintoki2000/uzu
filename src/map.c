@@ -225,9 +225,6 @@ void map_set_tile_at(s32 layer, s32 x, s32 y, s32 tile)
 
 void map_clear()
 {
-  memset(_front_layer, 0, MAP_MAX_COL * MAP_MAX_ROW * sizeof(s32));
-  memset(_wall_layer, 0, MAP_MAX_COL * MAP_MAX_ROW * sizeof(s32));
-  memset(_floor_layer, 0, MAP_MAX_COL * MAP_MAX_ROW * sizeof(s32));
   _animated_cell_list.cnt = 0;
   _col_cnt = 0;
   _row_cnt = 0;

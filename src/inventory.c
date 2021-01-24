@@ -163,8 +163,8 @@ void inventory_draw()
   RECT cell_rect;
   int  idx;
 
-  Item*     items = _items[_category];
-  ItemType* tp;
+  Item*           items = _items[_category];
+  const ItemType* tp;
 
   for (int i = 0; i < INV_ROW; ++i)
   {

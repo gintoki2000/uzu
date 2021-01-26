@@ -113,6 +113,10 @@ static int parse_objectgroup(const json_object* object_group_json_obj)
     {
       make_wogol(g_ecs, pos);
     }
+    else if (strcmp(objtype, "Imp") == 0)
+    {
+      make_imp(g_ecs, pos); 
+    }
   }
   return 0;
 }

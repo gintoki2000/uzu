@@ -12,12 +12,12 @@ typedef Sint32 s32;
 typedef Uint32 u32;
 
 typedef const char* cstr_t;
-
-typedef void* pointer_t;
-typedef int (*compare_fn_t)(const pointer_t lhs, const pointer_t rhs);
+typedef const void* constpointer_t;
+typedef void*       pointer_t;
+typedef int (*compare_fn_t)(constpointer_t lhs, constpointer_t rhs);
 typedef void (*destroy_fn_t)(pointer_t p);
-typedef int (*hash_fn_t)(const pointer_t p);
-typedef bool (*equal_fn_t)(const pointer_t lhs, const pointer_t rhs);
+typedef int (*hash_fn_t)(constpointer_t p);
+typedef bool (*equal_fn_t)(constpointer_t lhs, constpointer_t rhs);
 typedef bool (*consume_fn_t)(pointer_t user_data, pointer_t val);
 typedef bool (*bicomsume_fn_t)(pointer_t user_data, pointer_t, pointer_t);
 typedef void (*funcptr_t)();
@@ -38,6 +38,8 @@ typedef struct
 #define FONT FC_Font
 #define RENDERER SDL_Renderer
 #define TEXTURE SDL_Texture
+
+#define UNUSED(__var) (void)__var
 
 #define FLIP_TO_SIGN(__f) (__f == SDL_FLIP_NONE ? 1 : -1)
 
@@ -208,8 +210,8 @@ INLINE float vec2_mag2(Vec2 v)
 
 INLINE Vec2 vec2_unit_vec(Vec2 v)
 {
-  float len2   = vec2_mag2(v);
-  float ivlen = invsqrt( len2 );
+  float len2  = vec2_mag2(v);
+  float ivlen = invsqrt(len2);
   return VEC2(v.x * ivlen, v.y * ivlen);
 }
 

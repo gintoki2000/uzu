@@ -307,8 +307,7 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 pos)
 
   ecs_add(ecs, entity, TILE_COLLISION_TAG);
 
-  controller                = ecs_add(ecs, entity, CONTROLLER);
-  controller->lock_movement = TRUE;
+  controller = ecs_add(ecs, entity, CONTROLLER);
 
   BTRoot*              root;
   MoveTo*              move_to;
@@ -405,7 +404,7 @@ ecs_entity_t make_cleaver(Ecs* ecs, u16 mask_bits)
   Transform*    transform;
   Visual*       visual;
   HitBox*       hitbox;
-  WeaponBase*   core;
+  WeaponBase*   base;
   DamageOutput* damage_output;
   wpskl_Swing*  wpskl_swing;
 
@@ -423,9 +422,9 @@ ecs_entity_t make_cleaver(Ecs* ecs, u16 mask_bits)
   hitbox->category  = CATEGORY_WEAPON;
   hitbox->mask_bits = mask_bits;
 
-  core       = ecs_add(ecs, entity, WEAPON_BASE);
-  core->atk  = 2;
-  core->name = "cleaver";
+  base       = ecs_add(ecs, entity, WEAPON_BASE);
+  base->atk  = 2;
+  base->name = "cleaver";
 
   damage_output      = ecs_add(ecs, entity, DAMAGE_OUTPUT);
   damage_output->atk = 0;
@@ -472,64 +471,16 @@ ecs_entity_t make_blood_stain_effect(Ecs* ecs, Vec2 pos)
 
 ecs_entity_t make_bow(Ecs* ecs)
 {
-  ecs_entity_t bow;
-
-  Visual*    visual;
-  Transform* transform;
-
-  TEXTURE* texture;
-  texture = get_texture(TEX_BOW);
-
-  bow = ecs_create(ecs);
-
-  visual = ecs_add(ecs, bow, VISUAL);
-  sprite_init(&visual->sprite, texture);
-  visual->anchor.x = visual->sprite.rect.w / 2;
-  visual->anchor.y = visual->sprite.rect.h / 2;
-
-  transform = ecs_add(ecs, bow, TRANSFORM);
-
-  return bow;
+  UNUSED(ecs);
+  return ECS_NULL_ENT;
 }
 
 ecs_entity_t make_arrow(Ecs* ecs, Vec2 pos, Vec2 vel)
 {
-  TEXTURE*     texture;
-  ecs_entity_t arrow;
-
-  Transform*  transform;
-  Visual*     visual;
-  Motion*     motion;
-  Projectile* projectile;
-  HitBox*     hitbox;
-
-  texture = get_texture(TEX_ARROW);
-
-  arrow = ecs_create(ecs);
-
-  transform      = ecs_add(ecs, arrow, TRANSFORM);
-  transform->pos = pos;
-
-  motion      = ecs_add(ecs, arrow, MOTION);
-  motion->vel = vel;
-  motion->acc = VEC2(0.f, 0.f);
-
-  visual = ecs_add(ecs, arrow, VISUAL);
-  sprite_init(&visual->sprite, texture);
-  visual_set_anchor_to_center(visual);
-
-  projectile      = ecs_add(ecs, arrow, PROJECTILE);
-  projectile->atk = 3;
-
-  hitbox           = ecs_add(ecs, arrow, HITBOX);
-  hitbox->size.x   = visual->sprite.rect.w;
-  hitbox->size.y   = 3;
-  hitbox->anchor.x = hitbox->size.x / 2.f;
-  hitbox->anchor.y = hitbox->size.y / 2.f;
-  hitbox->proxy_id = RTREE_NULL_NODE;
-  hitbox->category = CATEGORY_PROJECTILE;
-
-  return arrow;
+  UNUSED(ecs);
+  UNUSED(pos);
+  UNUSED(vel);
+  return ECS_NULL_ENT;
 }
 
 ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
@@ -544,7 +495,7 @@ ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
   Transform*          transform;
   Visual*             visual;
   HitBox*             hitbox;
-  WeaponBase*         core;
+  WeaponBase*         base;
   DamageOutput*       damage_output;
   wpskl_Swing*        wpskl_swing;
   wpskl_ThunderStorm* wpskl_thunder_storm;
@@ -563,9 +514,10 @@ ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
   hitbox->category  = CATEGORY_WEAPON;
   hitbox->mask_bits = mask_bits;
 
-  core       = ecs_add(ecs, entity, WEAPON_BASE);
-  core->atk  = 2;
-  core->name = "golden sword";
+  base          = ecs_add(ecs, entity, WEAPON_BASE);
+  base->atk     = 2;
+  base->name    = "lavis_sword";
+  base->type_id = WEAPON_LAVIS_SWORD;
 
   damage_output      = ecs_add(ecs, entity, DAMAGE_OUTPUT);
   damage_output->atk = 0;
@@ -816,9 +768,9 @@ ecs_entity_t make_npc(Ecs* ecs, ecs_entity_t character_base)
 
   merchant = ecs_add(ecs, character_base, MERCHANT);
 
-  ItemPayload payloads[] = { { ITEM_TYPE_RED_FLASK,     10, 1 },
-                             { ITEM_TYPE_BIG_RED_FLASK, 5,  3 },
-                             { ITEM_TYPE_BLUE_FLASK,    10, 2 } };
+  ItemPayload payloads[] = { { ITEM_TYPE_RED_FLASK,    10, 1 },
+                             { ITEM_TYPE_BIG_RED_FLASK, 5, 3 },
+                             { ITEM_TYPE_BLUE_FLASK,   10, 2 } };
 
   merchant->num_payloads = sizeof(payloads) / sizeof(ItemPayload);
   memcpy(merchant->payloads, payloads, sizeof(payloads));

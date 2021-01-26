@@ -3,11 +3,13 @@
 #include <components.h>
 #include <ecs/ecs.h>
 #include <toolbox/toolbox.h>
+
 #define DT 0.0166f
+#define SPEED_LIMIT 200.f
 
 extern Ecs* g_ecs;
 
-static void set_vel_by_controller_input(void)
+static void apply_controller_input(void)
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;
@@ -18,11 +20,12 @@ static void set_vel_by_controller_input(void)
   ecs_raw(g_ecs, CONTROLLER, &entities, (void**)&controllers, &cnt);
   for (int i = 0; i < cnt; ++i)
   {
-    if (!controllers[i].lock_movement)
+    if (!ecs_has(g_ecs, entities[i], INPUT_BLOCKER))
     {
       if ((motion = ecs_get(g_ecs, entities[i], MOTION)))
       {
-        motion->vel = controllers[i].desired_vel;
+        motion->vel.x = controllers[i].force.x;
+        motion->vel.y = controllers[i].force.y;
       }
     }
   }
@@ -37,7 +40,7 @@ void motion_system_update()
   Transform* transform;
   Motion*    motion_raw_array;
 
-  set_vel_by_controller_input();
+  apply_controller_input();
 
   ecs_raw(g_ecs, MOTION, &entities, (void**)&motion_raw_array, &cnt);
 

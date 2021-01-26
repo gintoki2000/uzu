@@ -61,11 +61,15 @@ void swing_weapon_skl_system_update(void)
 
         if (!wearer_controller->in_action && (skl[i].on_action == wearer_controller->action))
         {
+          Vec2 v = { 1.f, 0.f };
+
           skl[i].timer                 = 0;
           skl[i].is_active             = TRUE;
           skl[i].step                  = 0;
           damage_output->atk           = base->atk * SWINGING_SYSTEM_DAMAGE_ADJ;
           damage_output->type          = DAMAGE_TYPE_STRIKE;
+          damage_output->impact        = TRUE;
+          damage_output->force         = v;
           wearer_controller->action    = CHARACTER_ACTION_NONE;
           wearer_controller->in_action = TRUE;
         }

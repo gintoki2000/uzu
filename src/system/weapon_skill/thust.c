@@ -17,7 +17,6 @@ void weapon_skill_thust_update()
   Motion*       wearer_motion;
   DamageOutput* damage_output;
 
-
   ecs_raw(g_ecs, WEAPON_SKILL_THUST, &entities, (pointer_t*)&skl, &cnt);
   for (ecs_size_t i = 0; i < cnt; ++i)
   {
@@ -34,14 +33,13 @@ void weapon_skill_thust_update()
             transform        = ecs_get(g_ecs, entities[i], TRANSFORM);
             damage_output    = ecs_get(g_ecs, entities[i], DAMAGE_OUTPUT);
 
-            wearer_equipment->d.x            = -10;
-            wearer_equipment->d.y            = -5;
-            wearer_controller->in_action     = TRUE;
-            wearer_controller->action        = CHARACTER_ACTION_NONE;
-            wearer_controller->lock_movement = TRUE;
-            wearer_motion->vel               = VEC2_ZERO;
-            damage_output->atk               = 2;
-            damage_output->type              = DAMAGE_TYPE_THUST;
+            wearer_equipment->d.x        = -10;
+            wearer_equipment->d.y        = -5;
+            wearer_controller->in_action = TRUE;
+            wearer_controller->action    = CHARACTER_ACTION_NONE;
+            wearer_motion->vel           = VEC2_ZERO;
+            damage_output->atk           = 2;
+            damage_output->type          = DAMAGE_TYPE_THUST;
 
             transform->rot = 65.0;
 
@@ -84,12 +82,11 @@ void weapon_skill_thust_update()
             wearer_equipment = ecs_get(g_ecs, base->wearer, EQUIPMENT);
             damage_output    = ecs_get(g_ecs, entities[i], DAMAGE_OUTPUT);
 
-            wearer_controller->in_action     = FALSE;
-            wearer_controller->lock_movement = FALSE;
-            wearer_equipment->d.x            = 0;
-            wearer_equipment->d.y            = 0;
-            skl[i].state                     = 0;
-            damage_output->atk               = 0;
+            wearer_controller->in_action = FALSE;
+            wearer_equipment->d.x        = 0;
+            wearer_equipment->d.y        = 0;
+            skl[i].state                 = 0;
+            damage_output->atk           = 0;
           }
         }
       }

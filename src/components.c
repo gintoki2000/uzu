@@ -35,6 +35,7 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
   [WEAPON_SKILL_CHARGE]        = ECS_TYPE(wpskl_Charge),
   [DROP]                       = ECS_TYPE(Drop),
   [INVULNERABLE]               = ECS_TYPE(Invulnerable),
+  [INPUT_BLOCKER]              = ECS_TYPE(InputBlocker),
   [CAMERA_TARGET_TAG]          = ECS_TYPE(CameraTargetTag),
   [AI_AGENT]                   = ECS_TYPE_EX(AIAgent, NULL, ai_agent_fini),
   [DESTINATION]                = ECS_TYPE(Destination),

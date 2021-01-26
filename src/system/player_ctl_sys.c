@@ -4,11 +4,11 @@
 #include "inventory.h"
 #include "ui_list.h"
 
+#include "event_messaging_sys.h"
 #include <components.h>
 #include <ecs/ecs.h>
 #include <engine/keyboard.h>
 #include <utils.h>
-#include "event_messaging_sys.h"
 
 extern Ecs* g_ecs;
 
@@ -32,10 +32,10 @@ static void on_list_select(pointer_t arg, const char* item)
   INFO("you selected %s\n", item);
 
   ems_broadcast(MSG_COMANND_SELECTED,
-                     &(MSG_CommandSelected){
-                         g_curr_iteractable_entity,
-                         item,
-                     });
+                &(MSG_CommandSelected){
+                    g_curr_iteractable_entity,
+                    item,
+                });
 }
 
 static void update_pointed_entity()
@@ -115,23 +115,23 @@ void player_controller_system_update()
 
   controller = ecs_get(g_ecs, player, CONTROLLER);
 
-  controller->desired_vel = VEC2_ZERO;
+  controller->force = VEC2_ZERO;
 
   if (key_pressed(KEY_UP))
   {
-    controller->desired_vel.y -= 1 * 100;
+    controller->force.y -= 1 * 100;
   }
   if (key_pressed(KEY_DOWN))
   {
-    controller->desired_vel.y += 1 * 100;
+    controller->force.y += 1 * 100;
   }
   if (key_pressed(KEY_LEFT))
   {
-    controller->desired_vel.x -= 1 * 100;
+    controller->force.x -= 1 * 100;
   }
   if (key_pressed(KEY_RIGHT))
   {
-    controller->desired_vel.x += 1 * 100;
+    controller->force.x += 1 * 100;
   }
 
   if (key_just_pressed(KEY_SELECT))

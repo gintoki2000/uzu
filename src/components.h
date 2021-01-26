@@ -30,6 +30,7 @@ typedef enum
   DROP,
   ITEM_TAG,
   INVULNERABLE,
+  INPUT_BLOCKER,
   ENEMY_TAG,
   PLAYER_TAG,
   CAMERA_TARGET_TAG,
@@ -61,6 +62,7 @@ typedef struct
   float max_force;
   float friction;
 } Motion;
+
 typedef struct
 {
   Vec2   prev_pos;
@@ -86,13 +88,23 @@ typedef struct
 
 typedef struct
 {
-  Direction desired_dir;
-  Vec2      desired_vel;
-  u16       action;
-  BOOL      in_action;
-  BOOL      lock_dir;
-  BOOL      lock_movement;
+  Vec2 force;
+  u16  action;
+  BOOL in_action;
 } Controller;
+
+INLINE void set_controller_action(Controller* c, u16 action)
+{
+  if (c->action != CHARACTER_ACTION_NONE)
+    c->action = action;
+}
+
+INLINE u16 get_controller_action(Controller* c)
+{
+  u16 action = c->action;
+  c->action  = 0;
+  return action;
+}
 
 typedef struct
 {
@@ -105,6 +117,7 @@ typedef struct
 {
   ecs_entity_t wearer;
   s32          atk;
+  u16          type_id;
   const char*  name;
 } WeaponBase;
 
@@ -142,8 +155,10 @@ typedef struct
 
 typedef struct
 {
-  int atk;
-  int type;
+  int  atk;
+  int  type;
+  BOOL impact;
+  Vec2 force;
 } DamageOutput;
 
 /*entity tag*/
@@ -222,7 +237,14 @@ typedef struct
 typedef struct
 {
   int remaining;
+} InputBlocker;
+
+typedef struct
+{
+  int remaining;
 } Invulnerable;
+
+typedef ecs_entity_t Attacker;
 
 typedef struct
 {

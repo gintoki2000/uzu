@@ -9,7 +9,7 @@ void game_event_init()
   GE_kill_monsters_init();
 }
 
-void notify_game_event_is_finished(GameEventCode event_code)
+void notify_game_event_finished(GameEventCode event_code)
 {
 	ems_broadcast(MSG_EVENT_FINISHED, &(MSG_EventFinished){ event_code });
 }

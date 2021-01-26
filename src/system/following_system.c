@@ -3,7 +3,8 @@
 #include <utils.h>
 
 extern Ecs* g_ecs;
-void        following_system_update(void)
+
+void following_system_update(void)
 {
   ecs_entity_t*    entities;
   ecs_size_t       cnt;

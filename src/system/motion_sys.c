@@ -24,8 +24,9 @@ static void apply_controller_input(void)
     {
       if ((motion = ecs_get(g_ecs, entities[i], MOTION)))
       {
-        motion->vel.x = controllers[i].force.x;
-        motion->vel.y = controllers[i].force.y;
+        motion->acc.x += controllers[i].force.x;
+        motion->acc.y += controllers[i].force.y;
+        controllers[i].force = VEC2_ZERO;
       }
     }
   }

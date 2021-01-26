@@ -15,6 +15,7 @@ extern Ecs* g_ecs;
 #define INTERACTABLE_DISTANCE TILE_SIZE * 4
 #define POINTER_DOWN_WIDTH 6
 #define POINTER_DOWN_HEIGHT 3
+#define MOVE_ACC 10.f
 
 ecs_entity_t g_curr_iteractable_entity = ECS_NULL_ENT;
 
@@ -28,9 +29,7 @@ static void on_list_select(pointer_t arg, const char* item);
 
 static void on_list_select(pointer_t arg, const char* item)
 {
-  (void)arg;
-  INFO("you selected %s\n", item);
-
+  UNUSED(arg);
   ems_broadcast(MSG_COMANND_SELECTED,
                 &(MSG_CommandSelected){
                     g_curr_iteractable_entity,
@@ -40,7 +39,11 @@ static void on_list_select(pointer_t arg, const char* item)
 
 static void update_pointed_entity()
 {
-  if (g_curr_iteractable_entity == ECS_NULL_ENT)
+  ecs_entity_t player;
+
+  player = get_player(g_ecs);
+
+  if (player != ECS_NULL_ENT && g_curr_iteractable_entity == ECS_NULL_ENT)
   {
     Vec2         player_pos, ientity_pos;
     RECT         rect;
@@ -50,7 +53,7 @@ static void update_pointed_entity()
     float        dist;
     ecs_entity_t closest;
 
-    player_pos = get_player_position(g_ecs);
+    player_pos = get_entity_position(g_ecs, player);
     rect.x     = player_pos.x - TILE_SIZE * 2;
     rect.y     = player_pos.y - TILE_SIZE * 2;
     rect.w     = TILE_SIZE * 3;
@@ -107,6 +110,7 @@ void player_controller_system_update()
 
   ecs_entity_t player;
   Controller*  controller;
+  BOOL         has_any_mov_inp;
 
   update_pointed_entity();
 
@@ -116,23 +120,30 @@ void player_controller_system_update()
   controller = ecs_get(g_ecs, player, CONTROLLER);
 
   controller->force = VEC2_ZERO;
-
+  has_any_mov_inp   = FALSE;
   if (key_pressed(KEY_UP))
   {
-    controller->force.y -= 1 * 100;
+    has_any_mov_inp = TRUE;
+    controller->force.y -= MOVE_ACC;
   }
   if (key_pressed(KEY_DOWN))
   {
-    controller->force.y += 1 * 100;
+    has_any_mov_inp = TRUE;
+    controller->force.y += MOVE_ACC;
   }
   if (key_pressed(KEY_LEFT))
   {
-    controller->force.x -= 1 * 100;
+    has_any_mov_inp = TRUE;
+    controller->force.x -= MOVE_ACC;
   }
   if (key_pressed(KEY_RIGHT))
   {
-    controller->force.x += 1 * 100;
+    has_any_mov_inp = TRUE;
+    controller->force.x += MOVE_ACC;
   }
+
+  if (!has_any_mov_inp)
+    set_entity_velocity(g_ecs, player, VEC2_ZERO);
 
   if (key_just_pressed(KEY_SELECT))
   {

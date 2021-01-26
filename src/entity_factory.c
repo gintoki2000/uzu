@@ -206,6 +206,7 @@ ecs_entity_t make_monster_base(Ecs* ecs, Vec2 pos, u16 texture_id)
   motion            = ecs_add(ecs, entity, MOTION);
   motion->max_speed = 60.f;
   motion->max_force = 5.f;
+  motion->friction  = 0.95f;
 
   drop          = ecs_add(ecs, entity, DROP);
   drop->item1   = ITEM_TYPE_BIG_RED_FLASK;
@@ -768,9 +769,9 @@ ecs_entity_t make_npc(Ecs* ecs, ecs_entity_t character_base)
 
   merchant = ecs_add(ecs, character_base, MERCHANT);
 
-  ItemPayload payloads[] = { { ITEM_TYPE_RED_FLASK,    10, 1 },
+  ItemPayload payloads[] = { { ITEM_TYPE_RED_FLASK, 10, 1 },
                              { ITEM_TYPE_BIG_RED_FLASK, 5, 3 },
-                             { ITEM_TYPE_BLUE_FLASK,   10, 2 } };
+                             { ITEM_TYPE_BLUE_FLASK, 10, 2 } };
 
   merchant->num_payloads = sizeof(payloads) / sizeof(ItemPayload);
   memcpy(merchant->payloads, payloads, sizeof(payloads));

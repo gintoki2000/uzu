@@ -16,10 +16,13 @@ static void on_weapon_hit(void* arg, const MSG_WeaponHit* event)
     {
       ems_broadcast(MSG_DEAL_DAMAGE,
                     &(MSG_DealDamage){
-                        .damage   = damage_output->atk,
-                        .dealer   = event->weapon,
-                        .receiver = event->entity,
-                        .type     = damage_output->type,
+                        .damage      = damage_output->atk,
+                        .dealer      = event->weapon,
+                        .receiver    = event->entity,
+                        .type        = damage_output->type,
+                        .impact      = damage_output->impact,
+                        .impact_time = 10,
+                        .force       = damage_output->force,
                     });
     }
   }

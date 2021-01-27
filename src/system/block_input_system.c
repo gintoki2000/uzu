@@ -1,5 +1,6 @@
 #include "block_input_system.h"
 #include <components.h>
+#include <utils.h>
 
 extern Ecs* g_ecs;
 
@@ -14,6 +15,9 @@ void input_blocking_system()
   for (int i = cnt - 1; i >= 0; --i)
   {
     if (--input_blockers[i].remaining == 0)
+    {
+      set_entity_velocity(g_ecs, entities[i], VEC2_ZERO);
       ecs_rmv(g_ecs, entities[i], INPUT_BLOCKER);
+    }
   }
 }

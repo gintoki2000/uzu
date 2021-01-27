@@ -21,6 +21,13 @@ void animator_controller_system_update()
     if ((motion = ecs_get(g_ecs, entities[i], MOTION)) &&
         (visual = ecs_get(g_ecs, entities[i], VISUAL)))
     {
+
+      if (ecs_has(g_ecs, entities[i], INVULNERABLE))
+      {
+        animators[i].current_anim = ANIM_STATE_HIT;
+        animators[i].elapsed      = 0;
+        return;
+      }
       vx = motion->vel.x;
       vy = motion->vel.y;
 

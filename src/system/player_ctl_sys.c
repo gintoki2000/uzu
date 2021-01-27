@@ -15,7 +15,7 @@ extern Ecs* g_ecs;
 #define INTERACTABLE_DISTANCE TILE_SIZE * 4
 #define POINTER_DOWN_WIDTH 6
 #define POINTER_DOWN_HEIGHT 3
-#define MOVE_ACC 10.f
+#define MOVE_SPEED 100.f
 
 ecs_entity_t g_curr_iteractable_entity = ECS_NULL_ENT;
 
@@ -39,11 +39,8 @@ static void on_list_select(pointer_t arg, const char* item)
 
 static void update_pointed_entity()
 {
-  ecs_entity_t player;
 
-  player = get_player(g_ecs);
-
-  if (player != ECS_NULL_ENT && g_curr_iteractable_entity == ECS_NULL_ENT)
+  if (g_curr_iteractable_entity == ECS_NULL_ENT)
   {
     Vec2         player_pos, ientity_pos;
     RECT         rect;
@@ -53,7 +50,7 @@ static void update_pointed_entity()
     float        dist;
     ecs_entity_t closest;
 
-    player_pos = get_entity_position(g_ecs, player);
+    player_pos = get_player_position(g_ecs);
     rect.x     = player_pos.x - TILE_SIZE * 2;
     rect.y     = player_pos.y - TILE_SIZE * 2;
     rect.w     = TILE_SIZE * 3;
@@ -110,7 +107,7 @@ void player_controller_system_update()
 
   ecs_entity_t player;
   Controller*  controller;
-  BOOL         has_any_mov_inp;
+  Motion*      motion;
 
   update_pointed_entity();
 
@@ -118,55 +115,56 @@ void player_controller_system_update()
     return;
 
   controller = ecs_get(g_ecs, player, CONTROLLER);
+  motion     = ecs_get(g_ecs, player, MOTION);
 
-  controller->force = VEC2_ZERO;
-  has_any_mov_inp   = FALSE;
-  if (key_pressed(KEY_UP))
+  if (!ecs_has(g_ecs, player, INVULNERABLE))
   {
-    has_any_mov_inp = TRUE;
-    controller->force.y -= MOVE_ACC;
-  }
-  if (key_pressed(KEY_DOWN))
-  {
-    has_any_mov_inp = TRUE;
-    controller->force.y += MOVE_ACC;
-  }
-  if (key_pressed(KEY_LEFT))
-  {
-    has_any_mov_inp = TRUE;
-    controller->force.x -= MOVE_ACC;
-  }
-  if (key_pressed(KEY_RIGHT))
-  {
-    has_any_mov_inp = TRUE;
-    controller->force.x += MOVE_ACC;
-  }
 
-  if (!has_any_mov_inp)
-    set_entity_velocity(g_ecs, player, VEC2_ZERO);
-
-  if (key_just_pressed(KEY_SELECT))
-  {
-    inventory_display();
-    return;
-  }
-
-  if (g_curr_iteractable_entity == ECS_NULL_ENT)
-  {
-    if (key_just_pressed(KEY_A))
+    motion->vel = VEC2_ZERO;
+    if (key_pressed(KEY_UP))
     {
-      controller->action = CHARACTER_ACTION_REGULAR_ATK;
+      motion->vel.y += -MOVE_SPEED;
     }
 
-    else if (key_just_pressed(KEY_B))
+    if (key_pressed(KEY_DOWN))
     {
-      controller->action = CHARACTER_ACTION_SPECIAL_ATK;
+      motion->vel.y += MOVE_SPEED;
     }
-  }
-  else
-  {
 
-    if (key_just_pressed(KEY_A))
-      begin_interact(g_curr_iteractable_entity);
+    if (key_pressed(KEY_LEFT))
+    {
+      motion->vel.x += -MOVE_SPEED;
+    }
+
+    if (key_pressed(KEY_RIGHT))
+
+    {
+      motion->vel.x += MOVE_SPEED;
+    }
+
+    if (key_just_pressed(KEY_SELECT))
+    {
+      inventory_display();
+      return;
+    }
+
+    if (g_curr_iteractable_entity == ECS_NULL_ENT)
+    {
+      if (key_just_pressed(KEY_A))
+      {
+        controller->action = CHARACTER_ACTION_REGULAR_ATK;
+      }
+
+      else if (key_just_pressed(KEY_B))
+      {
+        controller->action = CHARACTER_ACTION_SPECIAL_ATK;
+      }
+    }
+    else
+    {
+
+      if (key_just_pressed(KEY_A))
+        begin_interact(g_curr_iteractable_entity);
+    }
   }
 }

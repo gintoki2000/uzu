@@ -61,7 +61,7 @@ void swing_weapon_skl_system_update(void)
 
         if (!wearer_controller->in_action && (skl[i].on_action == wearer_controller->action))
         {
-          Vec2 v = { 100.f, 0.f };
+          Vec2 v = { 60.f, 20.f };
 
           skl[i].timer                 = 0;
           skl[i].is_active             = TRUE;

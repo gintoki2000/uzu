@@ -35,7 +35,6 @@ void charge_weapon_skl_system()
           transform->rot               = 0.0;
           weaer_motion->vel            = VEC2_ZERO;
           wearer_controller->in_action = FALSE;
-          wearer_controller->lock_dir  = FALSE;
           skl[i].is_active             = FALSE;
           damage_output->atk           = 0;
         }
@@ -62,7 +61,6 @@ void charge_weapon_skl_system()
         damage_output->atk           = weapon_core->atk;
         damage_output->type          = DAMAGE_TYPE_THUST;
         wearer_controller->action    = CHARACTER_ACTION_NONE;
-        wearer_controller->lock_dir  = TRUE;
         wearer_controller->in_action = TRUE;
         skl[i].is_active             = TRUE;
         skl[i].timer                 = 0;

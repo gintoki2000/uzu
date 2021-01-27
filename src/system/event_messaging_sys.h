@@ -57,6 +57,9 @@ typedef struct
   ecs_entity_t receiver;
   int          damage;
   int          type;
+  BOOL         impact;
+  u16          impact_time;
+  Vec2         force;
 } MSG_DealDamage;
 
 typedef struct

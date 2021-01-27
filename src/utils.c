@@ -75,6 +75,9 @@ BOOL equip(Ecs* ecs, ecs_entity_t entity, ecs_entity_t weapon)
 
   if (weapon_core == NULL)
     return FALSE;
+
+  if (equipment->weapon != ECS_NULL_ENT)
+    ecs_destroy(ecs, equipment->weapon);
   equipment->weapon   = weapon;
   weapon_core->wearer = entity;
 

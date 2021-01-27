@@ -9,7 +9,9 @@ extern Ecs* g_ecs;
 static void on_deal_damage(void* arg, const MSG_DealDamage* event)
 {
   (void)arg;
-  Health* health;
+  Health*       health;
+  Motion*       motion;
+  InputBlocker* input_blocker;
   if ((health = ecs_get(g_ecs, event->receiver, HEALTH)) != NULL &&
       !ecs_has(g_ecs, event->receiver, INVULNERABLE))
   {
@@ -36,10 +38,22 @@ static void on_deal_damage(void* arg, const MSG_DealDamage* event)
                     });
       invulnerable            = ecs_add(g_ecs, event->receiver, INVULNERABLE);
       invulnerable->remaining = 10;
+
+      if (event->impact && (motion = ecs_get(g_ecs, event->receiver, MOTION)))
+      {
+        motion->acc.x += event->force.x;
+        motion->acc.y += event->force.y;
+        if (!ecs_has(g_ecs, event->receiver, INPUT_BLOCKER))
+        {
+          input_blocker            = ecs_add(g_ecs, event->receiver, INPUT_BLOCKER);
+          input_blocker->remaining = event->impact_time;
+        }
+      }
     }
   }
 }
 
+// TODO: tạo một hệ thống react lại các  event và sinh ra các effect
 static void on_get_damaged(void* arg, const MSG_GetDamaged* event)
 {
   (void)arg;

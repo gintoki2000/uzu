@@ -4,17 +4,18 @@
 #include "inventory.h"
 #include "ui_list.h"
 
+#include "event_messaging_sys.h"
 #include <components.h>
 #include <ecs/ecs.h>
 #include <engine/keyboard.h>
 #include <utils.h>
-#include "event_messaging_sys.h"
 
 extern Ecs* g_ecs;
 
 #define INTERACTABLE_DISTANCE TILE_SIZE * 4
 #define POINTER_DOWN_WIDTH 6
 #define POINTER_DOWN_HEIGHT 3
+#define MOVE_SPEED 100.f
 
 ecs_entity_t g_curr_iteractable_entity = ECS_NULL_ENT;
 
@@ -28,18 +29,17 @@ static void on_list_select(pointer_t arg, const char* item);
 
 static void on_list_select(pointer_t arg, const char* item)
 {
-  (void)arg;
-  INFO("you selected %s\n", item);
-
+  UNUSED(arg);
   ems_broadcast(MSG_COMANND_SELECTED,
-                     &(MSG_CommandSelected){
-                         g_curr_iteractable_entity,
-                         item,
-                     });
+                &(MSG_CommandSelected){
+                    g_curr_iteractable_entity,
+                    item,
+                });
 }
 
 static void update_pointed_entity()
 {
+
   if (g_curr_iteractable_entity == ECS_NULL_ENT)
   {
     Vec2         player_pos, ientity_pos;
@@ -107,6 +107,7 @@ void player_controller_system_update()
 
   ecs_entity_t player;
   Controller*  controller;
+  Motion*      motion;
 
   update_pointed_entity();
 
@@ -114,48 +115,56 @@ void player_controller_system_update()
     return;
 
   controller = ecs_get(g_ecs, player, CONTROLLER);
+  motion     = ecs_get(g_ecs, player, MOTION);
 
-  controller->desired_vel = VEC2_ZERO;
+  if (!ecs_has(g_ecs, player, INVULNERABLE))
+  {
 
-  if (key_pressed(KEY_UP))
-  {
-    controller->desired_vel.y -= 1 * 100;
-  }
-  if (key_pressed(KEY_DOWN))
-  {
-    controller->desired_vel.y += 1 * 100;
-  }
-  if (key_pressed(KEY_LEFT))
-  {
-    controller->desired_vel.x -= 1 * 100;
-  }
-  if (key_pressed(KEY_RIGHT))
-  {
-    controller->desired_vel.x += 1 * 100;
-  }
-
-  if (key_just_pressed(KEY_SELECT))
-  {
-    inventory_display();
-    return;
-  }
-
-  if (g_curr_iteractable_entity == ECS_NULL_ENT)
-  {
-    if (key_just_pressed(KEY_A))
+    motion->vel = VEC2_ZERO;
+    if (key_pressed(KEY_UP))
     {
-      controller->action = CHARACTER_ACTION_REGULAR_ATK;
+      motion->vel.y += -MOVE_SPEED;
     }
 
-    else if (key_just_pressed(KEY_B))
+    if (key_pressed(KEY_DOWN))
     {
-      controller->action = CHARACTER_ACTION_SPECIAL_ATK;
+      motion->vel.y += MOVE_SPEED;
     }
-  }
-  else
-  {
 
-    if (key_just_pressed(KEY_A))
-      begin_interact(g_curr_iteractable_entity);
+    if (key_pressed(KEY_LEFT))
+    {
+      motion->vel.x += -MOVE_SPEED;
+    }
+
+    if (key_pressed(KEY_RIGHT))
+
+    {
+      motion->vel.x += MOVE_SPEED;
+    }
+
+    if (key_just_pressed(KEY_SELECT))
+    {
+      inventory_display();
+      return;
+    }
+
+    if (g_curr_iteractable_entity == ECS_NULL_ENT)
+    {
+      if (key_just_pressed(KEY_A))
+      {
+        controller->action = CHARACTER_ACTION_REGULAR_ATK;
+      }
+
+      else if (key_just_pressed(KEY_B))
+      {
+        controller->action = CHARACTER_ACTION_SPECIAL_ATK;
+      }
+    }
+    else
+    {
+
+      if (key_just_pressed(KEY_A))
+        begin_interact(g_curr_iteractable_entity);
+    }
   }
 }

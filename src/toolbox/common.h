@@ -12,12 +12,12 @@ typedef Sint32 s32;
 typedef Uint32 u32;
 
 typedef const char* cstr_t;
-
-typedef void* pointer_t;
-typedef int (*compare_fn_t)(const pointer_t lhs, const pointer_t rhs);
+typedef const void* constpointer_t;
+typedef void*       pointer_t;
+typedef int (*compare_fn_t)(constpointer_t lhs, constpointer_t rhs);
 typedef void (*destroy_fn_t)(pointer_t p);
-typedef int (*hash_fn_t)(const pointer_t p);
-typedef bool (*equal_fn_t)(const pointer_t lhs, const pointer_t rhs);
+typedef int (*hash_fn_t)(constpointer_t p);
+typedef bool (*equal_fn_t)(constpointer_t lhs, constpointer_t rhs);
 typedef bool (*consume_fn_t)(pointer_t user_data, pointer_t val);
 typedef bool (*bicomsume_fn_t)(pointer_t user_data, pointer_t, pointer_t);
 typedef void (*funcptr_t)();
@@ -38,6 +38,8 @@ typedef struct
 #define FONT FC_Font
 #define RENDERER SDL_Renderer
 #define TEXTURE SDL_Texture
+
+#define UNUSED(__var) (void)__var
 
 #define FLIP_TO_SIGN(__f) (__f == SDL_FLIP_NONE ? 1 : -1)
 
@@ -184,6 +186,16 @@ INLINE float vec2_normalize(Vec2* v)
   return mag;
 }
 
+INLINE float invsqrt(float x)
+{
+  float xhalf = 0.5f * x;
+  int   i     = *(int*)&x;                  // store floating-point bits in integer
+  i           = 0x5f3759df - (i >> 1);      // initial guess for Newton's method
+  x           = *(float*)&i;                // convert new bits into float
+  x           = x * (1.5f - xhalf * x * x); // One round of Newton's method
+  return x;
+}
+
 INLINE void vec2_scale_to_length(Vec2* v, float len)
 {
   vec2_normalize(v);
@@ -191,10 +203,15 @@ INLINE void vec2_scale_to_length(Vec2* v, float len)
   v->y *= len;
 }
 
+INLINE float vec2_mag2(Vec2 v)
+{
+  return v.x * v.x + v.y * v.y;
+}
+
 INLINE Vec2 vec2_unit_vec(Vec2 v)
 {
-  float len   = vec2_mag(v);
-  float ivlen = 1.f / len;
+  float len2  = vec2_mag2(v);
+  float ivlen = invsqrt(len2);
   return VEC2(v.x * ivlen, v.y * ivlen);
 }
 

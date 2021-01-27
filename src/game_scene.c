@@ -43,6 +43,7 @@
 #include "system/rendering_sys.h"
 #include "system/text_rendering_sys.h"
 #include "system/tile_collision_sys.h"
+#include "system/interaction_system.h"
 
 #include "system/weapon_skill/charge.h"
 #include "system/weapon_skill/swing.h"
@@ -190,6 +191,7 @@ static void on_update()
       camera_system_update();
       map_update_animated_cells();
       following_system_update();
+      input_blocking_system();
 
       //  skl
       swing_weapon_skl_system_update();

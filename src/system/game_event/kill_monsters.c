@@ -72,7 +72,7 @@ static void on_entity_died(pointer_t arg, const MSG_EntityDied* event)
 
 static void on_game_event_finished(pointer_t arg, const MSG_EventFinished* event)
 {
-  (void)arg;
+  UNUSED(arg);
   if (event->event_code == GAME_EVENT_GET_WEAPON)
   {
     ems_disconnect(MSG_EVENT_FINISHED, (pointer_t)on_game_event_finished);
@@ -82,21 +82,21 @@ static void on_game_event_finished(pointer_t arg, const MSG_EventFinished* event
 
 static void on_conversation_finished(pointer_t arg, const MSG_ConversationFinished* event)
 {
-  (void)arg;
-
+  UNUSED(arg);
   if (strcmp(event->conversation_name, "demo3") == 0)
   {
     add_to_inv(ITEM_TYPE_BIG_RED_FLASK, 3);
     ui_msgbox_display("you got x1 BIG RED FLASK");
     ems_disconnect(MSG_CONVERSATION_FINISHED, (pointer_t)on_conversation_finished);
-    notify_game_event_is_finished(GAME_EVENT_KILL_MONSTER);
+    notify_game_event_finished(GAME_EVENT_KILL_MONSTER);
   }
 }
 
 static void on_game_scene_unload(pointer_t arg, const pointer_t event)
 {
-  (void)arg;
-  (void)event;
+  UNUSED(arg);
+  UNUSED(event);
+
   FILE* save_file;
   if ((save_file = fopen("kill_monster", "w")) != NULL)
   {

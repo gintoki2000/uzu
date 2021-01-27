@@ -23,5 +23,9 @@ extern const char TEXT_COMMAND_SELL[];
 extern const char TEXT_COMMAND_BUY[];
 extern const char TEXT_COMMAND_EXAMINE[];
 extern const char TEXT_COMMAND_OPEN[];
+extern const char TEXT_COMMAND_CLOSE[];
+
+extern const RECT RECT_DOOR_CLOSE;
+extern const RECT RECT_DOOR_OPEN;
 
 #endif // CONSTANCES_H

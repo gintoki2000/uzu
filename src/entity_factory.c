@@ -121,6 +121,11 @@ ecs_entity_t make_wizzard(Ecs* ecs, Vec2 pos)
   return make_character_base(ecs, pos, TEX_WIZZARD);
 }
 
+ecs_entity_t make_dragon(Ecs* ecs, Vec2 pos) 
+{
+  return make_character_base(ecs, pos, TEX_LIZZARD);
+}
+
 ecs_entity_t make_monster_base(Ecs* ecs, Vec2 pos, u16 texture_id)
 {
   ecs_entity_t entity;
@@ -816,9 +821,9 @@ ecs_entity_t make_npc(Ecs* ecs, ecs_entity_t character_base)
 
   merchant = ecs_add(ecs, character_base, MERCHANT);
 
-  ItemPayload payloads[] = { { ITEM_TYPE_RED_FLASK,     10, 1 },
-                             { ITEM_TYPE_BIG_RED_FLASK, 5,  3 },
-                             { ITEM_TYPE_BLUE_FLASK,    10, 2 } };
+  ItemPayload payloads[] = { { ITEM_TYPE_RED_FLASK, 10, 1 },
+                             { ITEM_TYPE_BIG_RED_FLASK, 5, 3 },
+                             { ITEM_TYPE_BLUE_FLASK, 10, 2 } };
 
   merchant->num_payloads = sizeof(payloads) / sizeof(ItemPayload);
   memcpy(merchant->payloads, payloads, sizeof(payloads));
@@ -858,17 +863,16 @@ ecs_entity_t make_spear(Ecs* ecs, u16 mask)
   visual = ecs_add(ecs, entity, VISUAL);
   sprite_init(&visual->sprite, get_texture(TEX_SPEAR));
   visual->anchor.x = visual->sprite.rect.w / 2;
-  visual->anchor.y = 20;
+  visual->anchor.y = 3;
 
   transform      = ecs_add(ecs, entity, TRANSFORM);
-  transform->rot = 90;
 
   hitbox            = ecs_add(ecs, entity, HITBOX);
-  hitbox->size.x    = 6;
-  hitbox->size.y    = 30;
-  hitbox->anchor.x  = 3;
+  hitbox->size.x    = 30;
+  hitbox->size.y    = 6;
+  hitbox->anchor.x  = 15;
+  hitbox->anchor.y  = 3;
   hitbox->category  = CATEGORY_WEAPON;
-  hitbox->anchor.y  = 20;
   hitbox->mask_bits = mask;
   hitbox->proxy_id  = RTREE_NULL_NODE;
 
@@ -879,6 +883,44 @@ ecs_entity_t make_spear(Ecs* ecs, u16 mask)
 
   weapon_base         = ecs_add(ecs, entity, WEAPON_BASE);
   weapon_base->wearer = ECS_NULL_ENT;
+
+  return entity;
+}
+
+ecs_entity_t make_door(Ecs* ecs, Vec2 pos)
+{
+  ecs_entity_t entity;
+
+  HitBox*       hitbox;
+  Visual*       visual;
+  Transform*    transform;
+  DoorInfo*     door_info;
+  Interactable* interactable;
+
+  entity = ecs_create(ecs);
+
+  visual              = ecs_add(ecs, entity, VISUAL);
+  visual->sprite.tex  = get_texture(TEX_DOOR);
+  visual->sprite.rect = RECT_DOOR_CLOSE;
+  visual->anchor.x = 16;
+  visual->anchor.y = 34;
+
+  transform      = ecs_add(ecs, entity, TRANSFORM);
+  transform->pos = pos;
+
+  hitbox            = ecs_add(ecs, entity, HITBOX);
+  hitbox->size      = (Vec2){ 32, 34 };
+  hitbox->anchor    = (Vec2){ 16, 34 };
+  hitbox->category  = CATEGORY_INTERACABLE;
+  hitbox->mask_bits = 0;
+
+  interactable               = ecs_add(ecs, entity, INTERACTABLE);
+  interactable->num_commands = 1;
+  interactable->commands[0]  = TEXT_COMMAND_OPEN;
+
+  door_info               = ecs_add(ecs, entity, DOOR_INFO);
+  door_info->required_key = 0;
+  door_info->state        = DOOR_STATE_CLOSE;
 
   return entity;
 }

@@ -35,6 +35,7 @@ typedef enum
   CAMERA_TARGET_TAG,
   TILE_COLLISION_TAG,
   CHARACTER_ANIMATOR_TAG,
+  DOOR_TAG,
   AI_AGENT,
   DESTINATION,
   PATH,
@@ -50,6 +51,7 @@ typedef enum
   ATTUNEMENT_SLOT,
   CASTABLE,
   MANA_POOL,
+  DOOR_INFO,
   NUM_COMPONENTS
 } ComponentId;
 
@@ -61,6 +63,7 @@ typedef struct
   float max_force;
   float friction;
 } Motion;
+
 typedef struct
 {
   Vec2   prev_pos;
@@ -164,6 +167,18 @@ typedef int NpcTag;
 typedef int TagToBeDestroyed;
 
 typedef int CharacterAnimatorTag;
+
+typedef enum DoorState
+{
+  DOOR_STATE_CLOSE,
+  DOOR_STATE_OPEN,
+} DoorState;
+
+typedef struct DoorInfo
+{
+  u16 required_key;
+  u16 state;
+} DoorInfo;
 
 typedef struct
 {

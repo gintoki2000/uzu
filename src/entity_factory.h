@@ -48,4 +48,7 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_wogol(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_imp(Ecs* ecs, Vec2 pos);
 
+//other
+ecs_entity_t make_door(Ecs* ecs, Vec2 pos);
+
 #endif // ENTITY_FACTORY_H

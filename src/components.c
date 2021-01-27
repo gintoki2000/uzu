@@ -54,6 +54,7 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
   [CASTABLE]                   = ECS_TYPE(Castable),
   [MANA_POOL]                  = ECS_TYPE(ManaPool),
   [WEAPON_SKILL_THUST]         = ECS_TYPE(wpskl_Thust),
+  [DOOR_INFO]                  = ECS_TYPE(DoorInfo),
 };
 
 Animation*

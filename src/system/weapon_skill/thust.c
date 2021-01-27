@@ -43,7 +43,7 @@ void weapon_skill_thust_update()
             damage_output->atk               = 2;
             damage_output->type              = DAMAGE_TYPE_THUST;
 
-            transform->rot = 65.0;
+            transform->rot = -15.0;
 
             skl[i].state = 1;
             skl[i].timer = 2;
@@ -58,7 +58,7 @@ void weapon_skill_thust_update()
 
           wearer_equipment->d.x = -8;
           wearer_equipment->d.y = -4;
-          transform->rot        = 73.0;
+          transform->rot        = -12;
           skl[i].state          = 2;
           skl[i].timer          = 2;
         }
@@ -71,7 +71,7 @@ void weapon_skill_thust_update()
 
           wearer_equipment->d.x = 10;
           wearer_equipment->d.y = 0;
-          transform->rot        = 90.0;
+          transform->rot        = 0.0;
           skl[i].state          = 3;
           skl[i].timer          = 7;
         }

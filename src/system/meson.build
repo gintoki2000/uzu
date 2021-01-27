@@ -25,6 +25,8 @@ system_source_files = files(
   './dialogue_sys.c',
   './merchant_sys.c',
   './following_system.c',
+  './door_system.c',
+
   #weapon skill systems
   './weapon_skill/swing.c',
   './weapon_skill/charge.c',

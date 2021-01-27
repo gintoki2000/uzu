@@ -23,7 +23,7 @@ static u16         _count;
 
 static int compare_draw_command(const DrawCommand* lhs, const DrawCommand* rhs)
 {
-  return lhs->dst.y - rhs->dst.y;
+  return (lhs->dst.y + lhs->dst.h) - (rhs->dst.y + rhs->dst.h);
 }
 
 static void sort()

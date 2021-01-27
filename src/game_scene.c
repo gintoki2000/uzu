@@ -24,6 +24,7 @@
 #include "system/animator_sys.h"
 #include "system/camera_sys.h"
 #include "system/collision_mgr_sys.h"
+#include "system/door_system.h"
 #include "system/collision_sys.h"
 #include "system/dialogue_sys.h"
 #include "system/dmg_sys.h"
@@ -43,6 +44,7 @@
 #include "system/rendering_sys.h"
 #include "system/text_rendering_sys.h"
 #include "system/tile_collision_sys.h"
+#include "system/block_input_system.h"
 #include "system/interaction_system.h"
 
 #include "system/weapon_skill/charge.h"
@@ -114,6 +116,7 @@ static void on_load()
   dialogue_system_init();
   game_event_init();
   merchant_system_init();
+  door_system_init(); 
 
   //init ui
   ui_dialogue_init();

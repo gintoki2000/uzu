@@ -117,6 +117,10 @@ static int parse_objectgroup(const json_object* object_group_json_obj)
     {
       make_imp(g_ecs, pos); 
     }
+    else if (strcmp(objtype, "Door") == 0) 
+    {
+      make_door(g_ecs, VEC2(pos.x + size.x / 2, pos.y + size.y));
+    }
   }
   return 0;
 }

@@ -3,16 +3,16 @@
 #include "entity_factory.h"
 
 ecs_entity_t (*const g_weapon_create_fn_tbl[NUM_WEAPONS])(Ecs*, u16) = {
-  NULL,
+  make_spear,
   make_cleaver,
   make_golden_sword,
-  make_anime_sword,
+  NULL,
   NULL,
   NULL,
 };
 ecs_entity_t (*const g_char_create_fn_tbl[NUM_CLASSES])(Ecs*, Vec2)  = {
   make_knight,
-  NULL,
+  make_dragon,
   make_wizzard,
   NULL,
 };

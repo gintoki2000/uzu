@@ -94,7 +94,7 @@ static void process_key_input(void)
     if (_options[_select] == _text_new_game)
     {
       keybroad_pop_state();
-      new_game(JOB_KNIGHT);
+      new_game(JOB_DRAGON);
       set_scene(&g_game_scene);
     }
     else if (_options[_select] == _text_exit)

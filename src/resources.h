@@ -35,6 +35,8 @@ typedef enum
   TEX_UI_MAIN_MENU,
   TEX_UI_MAIN_MENU_POINTER,
   TEX_UI_DIALOGUE,
+  TEX_DOOR,
+  TEX_LIZZARD,
   NUM_TEXS
 } TextureId;
 

@@ -122,7 +122,6 @@ BOOL ecs_pool_add(EcsPool* self, ecs_entity_t e)
 
   self->sparse.data[idx] = self->dense.cnt++;
   self->dense.entities[self->dense.cnt - 1] = e;
-  memset(ECS_POOL_DATA_OFFSET(self, self->dense.cnt - 1), 0, self->type_size);
   return TRUE;
 }
 

@@ -13,7 +13,7 @@ void casting_system_update()
 
   Castable*       castables;
   Transform*      transform;
-  WeaponBase*     weapon_core;
+  WeaponAttributes*     weapon_core;
   Controller*     wearer_controller;
   AttunementSlot* attunement_slot;
   ManaPool*       mana_pool;
@@ -29,7 +29,7 @@ void casting_system_update()
       // just finish
       if (castables[i].timer == 0)
       {
-        if ((weapon_core       = ecs_get(g_ecs, entities[i],         WEAPON_BASE)) &&
+        if ((weapon_core       = ecs_get(g_ecs, entities[i],         WEAPON_ATTRIBUTES)) &&
             (wearer_controller = ecs_get(g_ecs, weapon_core->wearer, CONTROLLER)))
         {
           wearer_controller->in_action = FALSE;
@@ -38,7 +38,7 @@ void casting_system_update()
     }
 
     if (castables[i].timer == 0 && 
-       (weapon_core       = ecs_get(g_ecs, entities[i],         WEAPON_BASE)) &&
+       (weapon_core       = ecs_get(g_ecs, entities[i],         WEAPON_ATTRIBUTES)) &&
        (wearer_controller = ecs_get(g_ecs, weapon_core->wearer, CONTROLLER)) &&
        (attunement_slot   = ecs_get(g_ecs, weapon_core->wearer, ATTUNEMENT_SLOT)) &&
        (mana_pool         = ecs_get(g_ecs, weapon_core->wearer, MANA_POOL)))

@@ -6,16 +6,16 @@
 
 extern Ecs* g_ecs;
 
-typedef struct CBThust_QueryHitEntities
+typedef struct CBThust_QueryHitEntitiesArgs
 {
   ecs_entity_t dealer;
   int          damage;
   int          direction; // -1 / 1
-} CBThust_QueryHitEntities;
+} CBThust_QueryHitEntitiesArgs;
 
 static const Vec2 IMPACT_FORCE = { 100.f, 0.f };
 
-static BOOL __cb_query_hit_entities(CBThust_QueryHitEntities* args, ecs_entity_t e)
+static BOOL __cb_query_hit_entities(CBThust_QueryHitEntitiesArgs* args, ecs_entity_t e)
 {
   Vec2 force = vec2_mul(IMPACT_FORCE, args->direction);
   ems_broadcast(MSG_DEAL_DAMAGE,
@@ -26,6 +26,7 @@ static BOOL __cb_query_hit_entities(CBThust_QueryHitEntities* args, ecs_entity_t
                     .impact      = TRUE,
                     .force       = force,
                     .impact_time = 10,
+                    .type        = DAMAGE_TYPE_THUST,
                 });
   return TRUE;
 }
@@ -35,7 +36,7 @@ void weapon_skill_thust_update()
   ecs_entity_t* entities;
   ecs_size_t    cnt;
 
-  WeaponBase*  base;
+  WeaponAttributes*  base;
   wpskl_Thust* skl;
   Controller*  wearer_controller;
   Equipment*   wearer_equipment;
@@ -46,7 +47,7 @@ void weapon_skill_thust_update()
   ecs_raw(g_ecs, WEAPON_SKILL_THUST, &entities, (pointer_t*)&skl, &cnt);
   for (ecs_size_t i = 0; i < cnt; ++i)
   {
-    if ((base = ecs_get(g_ecs, entities[i], WEAPON_BASE)))
+    if ((base = ecs_get(g_ecs, entities[i], WEAPON_ATTRIBUTES)))
       switch (skl[i].state)
       {
       case 0: // INACTIVE
@@ -66,7 +67,7 @@ void weapon_skill_thust_update()
             transform->rot = -15.0;
 
             skl[i].state = 1;
-            skl[i].timer = 2;
+            skl[i].timer = 7;
           }
         }
         break;
@@ -102,7 +103,7 @@ void weapon_skill_thust_update()
           if (skl[i].timer && --skl[i].timer == 0)
           {
             wearer_equipment = ecs_get(g_ecs, base->wearer, EQUIPMENT);
-            transform = ecs_get(g_ecs, entities[i], TRANSFORM);
+            transform        = ecs_get(g_ecs, entities[i], TRANSFORM);
 
             wearer_controller->in_action = FALSE;
             wearer_equipment->d.x        = 0;
@@ -116,9 +117,11 @@ void weapon_skill_thust_update()
 
             collision_box_query(&damage_area,
                                 base->mask,
-                                CALLBACK_1((&(CBThust_QueryHitEntities){ .dealer    = base->wearer,
-                                                                         .damage    = base->atk,
-                                                                         .direction = 1 }),
+                                CALLBACK_1((&(CBThust_QueryHitEntitiesArgs){
+                                               .dealer    = base->wearer,
+                                               .damage    = base->atk,
+                                               .direction = 1,
+                                           }),
                                            __cb_query_hit_entities));
           }
         }

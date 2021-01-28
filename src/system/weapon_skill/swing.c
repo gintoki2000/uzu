@@ -7,73 +7,39 @@
 #define SWINGING_SYSTEM_DAMAGE_ADJ 1.0
 extern Ecs* g_ecs;
 
+typedef struct CBSwing_QueryHitEntitiesArgs
+{
+  ecs_entity_t dealer;
+  int          damage;
+  Vec2         force;
+} CBSwing_QueryHitEntitiesArgs;
+
+static BOOL __cb_query_hit_entities(CBSwing_QueryHitEntitiesArgs* args, ecs_entity_t e)
+{
+  ems_broadcast(MSG_DEAL_DAMAGE,
+                &(MSG_DealDamage){ .dealer      = args->dealer,
+                                   .receiver    = e,
+                                   .damage      = args->damage,
+                                   .impact      = TRUE,
+                                   .impact_time = 10,
+                                   .force       = args->force });
+  return TRUE;
+}
+
 void swing_weapon_skl_system_update(void)
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;
 
-  wpskl_Swing*  skl;
-  DamageOutput* damage_output;
-  WeaponBase*   base;
-  Visual*       visual;
-  Transform*    transform;
-  Controller*   wearer_controller;
+  wpskl_Swing* skl;
+  WeaponAttributes*  base;
+  Visual*      visual;
+  Transform*   transform;
+  Controller*  wearer_controller;
 
   ecs_raw(g_ecs, WEAPON_SKILL_SWING, &entities, (void**)&skl, &cnt);
 
   for (int i = 0; i < cnt; ++i)
   {
-    if (skl[i].is_active)
-    {
-      if (++skl[i].timer == SWINGING_SYSTEM_INTERVAL)
-      {
-        skl[i].timer = 0;
-        if (++skl[i].step == SWINGING_SYSTEM_STEP)
-        {
-          if ((transform = ecs_get(g_ecs, entities[i], TRANSFORM)) &&
-              (damage_output = ecs_get(g_ecs, entities[i], DAMAGE_OUTPUT)) &&
-              (base = ecs_get(g_ecs, entities[i], WEAPON_BASE)) &&
-              (wearer_controller = ecs_get(g_ecs, base->wearer, CONTROLLER)))
-          {
-
-            wearer_controller->in_action = FALSE;
-            damage_output->atk           = 0;
-            transform->rot               = 0.0;
-            skl[i].is_active             = FALSE;
-          }
-        }
-        else
-        {
-          if ((visual = ecs_get(g_ecs, entities[i], VISUAL)) &&
-              (transform = ecs_get(g_ecs, entities[i], TRANSFORM)))
-          {
-            transform->rot = skl[i].step * 20.0 * FLIP_TO_SIGN(visual->flip);
-          }
-        }
-      }
-    }
-    else
-    {
-      if ((base = ecs_get(g_ecs, entities[i], WEAPON_BASE)) &&
-          (wearer_controller = ecs_get(g_ecs, base->wearer, CONTROLLER)) &&
-          (damage_output = ecs_get(g_ecs, entities[i], DAMAGE_OUTPUT)))
-      {
-
-        if (!wearer_controller->in_action && (skl[i].on_action == wearer_controller->action))
-        {
-          Vec2 v = { 60.f, 20.f };
-
-          skl[i].timer                 = 0;
-          skl[i].is_active             = TRUE;
-          skl[i].step                  = 0;
-          damage_output->atk           = base->atk * SWINGING_SYSTEM_DAMAGE_ADJ;
-          damage_output->type          = DAMAGE_TYPE_STRIKE;
-          damage_output->impact        = TRUE;
-          damage_output->force         = v;
-          wearer_controller->action    = CHARACTER_ACTION_NONE;
-          wearer_controller->in_action = TRUE;
-        }
-      }
-    }
   }
 }

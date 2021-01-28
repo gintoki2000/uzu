@@ -14,7 +14,7 @@
   }
 
 const EcsType g_comp_types[NUM_COMPONENTS] = {
-  [VISUAL]                     = ECS_TYPE(Visual),
+  [VISUAL]                     = ECS_TYPE_EX(Visual, visual_init, NULL),
   [TRANSFORM]                  = ECS_TYPE(Transform),
   [ANIMATOR]                   = ECS_TYPE_EX(Animator, NULL, animator_fini),
   [PLAYER_TAG]                 = ECS_TYPE(PlayerTag),
@@ -24,12 +24,12 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
   [HITBOX]                     = ECS_TYPE_EX(HitBox, hitbox_init, NULL),
   [ENEMY_TAG]                  = ECS_TYPE(PlayerTag),
   [TILE_COLLISION_TAG]         = ECS_TYPE(TileCollisionTag),
+  [CHARACTER_ANIMATOR_TAG]     = ECS_TYPE(CharacterAnimatorTag),
   [HEAL_BAR]                   = ECS_TYPE(HealthBar),
   [LIFE_SPAN]                  = ECS_TYPE(LifeSpan),
   [MOTION]                     = ECS_TYPE(Motion),
-  [PROJECTILE]                 = ECS_TYPE(Projectile),
   [TAG_TO_BE_DESTROYED]        = ECS_TYPE(TagToBeDestroyed),
-  [WEAPON_BASE]                = ECS_TYPE(WeaponBase),
+  [WEAPON_ATTRIBUTES]          = ECS_TYPE(WeaponAttributes),
   [DAMAGE_OUTPUT]              = ECS_TYPE(DamageOutput),
   [WEAPON_SKILL_SWING]         = ECS_TYPE(wpskl_Swing),
   [WEAPON_SKILL_CHARGE]        = ECS_TYPE(wpskl_Charge),
@@ -109,6 +109,7 @@ void hitbox_init(HitBox* h)
 
 void level_switcher_init(LevelSwitcher* sw, const char* level, const char* dest)
 {
+  ASSERT(level != NULL && dest != NULL);
   sw->level = SDL_strdup(level);
   sw->dest  = SDL_strdup(dest);
 }
@@ -126,11 +127,13 @@ void name_fini(Name* name)
 
 void name_init(Name* name, const char* value)
 {
+  ASSERT(value != NULL);
   name->value = SDL_strdup(value);
 }
 
 void text_init(Text* text, const char* value, FONT* font, COLOR color)
 {
+  ASSERT(value != NULL);
   text->value   = SDL_strdup(value);
   text->opacity = 0xff;
   text->color   = color;
@@ -140,4 +143,13 @@ void text_init(Text* text, const char* value, FONT* font, COLOR color)
 void text_fini(Text* text)
 {
   free(text->value);
+}
+
+void visual_init(Visual* v)
+{
+  v->opacity = 255;
+  v->color   = (COLOR){ 255, 255, 255, 255 };
+  v->anchor  = (POINT){ 0, 0 };
+  v->sprite  = (Sprite){ .tex = NULL };
+  v->flip    = SDL_FLIP_NONE;
 }

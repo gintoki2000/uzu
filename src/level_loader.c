@@ -124,7 +124,7 @@ static int parse_objectgroup(const json_object* object_group_json_obj)
     else if (strcmp(objtype, "Chest") == 0)
     {
       make_chest(g_ecs,
-                 pos,
+                 VEC2(pos.x + size.x / 2, pos.y + size.y),
                  (Item[5]){ { ITEM_TYPE_BIG_RED_FLASK, 1 }, { ITEM_TYPE_BLUE_FLASK, 1 } },
                  2);
     }

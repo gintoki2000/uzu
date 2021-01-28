@@ -84,6 +84,8 @@ void* ecs_add(Ecs* self, ecs_entity_t entity, ecs_size_t type_id)
     type      = &self->types[type_id];
     if (type->init_fn != NULL)
       type->init_fn(component);
+    else
+      memset(component, 0, type->size);
     return component;
   }
   return ecs_pool_get(pool, entity);

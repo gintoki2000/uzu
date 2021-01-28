@@ -15,6 +15,7 @@ typedef struct DrawCommand
   POINT            center;
   double           rot;
   SDL_RendererFlip flip;
+  COLOR            color;
 } DrawCommand;
 
 #define MAX_COMMAND_CNT 255
@@ -63,6 +64,7 @@ void rendering_system_update(void)
           .center  = visuals[i].anchor,
           .rot     = transform->rot,
           .flip    = visuals[i].flip,
+          .color   = visuals[i].color,
         };
       }
     }
@@ -71,6 +73,7 @@ void rendering_system_update(void)
   sort();
   for (int i = 0; i < _count; ++i)
   {
+    SDL_SetTextureColorMod(_buff[i].texture, _buff[i].color.r, _buff[i].color.g, _buff[i].color.b);
     SDL_RenderCopyEx(g_renderer,
                      _buff[i].texture,
                      &_buff[i].src,
@@ -78,5 +81,6 @@ void rendering_system_update(void)
                      _buff[i].rot,
                      &_buff[i].center,
                      _buff[i].flip);
+    SDL_SetTextureColorMod(_buff[i].texture, 0xff, 0xff, 0xff);
   }
 }

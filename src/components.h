@@ -14,10 +14,8 @@ typedef enum
   ANIMATOR,
   CONTROLLER,
   EQUIPMENT,
-  WEAPON_ACTION,
   HEALTH,
   HITBOX,
-  PROJECTILE,
   HEAL_BAR,
   LIFE_SPAN,
   TAG_TO_BE_DESTROYED,
@@ -26,7 +24,7 @@ typedef enum
   WEAPON_SKILL_THUST,
   WEAPON_SKILL_THUNDER_STORM,
   DAMAGE_OUTPUT,
-  WEAPON_BASE,
+  WEAPON_ATTRIBUTES,
   DROP,
   ITEM_TAG,
   INVULNERABLE,
@@ -108,7 +106,7 @@ typedef struct
   s32          atk;
   u16          type_id;
   u16          mask;
-} WeaponBase;
+} WeaponAttributes;
 
 /*Weapon skills*/
 typedef struct
@@ -193,11 +191,6 @@ typedef struct
 {
   ItemTypeId item_id;
 } ItemTag;
-
-typedef struct
-{
-  int atk;
-} Projectile;
 
 typedef struct
 {
@@ -347,6 +340,8 @@ typedef struct
   int timer;
 } Castable;
 
+typedef struct ecs_entity_t Wearer;
+
 Animation*
 animation_init(Animation* anim, SDL_Texture* tex, u32 x, u32 y, u32 row, u32 col, u32 sw, u32 sh);
 
@@ -371,5 +366,7 @@ void name_fini(Name* name);
 
 void text_init(Text* text, const char* value, FONT* font, COLOR color);
 void text_fini(Text* text);
+
+void visual_init(Visual* v);
 
 #endif // COMPONENTS_H

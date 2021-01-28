@@ -12,7 +12,7 @@
 
 extern Ecs* g_ecs;
 
-#define INTERACTABLE_DISTANCE TILE_SIZE * 4
+#define INTERACTABLE_DISTANCE (TILE_SIZE * 1)
 #define POINTER_DOWN_WIDTH 6
 #define POINTER_DOWN_HEIGHT 3
 #define MOVE_SPEED 100.f
@@ -68,10 +68,10 @@ static void find_interacable_entity()
     struct CBPlayerController_QueryInteracableEntitiesArgs cbargs;
 
     player_pos = get_player_position(g_ecs);
-    rect.x     = player_pos.x - TILE_SIZE * 2;
-    rect.y     = player_pos.y - TILE_SIZE * 2;
-    rect.w     = TILE_SIZE * 3;
-    rect.h     = TILE_SIZE * 4;
+    rect.x     = player_pos.x - INTERACTABLE_DISTANCE / 2;
+    rect.y     = player_pos.y - INTERACTABLE_DISTANCE / 2;
+    rect.w     = INTERACTABLE_DISTANCE;
+    rect.h     = INTERACTABLE_DISTANCE;
 
     cbargs.player_position  = player_pos;
     cbargs.closest_entity   = ECS_NULL_ENT;

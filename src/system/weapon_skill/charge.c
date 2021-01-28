@@ -10,7 +10,7 @@ void charge_weapon_skl_system()
   ecs_entity_t* entities;
   ecs_size_t    cnt;
 
-  WeaponBase*   weapon_core;
+  WeaponAttributes*   weapon_core;
   Controller*   wearer_controller;
   Visual*       visual;
   Motion*       weaer_motion;
@@ -27,7 +27,7 @@ void charge_weapon_skl_system()
       if (++skl[i].timer == SYS_WEAPON_SKILL_CHARGE_TIME)
       {
         if ((transform = ecs_get(g_ecs, entities[i], TRANSFORM)) &&
-            (weapon_core = ecs_get(g_ecs, entities[i], WEAPON_BASE)) &&
+            (weapon_core = ecs_get(g_ecs, entities[i], WEAPON_ATTRIBUTES)) &&
             (weaer_motion = ecs_get(g_ecs, weapon_core->wearer, MOTION)) &&
             (wearer_controller = ecs_get(g_ecs, weapon_core->wearer, CONTROLLER)) &&
             (damage_output = ecs_get(g_ecs, entities[i], DAMAGE_OUTPUT)))
@@ -39,7 +39,7 @@ void charge_weapon_skl_system()
           damage_output->atk           = 0;
         }
       }
-      else if ((weapon_core = ecs_get(g_ecs, entities[i], WEAPON_BASE)) &&
+      else if ((weapon_core = ecs_get(g_ecs, entities[i], WEAPON_ATTRIBUTES)) &&
                (weaer_motion = ecs_get(g_ecs, weapon_core->wearer, MOTION)) &&
                (visual = ecs_get(g_ecs, entities[i], VISUAL)))
       {
@@ -48,7 +48,7 @@ void charge_weapon_skl_system()
       }
     }
     else if ((transform = ecs_get(g_ecs, entities[i], TRANSFORM)) &&
-             (weapon_core = ecs_get(g_ecs, entities[i], WEAPON_BASE)) &&
+             (weapon_core = ecs_get(g_ecs, entities[i], WEAPON_ATTRIBUTES)) &&
              (weaer_motion = ecs_get(g_ecs, weapon_core->wearer, MOTION)) &&
              (wearer_controller = ecs_get(g_ecs, weapon_core->wearer, CONTROLLER)) &&
              (visual = ecs_get(g_ecs, entities[i], VISUAL)) &&

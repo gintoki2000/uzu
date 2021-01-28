@@ -37,6 +37,13 @@ ecs_entity_t make_anime_sword(Ecs* ecs)
 #define CHARACTER_SPRITE_WIDTH 16
 #define CHARACTER_SPRITE_HEIGHT 28
 
+typedef struct NewCharacterParams
+{
+  Vec2 position;
+  u16  texture_id;
+  u16  hit_points;
+} NewCharacterParams;
+
 ecs_entity_t make_character_base(Ecs* ecs, Vec2 pos, u16 texture_id)
 {
   ecs_entity_t entity;
@@ -66,10 +73,10 @@ ecs_entity_t make_character_base(Ecs* ecs, Vec2 pos, u16 texture_id)
   transform      = ecs_add(ecs, entity, TRANSFORM);
   transform->pos = pos;
 
-  visual = ecs_add(ecs, entity, VISUAL);
-
+  visual           = ecs_add(ecs, entity, VISUAL);
   visual->anchor.x = 16 / 2;
   visual->anchor.y = 28;
+  // visual->color    = (COLOR){ 0xff, 0x00, 0x00, 0xff };
 
   equipment                  = ecs_add(ecs, entity, EQUIPMENT);
   equipment->weapon          = ECS_NULL_ENT;
@@ -97,6 +104,7 @@ ecs_entity_t make_character_base(Ecs* ecs, Vec2 pos, u16 texture_id)
   heath->max_hit_points = 40;
 
   ecs_add(ecs, entity, TILE_COLLISION_TAG);
+  ecs_add(ecs, entity, CHARACTER_ANIMATOR_TAG);
 
   return entity;
 }
@@ -116,7 +124,18 @@ ecs_entity_t make_dragon(Ecs* ecs, Vec2 pos)
   return make_character_base(ecs, pos, TEX_LIZZARD);
 }
 
-ecs_entity_t make_monster_base(Ecs* ecs, Vec2 pos, u16 texture_id)
+typedef struct NewMonsterParams
+{
+  Vec2 position;
+  u16  texture_id;
+  u16  hit_points;
+  Vec2 size;
+} NewMonsterParams;
+
+static const Vec2 k_big_size   = { 20.f, 20.f };
+static const Vec2 k_small_size = { 10.f, 12.f };
+
+ecs_entity_t make_monster_base(Ecs* ecs, const NewMonsterParams* params)
 {
   ecs_entity_t entity;
 
@@ -131,14 +150,13 @@ ecs_entity_t make_monster_base(Ecs* ecs, Vec2 pos, u16 texture_id)
   Health*    heath;
   HealthBar* health_bar;
   Motion*    motion;
-  Drop*      drop;
 
   int texture_width;
   int texture_height;
   int sprite_width;
   int sprite_height;
 
-  texture = get_texture(texture_id);
+  texture = get_texture(params->texture_id);
 
   SDL_QueryTexture(texture, NULL, NULL, &texture_width, &texture_height);
 
@@ -169,7 +187,7 @@ ecs_entity_t make_monster_base(Ecs* ecs, Vec2 pos, u16 texture_id)
   entity = ecs_create(ecs);
 
   transform      = ecs_add(ecs, entity, TRANSFORM);
-  transform->pos = pos;
+  transform->pos = params->position;
 
   visual = ecs_add(ecs, entity, VISUAL);
 
@@ -182,8 +200,8 @@ ecs_entity_t make_monster_base(Ecs* ecs, Vec2 pos, u16 texture_id)
   animator->elapsed      = 0;
 
   hitbox            = ecs_add(ecs, entity, HITBOX);
-  hitbox->size      = VEC2(sprite_width, sprite_height);
-  hitbox->anchor    = VEC2(sprite_width / 2.f, sprite_height);
+  hitbox->size      = params->size;
+  hitbox->anchor    = VEC2(params->size.x / 2.f, params->size.y);
   hitbox->proxy_id  = RTREE_NULL_NODE;
   hitbox->mask_bits = BIT(CATEGORY_WEAPON) | BIT(CATEGORY_PROJECTILE);
   hitbox->category  = CATEGORY_ENEMY;
@@ -191,8 +209,8 @@ ecs_entity_t make_monster_base(Ecs* ecs, Vec2 pos, u16 texture_id)
   ecs_add(ecs, entity, ENEMY_TAG);
 
   heath                 = ecs_add(ecs, entity, HEALTH);
-  heath->max_hit_points = 100;
-  heath->hit_points     = 100;
+  heath->max_hit_points = params->hit_points;
+  heath->hit_points     = params->hit_points;
 
   health_bar         = ecs_add(ecs, entity, HEAL_BAR);
   health_bar->len    = sprite_width;
@@ -201,107 +219,51 @@ ecs_entity_t make_monster_base(Ecs* ecs, Vec2 pos, u16 texture_id)
   motion            = ecs_add(ecs, entity, MOTION);
   motion->max_speed = 60.f;
   motion->max_force = 5.f;
-  motion->friction  = 0.95f;
-
-  drop          = ecs_add(ecs, entity, DROP);
-  drop->item1   = ITEM_TYPE_BIG_RED_FLASK;
-  drop->item2   = ITEM_TYPE_RED_FLASK;
-  drop->change1 = 70;
-  drop->change2 = 40;
+  motion->friction  = 0.0f;
 
   ecs_add(ecs, entity, TILE_COLLISION_TAG);
+  ecs_add(ecs, entity, CHARACTER_ANIMATOR_TAG);
   return entity;
 }
 
 ecs_entity_t make_huge_demon(Ecs* ecs, Vec2 pos)
 {
-  return make_monster_base(ecs, pos, TEX_BIG_DEMON);
+  return make_monster_base(ecs, &(NewMonsterParams){ pos, TEX_BIG_DEMON, 30, k_big_size });
 }
 
 ecs_entity_t make_imp(Ecs* ecs, Vec2 pos)
 {
-  return make_monster_base(ecs, pos, TEX_IMP);
+  return make_monster_base(ecs, &(NewMonsterParams){ pos, TEX_IMP, 5, k_small_size });
 }
 
 ecs_entity_t make_wogol(Ecs* ecs, Vec2 pos)
 {
-  return make_monster_base(ecs, pos, TEX_WOGOL);
+  return make_monster_base(ecs, &(NewMonsterParams){ pos, TEX_WOGOL, 5, k_small_size });
 }
 
 ecs_entity_t make_chort(Ecs* ecs, Vec2 pos)
 {
-  ecs_entity_t entity;
-  TEXTURE*     texture;
-  Animation    anims[NUM_ANIM_STATES];
+  ecs_entity_t entity =
+      make_monster_base(ecs, &(NewMonsterParams){ pos, TEX_CHORT, 5, k_small_size });
 
   /*components */
-  Transform*  transform;
-  Visual*     visual;
-  Animator*   animator;
-  HitBox*     hitbox;
-  Health*     heath;
-  HealthBar*  health_bar;
-  Motion*     motion;
   Drop*       drop;
   AIAgent*    ai_agent;
   Equipment*  equipment;
   Controller* controller;
   Spot*       spot;
 
-  texture = get_texture(TEX_CHORT);
-  animation_init(&anims[ANIM_STATE_HIT], texture, 16 * 6, 0, 1, 1, 16, 24);
-  animation_init(&anims[ANIM_STATE_IDLE], texture, 0, 0, 1, 4, 16, 24);
-  animation_init(&anims[ANIM_STATE_RUN], texture, 16 * 4, 0, 1, 4, 16, 24);
-
-  anims[ANIM_STATE_IDLE].frame_duration = 8;
-  anims[ANIM_STATE_RUN].frame_duration  = 6;
-
-  entity = ecs_create(ecs);
-
-  transform      = ecs_add(ecs, entity, TRANSFORM);
-  transform->pos = pos;
-
   spot         = ecs_add(ecs, entity, SPOT);
   spot->radius = TILE_SIZE * 7;
   spot->pos    = pos;
 
-  visual = ecs_add(ecs, entity, VISUAL);
-
-  visual->anchor.x = 16 / 2;
-  visual->anchor.y = 24;
-
-  animator = ecs_add(ecs, entity, ANIMATOR);
-  animator_init(animator, anims, NUM_ANIM_STATES);
-
-  hitbox            = ecs_add(ecs, entity, HITBOX);
-  hitbox->size      = VEC2(8.f, 14.f);
-  hitbox->anchor    = VEC2(4.f, 14.f);
-  hitbox->proxy_id  = RTREE_NULL_NODE;
-  hitbox->mask_bits = BIT(CATEGORY_WEAPON) | BIT(CATEGORY_PROJECTILE);
-  hitbox->category  = CATEGORY_ENEMY;
-  // hitbox->check_tile_collision = TRUE;
-
   ecs_add(ecs, entity, ENEMY_TAG);
-
-  heath                 = ecs_add(ecs, entity, HEALTH);
-  heath->max_hit_points = 10;
-  heath->hit_points     = 10;
-
-  health_bar         = ecs_add(ecs, entity, HEAL_BAR);
-  health_bar->len    = 25;
-  health_bar->anchor = (SDL_Point){ 20, 25 };
-
-  motion            = ecs_add(ecs, entity, MOTION);
-  motion->max_speed = 65;
-  motion->max_force = 20;
 
   drop          = ecs_add(ecs, entity, DROP);
   drop->item1   = ITEM_TYPE_RED_FLASK;
   drop->item2   = ITEM_TYPE_BLUE_FLASK;
   drop->change1 = 70;
   drop->change2 = 60;
-
-  ecs_add(ecs, entity, TILE_COLLISION_TAG);
 
   controller = ecs_add(ecs, entity, CONTROLLER);
 
@@ -397,10 +359,10 @@ ecs_entity_t make_cleaver(Ecs* ecs, u16 mask_bits)
   entity  = ecs_create(ecs);
   texture = get_texture(TEX_CLEAVER);
 
-  Transform*   transform;
-  Visual*      visual;
-  WeaponBase*  base;
-  wpskl_Swing* wpskl_swing;
+  Transform*        transform;
+  Visual*           visual;
+  WeaponAttributes* base;
+  wpskl_Swing*      wpskl_swing;
 
   transform = ecs_add(ecs, entity, TRANSFORM);
 
@@ -409,7 +371,7 @@ ecs_entity_t make_cleaver(Ecs* ecs, u16 mask_bits)
   visual->anchor.x = visual->sprite.rect.w / 2;
   visual->anchor.y = visual->sprite.rect.h;
 
-  base          = ecs_add(ecs, entity, WEAPON_BASE);
+  base          = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
   base->atk     = 2;
   base->type_id = WEAPON_CLEAVER;
   base->mask    = mask_bits;
@@ -479,7 +441,7 @@ ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
 
   Transform*          transform;
   Visual*             visual;
-  WeaponBase*         base;
+  WeaponAttributes*   base;
   wpskl_Swing*        wpskl_swing;
   wpskl_ThunderStorm* wpskl_thunder_storm;
 
@@ -490,7 +452,7 @@ ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
   visual->anchor.x = visual->sprite.rect.w / 2;
   visual->anchor.y = visual->sprite.rect.h;
 
-  base          = ecs_add(ecs, entity, WEAPON_BASE);
+  base          = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
   base->atk     = 2;
   base->type_id = WEAPON_LAVIS_SWORD;
   base->mask    = mask_bits;
@@ -765,12 +727,12 @@ ecs_entity_t make_chest(Ecs* ecs, Vec2 pos, Item items[CHEST_MAX_ITEMS], u16 cnt
   HitBox*       hitbox;
   Transform*    transform;
 
-
-
   entity              = ecs_create(ecs);
   visual              = ecs_add(ecs, entity, VISUAL);
   visual->sprite.tex  = get_texture(TEX_CHEST);
   visual->sprite.rect = RECT_CHEST_CLOSE;
+  visual->anchor.x    = 8.f;
+  visual->anchor.y    = 16.f;
 
   chest = ecs_add(ecs, entity, CHEST);
   memcpy(chest->items, items, cnt * sizeof(Item));
@@ -782,10 +744,11 @@ ecs_entity_t make_chest(Ecs* ecs, Vec2 pos, Item items[CHEST_MAX_ITEMS], u16 cnt
 
   hitbox            = ecs_add(ecs, entity, HITBOX);
   hitbox->size      = (Vec2){ 16, 16 };
+  hitbox->anchor    = (Vec2){ 8.f, 16.f };
   hitbox->category  = CATEGORY_INTERACABLE;
   hitbox->mask_bits = 0;
 
-  transform = ecs_add(ecs, entity, TRANSFORM);
+  transform      = ecs_add(ecs, entity, TRANSFORM);
   transform->pos = pos;
 
   return ECS_NULL_ENT;
@@ -795,10 +758,10 @@ ecs_entity_t make_spear(Ecs* ecs, u16 mask)
 {
   ecs_entity_t entity;
 
-  Visual*      visual;
-  Transform*   transform;
-  wpskl_Thust* thust;
-  WeaponBase*  weapon_base;
+  Visual*           visual;
+  Transform*        transform;
+  wpskl_Thust*      thust;
+  WeaponAttributes* weapon_base;
 
   entity = ecs_create(ecs);
 
@@ -812,7 +775,7 @@ ecs_entity_t make_spear(Ecs* ecs, u16 mask)
   thust            = ecs_add(ecs, entity, WEAPON_SKILL_THUST);
   thust->on_action = CHARACTER_ACTION_REGULAR_ATK;
 
-  weapon_base         = ecs_add(ecs, entity, WEAPON_BASE);
+  weapon_base         = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
   weapon_base->wearer = ECS_NULL_ENT;
   weapon_base->atk    = 1;
   weapon_base->mask   = mask;

@@ -226,7 +226,7 @@ static void on_update()
     ui_quality_draw();
     
 
-#if 0
+#if 1
     // render debug
     // collision_system_render_debug();
     // path_rendering_system_update();

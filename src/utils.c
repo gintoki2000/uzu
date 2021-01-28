@@ -65,13 +65,13 @@ ecs_entity_t find_ladder(Ecs* ecs, const char* _name)
 BOOL equip(Ecs* ecs, ecs_entity_t entity, ecs_entity_t weapon)
 {
   Equipment*  equipment;
-  WeaponBase* weapon_core;
+  WeaponAttributes* weapon_core;
 
   if (entity == ECS_NULL_ENT || weapon == ECS_NULL_ENT)
     return FALSE;
 
   equipment   = ecs_get(ecs, entity, EQUIPMENT);
-  weapon_core = ecs_get(ecs, weapon, WEAPON_BASE);
+  weapon_core = ecs_get(ecs, weapon, WEAPON_ATTRIBUTES);
 
   if (weapon_core == NULL)
     return FALSE;

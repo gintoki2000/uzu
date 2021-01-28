@@ -1,5 +1,6 @@
 #ifndef ENTITY_FACTORY_H
 #define ENTITY_FACTORY_H
+#include "components.h"
 #include "resources.h"
 #include <ecs/ecs.h>
 #include <toolbox/toolbox.h>
@@ -24,7 +25,6 @@ ecs_entity_t make_item_picked_up_msg(Ecs* ecs, Vec2 pos, const char* item_name);
 ecs_entity_t make_player(Ecs* ecs, ecs_entity_t character, ecs_entity_t weapon);
 ecs_entity_t make_npc(Ecs* ecs, ecs_entity_t character_base);
 ecs_entity_t make_wizzard_npc(Ecs* ecs, Vec2 pos);
-ecs_entity_t make_chest(Ecs* ecs, Vec2 pos);
 
 // weapons
 ecs_entity_t make_spear(Ecs* ecs, u16 mask);
@@ -50,5 +50,6 @@ ecs_entity_t make_imp(Ecs* ecs, Vec2 pos);
 
 //other
 ecs_entity_t make_door(Ecs* ecs, Vec2 pos);
+ecs_entity_t make_chest(Ecs* ecs, Vec2 pos, Item items[CHEST_MAX_ITEMS], u16 cnt);
 
 #endif // ENTITY_FACTORY_H

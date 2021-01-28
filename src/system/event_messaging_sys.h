@@ -25,6 +25,7 @@ enum
   MSG_LEVEL_LOADED,
   MSG_GAME_SCENE_UNLOAD,
   MSG_GAME_SCENE_LOADED,
+  MSG_HIT_DOOR,
   NUM_MSGS,
 };
 
@@ -132,6 +133,12 @@ typedef struct
 {
   const char* level_name;
 } MSG_LevelLoaded;
+
+typedef struct 
+{
+  ecs_entity_t entity;
+  ecs_entity_t door;
+} MSG_HitDoor;
 
 void ems_init();
 void ems_fini();

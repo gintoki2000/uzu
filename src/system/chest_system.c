@@ -3,14 +3,15 @@
 #include <components.h>
 #include <constances.h>
 #include <inventory.h>
-#include <ui_msgbox.h>
 #include <string.h>
+#include <ui_msgbox.h>
 
 extern Ecs* g_ecs;
 
 static void open_chest(ecs_entity_t entity)
 {
-  Chest* chest;
+  Chest*  chest;
+  Visual* visual;
 
   chest = ecs_get(g_ecs, entity, CHEST);
 
@@ -20,11 +21,19 @@ static void open_chest(ecs_entity_t entity)
   }
   else
   {
+    char msg[255] = "you got";
+    char tmp[100];
     for (int i = 0; i < chest->num_items; ++i)
     {
       add_to_inv(chest->items[i].type_id, chest->items[i].num_items);
+      sprintf(tmp, " %dx%s", chest->items[i].num_items, g_item_types[chest->items[i].type_id].name);
+      strcat(msg, tmp);
     }
+    ui_msgbox_display(msg);
     chest->num_items = 0;
+
+    visual              = ecs_get(g_ecs, entity, VISUAL);
+    visual->sprite.rect = RECT_CHEST_OPEN;
   }
 }
 

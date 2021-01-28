@@ -16,32 +16,22 @@
 
 ecs_entity_t make_anime_sword(Ecs* ecs)
 {
-  TEXTURE*     texture;
-  ecs_entity_t sword;
+  ecs_entity_t entity;
 
   /*component*/
   Visual*    visual;
   Transform* transform;
-  HitBox*    hitbox;
 
-  texture = get_texture(TEX_ANIME_SWORD);
+  entity = ecs_create(ecs);
 
-  sword = ecs_create(ecs);
+  transform = ecs_add(ecs, entity, TRANSFORM);
 
-  transform = ecs_add(ecs, sword, TRANSFORM);
-
-  visual = ecs_add(ecs, sword, VISUAL);
-  sprite_init(&visual->sprite, texture);
+  visual = ecs_add(ecs, entity, VISUAL);
+  sprite_init(&visual->sprite, get_texture(TEX_ANIME_SWORD));
   visual->anchor.x = visual->sprite.rect.w / 2;
   visual->anchor.y = visual->sprite.rect.h;
 
-  hitbox           = ecs_add(ecs, sword, HITBOX);
-  hitbox->size     = VEC2(12.f, 30.f);
-  hitbox->anchor   = VEC2(6.f, 30.f);
-  hitbox->proxy_id = RTREE_NULL_NODE;
-  hitbox->category = CATEGORY_WEAPON;
-
-  return sword;
+  return entity;
 }
 
 #define CHARACTER_SPRITE_WIDTH 16
@@ -121,7 +111,7 @@ ecs_entity_t make_wizzard(Ecs* ecs, Vec2 pos)
   return make_character_base(ecs, pos, TEX_WIZZARD);
 }
 
-ecs_entity_t make_dragon(Ecs* ecs, Vec2 pos) 
+ecs_entity_t make_dragon(Ecs* ecs, Vec2 pos)
 {
   return make_character_base(ecs, pos, TEX_LIZZARD);
 }
@@ -407,12 +397,10 @@ ecs_entity_t make_cleaver(Ecs* ecs, u16 mask_bits)
   entity  = ecs_create(ecs);
   texture = get_texture(TEX_CLEAVER);
 
-  Transform*    transform;
-  Visual*       visual;
-  HitBox*       hitbox;
-  WeaponBase*   base;
-  DamageOutput* damage_output;
-  wpskl_Swing*  wpskl_swing;
+  Transform*   transform;
+  Visual*      visual;
+  WeaponBase*  base;
+  wpskl_Swing* wpskl_swing;
 
   transform = ecs_add(ecs, entity, TRANSFORM);
 
@@ -421,19 +409,10 @@ ecs_entity_t make_cleaver(Ecs* ecs, u16 mask_bits)
   visual->anchor.x = visual->sprite.rect.w / 2;
   visual->anchor.y = visual->sprite.rect.h;
 
-  hitbox            = ecs_add(ecs, entity, HITBOX);
-  hitbox->size      = VEC2(visual->sprite.rect.w, visual->sprite.rect.h);
-  hitbox->anchor    = VEC2(visual->anchor.x, visual->anchor.y);
-  hitbox->proxy_id  = RTREE_NULL_NODE;
-  hitbox->category  = CATEGORY_WEAPON;
-  hitbox->mask_bits = mask_bits;
-
-  base       = ecs_add(ecs, entity, WEAPON_BASE);
-  base->atk  = 2;
-  base->name = "cleaver";
-
-  damage_output      = ecs_add(ecs, entity, DAMAGE_OUTPUT);
-  damage_output->atk = 0;
+  base          = ecs_add(ecs, entity, WEAPON_BASE);
+  base->atk     = 2;
+  base->type_id = WEAPON_CLEAVER;
+  base->mask    = mask_bits;
 
   wpskl_swing            = ecs_add(ecs, entity, WEAPON_SKILL_SWING);
   wpskl_swing->is_active = FALSE;
@@ -500,9 +479,7 @@ ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
 
   Transform*          transform;
   Visual*             visual;
-  HitBox*             hitbox;
   WeaponBase*         base;
-  DamageOutput*       damage_output;
   wpskl_Swing*        wpskl_swing;
   wpskl_ThunderStorm* wpskl_thunder_storm;
 
@@ -513,31 +490,16 @@ ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
   visual->anchor.x = visual->sprite.rect.w / 2;
   visual->anchor.y = visual->sprite.rect.h;
 
-  hitbox            = ecs_add(ecs, entity, HITBOX);
-  hitbox->size      = VEC2(visual->sprite.rect.w, visual->sprite.rect.h);
-  hitbox->anchor    = VEC2(visual->anchor.x, visual->anchor.y);
-  hitbox->proxy_id  = RTREE_NULL_NODE;
-  hitbox->category  = CATEGORY_WEAPON;
-  hitbox->mask_bits = mask_bits;
-
   base          = ecs_add(ecs, entity, WEAPON_BASE);
   base->atk     = 2;
-  base->name    = "lavis_sword";
   base->type_id = WEAPON_LAVIS_SWORD;
-
-  damage_output      = ecs_add(ecs, entity, DAMAGE_OUTPUT);
-  damage_output->atk = 0;
+  base->mask    = mask_bits;
 
   wpskl_swing            = ecs_add(ecs, entity, WEAPON_SKILL_SWING);
   wpskl_swing->is_active = FALSE;
   wpskl_swing->on_action = CHARACTER_ACTION_REGULAR_ATK;
   wpskl_swing->step      = 0;
   wpskl_swing->timer     = 0;
-
-  /*
-  wpskl_charge            = ecs_add(ecs, entity, WEAPON_SKILL_CHARGE);
-  wpskl_charge->on_action = CHARACTER_ACTION_SPECIAL_ATK;
-  */
 
   wpskl_thunder_storm            = ecs_add(ecs, entity, WEAPON_SKILL_THUNDER_STORM);
   wpskl_thunder_storm->on_action = CHARACTER_ACTION_SPECIAL_ATK;
@@ -637,9 +599,9 @@ ecs_entity_t make_player(Ecs* ecs, ecs_entity_t character, ecs_entity_t weapon)
 
   equip(ecs, character, weapon);
 
-  hitbox->category = CATEGORY_PLAYER;
-  hitbox->mask_bits =
-      BIT(CATEGORY_ITEM) | BIT(CATEGORY_WEAPON) | BIT(CATEGORY_PROJECTILE) | BIT(CATEGORY_LADDER);
+  hitbox->category  = CATEGORY_PLAYER;
+  hitbox->mask_bits = BIT(CATEGORY_ITEM) | BIT(CATEGORY_WEAPON) | BIT(CATEGORY_PROJECTILE) |
+                      BIT(CATEGORY_LADDER) | BIT(CATEGORY_INTERACABLE);
 
   return character;
 }
@@ -793,10 +755,39 @@ ecs_entity_t make_wizzard_npc(Ecs* ecs, Vec2 pos)
   return make_npc(ecs, make_wizzard(ecs, pos));
 }
 
-ecs_entity_t make_chest(Ecs* ecs, Vec2 pos)
+ecs_entity_t make_chest(Ecs* ecs, Vec2 pos, Item items[CHEST_MAX_ITEMS], u16 cnt)
 {
-  (void)ecs;
-  (void)pos;
+  ecs_entity_t entity;
+
+  Chest*        chest;
+  Visual*       visual;
+  Interactable* interactable;
+  HitBox*       hitbox;
+  Transform*    transform;
+
+
+
+  entity              = ecs_create(ecs);
+  visual              = ecs_add(ecs, entity, VISUAL);
+  visual->sprite.tex  = get_texture(TEX_CHEST);
+  visual->sprite.rect = RECT_CHEST_CLOSE;
+
+  chest = ecs_add(ecs, entity, CHEST);
+  memcpy(chest->items, items, cnt * sizeof(Item));
+  chest->num_items = cnt;
+
+  interactable               = ecs_add(ecs, entity, INTERACTABLE);
+  interactable->num_commands = 1;
+  interactable->commands[0]  = TEXT_COMMAND_OPEN;
+
+  hitbox            = ecs_add(ecs, entity, HITBOX);
+  hitbox->size      = (Vec2){ 16, 16 };
+  hitbox->category  = CATEGORY_INTERACABLE;
+  hitbox->mask_bits = 0;
+
+  transform = ecs_add(ecs, entity, TRANSFORM);
+  transform->pos = pos;
+
   return ECS_NULL_ENT;
 }
 
@@ -804,12 +795,10 @@ ecs_entity_t make_spear(Ecs* ecs, u16 mask)
 {
   ecs_entity_t entity;
 
-  Visual*       visual;
-  Transform*    transform;
-  HitBox*       hitbox;
-  DamageOutput* damage_output;
-  wpskl_Thust*  thust;
-  WeaponBase*   weapon_base;
+  Visual*      visual;
+  Transform*   transform;
+  wpskl_Thust* thust;
+  WeaponBase*  weapon_base;
 
   entity = ecs_create(ecs);
 
@@ -818,24 +807,15 @@ ecs_entity_t make_spear(Ecs* ecs, u16 mask)
   visual->anchor.x = visual->sprite.rect.w / 2;
   visual->anchor.y = 3;
 
-  transform      = ecs_add(ecs, entity, TRANSFORM);
-
-  hitbox            = ecs_add(ecs, entity, HITBOX);
-  hitbox->size.x    = 30;
-  hitbox->size.y    = 6;
-  hitbox->anchor.x  = 15;
-  hitbox->anchor.y  = 3;
-  hitbox->category  = CATEGORY_WEAPON;
-  hitbox->mask_bits = mask;
-  hitbox->proxy_id  = RTREE_NULL_NODE;
-
-  damage_output = ecs_add(ecs, entity, DAMAGE_OUTPUT);
+  transform = ecs_add(ecs, entity, TRANSFORM);
 
   thust            = ecs_add(ecs, entity, WEAPON_SKILL_THUST);
   thust->on_action = CHARACTER_ACTION_REGULAR_ATK;
 
   weapon_base         = ecs_add(ecs, entity, WEAPON_BASE);
   weapon_base->wearer = ECS_NULL_ENT;
+  weapon_base->atk    = 1;
+  weapon_base->mask   = mask;
 
   return entity;
 }
@@ -855,17 +835,17 @@ ecs_entity_t make_door(Ecs* ecs, Vec2 pos)
   visual              = ecs_add(ecs, entity, VISUAL);
   visual->sprite.tex  = get_texture(TEX_DOOR);
   visual->sprite.rect = RECT_DOOR_CLOSE;
-  visual->anchor.x = 16;
-  visual->anchor.y = 34;
+  visual->anchor.x    = 16;
+  visual->anchor.y    = 34;
 
   transform      = ecs_add(ecs, entity, TRANSFORM);
   transform->pos = pos;
 
   hitbox            = ecs_add(ecs, entity, HITBOX);
-  hitbox->size      = (Vec2){ 32, 34 };
-  hitbox->anchor    = (Vec2){ 16, 34 };
+  hitbox->size      = (Vec2){ 32, 5 };
+  hitbox->anchor    = (Vec2){ 16, 5 };
   hitbox->category  = CATEGORY_INTERACABLE;
-  hitbox->mask_bits = 0;
+  hitbox->mask_bits = BIT(CATEGORY_PLAYER) | BIT(CATEGORY_ENEMY);
 
   interactable               = ecs_add(ecs, entity, INTERACTABLE);
   interactable->num_commands = 1;

@@ -25,7 +25,18 @@ extern const char TEXT_COMMAND_EXAMINE[];
 extern const char TEXT_COMMAND_OPEN[];
 extern const char TEXT_COMMAND_CLOSE[];
 
+extern const char TEXT_WEAPON_SPEAR[];
+extern const char TEXT_WEAPON_LAVIS_SWORD[];
+extern const char TEXT_WEAPON_STAFF[];
+extern const char TEXT_WEAPON_CLEAVER[];
+
 extern const RECT RECT_DOOR_CLOSE;
 extern const RECT RECT_DOOR_OPEN;
+extern const RECT RECT_CHEST_CLOSE;
+extern const RECT RECT_CHEST_OPEN;
+
+extern const u16 MASK_PLAYER_WEAPON;
+extern const u16 MASK_ENEMY_WEAPON;
+extern const u16 MASK_INTERACABLE_ENTITY;
 
 #endif // CONSTANCES_H

@@ -17,6 +17,8 @@ static void player_vs_item(ecs_entity_t player, ecs_entity_t item);
 static void item_vs_player(ecs_entity_t item, ecs_entity_t player);
 static void player_vs_ladder(ecs_entity_t player, ecs_entity_t ladder);
 static void ladder_vs_player(ecs_entity_t ladder, ecs_entity_t player);
+static void interacable_vs_entity(ecs_entity_t interacable, ecs_entity_t entity);
+static void entity_vs_interacable(ecs_entity_t entity, ecs_entity_t interacable);
 
 static void (*_table[NUM_CATEGORIES][NUM_CATEGORIES])(ecs_entity_t, ecs_entity_t) =
 {
@@ -25,10 +27,12 @@ static void (*_table[NUM_CATEGORIES][NUM_CATEGORIES])(ecs_entity_t, ecs_entity_t
     [CATEGORY_PROJECTILE] = entity_vs_projectile,
     [CATEGORY_ITEM] = player_vs_item, 
     [CATEGORY_LADDER] = player_vs_ladder,
+    [CATEGORY_INTERACABLE] = entity_vs_interacable,
   },
   [CATEGORY_ENEMY] = {
     [CATEGORY_WEAPON ] = entity_vs_weapon,
     [CATEGORY_PROJECTILE] = entity_vs_projectile,
+    [CATEGORY_INTERACABLE] = entity_vs_interacable,
   },
   [CATEGORY_PROJECTILE] = {
     [CATEGORY_ENEMY] = projectile_vs_entity,
@@ -44,6 +48,10 @@ static void (*_table[NUM_CATEGORIES][NUM_CATEGORIES])(ecs_entity_t, ecs_entity_t
   [CATEGORY_LADDER] = {
     [CATEGORY_PLAYER] = ladder_vs_player,
   },
+  [CATEGORY_INTERACABLE] = {
+    [CATEGORY_ENEMY] = interacable_vs_entity,
+    [CATEGORY_PLAYER] = interacable_vs_entity,
+  }
 };
 
 void collision_manager_system_init()
@@ -51,7 +59,7 @@ void collision_manager_system_init()
   ems_connect(MSG_COLLISION, NULL, on_collision);
 }
 
-static void on_collision(void* arg, MSG_Collision* event)
+static void on_collision(SDL_UNUSED void* arg, MSG_Collision* event)
 {
   HitBox* hitbox1;
   HitBox* hitbox2;
@@ -133,5 +141,18 @@ static void ladder_vs_player(ecs_entity_t ladder, ecs_entity_t player)
                 &(MSG_HitLadder){
                     .ladder = ladder,
                 });
+}
+
+static void interacable_vs_entity(ecs_entity_t interacable, ecs_entity_t entity)
+{
+  if (ecs_has(g_ecs, interacable, DOOR_INFO))
+  {
+    ems_broadcast(MSG_HIT_DOOR, &(MSG_HitDoor){ .door = interacable, .entity = entity });
+  }
+}
+
+static void entity_vs_interacable(ecs_entity_t entity, ecs_entity_t interacable)
+{
+  interacable_vs_entity(interacable, entity);
 }
 #endif // COLLISION_FILTER_H

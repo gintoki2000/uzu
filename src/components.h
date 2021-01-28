@@ -95,19 +95,6 @@ typedef struct
   BOOL in_action;
 } Controller;
 
-INLINE void set_controller_action(Controller* c, u16 action)
-{
-  if (c->action != CHARACTER_ACTION_NONE)
-    c->action = action;
-}
-
-INLINE u16 get_controller_action(Controller* c)
-{
-  u16 action = c->action;
-  c->action  = 0;
-  return action;
-}
-
 typedef struct
 {
   ecs_entity_t weapon;
@@ -120,7 +107,7 @@ typedef struct
   ecs_entity_t wearer;
   s32          atk;
   u16          type_id;
-  const char*  name;
+  u16          mask;
 } WeaponBase;
 
 /*Weapon skills*/
@@ -162,6 +149,14 @@ typedef struct
   BOOL impact;
   Vec2 force;
 } DamageOutput;
+
+typedef struct 
+{
+  int w;
+  int h;
+  int cx;
+  int cy;
+} DamageArea;
 
 /*entity tag*/
 typedef int PlayerTag;

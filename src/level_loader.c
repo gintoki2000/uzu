@@ -87,7 +87,7 @@ static int parse_objectgroup(const json_object* object_group_json_obj)
 
     if (strcmp(objtype, "Chort") == 0)
     {
-      make_chort(g_ecs, pos);
+      make_chort(g_ecs, VEC2(pos.x + size.x / 2, pos.y + size.y));
     }
     else if (strcmp(objtype, "Ladder") == 0)
     {
@@ -103,7 +103,7 @@ static int parse_objectgroup(const json_object* object_group_json_obj)
     }
     else if (strcmp(objtype, "BigDemon") == 0)
     {
-      make_huge_demon(g_ecs, pos);
+      make_huge_demon(g_ecs, VEC2(pos.x + size.x / 2, pos.y + size.y));
     }
     else if (strcmp(objtype, "NPC") == 0)
     {
@@ -111,15 +111,22 @@ static int parse_objectgroup(const json_object* object_group_json_obj)
     }
     else if (strcmp(objtype, "Wogol") == 0)
     {
-      make_wogol(g_ecs, pos);
+      make_wogol(g_ecs, VEC2(pos.x + size.x / 2, pos.y + size.y));
     }
     else if (strcmp(objtype, "Imp") == 0)
     {
-      make_imp(g_ecs, pos); 
+      make_imp(g_ecs, VEC2(pos.x + size.x / 2, pos.y + size.y));
     }
-    else if (strcmp(objtype, "Door") == 0) 
+    else if (strcmp(objtype, "Door") == 0)
     {
       make_door(g_ecs, VEC2(pos.x + size.x / 2, pos.y + size.y));
+    }
+    else if (strcmp(objtype, "Chest") == 0)
+    {
+      make_chest(g_ecs,
+                 pos,
+                 (Item[5]){ { ITEM_TYPE_BIG_RED_FLASK, 1 }, { ITEM_TYPE_BLUE_FLASK, 1 } },
+                 2);
     }
   }
   return 0;

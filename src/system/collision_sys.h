@@ -9,14 +9,15 @@ typedef struct
   ecs_entity_t e2;
 } CollisionPair;
 
+typedef struct BoxQueryInput
+{
+  const AABB* aabb;
+  u16         mask_bits;
+} BoxQueryInput;
+
 void collision_system_init(void);
 void collision_system_fini(void);
 void collision_system_update(void);
 void collision_system_render_debug(void);
-void collision_system_query(const AABB* aabb, Callback callback);
-void collision_system_query_ex(const RECT*   rect,
-                               u16           mask_bits,
-                               ecs_entity_t* entities,
-                               u16*          cnt,
-                               u16           max);
+void collision_box_query(const RECT* rect, u16 mask_bits, Callback callback);
 #endif // COLLISION_SYSTEM_H

@@ -27,9 +27,8 @@ static void on_list_select(pointer_t arg, const char* item);
 
 //<==================================================================================>//
 
-static void on_list_select(pointer_t arg, const char* item)
+static void on_list_select(SDL_UNUSED pointer_t arg, const char* item)
 {
-  UNUSED(arg);
   ems_broadcast(MSG_COMANND_SELECTED,
                 &(MSG_CommandSelected){
                     g_curr_iteractable_entity,
@@ -37,18 +36,36 @@ static void on_list_select(pointer_t arg, const char* item)
                 });
 }
 
-static void update_pointed_entity()
+struct CBPlayerController_QueryInteracableEntitiesArgs
+{
+  Vec2         player_position;
+  float        closest_distance;
+  ecs_entity_t closest_entity;
+};
+
+static BOOL
+__cb_query_interacable_entities(struct CBPlayerController_QueryInteracableEntitiesArgs* args,
+                                ecs_entity_t                                            e)
+{
+  Vec2  entity_position = get_entity_position(g_ecs, e);
+  float dist            = vec2_dist(args->player_position, entity_position);
+  if (dist < args->closest_distance)
+  {
+    args->closest_distance = dist;
+    args->closest_entity   = e;
+  }
+  return TRUE;
+}
+
+static void find_interacable_entity()
 {
 
   if (g_curr_iteractable_entity == ECS_NULL_ENT)
   {
-    Vec2         player_pos, ientity_pos;
-    RECT         rect;
-    ecs_entity_t entities[5];
-    u16          cnt;
-    float        closest_distance;
-    float        dist;
-    ecs_entity_t closest;
+    Vec2 player_pos;
+    RECT rect;
+
+    struct CBPlayerController_QueryInteracableEntitiesArgs cbargs;
 
     player_pos = get_player_position(g_ecs);
     rect.x     = player_pos.x - TILE_SIZE * 2;
@@ -56,23 +73,14 @@ static void update_pointed_entity()
     rect.w     = TILE_SIZE * 3;
     rect.h     = TILE_SIZE * 4;
 
-    collision_system_query_ex(&rect, BIT(CATEGORY_INTERACABLE), entities, &cnt, 5);
+    cbargs.player_position  = player_pos;
+    cbargs.closest_entity   = ECS_NULL_ENT;
+    cbargs.closest_distance = 9999.f;
 
-    if (cnt > 0)
-    {
-      closest          = entities[0];
-      closest_distance = vec2_mag(vec2_sub(player_pos, get_entity_position(g_ecs, entities[0])));
-      for (int i = 1; i < cnt; ++i)
-      {
-        ientity_pos = get_entity_position(g_ecs, entities[i]);
-        if ((dist = vec2_mag(vec2_sub(ientity_pos, player_pos))) < closest_distance)
-        {
-          closest_distance = dist;
-          closest          = entities[i];
-        }
-      }
-      g_curr_iteractable_entity = closest;
-    }
+    collision_box_query(&rect,
+                        MASK_INTERACABLE_ENTITY,
+                        CALLBACK_1(&cbargs, __cb_query_interacable_entities));
+    g_curr_iteractable_entity = cbargs.closest_entity;
   }
   else
   {
@@ -81,7 +89,7 @@ static void update_pointed_entity()
     player_pos  = get_player_position(g_ecs);
     ientity_pos = get_entity_position(g_ecs, g_curr_iteractable_entity);
 
-    if (vec2_mag(vec2_sub(player_pos, ientity_pos)) > INTERACTABLE_DISTANCE)
+    if (vec2_dist(player_pos, ientity_pos) > INTERACTABLE_DISTANCE)
     {
       g_curr_iteractable_entity = ECS_NULL_ENT;
     }
@@ -109,7 +117,7 @@ void player_controller_system_update()
   Controller*  controller;
   Motion*      motion;
 
-  update_pointed_entity();
+  find_interacable_entity();
 
   if ((player = get_player(g_ecs)) == ECS_NULL_ENT)
     return;

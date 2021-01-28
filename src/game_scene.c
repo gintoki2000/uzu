@@ -23,6 +23,7 @@
 #include "system/animator_ctl_sys.h"
 #include "system/animator_sys.h"
 #include "system/camera_sys.h"
+#include "system/chest_system.h"
 #include "system/collision_mgr_sys.h"
 #include "system/door_system.h"
 #include "system/collision_sys.h"
@@ -117,6 +118,7 @@ static void on_load()
   game_event_init();
   merchant_system_init();
   door_system_init(); 
+  chest_system_init();
 
   //init ui
   ui_dialogue_init();
@@ -224,7 +226,7 @@ static void on_update()
     ui_quality_draw();
     
 
-#if 1
+#if 0
     // render debug
     // collision_system_render_debug();
     // path_rendering_system_update();

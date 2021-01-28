@@ -5,27 +5,32 @@
 #include "ui_helper.h"
 #include <toolbox/toolbox.h>
 
-static BOOL        _visible;
-static s32         _ticks;
-static const char* _msg;
+static BOOL       _visible;
+static s32        _ticks;
+static const char _msg[512];
 
 extern SDL_Renderer* g_renderer;
 
-const static RECT BOX_RECT  = { WIN_WIDTH / 2 - 50, WIN_HEIGHT / 2 - 15, 100, 30 };
-const static RECT TEXT_RECT = { WIN_WIDTH / 2 - 46, WIN_HEIGHT / 2 - 11, 94, 24 };
+const static RECT      BOX_RECT    = { WIN_WIDTH / 2 - 50, WIN_HEIGHT / 2 - 15, 100, 30 };
+const static RECT      TEXT_RECT   = { WIN_WIDTH / 2 - 46, WIN_HEIGHT / 2 - 11, 94, 24 };
+const static FC_Effect TEXT_EFFECT = { .alignment = FC_ALIGN_CENTER,
+                                       .scale     = { 1.f, 1.f },
+                                       .color     = { 0xff, 0xff, 0xff, 0xff } };
 
 static void close()
 {
   keybroad_pop_state();
-  _msg     = NULL;
   _ticks   = -1;
   _visible = FALSE;
 }
 static void process_key_input(void)
 {
-  if (key_just_pressed(KEY_A))
+  if (_ticks < 0)
   {
-    close();
+    if (key_just_pressed(KEY_A))
+    {
+      close();
+    }
   }
 }
 
@@ -36,7 +41,7 @@ void ui_msgbox_display(const char* msg)
 
 void ui_msgbox_display_timed(const char* msg, s32 ticks)
 {
-  _msg     = msg;
+  strcpy(_msg, msg);
   _ticks   = ticks;
   _visible = TRUE;
   keybroad_push_state(process_key_input);
@@ -47,6 +52,11 @@ void ui_msgbox_draw()
   if (!_visible)
     return;
 
+  if (_ticks > 0 && !(--_ticks))
+  {
+    close();
+  }
+
   draw_box_w_border(&BOX_RECT, COLOR_BLACK, COLOR_WHITE);
-  FC_DrawBoxColor(get_font(FONT_ITEM_PICKED_UP), g_renderer, TEXT_RECT, COLOR_WHITE, _msg);
+  FC_DrawBoxEffect(get_font(FONT_ITEM_PICKED_UP), g_renderer, TEXT_RECT, TEXT_EFFECT, _msg);
 }

@@ -224,6 +224,11 @@ INLINE Vec2 vec2_trunc(Vec2 v, float max_len)
   return v;
 }
 
+INLINE float vec2_dist(Vec2 a, Vec2 b)
+{
+  return vec2_mag(vec2_sub(a, b));
+}
+
 INLINE bool aabb_test_overlap(const AABB* a, const AABB* b)
 {
   float dx1 = b->lower_bound.x - a->upper_bound.x;

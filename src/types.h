@@ -51,6 +51,7 @@ typedef enum
   ANIM_STATE_IDLE,
   ANIM_STATE_RUN,
   ANIM_STATE_HIT,
+  ANIM_STATE_JUMP,
   NUM_ANIM_STATES,
 } AnimationState;
 

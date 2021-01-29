@@ -16,5 +16,7 @@ void         set_entity_mana_points(Ecs* ecs, ecs_entity_t entity, u16 mana_poin
 u16          get_entity_hit_points(Ecs* ecs, ecs_entity_t entity);
 u16          get_entity_conversation(Ecs* ecs, ecs_entity_t entity);
 const char*  get_entity_name(Ecs* ecs, ecs_entity_t entity);
+Vec2         get_entity_velocity(Ecs* ecs, ecs_entity_t entity);
+float        get_entity_vz(Ecs* ecs, ecs_entity_t entity);
 
 #endif // UTILS

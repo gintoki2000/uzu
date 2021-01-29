@@ -4,6 +4,21 @@
 
 extern Ecs* g_ecs;
 
+static void play_animation(Animator* animator, u16 new_anim_state)
+{
+  if (animator->current_anim != new_anim_state)
+  {
+    animator->current_anim = new_anim_state;
+    animator->elapsed      = 0;
+  }
+}
+
+static void force_play_animation(Animator* animator, u16 new_anim_state)
+{
+  animator->current_anim = new_anim_state;
+  animator->elapsed      = 0;
+}
+
 void animator_controller_system_update()
 {
   ecs_entity_t* entities;
@@ -25,22 +40,21 @@ void animator_controller_system_update()
 
       if (ecs_has(g_ecs, entities[i], INVULNERABLE))
       {
-        if (animator->current_anim != ANIM_STATE_HIT)
-        {
-          animator->current_anim = ANIM_STATE_HIT;
-          animator->elapsed      = 0;
-        }
+        play_animation(animator, ANIM_STATE_HIT);
+        return;
+      }
+
+      if (motion->vz > 1.f)
+      {
+        force_play_animation(animator, ANIM_STATE_JUMP);
         return;
       }
       vx = motion->vel.x;
       vy = motion->vel.y;
 
       next_state = (absf(vx) > 0.1f || absf(vy) > 0.1f) ? ANIM_STATE_RUN : ANIM_STATE_IDLE;
-      if (next_state != animator->current_anim)
-      {
-        animator->current_anim = next_state;
-        animator->elapsed      = 0;
-      }
+
+      play_animation(animator, next_state);
 
       if (absf(vx) > 0.1f)
       {

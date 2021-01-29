@@ -31,15 +31,15 @@ INLINE RECT* get_bounding_rect(RECT* r, const HitBox* hitbox, const Transform* t
 {
   r->w = hitbox->size.x;
   r->h = hitbox->size.y;
-  r->x = transform->pos.x - hitbox->anchor.x;
-  r->y = transform->pos.y - hitbox->anchor.y;
+  r->x = transform->position.x - hitbox->anchor.x;
+  r->y = transform->position.y - hitbox->anchor.y - transform->z;
   return r;
 }
 
 INLINE AABB* get_aabb(AABB* aabb, const HitBox* hitbox, const Transform* transform)
 {
-  aabb->lower_bound.x = transform->pos.x - hitbox->anchor.x;
-  aabb->lower_bound.y = transform->pos.y - hitbox->anchor.y;
+  aabb->lower_bound.x = transform->position.x - hitbox->anchor.x;
+  aabb->lower_bound.y = transform->position.y - hitbox->anchor.y - transform->z;
   aabb->upper_bound.x = aabb->lower_bound.x + hitbox->size.x;
   aabb->upper_bound.y = aabb->lower_bound.y + hitbox->size.y;
   return aabb;
@@ -53,7 +53,8 @@ static void update_proxies(Ecs* ecs)
   Transform* transform;
   HitBox*    hitboxs;
 
-  AABB aabb;
+  AABB  aabb;
+  float dx, dy;
 
   ecs_raw(ecs, HITBOX, &entites, (void**)&hitboxs, &cnt);
   for (int i = 0; i < cnt; ++i)
@@ -66,11 +67,9 @@ static void update_proxies(Ecs* ecs)
     }
     else
     {
-      float dx, dy, dr;
-      dx = transform->pos.x - transform->prev_pos.x;
-      dy = transform->pos.y - transform->prev_pos.y;
-      dr = transform->rot - transform->prev_rot;
-      if (absf(dx) > EPSILON || absf(dy) > EPSILON || absf(dr) > EPSILON)
+      dx = transform->position.x - transform->prev_position.x;
+      dy = transform->position.y - transform->prev_position.y;
+      if (absf(dx) > EPSILON || absf(dy) > EPSILON)
       {
         get_aabb(&aabb, &hitboxs[i], transform);
         rtree_move_proxy(_rtree, hitboxs[i].proxy_id, &aabb, VEC2(0, 0));

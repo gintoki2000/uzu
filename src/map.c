@@ -73,9 +73,25 @@ static AnimatedTile _animated_tile_list[ANIMATED_TILE_CNT] = {
 };
 
 static s32* _layers[] = {
-  [MAP_LAYER_FLOOR] = _floor_layer,
-  [MAP_LAYER_WALL]  = _wall_layer,
-  [MAP_LAYER_FRONT] = _front_layer,
+  [MAP_LAYER_FLOOR]      = _floor_layer,
+  [MAP_LAYER_BACK_WALL]  = _wall_layer,
+  [MAP_LAYER_FRONT_WALL] = _front_layer,
+};
+
+const TileInfo g_tile_info_tbl[] = {
+  { TILE_TYPE_FLOOR }, // 0
+  { TILE_TYPE_FLOOR },  // 1
+  { TILE_TYPE_FLOOR },  // 2
+  { TILE_TYPE_FLOOR },  // 3
+  { TILE_TYPE_FLOOR },  // 4
+  { TILE_TYPE_FLOOR },  // 5
+  { TILE_TYPE_FLOOR },  // 6
+  { TILE_TYPE_FLOOR },  // 7
+  { TILE_TYPE_FLOOR },  // 8
+  { TILE_TYPE_FLOOR },  // 9
+  { TILE_TYPE_TRAP },  // 10
+  { TILE_TYPE_TRAP },  // 11
+  { TILE_TYPE_TRAP },  // 12
 };
 
 void map_create_animated_cell(int layer, int row, int col, int anim_tile_id)
@@ -100,6 +116,52 @@ static void update_animated_tiles()
     tile = &_animated_tile_list[i];
 
     tile->curr = (_ticks / tile->duration) % tile->cnt;
+  }
+}
+
+static int to_animated_tile_id(s32 tile)
+{
+  int animated_tile_id = -1;
+  switch (tile)
+  {
+  case MAP_TRAP_TILE:
+    animated_tile_id = ANIMATED_TILE_TRAP;
+    break;
+  case MAP_BLUE_FOUNTAIN_MID_TILE:
+    animated_tile_id = ANIMATED_TILE_BLUE_FOUNTAIN_MID;
+    break;
+  case MAP_BLUE_FOUNTAIN_BASIN_TILE:
+    animated_tile_id = ANIMATED_TILE_BLUE_FOUNTAIN_BASIN;
+    break;
+  case MAP_RED_FOUNTAIN_MID_TILE:
+    animated_tile_id = ANIMATED_TILE_BLUE_FOUNTAIN_MID;
+    break;
+  case MAP_RED_FOUNTAIN_BASIN_TILE:
+    animated_tile_id = ANIMATED_TILE_BLUE_FOUNTAIN_BASIN;
+    break;
+  }
+  return animated_tile_id;
+}
+
+void map_scan_animated_cells(int layer)
+{
+  int        tile_cnt, animated_tile_id;
+  int        i;
+  int        col;
+  int        row;
+  const s32* data;
+
+  data     = _layers[layer];
+  tile_cnt = _row_cnt * _col_cnt;
+
+  for (i = 0; i < tile_cnt; ++i)
+  {
+    animated_tile_id = to_animated_tile_id(data[i]);
+    col              = i % _col_cnt;
+    row              = i / _col_cnt;
+
+    if (animated_tile_id != -1)
+      map_create_animated_cell(layer, row, col, animated_tile_id);
   }
 }
 
@@ -132,11 +194,11 @@ void map_draw(int layer)
   end_x = (g_viewport.x + g_viewport.w) / TILE_SIZE;
   end_y = (g_viewport.y + g_viewport.h) / TILE_SIZE;
 
-  start_x = MAX(0, start_x);
-  start_y = MAX(0, start_y);
+  start_x = max(0, start_x);
+  start_y = max(0, start_y);
 
-  end_x = MIN(end_x, _col_cnt);
-  end_y = MIN(end_y, _row_cnt);
+  end_x = min(end_x, _col_cnt);
+  end_y = min(end_y, _row_cnt);
 
   dst.w = dst.h = TILE_SIZE;
   src.w = src.h = TILE_SIZE;
@@ -183,22 +245,6 @@ void map_get_size(s32* w, s32* h)
 void map_set_data(s32 layer, const s32* data, u32 cnt)
 {
   memcpy(_layers[layer], data, sizeof(s32) * cnt);
-  for (u32 i = 0; i < cnt; ++i)
-  {
-    if (data[i] == MAP_TRAP_TILE)
-      map_create_animated_cell(layer, i / _col_cnt, i % _col_cnt, ANIMATED_TILE_TRAP);
-    else if (data[i] == MAP_BLUE_FOUNTAIN_MID_TILE)
-      map_create_animated_cell(layer, i / _col_cnt, i % _col_cnt, ANIMATED_TILE_BLUE_FOUNTAIN_MID);
-    else if (data[i] == MAP_BLUE_FOUNTAIN_BASIN_TILE)
-      map_create_animated_cell(layer,
-                               i / _col_cnt,
-                               i % _col_cnt,
-                               ANIMATED_TILE_BLUE_FOUNTAIN_BASIN);
-    else if (data[i] == MAP_RED_FOUNTAIN_MID_TILE)
-      map_create_animated_cell(layer, i / _col_cnt, i % _col_cnt, ANIMATED_TILE_RED_FOUNTAIN_MID);
-    else if (data[i] == MAP_RED_FOUNTAIN_BASIN_TILE)
-      map_create_animated_cell(layer, i / _col_cnt, i % _col_cnt, ANIMATED_TILE_RED_FOUNTAIN_BASIN);
-  }
 }
 
 s32* map_get_layer(s32 layer)
@@ -226,6 +272,6 @@ void map_set_tile_at(s32 layer, s32 x, s32 y, s32 tile)
 void map_clear()
 {
   _animated_cell_list.cnt = 0;
-  _col_cnt = 0;
-  _row_cnt = 0;
+  _col_cnt                = 0;
+  _row_cnt                = 0;
 }

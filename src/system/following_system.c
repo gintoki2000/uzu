@@ -26,7 +26,7 @@ void following_system_update(void)
         (controller = ecs_get(g_ecs, entities[i], CONTROLLER)))
     {
       target_pos = get_entity_position(g_ecs, target[i].entity);
-      desired    = vec2_sub(target_pos, transform->pos);
+      desired    = vec2_sub(target_pos, transform->position);
 
       d       = vec2_mag2(desired);
       desired = vec2_unit_vec(desired);

@@ -18,7 +18,7 @@ void position_rendering_system_update()
   for (int i = 0; i < cnt; ++i)
   {
     SDL_RenderDrawPoint(g_renderer,
-                        transforms[i].pos.x - g_viewport.x,
-                        transforms[i].pos.y - g_viewport.y);
+                        transforms[i].position.x - g_viewport.x,
+                        transforms[i].position.y - g_viewport.y);
   }
 }

@@ -42,7 +42,7 @@ static BTStatus set_dest_to_spot_exec(SetDestToSpot* self, Ecs* ecs, ecs_entity_
 
   dest = ecs_add(ecs, entity, DESTINATION);
 
-  *dest = spot->pos;
+  *dest = spot->position;
 
   return BT_STATUS_SUCCESS;
 }

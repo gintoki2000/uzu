@@ -13,9 +13,10 @@ typedef struct DrawCommand
   RECT             src;
   RECT             dst;
   POINT            center;
-  double           rot;
+  double           rotation;
   SDL_RendererFlip flip;
   COLOR            color;
+  float            z;
 } DrawCommand;
 
 #define MAX_COMMAND_CNT 255
@@ -48,8 +49,8 @@ void rendering_system_update(void)
   {
     if ((transform = ecs_get(g_ecs, entities[i], TRANSFORM)))
     {
-      dst.x = transform->pos.x - visuals[i].anchor.x;
-      dst.y = transform->pos.y - visuals[i].anchor.y;
+      dst.x = transform->position.x - visuals[i].anchor.x;
+      dst.y = transform->position.y - visuals[i].anchor.y;
       dst.w = visuals[i].sprite.rect.w;
       dst.h = visuals[i].sprite.rect.h;
       if (SDL_HasIntersection(&g_viewport, &dst))
@@ -62,23 +63,27 @@ void rendering_system_update(void)
           .src     = visuals[i].sprite.rect,
           .dst     = dst,
           .center  = visuals[i].anchor,
-          .rot     = transform->rot,
+          .rotation     = transform->rotation,
           .flip    = visuals[i].flip,
           .color   = visuals[i].color,
+          .z       = transform->z,
         };
       }
     }
   }
 
   sort();
+
   for (int i = 0; i < _count; ++i)
   {
+    dst = _buff[i].dst;
+    dst.y -= _buff[i].z;
     SDL_SetTextureColorMod(_buff[i].texture, _buff[i].color.r, _buff[i].color.g, _buff[i].color.b);
     SDL_RenderCopyEx(g_renderer,
                      _buff[i].texture,
                      &_buff[i].src,
-                     &_buff[i].dst,
-                     _buff[i].rot,
+                     &dst,
+                     _buff[i].rotation,
                      &_buff[i].center,
                      _buff[i].flip);
     SDL_SetTextureColorMod(_buff[i].texture, 0xff, 0xff, 0xff);

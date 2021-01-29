@@ -3,10 +3,10 @@
 #include <constances.h>
 
 const BTNodeVtbl* move_to_vtbl_inst();
-static void        move_to_vtbl_init(BTNodeVtbl* vtbl);
-static MoveTo*     move_to_init(MoveTo* self, float arrive_radius);
+static void       move_to_vtbl_init(BTNodeVtbl* vtbl);
+static MoveTo*    move_to_init(MoveTo* self, float arrive_radius);
 static BTStatus   move_to_exec(MoveTo* self, Ecs* ecs, ecs_entity_t entity);
-static void        move_to_abort(MoveTo* self, Ecs* ecs, ecs_entity_t entity);
+static void       move_to_abort(MoveTo* self, Ecs* ecs, ecs_entity_t entity);
 static void move_to_finish(MoveTo* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status);
 
 BT_ALLOC_FN(MoveTo, move_to)
@@ -36,14 +36,14 @@ static MoveTo* move_to_init(MoveTo* self, float arrive_radius)
 static BTStatus move_to_exec(MoveTo* self, Ecs* ecs, ecs_entity_t entity)
 {
   Destination* destination;
-  Transform*           transform;
-  Motion*              motion;
-  Vec2                 desired;
+  Transform*   transform;
+  Motion*      motion;
+  Vec2         desired;
 
   if ((destination = ecs_get(ecs, entity, DESTINATION)) &&
       (transform = ecs_get(ecs, entity, TRANSFORM)) && (motion = ecs_get(ecs, entity, MOTION)))
   {
-    desired = vec2_sub(*destination, transform->pos);
+    desired = vec2_sub(*destination, transform->position);
     float d = vec2_normalize(&desired);
     if (d < self->arrive_radius)
     {

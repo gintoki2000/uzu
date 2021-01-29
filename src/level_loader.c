@@ -18,8 +18,8 @@ static void level_name_to_file_name(const char* level_name, char* dest)
 
 static char* _layer_name_tbl[NUM_MAP_LAYERS] = {
   [MAP_LAYER_FLOOR] = "floor",
-  [MAP_LAYER_WALL]  = "back-wall",
-  [MAP_LAYER_FRONT] = "front-wall",
+  [MAP_LAYER_BACK_WALL]  = "back-wall",
+  [MAP_LAYER_FRONT_WALL] = "front-wall",
 };
 
 static int layer_name_to_id(const char* name)
@@ -52,6 +52,7 @@ static int parse_tilelayer(const json_object* tilelayer_json_obj)
   if ((layer = layer_name_to_id(name)) != -1)
   {
     map_set_data(layer, data, datalen);
+    map_scan_animated_cells(layer);
   }
 
   free(data);

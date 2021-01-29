@@ -5,30 +5,26 @@
 
 #define MAP_MAX_ROW 300
 #define MAP_MAX_COL 300
-#define MAP_MAX_TILES MAP_MAX_ROW* MAP_MAX_COL
+#define MAP_MAX_TILES MAP_MAX_ROW * MAP_MAX_COL
 
-enum
+typedef enum MapLayer
 {
   MAP_LAYER_FLOOR,
-  MAP_LAYER_WALL,
-  MAP_LAYER_FRONT,
+  MAP_LAYER_BACK_WALL,
+  MAP_LAYER_FRONT_WALL,
   NUM_MAP_LAYERS
-};
+} MapLayer;
 
-#define TILE_WALL_1 53
-#define TILE_ROOF_1 51
-#define TILE_ROOF_LEFT 58
-#define TILE_ROOF_RIGHT 57
-#define TILE_LEFT_CORNER_WALL 48
-#define TILE_RIGHT_CORNER_WALL 49
-#define TILE_LEFT_CORNER_ROOF 46
-#define TILE_RIGHT_CORNER_ROOF 47
-#define TILE_LEFT_SMALL_WALL 55
-#define TILE_RIGHT_SMALL_WALL 56
-#define TILE_LEFT_WALL_W_ROOF 24
-#define TILE_RIGHT_WALL_W_ROOF 25
+typedef enum TileType {
+	TILE_TYPE_FLOOR,
+	TILE_TYPE_WALL,
+	TILE_TYPE_TRAP
+} TileType;
 
-typedef u32 tile_t;
+typedef struct TileInfo
+{
+  u16 type;
+} TileInfo;
 
 typedef struct AnimatedTile
 {
@@ -46,7 +42,10 @@ typedef struct AnimatedCell
   const AnimatedTile* anim_tile;
 } AnimatedCell;
 
+extern const TileInfo g_tile_info_tbl[];
+
 void map_update_animated_cells();
+void map_scan_animated_cells(int layer);
 void map_draw(int layer);
 void map_set_size(s32 w, s32 h);
 void map_set_data(s32 layer, const s32* data, u32 cnt);

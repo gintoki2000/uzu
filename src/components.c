@@ -37,15 +37,15 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
   [INVULNERABLE]               = ECS_TYPE(Invulnerable),
   [INPUT_BLOCKER]              = ECS_TYPE(InputBlocker),
   [CAMERA_TARGET_TAG]          = ECS_TYPE(CameraTargetTag),
-  [AI_AGENT]                   = ECS_TYPE_EX(AIAgent, NULL, ai_agent_fini),
+  [BRAIN]                      = ECS_TYPE_EX(Brain, NULL, brain_fini),
   [DESTINATION]                = ECS_TYPE(Destination),
   [PATH]                       = ECS_TYPE(Path),
   [FOLLOWING_TARGET]           = ECS_TYPE(FollowingTarget),
   [SPOT]                       = ECS_TYPE(Spot),
   [WEAPON_SKILL_THUNDER_STORM] = ECS_TYPE(wpskl_ThunderStorm),
-  [LEVEL_SWITCHER]             = ECS_TYPE_EX(LevelSwitcher, NULL, level_switcher_fini),
-  [NAME]                       = { .size = sizeof(Name), .fini_fn = (ecs_comp_fini_fn_t)name_fini },
-  [TEXT]                       = { .size = sizeof(Text), .fini_fn = (ecs_comp_fini_fn_t)text_fini },
+  [LEVEL_SWITCHER]             = ECS_TYPE(LevelSwitcher),
+  [NAME]                       = ECS_TYPE(Name),
+  [TEXT]                       = ECS_TYPE(Text),
   [INTERACTABLE]               = { .size = sizeof(Interactable) },
   [DIALOGUE]                   = { .size = sizeof(Dialogue) },
   [ITEM_TAG]                   = { .size = sizeof(ItemTag) },
@@ -96,7 +96,7 @@ void visual_set_anchor_to_center(Visual* v)
   v->anchor.y = v->sprite.rect.h / 2;
 }
 
-void ai_agent_fini(AIAgent* ai_agent)
+void brain_fini(Brain* ai_agent)
 {
   bt_node_del(ai_agent->root);
   ai_agent->root = NULL;
@@ -110,39 +110,26 @@ void hitbox_init(HitBox* h)
 void level_switcher_init(LevelSwitcher* sw, const char* level, const char* dest)
 {
   ASSERT(level != NULL && dest != NULL);
-  sw->level = SDL_strdup(level);
-  sw->dest  = SDL_strdup(dest);
-}
-
-void level_switcher_fini(LevelSwitcher* sw)
-{
-  free(sw->level);
-  free(sw->dest);
-}
-
-void name_fini(Name* name)
-{
-  free(name->value);
+  strncpy(sw->level, level, LEVEL_SWITCHER_MAX_LEVEL_NAME_LEN);
+  sw->level[LEVEL_SWITCHER_MAX_LEVEL_NAME_LEN] = '\0';
+  strncpy(sw->dest, dest, LEVEL_SWITCHER_MAX_DEST_LEN);
+  sw->dest[LEVEL_SWITCHER_MAX_LEVEL_NAME_LEN] = '\0';
 }
 
 void name_init(Name* name, const char* value)
 {
   ASSERT(value != NULL);
-  name->value = SDL_strdup(value);
+  strncpy(name->value, value, NAME_MAX_LEN);
+  name->value[NAME_MAX_LEN] = '\0';
 }
 
 void text_init(Text* text, const char* value, FONT* font, COLOR color)
 {
   ASSERT(value != NULL);
-  text->value   = SDL_strdup(value);
-  text->opacity = 0xff;
-  text->color   = color;
-  text->font    = font;
-}
-
-void text_fini(Text* text)
-{
-  free(text->value);
+  strncpy(text->value, value, TEXT_MAX_LEN);
+  text->value[TEXT_MAX_LEN] = '\0';
+  text->color               = color;
+  text->font                = font;
 }
 
 void visual_init(Visual* v)

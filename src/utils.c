@@ -15,7 +15,7 @@ Vec2 get_player_position(Ecs* ecs)
 
 Vec2 get_entity_position(Ecs* ecs, ecs_entity_t entity)
 {
-  return ((Transform*)ecs_get(ecs, entity, TRANSFORM))->pos;
+  return ((Transform*)ecs_get(ecs, entity, TRANSFORM))->position;
 }
 
 BOOL set_entity_position(Ecs* ecs, ecs_entity_t entity, Vec2 pos)
@@ -23,7 +23,7 @@ BOOL set_entity_position(Ecs* ecs, ecs_entity_t entity, Vec2 pos)
   Transform* transform;
   if ((transform = ecs_get(ecs, entity, TRANSFORM)))
   {
-    transform->pos = pos;
+    transform->position = pos;
     return TRUE;
   }
   return FALSE;
@@ -64,7 +64,7 @@ ecs_entity_t find_ladder(Ecs* ecs, const char* _name)
 
 BOOL equip(Ecs* ecs, ecs_entity_t entity, ecs_entity_t weapon)
 {
-  Equipment*  equipment;
+  Equipment*        equipment;
   WeaponAttributes* weapon_core;
 
   if (entity == ECS_NULL_ENT || weapon == ECS_NULL_ENT)
@@ -127,4 +127,14 @@ u16 get_entity_conversation(Ecs* ecs, ecs_entity_t entity)
 const char* get_entity_name(Ecs* ecs, ecs_entity_t entity)
 {
   return ((Name*)ecs_get(ecs, entity, NAME))->value;
+}
+
+Vec2 get_entity_velocity(Ecs* ecs, ecs_entity_t entity)
+{
+  return ((Motion*)ecs_get(ecs, entity, MOTION))->vel;
+}
+
+float get_entity_vz(Ecs* ecs, ecs_entity_t entity)
+{
+  return ((Motion*)ecs_get(ecs, entity, MOTION))->vz;
 }

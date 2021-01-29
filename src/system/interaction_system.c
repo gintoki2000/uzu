@@ -21,14 +21,14 @@ void interactable_pointer_rendering_system_update()
 {
   if (g_curr_iteractable_entity != ECS_NULL_ENT)
   {
-    Vec2 pos = get_entity_position(g_ecs, g_curr_iteractable_entity);
+    Vec2 position = get_entity_position(g_ecs, g_curr_iteractable_entity);
 
     SDL_RenderCopy(g_renderer,
                    get_texture(TEX_PONITER_DOWN),
                    NULL,
                    &(RECT){
-                       pos.x - g_viewport.x - POINTER_DOWN_WIDTH / 2,
-                       pos.y - 2 * TILE_SIZE - g_viewport.y,
+                       position.x - g_viewport.x - POINTER_DOWN_WIDTH / 2,
+                       position.y - 2 * TILE_SIZE - g_viewport.y,
                        POINTER_DOWN_WIDTH,
                        POINTER_DOWN_HEIGHT,
                    });

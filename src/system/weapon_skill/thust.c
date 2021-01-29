@@ -36,27 +36,27 @@ void weapon_skill_thust_update()
   ecs_entity_t* entities;
   ecs_size_t    cnt;
 
-  WeaponAttributes*  base;
-  wpskl_Thust* skl;
-  Controller*  wearer_controller;
-  Equipment*   wearer_equipment;
-  Motion*      wearer_motion;
-  Transform*   transform;
-  RECT         damage_area;
+  WeaponAttributes* attributes;
+  wpskl_Thust*      skl;
+  Controller*       wearer_controller;
+  Equipment*        wearer_equipment;
+  Motion*           wearer_motion;
+  Transform*        transform;
+  RECT              damage_area;
 
   ecs_raw(g_ecs, WEAPON_SKILL_THUST, &entities, (pointer_t*)&skl, &cnt);
   for (ecs_size_t i = 0; i < cnt; ++i)
   {
-    if ((base = ecs_get(g_ecs, entities[i], WEAPON_ATTRIBUTES)))
+    if ((attributes = ecs_get(g_ecs, entities[i], WEAPON_ATTRIBUTES)))
       switch (skl[i].state)
       {
       case 0: // INACTIVE
-        if ((wearer_controller = ecs_get(g_ecs, base->wearer, CONTROLLER)))
+        if ((wearer_controller = ecs_get(g_ecs, attributes->wearer, CONTROLLER)))
         {
           if (wearer_controller->action == skl[i].on_action)
           {
-            wearer_equipment = ecs_get(g_ecs, base->wearer, EQUIPMENT);
-            wearer_motion    = ecs_get(g_ecs, base->wearer, MOTION);
+            wearer_equipment = ecs_get(g_ecs, attributes->wearer, EQUIPMENT);
+            wearer_motion    = ecs_get(g_ecs, attributes->wearer, MOTION);
             transform        = ecs_get(g_ecs, entities[i], TRANSFORM);
 
             wearer_equipment->d.x        = -10;
@@ -64,7 +64,7 @@ void weapon_skill_thust_update()
             wearer_controller->in_action = TRUE;
             wearer_controller->action    = CHARACTER_ACTION_NONE;
 
-            transform->rot = -15.0;
+            transform->rotation = -15.0 * transform->hdir;
 
             skl[i].state = 1;
             skl[i].timer = 7;
@@ -74,12 +74,12 @@ void weapon_skill_thust_update()
       case 1:
         if (skl[i].timer && --skl[i].timer == 0)
         {
-          wearer_equipment = ecs_get(g_ecs, base->wearer, EQUIPMENT);
+          wearer_equipment = ecs_get(g_ecs, attributes->wearer, EQUIPMENT);
           transform        = ecs_get(g_ecs, entities[i], TRANSFORM);
 
           wearer_equipment->d.x = -8;
           wearer_equipment->d.y = -4;
-          transform->rot        = -12;
+          transform->rotation   = -12 * transform->hdir;
           skl[i].state          = 2;
           skl[i].timer          = 2;
         }
@@ -87,22 +87,22 @@ void weapon_skill_thust_update()
       case 2:
         if (skl[i].timer && --skl[i].timer == 0)
         {
-          wearer_equipment = ecs_get(g_ecs, base->wearer, EQUIPMENT);
+          wearer_equipment = ecs_get(g_ecs, attributes->wearer, EQUIPMENT);
           transform        = ecs_get(g_ecs, entities[i], TRANSFORM);
 
           wearer_equipment->d.x = 10;
           wearer_equipment->d.y = 0;
-          transform->rot        = 0.0;
+          transform->rotation   = 0.0;
           skl[i].state          = 3;
           skl[i].timer          = 7;
         }
         break;
       case 3:
-        if ((wearer_controller = ecs_get(g_ecs, base->wearer, CONTROLLER)))
+        if ((wearer_controller = ecs_get(g_ecs, attributes->wearer, CONTROLLER)))
         {
           if (skl[i].timer && --skl[i].timer == 0)
           {
-            wearer_equipment = ecs_get(g_ecs, base->wearer, EQUIPMENT);
+            wearer_equipment = ecs_get(g_ecs, attributes->wearer, EQUIPMENT);
             transform        = ecs_get(g_ecs, entities[i], TRANSFORM);
 
             wearer_controller->in_action = FALSE;
@@ -110,17 +110,17 @@ void weapon_skill_thust_update()
             wearer_equipment->d.y        = 0;
             skl[i].state                 = 0;
 
-            damage_area.x = transform->pos.x - 20;
-            damage_area.y = transform->pos.y - 9;
+            damage_area.x = transform->position.x - 20;
+            damage_area.y = transform->position.y - 9;
             damage_area.w = 40;
             damage_area.h = 12;
 
             collision_box_query(&damage_area,
-                                base->mask,
+                                attributes->mask,
                                 CALLBACK_1((&(CBThust_QueryHitEntitiesArgs){
-                                               .dealer    = base->wearer,
-                                               .damage    = base->atk,
-                                               .direction = 1,
+                                               .dealer    = attributes->wearer,
+                                               .damage    = attributes->atk,
+                                               .direction = transform->hdir,
                                            }),
                                            __cb_query_hit_entities));
           }

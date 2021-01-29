@@ -61,6 +61,7 @@ typedef struct
   BOOL         impact;
   u16          impact_time;
   Vec2         force;
+  float        zforce;
 } MSG_DealDamage;
 
 typedef struct
@@ -134,7 +135,7 @@ typedef struct
   const char* level_name;
 } MSG_LevelLoaded;
 
-typedef struct 
+typedef struct
 {
   ecs_entity_t entity;
   ecs_entity_t door;

@@ -165,7 +165,12 @@ void player_controller_system_update()
 
       else if (key_just_pressed(KEY_B))
       {
-        controller->action = CHARACTER_ACTION_SPECIAL_ATK;
+        Transform* transform = ecs_get(g_ecs, player, TRANSFORM);
+        if (transform->z <= 0.f)
+        {
+          Motion* motion = ecs_get(g_ecs, player, MOTION);
+          motion->vz     = 100.f;
+        }
       }
     }
     else

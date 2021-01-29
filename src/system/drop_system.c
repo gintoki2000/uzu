@@ -24,13 +24,13 @@ static void on_entity_died(void* arg, const MSG_EntityDied* event)
     v = rand() % 100;
     if (v <= drop->change1)
     {
-      create_fn_tbl[drop->item1](g_ecs, transform->pos);
+      create_fn_tbl[drop->item1](g_ecs, transform->position);
     }
 
     v = rand() % 100;
     if (v <= drop->change2)
     {
-      create_fn_tbl[drop->item2](g_ecs, transform->pos);
+      create_fn_tbl[drop->item2](g_ecs, transform->position);
     }
   }
 }

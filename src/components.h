@@ -35,7 +35,7 @@ typedef enum
   TILE_COLLISION_TAG,
   CHARACTER_ANIMATOR_TAG,
   DOOR_TAG,
-  AI_AGENT,
+  BRAIN,
   DESTINATION,
   PATH,
   FOLLOWING_TARGET,
@@ -61,14 +61,17 @@ typedef struct
   float max_speed;
   float max_force;
   float friction;
+  float vz;
+  float gravity_scale;
 } Motion;
 
 typedef struct
 {
-  Vec2   prev_pos;
-  Vec2   pos;
-  double prev_rot;
-  double rot;
+  Vec2   prev_position;
+  Vec2   position;
+  double rotation;
+  float  z;
+  int    hdir;
 } Transform;
 
 typedef struct
@@ -82,7 +85,7 @@ typedef struct
 
 typedef struct
 {
-  Vec2  pos;
+  Vec2  position;
   float radius;
 } Spot;
 
@@ -148,7 +151,7 @@ typedef struct
   Vec2 force;
 } DamageOutput;
 
-typedef struct 
+typedef struct
 {
   int w;
   int h;
@@ -251,7 +254,7 @@ typedef ecs_entity_t Attacker;
 typedef struct
 {
   BTNode* root;
-} AIAgent;
+} Brain;
 
 //** BT Vars
 
@@ -271,22 +274,25 @@ typedef struct
   float        radius;
 } FollowingTarget;
 
+#define LEVEL_SWITCHER_MAX_LEVEL_NAME_LEN 255
+#define LEVEL_SWITCHER_MAX_DEST_LEN 255
 typedef struct
 {
-  char*     level;
-  char*     dest;
+  char      level[LEVEL_SWITCHER_MAX_LEVEL_NAME_LEN + 1];
+  char      dest[LEVEL_SWITCHER_MAX_DEST_LEN + 1];
   Direction exit_direction;
 } LevelSwitcher;
 
+#define NAME_MAX_LEN 15
 typedef struct
 {
-  char* value;
+  char value[NAME_MAX_LEN + 1];
 } Name;
 
+#define TEXT_MAX_LEN 50
 typedef struct
 {
-  char* value;
-  u8    opacity;
+  char  value[TEXT_MAX_LEN + 1];
   COLOR color;
   FONT* font;
 } Text;
@@ -294,8 +300,8 @@ typedef struct
 #define INTERACTABLE_MAX_COMMANDS 5
 typedef struct Interatcable
 {
-  cstr_t commands[INTERACTABLE_MAX_COMMANDS];
-  int    num_commands;
+  const char* commands[INTERACTABLE_MAX_COMMANDS];
+  int         num_commands;
 } Interactable;
 
 typedef struct
@@ -351,7 +357,7 @@ Animator* animator_init(Animator* animator, const Animation* anims, u32 cnt);
 void      animator_fini(Animator* animator);
 
 void visual_set_anchor_to_center(Visual* v);
-void ai_agent_fini(AIAgent* ai_agent);
+void brain_fini(Brain* ai_agent);
 
 void hitbox_init(HitBox* h);
 

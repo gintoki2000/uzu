@@ -30,11 +30,18 @@ void hitbox_rendering_system_update()
   {
     transform = ecs_get(g_ecs, entities[i], TRANSFORM);
 
-    x = transform->pos.x - hitboxs[i].anchor.x - g_viewport.x;
-    y = transform->pos.y - hitboxs[i].anchor.y - g_viewport.y;
+    x = transform->position.x - hitboxs[i].anchor.x - g_viewport.x;
+    y = transform->position.y - hitboxs[i].anchor.y - g_viewport.y - transform->z;
     w = hitboxs[i].size.x;
     h = hitboxs[i].size.y;
-    rect_init_full(&rect, x, y, w, h, hitboxs[i].anchor.x, hitboxs[i].anchor.y, transform->rot);
+    rect_init_full(&rect,
+                   x,
+                   y,
+                   w,
+                   h,
+                   hitboxs[i].anchor.x,
+                   hitboxs[i].anchor.y,
+                   transform->rotation);
     draw_rect(&rect, g_renderer);
   }
 }

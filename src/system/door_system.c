@@ -64,17 +64,17 @@ static void on_entity_collied_door(SDL_UNUSED void* arg, const MSG_HitDoor* even
   etx = ecs_get(g_ecs, event->entity, TRANSFORM);
   dtx = ecs_get(g_ecs, event->door, TRANSFORM);
 
-  er.x = etx->pos.x - eh->anchor.x;
-  er.y = etx->pos.y - 5;
+  er.x = etx->position.x - eh->anchor.x;
+  er.y = etx->position.y - 5;
   er.w = eh->size.x;
   er.h = 5;
 
-  dr.x = dtx->pos.x - dh->anchor.x;
-  dr.y = dtx->pos.y - dh->anchor.y;
+  dr.x = dtx->position.x - dh->anchor.x;
+  dr.y = dtx->position.y - dh->anchor.y;
   dr.w = dh->size.x;
   dr.h = dh->size.y;
   if (SDL_HasIntersection(&er, &dr))
   {
-    etx->pos = etx->prev_pos;
+    etx->position = etx->prev_position;
   }
 }

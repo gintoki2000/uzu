@@ -1,5 +1,4 @@
 #include <ai/attack.h>
-#include <ai/find_random_destination.h>
 #include <ai/follow_player.h>
 #include <ai/is_player_cross_spot.h>
 #include <ai/is_player_out_of_spot.h>
@@ -44,7 +43,7 @@ typedef struct NewCharacterParams
   u16  hit_points;
 } NewCharacterParams;
 
-ecs_entity_t make_character_base(Ecs* ecs, Vec2 pos, u16 texture_id)
+ecs_entity_t make_character_base(Ecs* ecs, Vec2 position, u16 texture_id)
 {
   ecs_entity_t entity;
   TEXTURE*     texture;
@@ -64,14 +63,15 @@ ecs_entity_t make_character_base(Ecs* ecs, Vec2 pos, u16 texture_id)
   animation_init(&anims[ANIM_STATE_HIT], texture, 0, 0, 1, 1, 16, 28);
   animation_init(&anims[ANIM_STATE_IDLE], texture, 16 * 1, 0, 1, 4, 16, 28);
   animation_init(&anims[ANIM_STATE_RUN], texture, 16 * 5, 0, 1, 4, 16, 28);
+  animation_init(&anims[ANIM_STATE_JUMP], texture, 16 * 6, 0, 1, 1, 16, 28);
 
   anims[ANIM_STATE_IDLE].frame_duration = 8;
   anims[ANIM_STATE_RUN].frame_duration  = 4;
 
   entity = ecs_create(ecs);
 
-  transform      = ecs_add(ecs, entity, TRANSFORM);
-  transform->pos = pos;
+  transform           = ecs_add(ecs, entity, TRANSFORM);
+  transform->position = position;
 
   visual           = ecs_add(ecs, entity, VISUAL);
   visual->anchor.x = 16 / 2;
@@ -109,19 +109,19 @@ ecs_entity_t make_character_base(Ecs* ecs, Vec2 pos, u16 texture_id)
   return entity;
 }
 
-ecs_entity_t make_knight(Ecs* ecs, Vec2 pos)
+ecs_entity_t make_knight(Ecs* ecs, Vec2 position)
 {
-  return make_character_base(ecs, pos, TEX_KNIGHT);
+  return make_character_base(ecs, position, TEX_KNIGHT);
 }
 
-ecs_entity_t make_wizzard(Ecs* ecs, Vec2 pos)
+ecs_entity_t make_wizzard(Ecs* ecs, Vec2 position)
 {
-  return make_character_base(ecs, pos, TEX_WIZZARD);
+  return make_character_base(ecs, position, TEX_WIZZARD);
 }
 
-ecs_entity_t make_dragon(Ecs* ecs, Vec2 pos)
+ecs_entity_t make_dragon(Ecs* ecs, Vec2 position)
 {
-  return make_character_base(ecs, pos, TEX_LIZZARD);
+  return make_character_base(ecs, position, TEX_LIZZARD);
 }
 
 typedef struct NewMonsterParams
@@ -180,14 +180,15 @@ ecs_entity_t make_monster_base(Ecs* ecs, const NewMonsterParams* params)
                  4,
                  sprite_width,
                  sprite_height);
+  animation_init(&anims[ANIM_STATE_JUMP], texture, 0, 0, 1, 1, sprite_width, sprite_height);
 
   anims[ANIM_STATE_IDLE].frame_duration = 8;
   anims[ANIM_STATE_RUN].frame_duration  = 6;
 
   entity = ecs_create(ecs);
 
-  transform      = ecs_add(ecs, entity, TRANSFORM);
-  transform->pos = params->position;
+  transform           = ecs_add(ecs, entity, TRANSFORM);
+  transform->position = params->position;
 
   visual = ecs_add(ecs, entity, VISUAL);
 
@@ -226,36 +227,36 @@ ecs_entity_t make_monster_base(Ecs* ecs, const NewMonsterParams* params)
   return entity;
 }
 
-ecs_entity_t make_huge_demon(Ecs* ecs, Vec2 pos)
+ecs_entity_t make_huge_demon(Ecs* ecs, Vec2 position)
 {
-  return make_monster_base(ecs, &(NewMonsterParams){ pos, TEX_BIG_DEMON, 30, k_big_size });
+  return make_monster_base(ecs, &(NewMonsterParams){ position, TEX_BIG_DEMON, 30, k_big_size });
 }
 
-ecs_entity_t make_imp(Ecs* ecs, Vec2 pos)
+ecs_entity_t make_imp(Ecs* ecs, Vec2 position)
 {
-  return make_monster_base(ecs, &(NewMonsterParams){ pos, TEX_IMP, 5, k_small_size });
+  return make_monster_base(ecs, &(NewMonsterParams){ position, TEX_IMP, 5, k_small_size });
 }
 
-ecs_entity_t make_wogol(Ecs* ecs, Vec2 pos)
+ecs_entity_t make_wogol(Ecs* ecs, Vec2 position)
 {
-  return make_monster_base(ecs, &(NewMonsterParams){ pos, TEX_WOGOL, 5, k_small_size });
+  return make_monster_base(ecs, &(NewMonsterParams){ position, TEX_WOGOL, 5, k_small_size });
 }
 
-ecs_entity_t make_chort(Ecs* ecs, Vec2 pos)
+ecs_entity_t make_chort(Ecs* ecs, Vec2 position)
 {
   ecs_entity_t entity =
-      make_monster_base(ecs, &(NewMonsterParams){ pos, TEX_CHORT, 5, k_small_size });
+      make_monster_base(ecs, &(NewMonsterParams){ position, TEX_CHORT, 5, k_small_size });
 
   /*components */
   Drop*       drop;
-  AIAgent*    ai_agent;
+  Brain*      brain;
   Equipment*  equipment;
   Controller* controller;
   Spot*       spot;
 
-  spot         = ecs_add(ecs, entity, SPOT);
-  spot->radius = TILE_SIZE * 7;
-  spot->pos    = pos;
+  spot           = ecs_add(ecs, entity, SPOT);
+  spot->radius   = TILE_SIZE * 7;
+  spot->position = position;
 
   ecs_add(ecs, entity, ENEMY_TAG);
 
@@ -311,8 +312,8 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 pos)
   bt_selector_add(selector, (BTNode*)is_player_cross_spot);
   bt_selector_add(selector, (BTNode*)is_player_out_of_spot);
 
-  ai_agent       = ecs_add(ecs, entity, AI_AGENT);
-  ai_agent->root = (BTNode*)root;
+  brain       = ecs_add(ecs, entity, BRAIN);
+  brain->root = (BTNode*)root;
 
   equipment                  = ecs_add(ecs, entity, EQUIPMENT);
   equipment->weapon          = ECS_NULL_ENT;
@@ -385,7 +386,7 @@ ecs_entity_t make_cleaver(Ecs* ecs, u16 mask_bits)
   return entity;
 }
 
-ecs_entity_t make_blood_stain_effect(Ecs* ecs, Vec2 pos)
+ecs_entity_t make_blood_stain_effect(Ecs* ecs, Vec2 position)
 {
   ecs_entity_t stain_effect;
 
@@ -407,8 +408,8 @@ ecs_entity_t make_blood_stain_effect(Ecs* ecs, Vec2 pos)
   animator = ecs_add(ecs, stain_effect, ANIMATOR);
   animator_init(animator, &animation, 1);
 
-  transform      = ecs_add(ecs, stain_effect, TRANSFORM);
-  transform->pos = pos;
+  transform           = ecs_add(ecs, stain_effect, TRANSFORM);
+  transform->position = position;
 
   life_span            = ecs_add(ecs, stain_effect, LIFE_SPAN);
   life_span->remaining = 15; // frames
@@ -422,10 +423,10 @@ ecs_entity_t make_bow(Ecs* ecs)
   return ECS_NULL_ENT;
 }
 
-ecs_entity_t make_arrow(Ecs* ecs, Vec2 pos, Vec2 vel)
+ecs_entity_t make_arrow(Ecs* ecs, Vec2 position, Vec2 vel)
 {
   UNUSED(ecs);
-  UNUSED(pos);
+  UNUSED(position);
   UNUSED(vel);
   return ECS_NULL_ENT;
 }
@@ -471,7 +472,7 @@ ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
   return entity;
 }
 
-ecs_entity_t make_golden_cross_hit_effect(Ecs* ecs, Vec2 pos)
+ecs_entity_t make_golden_cross_hit_effect(Ecs* ecs, Vec2 position)
 {
   ecs_entity_t entity;
   TEXTURE*     texture;
@@ -487,8 +488,8 @@ ecs_entity_t make_golden_cross_hit_effect(Ecs* ecs, Vec2 pos)
 
   entity = ecs_create(ecs);
 
-  transform      = ecs_add(ecs, entity, TRANSFORM);
-  transform->pos = pos;
+  transform           = ecs_add(ecs, entity, TRANSFORM);
+  transform->position = position;
 
   visual         = ecs_add(ecs, entity, VISUAL);
   visual->anchor = (SDL_Point){ 24, 24 };
@@ -502,22 +503,22 @@ ecs_entity_t make_golden_cross_hit_effect(Ecs* ecs, Vec2 pos)
   return entity;
 }
 
-ecs_entity_t make_big_red_flask(Ecs* ecs, Vec2 pos)
+ecs_entity_t make_big_red_flask(Ecs* ecs, Vec2 position)
 {
-  return make_flask_base(ecs, TEX_FLASK_RED_BIG, ITEM_TYPE_BIG_RED_FLASK, pos);
+  return make_flask_base(ecs, TEX_FLASK_RED_BIG, ITEM_TYPE_BIG_RED_FLASK, position);
 }
 
-ecs_entity_t make_red_flask(Ecs* ecs, Vec2 pos)
+ecs_entity_t make_red_flask(Ecs* ecs, Vec2 position)
 {
-  return make_flask_base(ecs, TEX_FLASK_RED, ITEM_TYPE_RED_FLASK, pos);
+  return make_flask_base(ecs, TEX_FLASK_RED, ITEM_TYPE_RED_FLASK, position);
 }
 
-ecs_entity_t make_blue_flask(Ecs* ecs, Vec2 pos)
+ecs_entity_t make_blue_flask(Ecs* ecs, Vec2 position)
 {
-  return make_flask_base(ecs, TEX_BLUE_FLASK, ITEM_TYPE_BLUE_FLASK, pos);
+  return make_flask_base(ecs, TEX_BLUE_FLASK, ITEM_TYPE_BLUE_FLASK, position);
 }
 
-ecs_entity_t make_flask_base(Ecs* ecs, TextureId texture_id, ItemTypeId item_type_id, Vec2 pos)
+ecs_entity_t make_flask_base(Ecs* ecs, TextureId texture_id, ItemTypeId item_type_id, Vec2 position)
 {
   ecs_entity_t entity;
   TEXTURE*     texture;
@@ -535,8 +536,8 @@ ecs_entity_t make_flask_base(Ecs* ecs, TextureId texture_id, ItemTypeId item_typ
   sprite_init(&visual->sprite, texture);
   visual_set_anchor_to_center(visual);
 
-  transform      = ecs_add(ecs, entity, TRANSFORM);
-  transform->pos = pos;
+  transform           = ecs_add(ecs, entity, TRANSFORM);
+  transform->position = position;
 
   hitbox            = ecs_add(ecs, entity, HITBOX);
   hitbox->size      = VEC2(visual->sprite.rect.w, visual->sprite.rect.h);
@@ -568,7 +569,7 @@ ecs_entity_t make_player(Ecs* ecs, ecs_entity_t character, ecs_entity_t weapon)
   return character;
 }
 
-ecs_entity_t make_thunder(Ecs* ecs, Vec2 pos, u16 mask_bits)
+ecs_entity_t make_thunder(Ecs* ecs, Vec2 position, u16 mask_bits)
 {
   ecs_entity_t entity;
 
@@ -584,8 +585,8 @@ ecs_entity_t make_thunder(Ecs* ecs, Vec2 pos, u16 mask_bits)
 
   entity = ecs_create(ecs);
 
-  transform      = ecs_add(ecs, entity, TRANSFORM);
-  transform->pos = pos;
+  transform           = ecs_add(ecs, entity, TRANSFORM);
+  transform->position = position;
 
   visual         = ecs_add(ecs, entity, VISUAL);
   visual->anchor = (SDL_Point){ 32, 224 };
@@ -606,8 +607,12 @@ ecs_entity_t make_thunder(Ecs* ecs, Vec2 pos, u16 mask_bits)
   return entity;
 }
 
-ecs_entity_t
-make_ladder(Ecs* ecs, const char* name, Vec2 pos, Vec2 size, const char* level, const char* dest)
+ecs_entity_t make_ladder(Ecs*        ecs,
+                         const char* name,
+                         Vec2        position,
+                         Vec2        size,
+                         const char* level,
+                         const char* dest)
 {
   ecs_entity_t entity;
 
@@ -616,8 +621,8 @@ make_ladder(Ecs* ecs, const char* name, Vec2 pos, Vec2 size, const char* level, 
 
   entity = ecs_create(ecs);
 
-  transform      = ecs_add(ecs, entity, TRANSFORM);
-  transform->pos = pos;
+  transform           = ecs_add(ecs, entity, TRANSFORM);
+  transform->position = position;
 
   hitbox            = ecs_add(ecs, entity, HITBOX);
   hitbox->size      = size;
@@ -632,7 +637,7 @@ make_ladder(Ecs* ecs, const char* name, Vec2 pos, Vec2 size, const char* level, 
 }
 
 ecs_entity_t
-make_text_particle(Ecs* ecs, const char* text, Vec2 pos, Vec2 vel, FONT* font, COLOR color)
+make_text_particle(Ecs* ecs, const char* text, Vec2 position, Vec2 vel, FONT* font, COLOR color)
 {
   ecs_entity_t entity;
 
@@ -642,8 +647,8 @@ make_text_particle(Ecs* ecs, const char* text, Vec2 pos, Vec2 vel, FONT* font, C
 
   entity = ecs_create(ecs);
 
-  transform      = ecs_add(ecs, entity, TRANSFORM);
-  transform->pos = pos;
+  transform           = ecs_add(ecs, entity, TRANSFORM);
+  transform->position = position;
 
   motion            = ecs_add(ecs, entity, MOTION);
   motion->vel       = vel;
@@ -657,23 +662,23 @@ make_text_particle(Ecs* ecs, const char* text, Vec2 pos, Vec2 vel, FONT* font, C
   return entity;
 }
 
-ecs_entity_t make_make_damage_indicator_particle(Ecs* ecs, Vec2 pos, int amount)
+ecs_entity_t make_make_damage_indicator_particle(Ecs* ecs, Vec2 position, int amount)
 {
   char strnum[5];
   sprintf(strnum, "%d", amount);
   return make_text_particle(ecs,
                             strnum,
-                            pos,
+                            position,
                             VEC2(0.f, -30.f),
                             get_font(FONT_DAMAGE_INDICATOR),
                             (COLOR){ 252, 78, 3, 255 });
 }
 
-ecs_entity_t make_item_picked_up_msg(Ecs* ecs, Vec2 pos, const char* item_name)
+ecs_entity_t make_item_picked_up_msg(Ecs* ecs, Vec2 position, const char* item_name)
 {
   return make_text_particle(ecs,
                             item_name,
-                            pos,
+                            position,
                             VEC2(0.f, -40.f),
                             get_font(FONT_ITEM_PICKED_UP),
                             (COLOR){ 122, 196, 10, 255 });
@@ -712,12 +717,12 @@ ecs_entity_t make_npc(Ecs* ecs, ecs_entity_t character_base)
   return character_base;
 }
 
-ecs_entity_t make_wizzard_npc(Ecs* ecs, Vec2 pos)
+ecs_entity_t make_wizzard_npc(Ecs* ecs, Vec2 position)
 {
-  return make_npc(ecs, make_wizzard(ecs, pos));
+  return make_npc(ecs, make_wizzard(ecs, position));
 }
 
-ecs_entity_t make_chest(Ecs* ecs, Vec2 pos, Item items[CHEST_MAX_ITEMS], u16 cnt)
+ecs_entity_t make_chest(Ecs* ecs, Vec2 position, Item items[CHEST_MAX_ITEMS], u16 cnt)
 {
   ecs_entity_t entity;
 
@@ -748,8 +753,8 @@ ecs_entity_t make_chest(Ecs* ecs, Vec2 pos, Item items[CHEST_MAX_ITEMS], u16 cnt
   hitbox->category  = CATEGORY_INTERACABLE;
   hitbox->mask_bits = 0;
 
-  transform      = ecs_add(ecs, entity, TRANSFORM);
-  transform->pos = pos;
+  transform           = ecs_add(ecs, entity, TRANSFORM);
+  transform->position = position;
 
   return ECS_NULL_ENT;
 }
@@ -783,7 +788,7 @@ ecs_entity_t make_spear(Ecs* ecs, u16 mask)
   return entity;
 }
 
-ecs_entity_t make_door(Ecs* ecs, Vec2 pos)
+ecs_entity_t make_door(Ecs* ecs, Vec2 position)
 {
   ecs_entity_t entity;
 
@@ -801,8 +806,8 @@ ecs_entity_t make_door(Ecs* ecs, Vec2 pos)
   visual->anchor.x    = 16;
   visual->anchor.y    = 34;
 
-  transform      = ecs_add(ecs, entity, TRANSFORM);
-  transform->pos = pos;
+  transform           = ecs_add(ecs, entity, TRANSFORM);
+  transform->position = position;
 
   hitbox            = ecs_add(ecs, entity, HITBOX);
   hitbox->size      = (Vec2){ 32, 5 };

@@ -46,5 +46,5 @@ BOOL is_player_out_of_spot_pred(IsPlayerOutOfSpot* self, Ecs* ecs, ecs_entity_t 
   ASSERT(spot != NULL);
   ASSERT(player_transform != NULL);
 
-  return vec2_mag(vec2_sub(player_transform->pos, spot->pos)) > spot->radius;
+  return vec2_dist(player_transform->position, spot->position) > spot->radius;
 }

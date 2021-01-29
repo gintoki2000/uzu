@@ -28,15 +28,25 @@ static void on_weapon_hit(void* arg, const MSG_WeaponHit* event)
   }
 }
 
+static const Vec2 kTrapHImpactForce = { 100.f, 0.f };
+static const Vec2 kTrapVImpactForce = { 0.f, 100.f };
+#define kTrapImpactZForce 60.f
+
 static void on_hit_trap(void* arg, const MSG_EntityHitTrap* event)
 {
   (void)arg;
+  Transform* transform = ecs_get(g_ecs, event->entity, TRANSFORM);
+  Vec2 force = vec2_mul(kTrapHImpactForce, -transform->hdir);
   ems_broadcast(MSG_DEAL_DAMAGE,
                 &(MSG_DealDamage){
-                    .damage   = 1,
-                    .dealer   = ECS_NULL_ENT,
-                    .receiver = event->entity,
-                    .type     = DAMAGE_TYPE_THUST,
+                    .damage      = 1,
+                    .dealer      = ECS_NULL_ENT,
+                    .receiver    = event->entity,
+                    .type        = DAMAGE_TYPE_THUST,
+                    .impact      = TRUE,
+                    .impact_time = 10,
+                    .force       = force,
+                    .zforce      = kTrapImpactZForce,
                 });
 }
 

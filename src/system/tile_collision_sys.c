@@ -10,8 +10,8 @@ extern Ecs* g_ecs;
 INLINE RECT get_bounding_box(const HitBox* hitbox, const Transform* transform)
 {
   return (RECT){
-    (transform->pos.x - hitbox->anchor.x),
-    (transform->pos.y - hitbox->anchor.y),
+    (transform->position.x - hitbox->anchor.x),
+    (transform->position.y - hitbox->anchor.y),
     hitbox->size.x,
     hitbox->size.y,
   };
@@ -30,9 +30,9 @@ INLINE Vec2 to_world_coords(int tile_x, int tile_y)
 #define V_AXIS 0
 #define H_AXIS 1
 
-INLINE int get_axis(Vec2 prev_pos, Vec2 tile_pos)
+INLINE int get_axis(Vec2 prev_position, Vec2 tile_pos)
 {
-  Vec2 d = vec2_sub(prev_pos, tile_pos);
+  Vec2 d = vec2_sub(prev_position, tile_pos);
   return absf(d.x) > absf(d.y) ? H_AXIS : V_AXIS;
 }
 
@@ -55,9 +55,10 @@ static void on_collided_w_wall(RECT* obj_rect, int tile_x, int tile_y, int axis,
   }
 }
 
-static void on_standing_floor(ecs_entity_t e, int tile_x, int tile_y, int tile_id)
+static void
+on_standing_floor(ecs_entity_t e, float entity_position_z, int tile_x, int tile_y, int tile_id)
 {
-  if (tile_id >= 11 && tile_id <= 13)
+  if (tile_id >= 11 && tile_id <= 13 && absf(entity_position_z) < 0.1f)
     ems_broadcast(MSG_HIT_TRAP, &(MSG_EntityHitTrap){ .row = tile_y, .col = tile_x, .entity = e });
 }
 
@@ -88,8 +89,8 @@ void tile_collision_system_update()
       obj_rect = get_bounding_box(hitbox, transform);
 
       has_any_collision = FALSE;
-      dx                = transform->pos.x - transform->prev_pos.x;
-      dy                = transform->pos.y - transform->prev_pos.y;
+      dx                = transform->position.x - transform->prev_position.x;
+      dy                = transform->position.y - transform->prev_position.y;
       for (tile_x = to_tile_coord(obj_rect.x); tile_x <= to_tile_coord(obj_rect.x + obj_rect.w);
            ++tile_x)
       {
@@ -99,19 +100,19 @@ void tile_collision_system_update()
         if (!is_floor_tile)
         {
           has_any_collision = TRUE;
-          axis              = get_axis(transform->prev_pos, to_world_coords(tile_x, tile_y));
+          axis              = get_axis(transform->prev_position, to_world_coords(tile_x, tile_y));
 
           on_collided_w_wall(&obj_rect, tile_x, tile_y, axis, dx, dy);
         }
         else
         {
-          on_standing_floor(entities[ie], tile_x, tile_y, tile_id);
+          on_standing_floor(entities[ie], transform->z, tile_x, tile_y, tile_id);
         }
       }
       if (has_any_collision)
       {
-        transform->pos.x = obj_rect.x + hitbox->anchor.x;
-        transform->pos.y = obj_rect.y + hitbox->anchor.y;
+        transform->position.x = obj_rect.x + hitbox->anchor.x;
+        transform->position.y = obj_rect.y + hitbox->anchor.y;
       }
     }
   }

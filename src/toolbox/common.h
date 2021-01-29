@@ -11,15 +11,12 @@ typedef Uint16 u16;
 typedef Sint32 s32;
 typedef Uint32 u32;
 
-typedef const char* cstr_t;
 typedef const void* constpointer_t;
 typedef void*       pointer_t;
 typedef int (*compare_fn_t)(constpointer_t lhs, constpointer_t rhs);
 typedef void (*destroy_fn_t)(pointer_t p);
-typedef int (*hash_fn_t)(constpointer_t p);
 typedef bool (*equal_fn_t)(constpointer_t lhs, constpointer_t rhs);
 typedef bool (*consume_fn_t)(pointer_t user_data, pointer_t val);
-typedef bool (*bicomsume_fn_t)(pointer_t user_data, pointer_t, pointer_t);
 typedef void (*funcptr_t)();
 
 typedef struct
@@ -104,6 +101,13 @@ typedef struct
   float x;
   float y;
 } Vec2;
+
+typedef struct 
+{
+  float x;
+  float y;
+  float z;
+} Vec3;
 
 typedef struct
 {

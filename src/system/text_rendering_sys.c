@@ -23,8 +23,8 @@ void text_rendering_system_update()
     {
       FC_DrawColor(texts[i].font,
                    g_renderer,
-                   transform->pos.x - g_viewport.x,
-                   transform->pos.y - g_viewport.y,
+                   transform->position.x - g_viewport.x,
+                   transform->position.y - g_viewport.y,
                    texts[i].color,
                    texts[i].value);
     }

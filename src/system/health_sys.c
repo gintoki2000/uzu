@@ -43,6 +43,7 @@ static void on_deal_damage(void* arg, const MSG_DealDamage* event)
       {
         motion->acc.x += event->force.x;
         motion->acc.y += event->force.y;
+        motion->vz = event->zforce;
         if (!ecs_has(g_ecs, event->receiver, INPUT_BLOCKER))
         {
           input_blocker            = ecs_add(g_ecs, event->receiver, INPUT_BLOCKER);
@@ -62,7 +63,7 @@ static void on_get_damaged(void* arg, const MSG_GetDamaged* event)
   if ((transform = ecs_get(g_ecs, event->damagee, TRANSFORM)))
   {
     make_make_damage_indicator_particle(g_ecs,
-                                        (Vec2){ transform->pos.x, transform->pos.y - 30.f },
+                                        (Vec2){ transform->position.x, transform->position.y - 30.f },
                                         event->damage);
   }
 }

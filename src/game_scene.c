@@ -210,10 +210,10 @@ static void on_update()
 
     // render
     map_draw(MAP_LAYER_FLOOR);
-    map_draw(MAP_LAYER_WALL);
+    map_draw(MAP_LAYER_BACK_WALL);
     rendering_system_update();
     healthbar_rendering_system_update();
-    map_draw(MAP_LAYER_FRONT);
+    map_draw(MAP_LAYER_FRONT_WALL);
     text_rendering_system_update();
     interactable_pointer_rendering_system_update();
     hub_system_update();

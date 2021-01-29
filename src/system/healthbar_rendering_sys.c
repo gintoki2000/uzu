@@ -28,8 +28,8 @@ void healthbar_rendering_system_update()
       continue;
     p = (float)health->hit_points / (float)health->max_hit_points;
 
-    border.x = transform->pos.x - health_bar[i].anchor.x - g_viewport.x;
-    border.y = transform->pos.y - health_bar[i].anchor.y - g_viewport.y;
+    border.x = transform->position.x - health_bar[i].anchor.x - g_viewport.x;
+    border.y = transform->position.y - health_bar[i].anchor.y - g_viewport.y;
     border.w = health_bar[i].len;
     border.h = 3;
 

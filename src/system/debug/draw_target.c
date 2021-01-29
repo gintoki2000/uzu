@@ -22,8 +22,8 @@ void move_target_rendering_system_update()
   {
     if ((transform = ecs_get(g_ecs, entities[i], TRANSFORM)))
     {
-      x1 = transform->pos.x - g_viewport.x;
-      y1 = transform->pos.y - g_viewport.y;
+      x1 = transform->position.x - g_viewport.x;
+      y1 = transform->position.y - g_viewport.y;
       x2 = dest[i].x - g_viewport.x;
       y2 = dest[i].y - g_viewport.y;
       SDL_RenderDrawLine(g_renderer, x1, y1, x2, y2);
@@ -37,10 +37,10 @@ void move_target_rendering_system_update()
     if ((transform = ecs_get(g_ecs, entities[i], TRANSFORM)) &&
         (target_transform = ecs_get(g_ecs, target[i].entity, TRANSFORM)))
     {
-      x1 = transform->pos.x - g_viewport.x;
-      y1 = transform->pos.y - g_viewport.y;
-      x2 = target_transform->pos.x - g_viewport.x;
-      y2 = target_transform->pos.y - g_viewport.y;
+      x1 = transform->position.x - g_viewport.x;
+      y1 = transform->position.y - g_viewport.y;
+      x2 = target_transform->position.x - g_viewport.x;
+      y2 = target_transform->position.y - g_viewport.y;
       SDL_RenderDrawLine(g_renderer, x1, y1, x2, y2);
 
       aacircleColor(g_renderer, x2, y2, target[i].radius, 0xffffffff);
@@ -52,8 +52,8 @@ void move_target_rendering_system_update()
   ecs_raw(g_ecs, SPOT, &entities, (void**)&spot, &cnt);
   for (int i = 0; i < cnt; ++i)
   {
-    x = spot[i].pos.x - g_viewport.x;
-    y = spot[i].pos.y - g_viewport.y;
+    x = spot[i].position.x - g_viewport.x;
+    y = spot[i].position.y - g_viewport.y;
     r = spot[i].radius;
 
     aacircleColor(g_renderer, x, y, (Sint16)r, 0xffffffff);

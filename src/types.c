@@ -7,15 +7,17 @@ ecs_entity_t (*const g_weapon_create_fn_tbl[NUM_WEAPONS])(Ecs*, u16) = {
   make_cleaver,
   make_golden_sword,
   NULL,
-  NULL,
+  make_staff,
   NULL,
 };
+
 ecs_entity_t (*const g_char_create_fn_tbl[NUM_CLASSES])(Ecs*, Vec2)  = {
   make_knight,
   make_dragon,
   make_wizzard,
   NULL,
 };
+
 Conversation* conversation_init(Conversation* self)
 {
   self->name      = NULL;

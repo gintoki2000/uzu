@@ -29,4 +29,5 @@ source_files = files(
   'session.c',
   'level_loader.c',
   'ui_dialogue.c',
+  'spells.c',
 ) + engine_source_files + ecs_source_files + toolbox_source_files + system_source_files + ai_source_files

@@ -556,6 +556,9 @@ ecs_entity_t make_player(Ecs* ecs, ecs_entity_t character, ecs_entity_t weapon)
   ecs_add(ecs, character, PLAYER_TAG);
   ecs_add(ecs, character, CAMERA_TARGET_TAG);
 
+  AttunementSlot* attunement_slot;
+  ManaPool*       mana_pool;
+
   HitBox* hitbox = ecs_get(ecs, character, HITBOX);
 
   ASSERT(hitbox != NULL && "player entity must have hitbox component");
@@ -565,6 +568,13 @@ ecs_entity_t make_player(Ecs* ecs, ecs_entity_t character, ecs_entity_t weapon)
   hitbox->category  = CATEGORY_PLAYER;
   hitbox->mask_bits = BIT(CATEGORY_ITEM) | BIT(CATEGORY_WEAPON) | BIT(CATEGORY_PROJECTILE) |
                       BIT(CATEGORY_LADDER) | BIT(CATEGORY_INTERACABLE);
+
+  attunement_slot           = ecs_add(ecs, character, ATTUNEMENT_SLOT);
+  attunement_slot->spell_id = SPELL_ICE_ARROW;
+
+  mana_pool                  = ecs_add(ecs, character, MANA_POOL);
+  mana_pool->mana_points     = 5;
+  mana_pool->max_mana_points = 100;
 
   return character;
 }
@@ -766,7 +776,7 @@ ecs_entity_t make_spear(Ecs* ecs, u16 mask)
   Visual*           visual;
   Transform*        transform;
   wpskl_Thust*      thust;
-  WeaponAttributes* weapon_base;
+  WeaponAttributes* attributes;
 
   entity = ecs_create(ecs);
 
@@ -780,10 +790,10 @@ ecs_entity_t make_spear(Ecs* ecs, u16 mask)
   thust            = ecs_add(ecs, entity, WEAPON_SKILL_THUST);
   thust->on_action = CHARACTER_ACTION_REGULAR_ATK;
 
-  weapon_base         = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
-  weapon_base->wearer = ECS_NULL_ENT;
-  weapon_base->atk    = 1;
-  weapon_base->mask   = mask;
+  attributes         = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
+  attributes->wearer = ECS_NULL_ENT;
+  attributes->atk    = 1;
+  attributes->mask   = mask;
 
   return entity;
 }
@@ -846,7 +856,7 @@ ecs_entity_t make_blood_loss_particle(Ecs* ecs, Vec2 position)
 
   const int sw = 100;
   const int sh = 100;
-  int i;
+  int       i;
 
   i = rand() % kNumBloodParticleTextures;
 
@@ -866,6 +876,64 @@ ecs_entity_t make_blood_loss_particle(Ecs* ecs, Vec2 position)
 
   life_span            = ecs_add(ecs, entity, LIFE_SPAN);
   life_span->remaining = 28;
+
+  return entity;
+}
+
+ecs_entity_t make_staff(Ecs* ecs, u16 mask)
+{
+  ecs_entity_t entity = ecs_create(ecs);
+
+  Transform*        transform;
+  Visual*           visual;
+  WeaponAttributes* attributes;
+  Castable*         castable;
+
+  transform = ecs_add(ecs, entity, TRANSFORM);
+
+  visual = ecs_add(ecs, entity, VISUAL);
+  sprite_init(&visual->sprite, get_texture(TEX_RED_STAFF));
+  visual->anchor.x = visual->sprite.rect.w / 2;
+  visual->anchor.y = visual->sprite.rect.h / 2;
+
+  attributes          = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
+  attributes->atk     = 1;
+  attributes->mask    = mask;
+  attributes->wearer  = ECS_NULL_ENT;
+  attributes->type_id = WEAPON_STAFF;
+
+  castable = ecs_add(ecs, entity, CASTABLE);
+
+  return entity;
+}
+
+ecs_entity_t make_ice_arrow(Ecs* ecs, Vec2 pos, Vec2 direction, u16 mask)
+{
+  (void)mask;
+  ecs_entity_t entity = ecs_create(ecs);
+
+  Animation animation;
+
+  Visual*    visual;
+  Transform* transform;
+  Motion*    motion;
+  Animator*  animator;
+
+  visual           = ecs_add(ecs, entity, VISUAL);
+  visual->anchor.x = 15;
+  visual->anchor.y = 7;
+
+  transform           = ecs_add(ecs, entity, TRANSFORM);
+  transform->position = pos;
+
+  motion            = ecs_add(ecs, entity, MOTION);
+  motion->vel       = (Vec2){ 100.f, 0.f };
+  motion->friction  = 0.f;
+  motion->max_speed = 100;
+
+  animation_init(&animation, get_texture(TEX_ICE_ARROW), 0, 0, 1, 30, 32, 15);
+  animator = ecs_add(ecs, entity, ANIMATOR);
+  animator_init(animator, &animation, 1);
 
   return entity;
 }

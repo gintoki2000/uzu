@@ -318,12 +318,6 @@ typedef struct Merchant
 } Merchant;
 
 #define CHEST_MAX_ITEMS 5
-typedef enum
-{
-  CHEST_ANIM_CLOSE,
-  CHEST_ANIM_OPEN,
-} ChestAnimId;
-
 typedef struct
 {
   Item items[CHEST_MAX_ITEMS];
@@ -346,7 +340,7 @@ typedef struct
   int timer;
 } Castable;
 
-typedef struct ecs_entity_t Wearer;
+typedef ecs_entity_t Wearer;
 
 Animation*
 animation_init(Animation* anim, SDL_Texture* tex, u32 x, u32 y, u32 row, u32 col, u32 sw, u32 sh);
@@ -358,21 +352,10 @@ void      animator_fini(Animator* animator);
 
 void visual_set_anchor_to_center(Visual* v);
 void brain_fini(Brain* ai_agent);
-
 void hitbox_init(HitBox* h);
-
-void hitbox_init_center(HitBox* h, Vec2 size);
-void hitbox_init_bottom_middle(HitBox* h, Vec2 size);
-
 void level_switcher_init(LevelSwitcher* sw, const char* level, const char* dest);
-void level_switcher_fini(LevelSwitcher* sw);
-
 void name_init(Name* name, const char* value);
-void name_fini(Name* name);
-
 void text_init(Text* text, const char* value, FONT* font, COLOR color);
-void text_fini(Text* text);
-
 void visual_init(Visual* v);
 
 #endif // COMPONENTS_H

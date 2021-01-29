@@ -121,15 +121,23 @@ typedef struct
   SpriteSheet sheet;
 } Animation;
 
+typedef enum
+{
+  SPELL_ICE_ARROW,
+  SPELL_FIRE_BALL,
+  NUM_SPELLS
+} SpellType;
+
 typedef struct
 {
   const char* name;
-  void (*cast_fn)(Ecs* ecs, ecs_entity_t caster);
+  void (*cast_fn)(Ecs* ecs, ecs_entity_t caster, ecs_entity_t weapon);
   u16 cost;
   u16 cast_spd;
+  u16 casting_effect;
 } Spell;
 
-enum
+typedef enum
 {
   WEAPON_SPEAR,
   WEAPON_CLEAVER,
@@ -140,7 +148,7 @@ enum
   NUM_WEAPONS,
 } WeaponType;
 
-enum
+typedef enum
 {
   JOB_KNIGHT,
   JOB_DRAGON,
@@ -149,10 +157,27 @@ enum
   NUM_CLASSES,
 } JobType;
 
+typedef enum
+{
+  PROJECTILE_ICE_ARROW,
+  PROJECTILE_FIRE_BALL,
+  NUM_PROJECTILE_TYPES
+} ProjecttileType;
+
+typedef enum
+{
+  CAST_EFFECT_ICE,
+  CAST_EFFECT_FIRE,
+  NUM_CAST_EFFECTS
+} CastEffectType;
+
 extern ecs_entity_t (*const g_weapon_create_fn_tbl[NUM_WEAPONS])(Ecs*, u16);
 extern ecs_entity_t (*const g_char_create_fn_tbl[NUM_CLASSES])(Ecs*, Vec2);
 extern ecs_entity_t (*const g_item_create_fn_tbl[NUM_ITEM_TYPES])(Ecs*, Vec2 pos);
-extern const ItemType g_item_types[];
+extern ecs_entity_t (*const g_projectile_create_fn[])(Ecs*, Vec2 pos, Vec2 dir, u16 mask);
+extern ecs_entity_t (*const g_cast_effect_fn_tbl[NUM_CAST_EFFECTS])(Ecs* ecs, Vec2 pos);
+extern const ItemType g_item_types[NUM_ITEM_TYPES];
+extern const Spell    g_spell_tbl[NUM_SPELLS];
 
 Conversation* conversation_init(Conversation* self);
 void          conversation_fini(Conversation* self);

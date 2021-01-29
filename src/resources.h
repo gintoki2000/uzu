@@ -39,6 +39,7 @@ typedef enum
   TEX_LIZZARD,
   TEX_EFFECT_BLOOD_1,
   TEX_EFFECT_BLOOD_2,
+  TEX_ICE_ARROW,
   NUM_TEXS
 } TextureId;
 

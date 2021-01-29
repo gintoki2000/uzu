@@ -24,6 +24,7 @@
 #include "system/animator_sys.h"
 #include "system/camera_sys.h"
 #include "system/chest_system.h"
+#include "system/casting_system.h"
 #include "system/collision_mgr_sys.h"
 #include "system/door_system.h"
 #include "system/collision_sys.h"
@@ -200,6 +201,7 @@ static void on_update()
 
       //  skl
       swing_weapon_skl_system_update();
+      casting_system_update();
       charge_weapon_skl_system();
 
       weapon_skill_thust_update();

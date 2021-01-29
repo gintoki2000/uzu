@@ -11,25 +11,26 @@ void casting_system_update()
   ecs_entity_t* entities;
   ecs_size_t    cnt;
 
-  Castable*       castables;
-  Transform*      transform;
-  WeaponAttributes*     weapon_core;
-  Controller*     wearer_controller;
-  AttunementSlot* attunement_slot;
-  ManaPool*       mana_pool;
-  const Spell* spell;
+  Castable*         castables;
+  WeaponAttributes* weapon_core;
+  Controller*       wearer_controller;
+  AttunementSlot*   attunement_slot;
+  ManaPool*         mana_pool;
+  const Spell*      spell;
+  BOOL              trigger;
+  BOOL              enough_mp;
 
   ecs_raw(g_ecs, CASTABLE, &entities, (pointer_t*)&castables, &cnt);
 
   for (int i = 0; i < cnt; ++i)
   {
-    if (castables[i].timer)
+    if (castables[i].timer > 0)
     {
       --castables[i].timer;
       // just finish
       if (castables[i].timer == 0)
       {
-        if ((weapon_core       = ecs_get(g_ecs, entities[i],         WEAPON_ATTRIBUTES)) &&
+        if ((weapon_core = ecs_get(g_ecs, entities[i], WEAPON_ATTRIBUTES)) &&
             (wearer_controller = ecs_get(g_ecs, weapon_core->wearer, CONTROLLER)))
         {
           wearer_controller->in_action = FALSE;
@@ -37,21 +38,21 @@ void casting_system_update()
       }
     }
 
-    if (castables[i].timer == 0 && 
-       (weapon_core       = ecs_get(g_ecs, entities[i],         WEAPON_ATTRIBUTES)) &&
-       (wearer_controller = ecs_get(g_ecs, weapon_core->wearer, CONTROLLER)) &&
-       (attunement_slot   = ecs_get(g_ecs, weapon_core->wearer, ATTUNEMENT_SLOT)) &&
-       (mana_pool         = ecs_get(g_ecs, weapon_core->wearer, MANA_POOL)))
+    if (castables[i].timer == 0 && (weapon_core = ecs_get(g_ecs, entities[i], WEAPON_ATTRIBUTES)) &&
+        (wearer_controller = ecs_get(g_ecs, weapon_core->wearer, CONTROLLER)) &&
+        (attunement_slot = ecs_get(g_ecs, weapon_core->wearer, ATTUNEMENT_SLOT)) &&
+        (mana_pool = ecs_get(g_ecs, weapon_core->wearer, MANA_POOL)))
     {
-      spell = &g_spell_tbl[attunement_slot->spell_id];
-      if (wearer_controller->action == CHARACTER_ACTION_REGULAR_ATK && 
-          mana_pool->mana_points >= spell->cost) 
+      spell     = &g_spell_tbl[attunement_slot->spell_id];
+      trigger   = wearer_controller->action == CHARACTER_ACTION_REGULAR_ATK;
+      enough_mp = mana_pool->mana_points >= spell->cost;
+      if (trigger && enough_mp)
       {
         wearer_controller->action    = CHARACTER_ACTION_NONE;
         wearer_controller->in_action = TRUE;
         castables[i].timer           = spell->cast_spd;
-        spell->cast_fn(g_ecs, weapon_core->wearer);
-        
+        mana_pool->mana_points -= spell->cost;
+        spell->cast_fn(g_ecs, weapon_core->wearer, entities[i]);
       }
     }
   }

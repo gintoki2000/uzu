@@ -7,7 +7,6 @@
 
 ecs_entity_t make_anime_sword(Ecs* ecs);
 ecs_entity_t make_axe(Ecs* ecs);
-ecs_entity_t make_blood_stain_effect(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_bow(Ecs* ecs);
 ecs_entity_t make_arrow(Ecs* ecs, Vec2 pos, Vec2 vel);
 ecs_entity_t make_golden_cross_hit_effect(Ecs* ecs, Vec2 pos);
@@ -51,5 +50,8 @@ ecs_entity_t make_imp(Ecs* ecs, Vec2 pos);
 //other
 ecs_entity_t make_door(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_chest(Ecs* ecs, Vec2 pos, Item items[CHEST_MAX_ITEMS], u16 cnt);
+
+//effects
+ecs_entity_t make_blood_loss_particle(Ecs* ecs, Vec2 position);
 
 #endif // ENTITY_FACTORY_H

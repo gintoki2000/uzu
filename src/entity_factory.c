@@ -825,3 +825,47 @@ ecs_entity_t make_door(Ecs* ecs, Vec2 position)
 
   return entity;
 }
+
+static const u16 kBloodParticleTexureTbl[] = {
+  TEX_EFFECT_BLOOD_1,
+  TEX_EFFECT_BLOOD_2,
+};
+
+#define kNumBloodParticleTextures 2
+
+ecs_entity_t make_blood_loss_particle(Ecs* ecs, Vec2 position)
+{
+  ecs_entity_t entity;
+
+  Animation animation;
+
+  Visual*    visual;
+  Transform* transform;
+  LifeSpan*  life_span;
+  Animator*  animator;
+
+  const int sw = 100;
+  const int sh = 100;
+  int i;
+
+  i = rand() % kNumBloodParticleTextures;
+
+  animation_init(&animation, get_texture(kBloodParticleTexureTbl[i]), 0, 0, 1, 28, sw, sh);
+
+  entity = ecs_create(ecs);
+
+  visual           = ecs_add(ecs, entity, VISUAL);
+  visual->anchor.x = sw / 2;
+  visual->anchor.y = sh / 2;
+
+  animator = ecs_add(ecs, entity, ANIMATOR);
+  animator_init(animator, &animation, 1);
+
+  transform           = ecs_add(ecs, entity, TRANSFORM);
+  transform->position = position;
+
+  life_span            = ecs_add(ecs, entity, LIFE_SPAN);
+  life_span->remaining = 28;
+
+  return entity;
+}

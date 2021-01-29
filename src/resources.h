@@ -37,6 +37,8 @@ typedef enum
   TEX_UI_DIALOGUE,
   TEX_DOOR,
   TEX_LIZZARD,
+  TEX_EFFECT_BLOOD_1,
+  TEX_EFFECT_BLOOD_2,
   NUM_TEXS
 } TextureId;
 

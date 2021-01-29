@@ -37,6 +37,8 @@ static const char*  _texture_files[NUM_TEXS] = {
   [TEX_UI_MAIN_MENU_POINTER] = "asserts/ui/main_menu_pointer.png",
   [TEX_UI_DIALOGUE]          = "asserts/ui/dialogue.png",
   [TEX_DOOR]                 = "asserts/door.png",
+  [TEX_EFFECT_BLOOD_1]       = "asserts/effect/blood_1.png",
+  [TEX_EFFECT_BLOOD_2]       = "asserts/effect/blood_2.png",
   [TEX_LIZZARD]              = "asserts/lizzard.png",
 };
 

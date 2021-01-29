@@ -59,12 +59,25 @@ static void on_get_damaged(void* arg, const MSG_GetDamaged* event)
 {
   (void)arg;
   Transform* transform;
+  HitBox*    hitbox;
+  Vec2       particle_position;
+  Vec2       damagee_topleft;
 
   if ((transform = ecs_get(g_ecs, event->damagee, TRANSFORM)))
   {
-    make_make_damage_indicator_particle(g_ecs,
-                                        (Vec2){ transform->position.x, transform->position.y - 30.f },
-                                        event->damage);
+    particle_position.x = transform->position.x;
+    particle_position.y = transform->position.y - 30.f;
+    make_make_damage_indicator_particle(g_ecs, particle_position, event->damage);
+  }
+
+  if (transform && (hitbox = ecs_get(g_ecs, event->damagee, HITBOX)))
+  {
+    damagee_topleft.x = transform->position.x - hitbox->anchor.x;
+    damagee_topleft.y = transform->position.y - hitbox->anchor.y;
+
+    particle_position.x = rand() % ((int) hitbox->size.x) + damagee_topleft.x;
+    particle_position.y = rand() % ((int) hitbox->size.y) + damagee_topleft.y;
+    make_blood_loss_particle(g_ecs, particle_position);
   }
 }
 

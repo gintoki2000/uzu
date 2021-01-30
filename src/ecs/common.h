@@ -8,11 +8,13 @@ typedef uint16_t ecs_size_t;
 
 typedef void (*ecs_comp_init_fn_t)(void*);
 typedef void (*ecs_comp_fini_fn_t)(void*);
+typedef void (*ecs_comp_cpy_fn_t)(void*, const void*);
 
 typedef struct EcsType
 {
   ecs_comp_init_fn_t init_fn;
   ecs_comp_init_fn_t fini_fn;
+  ecs_comp_cpy_fn_t  cpy_fn;
   ecs_size_t         size;
 } EcsType;
 

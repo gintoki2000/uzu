@@ -280,3 +280,58 @@ void ecs_clear(Ecs* self)
 {
   ecs_each(self, NULL, cb_clear);
 }
+
+void ecs_set(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const void* data)
+{
+  ASSERT(ecs_is_valid(self, entity) && "invalid entity");
+  ASSERT(type_id < self->type_cnt && "invalid component type id");
+  void* raw = ecs_pool_get(self->pools[type_id], entity);
+  ASSERT(raw != NULL && "entity do not have given component");
+  if (self->types[type_id].cpy_fn != NULL)
+  {
+    self->types[type_id].cpy_fn(raw, data);
+  }
+  else
+  {
+    memcpy(raw, data, self->types[type_id].size);
+  }
+}
+
+void ecs_add_or_set(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const void* data)
+{
+  ASSERT(ecs_is_valid(self, entity) && "invalid entity");
+  ASSERT(type_id < self->type_cnt && "invalid component type id");
+  void* raw = ecs_pool_get(self->pools[type_id], entity);
+
+  if (raw == NULL)
+  {
+    ecs_pool_add(self->pools[type_id], entity);
+    raw = ecs_pool_get(self->pools[type_id], entity);
+  }
+
+  if (self->types[type_id].cpy_fn != NULL)
+  {
+    self->types[type_id].cpy_fn(raw, data);
+  }
+  else
+  {
+    memcpy(raw, data, self->types[type_id].size);
+  }
+}
+
+void* ecs_add_w_data(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const void* data)
+{
+  ASSERT(ecs_is_valid(self, entity) && "invalid entity");
+  ASSERT(type_id < self->type_cnt && "invalid component type id");
+  ecs_pool_add(self->pools[type_id], entity);
+  void* raw = ecs_pool_get(self->pools[type_id], entity);
+  if (self->types[type_id].cpy_fn != NULL)
+  {
+    self->types[type_id].cpy_fn(raw, data);
+  }
+  else
+  {
+    memcpy(raw, data, self->types[type_id].size);
+  }
+  return raw;
+}

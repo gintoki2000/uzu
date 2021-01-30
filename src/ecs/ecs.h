@@ -46,9 +46,13 @@ Ecs* ecs_init(Ecs* self, const EcsType* types, ecs_size_t type_cnt);
 void ecs_fini(Ecs* self);
 
 ecs_entity_t ecs_create(Ecs* self);
+ecs_entity_t ecs_clone(Ecs* self, ecs_entity_t prototype);
+ecs_entity_t ecs_cpy(Ecs* self, Ecs* srcworld, ecs_entity_t srcentity);
 void         ecs_destroy(Ecs* self, ecs_entity_t entity);
 void*        ecs_add(Ecs* self, ecs_entity_t entity, ecs_size_t type_id);
 void*        ecs_add_w_data(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const void* data);
+void         ecs_set(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const void* data);
+void         ecs_add_or_set(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const void* data);
 void         ecs_rmv(Ecs* self, ecs_entity_t entity, ecs_size_t type_id);
 void*        ecs_get(Ecs* self, ecs_entity_t entity, ecs_size_t type_id);
 BOOL         ecs_has(Ecs* self, ecs_entity_t entity, ecs_size_t type_id);

@@ -56,6 +56,8 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
   [MANA_POOL]                  = ECS_TYPE(ManaPool),
   [WEAPON_SKILL_THUST]         = ECS_TYPE(wpskl_Thust),
   [DOOR_INFO]                  = ECS_TYPE(DoorInfo),
+  [REMOVE_IF_OFFSCREEN]        = ECS_TYPE(RemoveIfOffScreen),
+  [PROJECTILE_ATTRIBUTES]      = ECS_TYPE(PROJECTILE_ATTRIBUTES),
 };
 
 Animation*

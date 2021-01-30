@@ -5,9 +5,9 @@
 #include "ui_helper.h"
 #include <toolbox/toolbox.h>
 
-static BOOL       _visible;
-static s32        _ticks;
-static const char _msg[512];
+static BOOL _visible;
+static s32  _ticks;
+static char _msg[512];
 
 extern SDL_Renderer* g_renderer;
 

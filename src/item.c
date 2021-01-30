@@ -58,5 +58,10 @@ static void blue_flask_on_use(Ecs* ecs, ecs_entity_t entity)
 {
   (void)ecs;
   (void)entity;
-  INFO("nothing happen...\n");
+  ManaPool* mana_pool = ecs_get(ecs, entity, MANA_POOL);
+  if (mana_pool)
+  {
+    mana_pool->mana_points = min(mana_pool->max_mana_points, mana_pool->mana_points + 5);
+    INFO("restore 5 mp\n");
+  }
 }

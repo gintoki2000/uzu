@@ -19,6 +19,7 @@ void casting_system_update()
   const Spell*      spell;
   BOOL              trigger;
   BOOL              enough_mp;
+  Transform*        transform;
 
   ecs_raw(g_ecs, CASTABLE, &entities, (pointer_t*)&castables, &cnt);
 
@@ -41,7 +42,8 @@ void casting_system_update()
     if (castables[i].timer == 0 && (weapon_core = ecs_get(g_ecs, entities[i], WEAPON_ATTRIBUTES)) &&
         (wearer_controller = ecs_get(g_ecs, weapon_core->wearer, CONTROLLER)) &&
         (attunement_slot = ecs_get(g_ecs, weapon_core->wearer, ATTUNEMENT_SLOT)) &&
-        (mana_pool = ecs_get(g_ecs, weapon_core->wearer, MANA_POOL)))
+        (mana_pool = ecs_get(g_ecs, weapon_core->wearer, MANA_POOL)) &&
+        (transform = ecs_get(g_ecs, entities[i], TRANSFORM)))
     {
       spell     = &g_spell_tbl[attunement_slot->spell_id];
       trigger   = wearer_controller->action == CHARACTER_ACTION_REGULAR_ATK;
@@ -53,6 +55,7 @@ void casting_system_update()
         castables[i].timer           = spell->cast_spd;
         mana_pool->mana_points -= spell->cost;
         spell->cast_fn(g_ecs, weapon_core->wearer, entities[i]);
+        g_cast_effect_fn_tbl[spell->casting_effect](g_ecs, transform->position);
       }
     }
   }

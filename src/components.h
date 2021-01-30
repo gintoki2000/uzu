@@ -34,6 +34,7 @@ typedef enum
   CAMERA_TARGET_TAG,
   TILE_COLLISION_TAG,
   CHARACTER_ANIMATOR_TAG,
+  PROJECTILE_ATTRIBUTES,
   DOOR_TAG,
   BRAIN,
   DESTINATION,
@@ -51,6 +52,7 @@ typedef enum
   CASTABLE,
   MANA_POOL,
   DOOR_INFO,
+  REMOVE_IF_OFFSCREEN,
   NUM_COMPONENTS
 } ComponentId;
 
@@ -170,7 +172,12 @@ typedef int CameraTargetTag;
 
 typedef int TileCollisionTag;
 
-typedef int ProjectileTag;
+typedef struct ProjectileAttributes
+{
+  int  damage;
+  u16  effect;
+  BOOL destroy_when_hit;
+} ProjectileAttributes;
 
 typedef int NpcTag;
 
@@ -339,6 +346,8 @@ typedef struct
 {
   int timer;
 } Castable;
+
+typedef int RemoveIfOffScreen;
 
 typedef ecs_entity_t Wearer;
 

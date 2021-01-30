@@ -158,7 +158,7 @@ void player_controller_system_update()
 
     if (g_curr_iteractable_entity == ECS_NULL_ENT)
     {
-      if (key_just_pressed(KEY_A))
+      if (key_just_pressed(KEY_A) && !controller->in_action)
       {
         controller->action = CHARACTER_ACTION_REGULAR_ATK;
       }

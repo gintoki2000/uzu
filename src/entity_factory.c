@@ -910,14 +910,17 @@ ecs_entity_t make_staff(Ecs* ecs, u16 mask)
 ecs_entity_t make_ice_arrow(Ecs* ecs, Vec2 pos, Vec2 direction, u16 mask)
 {
   (void)mask;
+  (void)direction;
   ecs_entity_t entity = ecs_create(ecs);
 
   Animation animation;
 
-  Visual*    visual;
-  Transform* transform;
-  Motion*    motion;
-  Animator*  animator;
+  Visual*               visual;
+  Transform*            transform;
+  Motion*               motion;
+  Animator*             animator;
+  HitBox*               hitbox;
+  ProjectileAttributes* attributes;
 
   visual           = ecs_add(ecs, entity, VISUAL);
   visual->anchor.x = 15;
@@ -925,15 +928,62 @@ ecs_entity_t make_ice_arrow(Ecs* ecs, Vec2 pos, Vec2 direction, u16 mask)
 
   transform           = ecs_add(ecs, entity, TRANSFORM);
   transform->position = pos;
+  transform->rotation = SDL_atan2(direction.y, direction.x) * 57.2957795;
 
   motion            = ecs_add(ecs, entity, MOTION);
-  motion->vel       = (Vec2){ 100.f, 0.f };
+  motion->vel       = direction;
   motion->friction  = 0.f;
-  motion->max_speed = 100;
+  motion->max_speed = 150.f;
 
   animation_init(&animation, get_texture(TEX_ICE_ARROW), 0, 0, 1, 30, 32, 15);
   animator = ecs_add(ecs, entity, ANIMATOR);
   animator_init(animator, &animation, 1);
 
+  hitbox            = ecs_add(ecs, entity, HITBOX);
+  hitbox->size.x    = 32;
+  hitbox->size.y    = 15;
+  hitbox->anchor.x  = 16;
+  hitbox->anchor.y  = 7;
+  hitbox->category  = CATEGORY_PROJECTILE;
+  hitbox->mask_bits = mask;
+
+  attributes                   = ecs_add(ecs, entity, PROJECTILE_ATTRIBUTES);
+  attributes->damage           = 3;
+  attributes->destroy_when_hit = TRUE;
+  attributes->effect           = 0;
+
+  ecs_add(ecs, entity, REMOVE_IF_OFFSCREEN);
+
   return entity;
 }
+ecs_entity_t make_ice_cast_effect(Ecs* ecs, Vec2 pos)
+{
+  ecs_entity_t entity;
+
+  Animation anim;
+
+  Visual*    visual;
+  Transform* transform;
+  Animator*  animator;
+  LifeSpan*  life_span;
+
+  entity = ecs_create(ecs);
+
+  animation_init(&anim, get_texture(TEX_EFFECT_ICE_CAST), 0, 0, 1, 28, 96, 96);
+
+  visual           = ecs_add(ecs, entity, VISUAL);
+  visual->anchor.x = 48;
+  visual->anchor.y = 48;
+
+  transform           = ecs_add(ecs, entity, TRANSFORM);
+  transform->position = pos;
+
+  animator = ecs_add(ecs, entity, ANIMATOR);
+  animator_init(animator, &anim, 1);
+
+  life_span            = ecs_add(ecs, entity, LIFE_SPAN);
+  life_span->remaining = 28;
+
+  return entity;
+}
+ecs_entity_t make_fire_cast_effect(Ecs* ecs, Vec2 pos);

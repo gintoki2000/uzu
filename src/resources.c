@@ -41,6 +41,7 @@ static const char*  _texture_files[NUM_TEXS] = {
   [TEX_EFFECT_BLOOD_2]       = "asserts/effect/blood_2.png",
   [TEX_LIZZARD]              = "asserts/lizzard.png",
   [TEX_ICE_ARROW]            = "asserts/IcePick.png",
+  [TEX_EFFECT_ICE_CAST]      = "asserts/effect/icecast.png",
 };
 
 static Mix_Music*  _bg_musics[NUM_BG_MUSICS];

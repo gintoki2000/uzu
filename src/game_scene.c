@@ -24,7 +24,7 @@
 #include "system/animator_sys.h"
 #include "system/camera_sys.h"
 #include "system/chest_system.h"
-#include "system/casting_system.h"
+#include "system/casting_sys.h"
 #include "system/collision_mgr_sys.h"
 #include "system/door_system.h"
 #include "system/collision_sys.h"
@@ -74,7 +74,7 @@ static void on_player_hit_ladder(pointer_t arg, const MSG_HitLadder* event);
 static void on_entity_died(pointer_t arg, const MSG_EntityDied* event);
 static void unload_current_level(void);
 
-static void cb_clear_world(pointer_t arg, Ecs* ecs, ecs_entity_t entity);
+static void __callback_clear_entities(pointer_t arg, Ecs* ecs, ecs_entity_t entity);
 
 extern EcsType g_comp_types[];
 
@@ -103,6 +103,8 @@ static void spawn_player(Vec2 pos)
   make_player(g_ecs, player, weapon);
 
   set_entity_hit_points(g_ecs, player, g_session.hp);
+  set_entity_mana_points(g_ecs, player, g_session.mp);
+  set_spell(g_ecs, player, g_session.spell);
 }
 static void on_load()
 {
@@ -120,6 +122,7 @@ static void on_load()
   merchant_system_init();
   door_system_init(); 
   chest_system_init();
+  player_controller_system_init();
 
   //init ui
   ui_dialogue_init();
@@ -232,7 +235,7 @@ static void on_update()
     // render debug
     // collision_system_render_debug();
     // path_rendering_system_update();
-    move_target_rendering_system_update();
+    //move_target_rendering_system_update();
     hitbox_rendering_system_update();
     position_rendering_system_update();
 #endif
@@ -266,7 +269,7 @@ static void on_entity_died(pointer_t arg, const MSG_EntityDied* event)
   }
 }
 
-static void cb_clear_world(pointer_t arg, Ecs* ecs, ecs_entity_t entity)
+static void __callback_clear_entities(pointer_t arg, Ecs* ecs, ecs_entity_t entity)
 {
   (void)arg;
   ecs_destroy(ecs, entity);
@@ -274,8 +277,12 @@ static void cb_clear_world(pointer_t arg, Ecs* ecs, ecs_entity_t entity)
 
 static void unload_current_level()
 {
-  g_session.hp = get_entity_hit_points(g_ecs, get_player(g_ecs));
-  ecs_each(g_ecs, NULL, cb_clear_world);
+  ecs_entity_t player = get_player(g_ecs);
+  g_session.hp = get_entity_hit_points(g_ecs, player);
+  g_session.mp = get_entity_mana_points(g_ecs, player);
+  g_session.spell = get_spell(g_ecs, player);
+  g_session.weapon = get_equiped_weapon_type_id(g_ecs, player);
+  ecs_each(g_ecs, NULL, __callback_clear_entities);
   map_clear();
 }
 

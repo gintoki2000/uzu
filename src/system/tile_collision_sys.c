@@ -27,19 +27,19 @@ INLINE Vec2 to_world_coords(int tile_x, int tile_y)
   return (Vec2){ .x = (tile_x + 0.5f) * TILE_SIZE, .y = (tile_y + 0.5f) * TILE_SIZE };
 }
 
-#define V_AXIS 0
-#define H_AXIS 1
+#define V_COLLISION 0
+#define H_COLLISION 1
 
 INLINE int get_axis(Vec2 prev_position, Vec2 tile_pos)
 {
   Vec2 d = vec2_sub(prev_position, tile_pos);
-  return absf(d.x) > absf(d.y) ? H_AXIS : V_AXIS;
+  return absf(d.x) > absf(d.y) ? H_COLLISION : V_COLLISION;
 }
 
 static void on_collided_w_wall(RECT* obj_rect, int tile_x, int tile_y, int axis, float dx, float dy)
 {
 
-  if (axis == V_AXIS)
+  if (axis == V_COLLISION)
   {
     if (dy < 0.f)
       obj_rect->y = (tile_y + 1) * TILE_SIZE - obj_rect->h + 1;
@@ -80,7 +80,7 @@ void tile_collision_system_update()
   BOOL  has_any_collision;
   BOOL  is_floor_tile;
 
-  ecs_raw(g_ecs, TILE_COLLISION_TAG, &entities, NULL, &cnt);
+  ecs_raw(g_ecs, ENDABLE_TILE_COLLISION_TAG, &entities, NULL, &cnt);
   for (int ie = 0; ie < cnt; ++ie)
   {
     if ((transform = ecs_get(g_ecs, entities[ie], TRANSFORM)) &&

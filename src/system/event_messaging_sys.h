@@ -23,6 +23,7 @@ enum
   MSG_ITEM_USED,             // item đã được sử dụng
   MSG_NEW_GAME,
   MSG_LEVEL_LOADED,
+  MSG_LEVEL_UNLOADED,
   MSG_GAME_SCENE_UNLOAD,
   MSG_GAME_SCENE_LOADED,
   MSG_HIT_DOOR,
@@ -134,6 +135,11 @@ typedef struct
 {
   const char* level_name;
 } MSG_LevelLoaded;
+
+typedef struct
+{
+	const char* level_name;
+} MSG_LevelUnloaded;
 
 typedef struct
 {

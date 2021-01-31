@@ -32,14 +32,14 @@ INLINE RECT* get_bounding_rect(RECT* r, const HitBox* hitbox, const Transform* t
   r->w = hitbox->size.x;
   r->h = hitbox->size.y;
   r->x = transform->position.x - hitbox->anchor.x;
-  r->y = transform->position.y - hitbox->anchor.y - transform->z;
+  r->y = transform->position.y - hitbox->anchor.y;
   return r;
 }
 
 INLINE AABB* get_aabb(AABB* aabb, const HitBox* hitbox, const Transform* transform)
 {
   aabb->lower_bound.x = transform->position.x - hitbox->anchor.x;
-  aabb->lower_bound.y = transform->position.y - hitbox->anchor.y - transform->z;
+  aabb->lower_bound.y = transform->position.y - hitbox->anchor.y;
   aabb->upper_bound.x = aabb->lower_bound.x + hitbox->size.x;
   aabb->upper_bound.y = aabb->lower_bound.y + hitbox->size.y;
   return aabb;

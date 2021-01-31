@@ -42,6 +42,12 @@ static const char*  _texture_files[NUM_TEXS] = {
   [TEX_LIZZARD]              = "asserts/lizzard.png",
   [TEX_ICE_ARROW]            = "asserts/IcePick.png",
   [TEX_EFFECT_ICE_CAST]      = "asserts/effect/icecast.png",
+  [TEX_SCROLL]               = "asserts/scroll.png",
+  [TEX_EFFECT_ICE_HIT]       = "asserts/effect/icehit.png",
+  [TEX_KEY]                  = "asserts/key.png",
+  [TEX_EFFECT_FIRE_HIT]      = "asserts/effect/frehit.png",
+  [TEX_EFFECT_FIRE_CAST]     = "asserts/effect/firecast.png",
+  [TEX_FIRE_BALL]            = "asserts/fireball.png",
 };
 
 static Mix_Music*  _bg_musics[NUM_BG_MUSICS];
@@ -75,6 +81,7 @@ static const char* _sfx_files[NUM_SFXS] = {
   [SFX_INTERACTION] = "asserts/sound/fx/interaction1_0.75v.wav",
   [SFX_CLAW_HIT]    = "asserts/sound/fx/claw_hit.wav",
   [SFX_BUTTON]      = "asserts/sound/fx/button1.wav",
+  [SFX_ICE_SHOOT]   = "asserts/sound/fx/ice_shoot.wav",
 };
 
 static FONT* _fonts[NUM_FONTS];

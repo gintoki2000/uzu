@@ -18,5 +18,11 @@ u16          get_entity_conversation(Ecs* ecs, ecs_entity_t entity);
 const char*  get_entity_name(Ecs* ecs, ecs_entity_t entity);
 Vec2         get_entity_velocity(Ecs* ecs, ecs_entity_t entity);
 float        get_entity_vz(Ecs* ecs, ecs_entity_t entity);
+u16          get_entity_mana_points(Ecs* ecs, ecs_entity_t entity);
+void         set_spell(Ecs* ecs, ecs_entity_t entity, u16 spell_id);
+u16          get_spell(Ecs* ecs, ecs_entity_t entity);
+u16          get_weapon_type_id(Ecs* ecs, ecs_entity_t weapon);
+ecs_entity_t get_equiped_weapon(Ecs* ecs, ecs_entity_t holder);
+u16          get_equiped_weapon_type_id(Ecs* ecs, ecs_entity_t holder);
 
 #endif // UTILS

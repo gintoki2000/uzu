@@ -21,12 +21,12 @@ void text_rendering_system_update()
   {
     if ((transform = ecs_get(g_ecs, entities[i], TRANSFORM)))
     {
-      FC_DrawColor(texts[i].font,
-                   g_renderer,
-                   transform->position.x - g_viewport.x,
-                   transform->position.y - g_viewport.y,
-                   texts[i].color,
-                   texts[i].value);
+      FC_DrawEffect(texts[i].font,
+                    g_renderer,
+                    transform->position.x - g_viewport.x,
+                    transform->position.y - g_viewport.y,
+                    texts[i].effect,
+                    texts[i].value);
     }
   }
 }

@@ -12,10 +12,9 @@ static void destroy_offscreen_entities()
   ecs_entity_t* entities;
   ecs_size_t    cnt;
 
-  RemoveIfOffScreen* tags;
   Vec2               position;
 
-  ecs_raw(g_ecs, REMOVE_IF_OFFSCREEN, &entities, (void**)&tags, &cnt);
+  ecs_raw(g_ecs, REMOVE_IF_OFFSCREEN, &entities, NULL, &cnt);
 
   for (int i = cnt - 1; i >= 0; --i)
   {
@@ -24,7 +23,6 @@ static void destroy_offscreen_entities()
     if (!SDL_PointInRect(&(POINT){position.x, position.y}, &g_viewport))
     {
       ecs_destroy(g_ecs, entities[i]);
-      INFO("destory "ECS_ENT_FMT_PATTERN "\n", ECS_ENT_FMT_VARS(entities[i]));
     }
   }
 }
@@ -37,7 +35,7 @@ static void destroy_tagged_entities()
 
   Equipment* equipment;
 
-  ecs_raw(g_ecs, TAG_TO_BE_DESTROYED, &entities, NULL, &cnt);
+  ecs_raw(g_ecs, DESTROYED_TAG, &entities, NULL, &cnt);
   for (int i = cnt - 1; i >= 0; --i)
   {
     if ((equipment = ecs_get(g_ecs, entities[i], EQUIPMENT)))

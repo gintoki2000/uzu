@@ -11,7 +11,7 @@ ecs_entity_t (*const g_weapon_create_fn_tbl[NUM_WEAPONS])(Ecs*, u16) = {
   NULL,
 };
 
-ecs_entity_t (*const g_char_create_fn_tbl[NUM_CLASSES])(Ecs*, Vec2)  = {
+ecs_entity_t (*const g_char_create_fn_tbl[NUM_JOBS])(Ecs*, Vec2)  = {
   make_knight,
   make_dragon,
   make_wizzard,

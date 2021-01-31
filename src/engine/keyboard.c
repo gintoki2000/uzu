@@ -6,7 +6,8 @@ static const int _key_to_scancode_tbl[NUM_KEYS] = {
   [KEY_A] = SDL_SCANCODE_A,          [KEY_B] = SDL_SCANCODE_S,
   [KEY_UP] = SDL_SCANCODE_UP,        [KEY_DOWN] = SDL_SCANCODE_DOWN,
   [KEY_LEFT] = SDL_SCANCODE_LEFT,    [KEY_RIGHT] = SDL_SCANCODE_RIGHT,
-  [KEY_SELECT] = SDL_SCANCODE_SPACE,
+  [KEY_SELECT] = SDL_SCANCODE_SPACE, [KEY_R] = SDL_SCANCODE_W,
+  [KEY_L] = SDL_SCANCODE_Q,
 };
 
 static int _curr_state[NUM_KEYS];

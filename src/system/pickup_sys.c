@@ -22,7 +22,7 @@ static void on_player_hit_item(void* arg, const MSG_PlayerHitItem* event)
       Mix_PlayChannel(-1, get_sfx(SFX_INTERACTION), 0);
       make_item_picked_up_msg(g_ecs, transform->position, g_item_types[item_tag->item_id].name);
 
-      ecs_add(g_ecs, event->item, TAG_TO_BE_DESTROYED);
+      ecs_add(g_ecs, event->item, DESTROYED_TAG);
     }
   }
 }

@@ -6,37 +6,15 @@
 
 extern Ecs* g_ecs;
 
-static void on_weapon_hit(void* arg, const MSG_WeaponHit* event)
-{
-  (void)arg;
-  DamageOutput* damage_output;
-  if ((damage_output = ecs_get(g_ecs, event->weapon, DAMAGE_OUTPUT)) != NULL)
-  {
-    if (damage_output->atk > 0)
-    {
-      ems_broadcast(MSG_DEAL_DAMAGE,
-                    &(MSG_DealDamage){
-                        .damage      = damage_output->atk,
-                        .dealer      = event->weapon,
-                        .receiver    = event->entity,
-                        .type        = damage_output->type,
-                        .impact      = damage_output->impact,
-                        .impact_time = 10,
-                        .force       = damage_output->force,
-                    });
-    }
-  }
-}
+static const Vec2 k_trap_impact_force = { 100.f, 0.f };
 
-static const Vec2 kTrapHImpactForce = { 100.f, 0.f };
-static const Vec2 kTrapVImpactForce = { 0.f, 100.f };
-#define kTrapImpactZForce 60.f
+#define k_trap_impact_force_z 60.f
 
 static void on_hit_trap(void* arg, const MSG_EntityHitTrap* event)
 {
   (void)arg;
   Transform* transform = ecs_get(g_ecs, event->entity, TRANSFORM);
-  Vec2       force     = vec2_mul(kTrapHImpactForce, -transform->hdir);
+  Vec2       force     = vec2_mul(k_trap_impact_force, -transform->hdir);
   ems_broadcast(MSG_DEAL_DAMAGE,
                 &(MSG_DealDamage){
                     .damage      = 1,
@@ -46,7 +24,7 @@ static void on_hit_trap(void* arg, const MSG_EntityHitTrap* event)
                     .impact      = TRUE,
                     .impact_time = 10,
                     .force       = force,
-                    .zforce      = kTrapImpactZForce,
+                    .zforce      = k_trap_impact_force_z,
                 });
 }
 
@@ -58,21 +36,24 @@ static void on_projectile_hit(void* arg, const MSG_ProjectileHit* event)
   {
     ems_broadcast(MSG_DEAL_DAMAGE,
                   &(MSG_DealDamage){
-                      .damage   = attributes->damage,
-                      .dealer   = ECS_NULL_ENT,
-                      .receiver = event->entity,
-                      .type     = DAMAGE_TYPE_FIRE,
+                      .damage      = attributes->damage,
+                      .dealer      = ECS_NULL_ENT,
+                      .receiver    = event->entity,
+                      .type        = attributes->damage_type,
+					  .impact      = attributes->impact,
+					  .force       = attributes->impact_force,
+					  .impact_time = attributes->impact_time,
+					  .zforce      = attributes->impact_force_z,
                   });
     if (attributes->destroy_when_hit)
     {
-      ecs_add(g_ecs, event->projectile, TAG_TO_BE_DESTROYED);
+      ecs_add(g_ecs, event->projectile, DESTROYED_TAG);
     }
   }
 }
 
 void damage_system_init()
 {
-  ems_connect(MSG_WEAPON_HIT, NULL, (on_weapon_hit));
-  ems_connect(MSG_HIT_TRAP, NULL, (on_hit_trap));
+  ems_connect(MSG_HIT_TRAP, NULL, on_hit_trap);
   ems_connect(MSG_PROJECTILE_HIT, NULL, on_projectile_hit);
 }

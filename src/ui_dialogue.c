@@ -18,7 +18,7 @@ static TEXTURE*            _texture_dialogue;
 static u16                 _sentence_length;
 static char                _displayed_text[MAX_TEXT_LENGTH + 1];
 static u16                 _displayed_text_length;
-static u16                 _speed; // thời gian cho kí tự tiếp theo xuất hiện
+static u16                 _delay; // thời gian cho kí tự tiếp theo xuất hiện
 static u16  _elpased_time;         // thời gian kể từ khi kí tự trước đó xuất hiện
 static BOOL _is_visible;
 
@@ -41,7 +41,7 @@ void ui_dialogue_init(void)
   _font             = get_font(FONT_DAMAGE_INDICATOR);
   _texture_dialogue = get_texture(TEX_UI_DIALOGUE);
   _is_visible       = FALSE;
-  _speed            = 3;
+  _delay            = 3;
   strcpy(_displayed_text, "");
 }
 
@@ -70,7 +70,7 @@ void ui_dialogue_update(void)
 {
   if (_is_visible)
   {
-    if (++_elpased_time >= _speed)
+    if (++_elpased_time >= _delay)
     {
       _elpased_time = 0;
       if (_displayed_text_length < MAX_TEXT_LENGTH && _displayed_text_length < _sentence_length)

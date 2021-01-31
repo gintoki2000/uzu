@@ -5,6 +5,8 @@ typedef enum
 {
   KEY_A,
   KEY_B,
+  KEY_L,
+  KEY_R,
   KEY_UP,
   KEY_DOWN,
   KEY_LEFT,

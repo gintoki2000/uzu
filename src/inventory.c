@@ -40,16 +40,17 @@ static Item* current_item(void)
 
 static int find_item(ItemTypeId type_id)
 {
+  const ItemCategory item_category = g_item_types[type_id].category;
   for (u32 i = 0; i < INV_MAX_SLOTS; ++i)
-    if (_items[_category][i].type_id == type_id)
+    if (_items[item_category][i].type_id == type_id)
       return i;
   return -1;
 }
 
-static int find_empty_slot()
+static int find_empty_slot(u16 category)
 {
   for (u32 i = 0; i < INV_MAX_SLOTS; ++i)
-    if (_items[_category][i].num_items == 0)
+    if (_items[category][i].num_items == 0)
       return i;
   return -1;
 }
@@ -89,6 +90,18 @@ static void process_key_input(void)
     ui_list_hook(UI_LIST_ON_SELECT, CALLBACK_2(on_list_selected));
   }
 
+  if (key_just_pressed(KEY_L) && _category > 0)
+  {
+    --_category;
+    play_sound(SFX_INTERACTION);
+  }
+
+  if (key_just_pressed(KEY_R) && _category < NUM_ITEM_CATEGORIES - 1)
+  {
+    ++_category;
+    play_sound(SFX_INTERACTION);
+  }
+
   if (key_just_pressed(KEY_B))
   {
     inventory_close();
@@ -99,12 +112,14 @@ static void process_key_input(void)
 static void on_list_selected(pointer_t arg, const char* item)
 {
   (void)arg;
-  Item* it = current_item();
+  Item*           it   = current_item();
+  const ItemType* type = &g_item_types[it->type_id];
 
   if (strcmp(item, INV_TEXT_USE) == 0)
   {
-    it->num_items--;
-    g_item_types[it->type_id].on_use(g_ecs, get_player(g_ecs));
+    if (type->category == ITEM_CATEGORY_CONSUMABLE)
+      it->num_items--;
+    type->use(type->data, g_ecs, get_player(g_ecs));
   }
   else if (strcmp(item, INV_TEXT_DROP) == 0)
   {
@@ -121,7 +136,7 @@ BOOL add_to_inv(ItemTypeId type_id, u8 quality)
 
   if (idx == -1)
   {
-    empty_slot = find_empty_slot();
+    empty_slot = find_empty_slot(cat);
     if (empty_slot != -1)
     {
       items[empty_slot] = (Item){ .type_id = type_id, .num_items = quality };
@@ -139,6 +154,11 @@ BOOL add_to_inv(ItemTypeId type_id, u8 quality)
     return FALSE;
   }
   return FALSE;
+}
+
+BOOL has_item(ItemTypeId type_id)
+{
+	return find_item(type_id) != -1;
 }
 
 void inventory_display()
@@ -191,13 +211,14 @@ void inventory_draw()
                        get_texture(tp->sprite.texture_id),
                        &tp->sprite.rect,
                        &cell_rect);
-        FC_DrawColor(get_font(FONT_DAMAGE_INDICATOR),
-                     g_renderer,
-                     cell_rect.x + 3,
-                     cell_rect.y + 3,
-                     (COLOR){ 232, 39, 194, 255 },
-                     "%d",
-                     items[idx].num_items);
+        if (items[idx].num_items > 1)
+			FC_DrawColor(get_font(FONT_DAMAGE_INDICATOR),
+						 g_renderer,
+						 cell_rect.x + 3,
+						 cell_rect.y + 3,
+						 (COLOR){ 232, 39, 194, 255 },
+						 "%d",
+						 items[idx].num_items);
       }
     }
   }

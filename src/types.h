@@ -38,6 +38,7 @@ typedef enum
   DAMAGE_TYPE_THUST,
   DAMAGE_TYPE_FIRE,
   DAMAGE_TYPE_LIGHTNING,
+  DAMAGE_TYPE_ICE,
 } DamageType;
 
 typedef enum
@@ -69,6 +70,9 @@ typedef enum
   ITEM_TYPE_RED_FLASK,
   ITEM_TYPE_BIG_RED_FLASK,
   ITEM_TYPE_BLUE_FLASK,
+  ITEM_TYPE_SCROLL_ICE_ARROW,
+  ITEM_TYPE_SCROLL_FIRE_BALL,
+  ITEM_TYPE_KEY_1_1,
   NUM_ITEM_TYPES,
 } ItemTypeId;
 
@@ -76,16 +80,19 @@ typedef enum
 {
   ITEM_CATEGORY_CONSUMABLE,
   ITEM_CATEGORY_EQUIPMENT,
+  ITEM_CATEGORY_SCROLL,
+  ITEM_CATEGORY_KEY,
   NUM_ITEM_CATEGORIES,
 } ItemCategory;
 
-typedef struct
+typedef struct ItemType
 {
   const char*  name;
   const char*  description;
   ItemCategory category;
   BOOL         stackable;
-  void (*on_use)(Ecs*, ecs_entity_t);
+  void (*use)(const void* data, Ecs*, ecs_entity_t);
+  const void* data;
   struct
   {
     u32  texture_id;
@@ -128,10 +135,10 @@ typedef enum
   NUM_SPELLS
 } SpellType;
 
-typedef struct
+typedef struct Spell
 {
   const char* name;
-  void (*cast_fn)(Ecs* ecs, ecs_entity_t caster, ecs_entity_t weapon);
+  void (*cast)(Ecs* ecs, ecs_entity_t caster, ecs_entity_t weapon);
   u16 cost;
   u16 cast_spd;
   u16 casting_effect;
@@ -154,7 +161,7 @@ typedef enum
   JOB_DRAGON,
   JOB_WIZZARD,
   JOB_HUNTER,
-  NUM_CLASSES,
+  NUM_JOBS,
 } JobType;
 
 typedef enum
@@ -168,11 +175,12 @@ typedef enum
 {
   CAST_EFFECT_ICE,
   CAST_EFFECT_FIRE,
+  CAST_EFFECT_LIGHTNING,
   NUM_CAST_EFFECTS
 } CastEffectType;
 
 extern ecs_entity_t (*const g_weapon_create_fn_tbl[NUM_WEAPONS])(Ecs*, u16);
-extern ecs_entity_t (*const g_char_create_fn_tbl[NUM_CLASSES])(Ecs*, Vec2);
+extern ecs_entity_t (*const g_char_create_fn_tbl[NUM_JOBS])(Ecs*, Vec2);
 extern ecs_entity_t (*const g_item_create_fn_tbl[NUM_ITEM_TYPES])(Ecs*, Vec2 pos);
 extern ecs_entity_t (*const g_projectile_create_fn[])(Ecs*, Vec2 pos, Vec2 dir, u16 mask);
 extern ecs_entity_t (*const g_cast_effect_fn_tbl[NUM_CAST_EFFECTS])(Ecs* ecs, Vec2 pos);

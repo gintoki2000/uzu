@@ -24,6 +24,7 @@ extern Ecs* g_ecs;
 //<--------------------------------event callbacks----------------------------------->//
 
 static void on_list_select(pointer_t arg, const char* item);
+static void on_level_unloaded(pointer_t arg, pointer_t event);
 
 //<==================================================================================>//
 
@@ -34,6 +35,13 @@ static void on_list_select(SDL_UNUSED pointer_t arg, const char* item)
                     g_curr_iteractable_entity,
                     item,
                 });
+}
+
+static void on_level_unloaded(pointer_t arg, pointer_t event)
+{
+	(void)arg;
+	(void)event;
+	g_curr_iteractable_entity = ECS_NULL_ENT;
 }
 
 struct CBPlayerController_QueryInteracableEntitiesArgs
@@ -180,4 +188,9 @@ void player_controller_system_update()
         begin_interact(g_curr_iteractable_entity);
     }
   }
+}
+
+void player_controller_system_init(void)
+{
+	ems_connect(MSG_LEVEL_UNLOADED, NULL, on_level_unloaded);
 }

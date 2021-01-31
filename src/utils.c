@@ -64,22 +64,17 @@ ecs_entity_t find_ladder(Ecs* ecs, const char* _name)
 
 BOOL equip(Ecs* ecs, ecs_entity_t entity, ecs_entity_t weapon)
 {
-  Equipment*        equipment;
-  WeaponAttributes* weapon_core;
+  Equipment* equipment;
 
   if (entity == ECS_NULL_ENT || weapon == ECS_NULL_ENT)
     return FALSE;
 
-  equipment   = ecs_get(ecs, entity, EQUIPMENT);
-  weapon_core = ecs_get(ecs, weapon, WEAPON_ATTRIBUTES);
+  equipment = ecs_get(ecs, entity, EQUIPMENT);
 
-  if (weapon_core == NULL)
-    return FALSE;
-
+  ecs_add_or_set(ecs, weapon, HOLDER, &(Holder){ .value = entity });
   if (equipment->weapon != ECS_NULL_ENT)
-    ecs_destroy(ecs, equipment->weapon);
-  equipment->weapon   = weapon;
-  weapon_core->wearer = entity;
+    ecs_add(ecs, equipment->weapon, DESTROYED_TAG);
+  equipment->weapon = weapon;
 
   return TRUE;
 }
@@ -137,4 +132,33 @@ Vec2 get_entity_velocity(Ecs* ecs, ecs_entity_t entity)
 float get_entity_vz(Ecs* ecs, ecs_entity_t entity)
 {
   return ((Motion*)ecs_get(ecs, entity, MOTION))->vz;
+}
+u16 get_entity_mana_points(Ecs* ecs, ecs_entity_t entity)
+{
+  return ((ManaPool*)ecs_get(ecs, entity, MANA_POOL))->mana_points;
+}
+
+void set_entity_mana_points(Ecs* ecs, ecs_entity_t entity, u16 mana_points)
+{
+  ((ManaPool*)ecs_get(ecs, entity, MANA_POOL))->mana_points = mana_points;
+}
+void set_spell(Ecs* ecs, ecs_entity_t entity, u16 spell_id)
+{
+  ((AttunementSlot*)ecs_get(ecs, entity, ATTUNEMENT_SLOT))->spell_id = spell_id;
+}
+u16 get_spell(Ecs* ecs, ecs_entity_t entity)
+{
+  return ((AttunementSlot*)ecs_get(ecs, entity, ATTUNEMENT_SLOT))->spell_id;
+}
+u16 get_weapon_type_id(Ecs* ecs, ecs_entity_t weapon)
+{
+  return ((const WeaponAttributes*)ecs_get(ecs, weapon, WEAPON_ATTRIBUTES))->type_id;
+}
+ecs_entity_t get_equiped_weapon(Ecs* ecs, ecs_entity_t holder)
+{
+  return ((const Equipment*)ecs_get(ecs, holder, EQUIPMENT))->weapon;
+}
+u16 get_equiped_weapon_type_id(Ecs* ecs, ecs_entity_t holder)
+{
+  return get_weapon_type_id(ecs, get_equiped_weapon(ecs, holder));
 }

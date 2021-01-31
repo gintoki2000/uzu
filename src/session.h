@@ -9,6 +9,7 @@ struct Session
   u16  hp;
   u16  mp;
   u16  new_game;
+  u16  spell;
   Vec2 pos;
   char level[255];
 };

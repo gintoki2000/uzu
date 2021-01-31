@@ -13,9 +13,12 @@
     .fini_fn = (ecs_comp_fini_fn_t)__fini_fn                                                       \
   }
 
+static void transform_init(Transform* transform);
+static void holder_init(Holder* holder);
+
 const EcsType g_comp_types[NUM_COMPONENTS] = {
   [VISUAL]                     = ECS_TYPE_EX(Visual, visual_init, NULL),
-  [TRANSFORM]                  = ECS_TYPE(Transform),
+  [TRANSFORM]                  = ECS_TYPE_EX(Transform, transform_init, NULL),
   [ANIMATOR]                   = ECS_TYPE_EX(Animator, NULL, animator_fini),
   [PLAYER_TAG]                 = ECS_TYPE(PlayerTag),
   [CONTROLLER]                 = ECS_TYPE(Controller),
@@ -23,12 +26,12 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
   [HEALTH]                     = ECS_TYPE(Health),
   [HITBOX]                     = ECS_TYPE_EX(HitBox, hitbox_init, NULL),
   [ENEMY_TAG]                  = ECS_TYPE(PlayerTag),
-  [TILE_COLLISION_TAG]         = ECS_TYPE(TileCollisionTag),
+  [ENDABLE_TILE_COLLISION_TAG] = ECS_TYPE(EnableTileCollisionTag),
   [CHARACTER_ANIMATOR_TAG]     = ECS_TYPE(CharacterAnimatorTag),
   [HEAL_BAR]                   = ECS_TYPE(HealthBar),
   [LIFE_SPAN]                  = ECS_TYPE(LifeSpan),
   [MOTION]                     = ECS_TYPE(Motion),
-  [TAG_TO_BE_DESTROYED]        = ECS_TYPE(TagToBeDestroyed),
+  [DESTROYED_TAG]              = ECS_TYPE(DestroyedTag),
   [WEAPON_ATTRIBUTES]          = ECS_TYPE(WeaponAttributes),
   [DAMAGE_OUTPUT]              = ECS_TYPE(DamageOutput),
   [WEAPON_SKILL_SWING]         = ECS_TYPE(wpskl_Swing),
@@ -57,7 +60,8 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
   [WEAPON_SKILL_THUST]         = ECS_TYPE(wpskl_Thust),
   [DOOR_INFO]                  = ECS_TYPE(DoorInfo),
   [REMOVE_IF_OFFSCREEN]        = ECS_TYPE(RemoveIfOffScreen),
-  [PROJECTILE_ATTRIBUTES]      = ECS_TYPE(PROJECTILE_ATTRIBUTES),
+  [PROJECTILE_ATTRIBUTES]      = ECS_TYPE(ProjectileAttributes),
+  [HOLDER]                     = ECS_TYPE_EX(Holder, holder_init, NULL),
 };
 
 Animation*
@@ -81,6 +85,11 @@ Animator* animator_init(Animator* animator, const Animation* anims, u32 cnt)
   animator->current_anim = 0;
   memmove(animator->anims, anims, cnt * sizeof(Animation));
   return animator;
+}
+
+static void transform_init(Transform* transform)
+{
+  *transform = (Transform){ .hdir = 1 };
 }
 
 void animator_fini(Animator* animator)
@@ -130,8 +139,11 @@ void text_init(Text* text, const char* value, FONT* font, COLOR color)
   ASSERT(value != NULL);
   strncpy(text->value, value, TEXT_MAX_LEN);
   text->value[TEXT_MAX_LEN] = '\0';
-  text->color               = color;
   text->font                = font;
+  text->effect.color        = color;
+  text->effect.alignment    = FC_ALIGN_CENTER;
+  text->effect.scale.x      = 1.f;
+  text->effect.scale.y      = 1.f;
 }
 
 void visual_init(Visual* v)
@@ -141,4 +153,9 @@ void visual_init(Visual* v)
   v->anchor  = (POINT){ 0, 0 };
   v->sprite  = (Sprite){ .tex = NULL };
   v->flip    = SDL_FLIP_NONE;
+}
+
+static void holder_init(Holder* holder)
+{
+  *holder = (Holder){ .value = ECS_NULL_ENT };
 }

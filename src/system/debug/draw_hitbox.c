@@ -31,7 +31,7 @@ void hitbox_rendering_system_update()
     transform = ecs_get(g_ecs, entities[i], TRANSFORM);
 
     x = transform->position.x - hitboxs[i].anchor.x - g_viewport.x;
-    y = transform->position.y - hitboxs[i].anchor.y - g_viewport.y - transform->z;
+    y = transform->position.y - hitboxs[i].anchor.y - g_viewport.y;
     w = hitboxs[i].size.x;
     h = hitboxs[i].size.y;
     rect_init_full(&rect,

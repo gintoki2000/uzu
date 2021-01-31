@@ -19,11 +19,10 @@ typedef struct NewLadderParams
   const char* name;
   const char* level;
   const char* dest;
-  Vec2 pos;
-  Vec2 size;
+  Vec2        pos;
+  Vec2        size;
 } NewLadderParams;
-ecs_entity_t
-make_ladder(Ecs* ecs, const char* name, Vec2 pos, Vec2 size, const char* level, const char* dest);
+ecs_entity_t make_ladder(Ecs* ecs, const NewLadderParams* params);
 ecs_entity_t
 make_text_particle(Ecs* ecs, const char* text, Vec2 pos, Vec2 vel, FONT* font, COLOR color);
 
@@ -60,13 +59,15 @@ ecs_entity_t make_chest(Ecs* ecs, Vec2 pos, Item items[CHEST_MAX_ITEMS], u16 cnt
 
 // effects
 ecs_entity_t make_blood_loss_particle(Ecs* ecs, Vec2 position);
-ecs_entity_t make_make_damage_indicator_particle(Ecs* ecs, Vec2 pos, int amount);
+ecs_entity_t make_damage_indicator_particle(Ecs* ecs, Vec2 pos, COLOR color, int amount);
 ecs_entity_t make_item_picked_up_msg(Ecs* ecs, Vec2 pos, const char* item_name);
 ecs_entity_t make_ice_cast_effect(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_fire_cast_effect(Ecs* ecs, Vec2 pos);
+ecs_entity_t make_ice_hit_effect(Ecs* ecs, Vec2 pos);
+ecs_entity_t make_fire_hit_effect(Ecs* ecs, Vec2 pos);
 
+// projectile
 ecs_entity_t make_fire_ball(Ecs* ecs, Vec2 pos, Vec2 direction, u16 mask);
 ecs_entity_t make_ice_arrow(Ecs* ecs, Vec2 pos, Vec2 direction, u16 mask);
-
 
 #endif // ENTITY_FACTORY_H

@@ -18,7 +18,7 @@ typedef enum
   HITBOX,
   HEAL_BAR,
   LIFE_SPAN,
-  TAG_TO_BE_DESTROYED,
+  DESTROYED_TAG,
   WEAPON_SKILL_SWING,
   WEAPON_SKILL_CHARGE,
   WEAPON_SKILL_THUST,
@@ -32,7 +32,7 @@ typedef enum
   ENEMY_TAG,
   PLAYER_TAG,
   CAMERA_TARGET_TAG,
-  TILE_COLLISION_TAG,
+  ENDABLE_TILE_COLLISION_TAG,
   CHARACTER_ANIMATOR_TAG,
   PROJECTILE_ATTRIBUTES,
   DOOR_TAG,
@@ -52,7 +52,9 @@ typedef enum
   CASTABLE,
   MANA_POOL,
   DOOR_INFO,
+  HOLDER,
   REMOVE_IF_OFFSCREEN,
+
   NUM_COMPONENTS
 } ComponentId;
 
@@ -107,10 +109,9 @@ typedef struct
 
 typedef struct
 {
-  ecs_entity_t wearer;
-  s32          atk;
-  u16          type_id;
-  u16          mask;
+  s32 atk;
+  u16 type_id;
+  u16 mask;
 } WeaponAttributes;
 
 /*Weapon skills*/
@@ -161,7 +162,7 @@ typedef struct
   int cy;
 } DamageArea;
 
-/*entity tag*/
+/*entity tags*/
 typedef int PlayerTag;
 
 typedef int EnemyTag;
@@ -170,20 +171,25 @@ typedef int WeaponTag;
 
 typedef int CameraTargetTag;
 
-typedef int TileCollisionTag;
-
-typedef struct ProjectileAttributes
-{
-  int  damage;
-  u16  effect;
-  BOOL destroy_when_hit;
-} ProjectileAttributes;
+typedef int EnableTileCollisionTag;
 
 typedef int NpcTag;
 
-typedef int TagToBeDestroyed;
+typedef int DestroyedTag;
 
 typedef int CharacterAnimatorTag;
+
+typedef struct ProjectileAttributes
+{
+  int   damage;
+  u16   effect;
+  u16   damage_type;
+  BOOL  destroy_when_hit;
+  BOOL  impact;
+  Vec2  impact_force;
+  float impact_force_z;
+  u16   impact_time;
+} ProjectileAttributes;
 
 typedef enum DoorState
 {
@@ -191,9 +197,11 @@ typedef enum DoorState
   DOOR_STATE_OPEN,
 } DoorState;
 
+#define DOOR_NO_REQUIRED_KEY -1
+#define DOOR_REQUIRED_SPECIAL_CONDITION -2
 typedef struct DoorInfo
 {
-  u16 required_key;
+  s16 required_key;
   u16 state;
 } DoorInfo;
 
@@ -263,8 +271,6 @@ typedef struct
   BTNode* root;
 } Brain;
 
-//** BT Vars
-
 typedef Vec2 Destination;
 
 #define PATH_MAX_NUM_NODES 100
@@ -296,12 +302,12 @@ typedef struct
   char value[NAME_MAX_LEN + 1];
 } Name;
 
-#define TEXT_MAX_LEN 50
+#define TEXT_MAX_LEN 63
 typedef struct
 {
-  char  value[TEXT_MAX_LEN + 1];
-  COLOR color;
-  FONT* font;
+  char      value[TEXT_MAX_LEN + 1];
+  FC_Effect effect;
+  FONT*     font;
 } Text;
 
 #define INTERACTABLE_MAX_COMMANDS 5
@@ -349,7 +355,10 @@ typedef struct
 
 typedef int RemoveIfOffScreen;
 
-typedef ecs_entity_t Wearer;
+typedef struct Holder
+{
+  ecs_entity_t value;
+} Holder;
 
 Animation*
 animation_init(Animation* anim, SDL_Texture* tex, u32 x, u32 y, u32 row, u32 col, u32 sw, u32 sh);

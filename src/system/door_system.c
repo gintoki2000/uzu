@@ -4,6 +4,8 @@
 #include <constances.h>
 
 #include <toolbox/toolbox.h>
+#include "ui_msgbox.h"
+#include "inventory.h"
 
 extern Ecs* g_ecs;
 
@@ -18,6 +20,7 @@ void door_system_init()
   ems_connect(MSG_HIT_DOOR, NULL, on_entity_collied_door);
 }
 
+
 static void on_command_selected(SDL_UNUSED void* arg, const MSG_CommandSelected* event)
 {
 
@@ -31,9 +34,15 @@ static void on_command_selected(SDL_UNUSED void* arg, const MSG_CommandSelected*
     interactable = ecs_get(g_ecs, event->entity, INTERACTABLE);
     if (strcmp(event->cmd, TEXT_COMMAND_OPEN) == 0)
     {
-      visual->sprite.rect       = RECT_DOOR_OPEN;
-      door_info->state          = DOOR_STATE_OPEN;
-      interactable->commands[0] = TEXT_COMMAND_CLOSE;
+      if (door_info->required_key == DOOR_NO_REQUIRED_KEY || has_item(door_info->required_key))
+      {
+		  visual->sprite.rect       = RECT_DOOR_OPEN;
+		  door_info->state          = DOOR_STATE_OPEN;
+		  interactable->commands[0] = TEXT_COMMAND_CLOSE;
+      } else
+      {
+    	  ui_msgbox_display("it's locked!");
+      }
     }
     else if (strcmp(event->cmd, TEXT_COMMAND_CLOSE) == 0)
     {

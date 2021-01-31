@@ -141,7 +141,7 @@
                  "name":"",
                  "properties":
                     {
-                     "items":"[{BIG_RED_FLASHK 1}, {BLUE_FLASK, 1}]"
+                     "items":"[{\"type\":\"BigRedFlask\",\"count\":3},{\"type\":\"Key_1_1\",\"count\":1}]"
                     },
                  "propertytypes":
                     {
@@ -151,30 +151,46 @@
                  "type":"Chest",
                  "visible":true,
                  "width":16,
-                 "x":375.5,
-                 "y":72
+                 "x":622,
+                 "y":296
                 }, 
                 {
                  "height":16,
                  "id":18,
                  "name":"",
+                 "properties":
+                    {
+                     "items":"[{\"type\":\"FireBallScroll\",\"count\":1}]"
+                    },
+                 "propertytypes":
+                    {
+                     "items":"string"
+                    },
                  "rotation":0,
                  "type":"Chest",
                  "visible":true,
                  "width":16,
-                 "x":379.75,
-                 "y":149.75
+                 "x":382.75,
+                 "y":55.75
                 }, 
                 {
                  "height":16,
                  "id":19,
                  "name":"",
+                 "properties":
+                    {
+                     "items":"[{\"type\":\"IceArrowScroll\",\"count\":1}]"
+                    },
+                 "propertytypes":
+                    {
+                     "items":"string"
+                    },
                  "rotation":0,
                  "type":"Chest",
                  "visible":true,
                  "width":16,
-                 "x":373.75,
-                 "y":190.75
+                 "x":560.75,
+                 "y":125.75
                 }],
          "opacity":1,
          "type":"objectgroup",

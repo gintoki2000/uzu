@@ -31,38 +31,41 @@ static BOOL __cb_query_hit_entities(CBThust_QueryHitEntitiesArgs* args, ecs_enti
   return TRUE;
 }
 
+#define TIMER_TICK(__timer) ((__timer) > 0 && --(__timer) == 0)
+
 void weapon_skill_thust_update()
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;
 
   WeaponAttributes* attributes;
+  Holder*           holder;
   wpskl_Thust*      skl;
-  Controller*       wearer_controller;
-  Equipment*        wearer_equipment;
-  Motion*           wearer_motion;
+  Controller*       holder_controller;
+  Equipment*        holder_equipment;
+  Motion*           holder_motion;
   Transform*        transform;
   RECT              damage_area;
 
   ecs_raw(g_ecs, WEAPON_SKILL_THUST, &entities, (pointer_t*)&skl, &cnt);
   for (ecs_size_t i = 0; i < cnt; ++i)
   {
-    if ((attributes = ecs_get(g_ecs, entities[i], WEAPON_ATTRIBUTES)))
+    if ((holder = ecs_get(g_ecs, entities[i], HOLDER)))
       switch (skl[i].state)
       {
       case 0: // INACTIVE
-        if ((wearer_controller = ecs_get(g_ecs, attributes->wearer, CONTROLLER)))
+        if ((holder_controller = ecs_get(g_ecs, holder->value, CONTROLLER)))
         {
-          if (wearer_controller->action == skl[i].on_action)
+          if (holder_controller->action == skl[i].on_action)
           {
-            wearer_equipment = ecs_get(g_ecs, attributes->wearer, EQUIPMENT);
-            wearer_motion    = ecs_get(g_ecs, attributes->wearer, MOTION);
+            holder_equipment = ecs_get(g_ecs, holder->value, EQUIPMENT);
+            holder_motion    = ecs_get(g_ecs, holder->value, MOTION);
             transform        = ecs_get(g_ecs, entities[i], TRANSFORM);
 
-            wearer_equipment->d.x        = -10;
-            wearer_equipment->d.y        = -5;
-            wearer_controller->in_action = TRUE;
-            wearer_controller->action    = CHARACTER_ACTION_NONE;
+            holder_equipment->d.x        = -10;
+            holder_equipment->d.y        = -5;
+            holder_controller->in_action = TRUE;
+            holder_controller->action    = CHARACTER_ACTION_NONE;
 
             transform->rotation = -15.0 * transform->hdir;
 
@@ -72,42 +75,43 @@ void weapon_skill_thust_update()
         }
         break;
       case 1:
-        if (skl[i].timer && --skl[i].timer == 0)
+        if (TIMER_TICK(skl[i].timer))
         {
-          wearer_equipment = ecs_get(g_ecs, attributes->wearer, EQUIPMENT);
+          holder_equipment = ecs_get(g_ecs, holder->value, EQUIPMENT);
           transform        = ecs_get(g_ecs, entities[i], TRANSFORM);
 
-          wearer_equipment->d.x = -8;
-          wearer_equipment->d.y = -4;
+          holder_equipment->d.x = -8;
+          holder_equipment->d.y = -4;
           transform->rotation   = -12 * transform->hdir;
           skl[i].state          = 2;
           skl[i].timer          = 2;
         }
         break;
       case 2:
-        if (skl[i].timer && --skl[i].timer == 0)
+        if (TIMER_TICK(skl[i].timer))
         {
-          wearer_equipment = ecs_get(g_ecs, attributes->wearer, EQUIPMENT);
+          holder_equipment = ecs_get(g_ecs, holder->value, EQUIPMENT);
           transform        = ecs_get(g_ecs, entities[i], TRANSFORM);
 
-          wearer_equipment->d.x = 10;
-          wearer_equipment->d.y = 0;
+          holder_equipment->d.x = 10;
+          holder_equipment->d.y = 0;
           transform->rotation   = 0.0;
           skl[i].state          = 3;
           skl[i].timer          = 7;
         }
         break;
       case 3:
-        if ((wearer_controller = ecs_get(g_ecs, attributes->wearer, CONTROLLER)))
+        if ((holder_controller = ecs_get(g_ecs, holder->value, CONTROLLER)))
         {
-          if (skl[i].timer && --skl[i].timer == 0)
+          if (TIMER_TICK(skl[i].timer))
           {
-            wearer_equipment = ecs_get(g_ecs, attributes->wearer, EQUIPMENT);
+            holder_equipment = ecs_get(g_ecs, holder->value, EQUIPMENT);
             transform        = ecs_get(g_ecs, entities[i], TRANSFORM);
+            attributes       = ecs_get(g_ecs, entities[i], WEAPON_ATTRIBUTES);
 
-            wearer_controller->in_action = FALSE;
-            wearer_equipment->d.x        = 0;
-            wearer_equipment->d.y        = 0;
+            holder_controller->in_action = FALSE;
+            holder_equipment->d.x        = 0;
+            holder_equipment->d.y        = 0;
             skl[i].state                 = 0;
 
             damage_area.x = transform->position.x - 20;
@@ -118,7 +122,7 @@ void weapon_skill_thust_update()
             collision_box_query(&damage_area,
                                 attributes->mask,
                                 CALLBACK_1((&(CBThust_QueryHitEntitiesArgs){
-                                               .dealer    = attributes->wearer,
+                                               .dealer    = holder->value,
                                                .damage    = attributes->atk,
                                                .direction = transform->hdir,
                                            }),
@@ -128,3 +132,5 @@ void weapon_skill_thust_update()
       }
   }
 }
+
+#undef TIMER_TICK

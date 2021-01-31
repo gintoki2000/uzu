@@ -24,7 +24,7 @@ static void on_deal_damage(void* arg, const MSG_DealDamage* event)
     {
       health->hit_points = 0;
       ems_broadcast(MSG_ENTITY_DIED, &(MSG_EntityDied){ event->receiver });
-      ecs_add(g_ecs, event->receiver, TAG_TO_BE_DESTROYED);
+      ecs_add(g_ecs, event->receiver, DESTROYED_TAG);
     }
     else
     {
@@ -54,6 +54,16 @@ static void on_deal_damage(void* arg, const MSG_DealDamage* event)
   }
 }
 
+static ecs_entity_t (*const _effect_fn_tbl[])(Ecs*, Vec2) = {
+  make_blood_loss_particle, make_blood_loss_particle, make_fire_hit_effect,
+  make_blood_loss_particle, make_ice_hit_effect,
+};
+
+static COLOR _color_tbl[] = {
+  { 0xff, 0x00, 0x00, 0xff }, { 0xff, 0x00, 0x00, 0xff }, {0xfc, 0xad, 0x03, 0xff } ,
+  { 0xff, 0x00, 0x00, 0xff }, { 0x03, 0xba, 0xfc, 0xff },
+};
+
 // TODO: tạo một hệ thống react lại các  event và sinh ra các effect
 static void on_get_damaged(void* arg, const MSG_GetDamaged* event)
 {
@@ -67,7 +77,10 @@ static void on_get_damaged(void* arg, const MSG_GetDamaged* event)
   {
     particle_position.x = transform->position.x;
     particle_position.y = transform->position.y - 30.f;
-    make_make_damage_indicator_particle(g_ecs, particle_position, event->damage);
+    make_damage_indicator_particle(g_ecs,
+									particle_position,
+									_color_tbl[event->type],
+									event->damage);
   }
 
   if (transform && (hitbox = ecs_get(g_ecs, event->damagee, HITBOX)))
@@ -75,9 +88,10 @@ static void on_get_damaged(void* arg, const MSG_GetDamaged* event)
     damagee_topleft.x = transform->position.x - hitbox->anchor.x;
     damagee_topleft.y = transform->position.y - hitbox->anchor.y;
 
-    particle_position.x = rand() % ((int) hitbox->size.x) + damagee_topleft.x;
-    particle_position.y = rand() % ((int) hitbox->size.y) + damagee_topleft.y;
-    make_blood_loss_particle(g_ecs, particle_position);
+    particle_position.x = rand() % ((int)hitbox->size.x) + damagee_topleft.x;
+    particle_position.y = rand() % ((int)hitbox->size.y) + damagee_topleft.y;
+
+    _effect_fn_tbl[event->type](g_ecs, particle_position);
   }
 }
 

@@ -103,7 +103,7 @@ ecs_entity_t make_character_base(Ecs* ecs, Vec2 position, u16 texture_id)
   heath->hit_points     = 40;
   heath->max_hit_points = 40;
 
-  ecs_add(ecs, entity, TILE_COLLISION_TAG);
+  ecs_add(ecs, entity, ENDABLE_TILE_COLLISION_TAG);
   ecs_add(ecs, entity, CHARACTER_ANIMATOR_TAG);
 
   return entity;
@@ -222,7 +222,7 @@ ecs_entity_t make_monster_base(Ecs* ecs, const NewMonsterParams* params)
   motion->max_force = 5.f;
   motion->friction  = 0.0f;
 
-  ecs_add(ecs, entity, TILE_COLLISION_TAG);
+  ecs_add(ecs, entity, ENDABLE_TILE_COLLISION_TAG);
   ecs_add(ecs, entity, CHARACTER_ANIMATOR_TAG);
   return entity;
 }
@@ -362,7 +362,7 @@ ecs_entity_t make_cleaver(Ecs* ecs, u16 mask_bits)
 
   Transform*        transform;
   Visual*           visual;
-  WeaponAttributes* base;
+  WeaponAttributes* attributes;
   wpskl_Swing*      wpskl_swing;
 
   transform = ecs_add(ecs, entity, TRANSFORM);
@@ -372,16 +372,18 @@ ecs_entity_t make_cleaver(Ecs* ecs, u16 mask_bits)
   visual->anchor.x = visual->sprite.rect.w / 2;
   visual->anchor.y = visual->sprite.rect.h;
 
-  base          = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
-  base->atk     = 2;
-  base->type_id = WEAPON_CLEAVER;
-  base->mask    = mask_bits;
+  attributes          = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
+  attributes->atk     = 2;
+  attributes->type_id = WEAPON_CLEAVER;
+  attributes->mask    = mask_bits;
 
   wpskl_swing            = ecs_add(ecs, entity, WEAPON_SKILL_SWING);
   wpskl_swing->is_active = FALSE;
   wpskl_swing->on_action = CHARACTER_ACTION_REGULAR_ATK;
   wpskl_swing->step      = 0;
   wpskl_swing->timer     = 0;
+
+  ecs_add(ecs, entity, HOLDER);
 
   return entity;
 }
@@ -442,7 +444,7 @@ ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
 
   Transform*          transform;
   Visual*             visual;
-  WeaponAttributes*   base;
+  WeaponAttributes*   attributes;
   wpskl_Swing*        wpskl_swing;
   wpskl_ThunderStorm* wpskl_thunder_storm;
 
@@ -453,10 +455,10 @@ ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
   visual->anchor.x = visual->sprite.rect.w / 2;
   visual->anchor.y = visual->sprite.rect.h;
 
-  base          = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
-  base->atk     = 2;
-  base->type_id = WEAPON_LAVIS_SWORD;
-  base->mask    = mask_bits;
+  attributes          = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
+  attributes->atk     = 2;
+  attributes->type_id = WEAPON_LAVIS_SWORD;
+  attributes->mask    = mask_bits;
 
   wpskl_swing            = ecs_add(ecs, entity, WEAPON_SKILL_SWING);
   wpskl_swing->is_active = FALSE;
@@ -468,6 +470,8 @@ ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
   wpskl_thunder_storm->on_action = CHARACTER_ACTION_SPECIAL_ATK;
   wpskl_thunder_storm->interval  = 10;
   wpskl_thunder_storm->total     = 5;
+
+  ecs_add(ecs, entity, HOLDER);
 
   return entity;
 }
@@ -573,8 +577,8 @@ ecs_entity_t make_player(Ecs* ecs, ecs_entity_t character, ecs_entity_t weapon)
   attunement_slot->spell_id = SPELL_ICE_ARROW;
 
   mana_pool                  = ecs_add(ecs, character, MANA_POOL);
-  mana_pool->mana_points     = 5;
-  mana_pool->max_mana_points = 100;
+  mana_pool->mana_points     = 10;
+  mana_pool->max_mana_points = 10;
 
   return character;
 }
@@ -618,11 +622,7 @@ ecs_entity_t make_thunder(Ecs* ecs, Vec2 position, u16 mask_bits)
 }
 
 ecs_entity_t make_ladder(Ecs*        ecs,
-                         const char* name,
-                         Vec2        position,
-                         Vec2        size,
-                         const char* level,
-                         const char* dest)
+                         const NewLadderParams* params)
 {
   ecs_entity_t entity;
 
@@ -632,16 +632,16 @@ ecs_entity_t make_ladder(Ecs*        ecs,
   entity = ecs_create(ecs);
 
   transform           = ecs_add(ecs, entity, TRANSFORM);
-  transform->position = position;
+  transform->position = params->pos;
 
   hitbox            = ecs_add(ecs, entity, HITBOX);
-  hitbox->size      = size;
+  hitbox->size      = params->size;
   hitbox->mask_bits = BIT(CATEGORY_PLAYER);
   hitbox->category  = CATEGORY_LADDER;
 
-  level_switcher_init(ecs_add(ecs, entity, LEVEL_SWITCHER), level, dest);
+  level_switcher_init(ecs_add(ecs, entity, LEVEL_SWITCHER), params->level, params->dest);
 
-  name_init(ecs_add(ecs, entity, NAME), name);
+  name_init(ecs_add(ecs, entity, NAME), params->name);
 
   return entity;
 }
@@ -672,7 +672,7 @@ make_text_particle(Ecs* ecs, const char* text, Vec2 position, Vec2 vel, FONT* fo
   return entity;
 }
 
-ecs_entity_t make_make_damage_indicator_particle(Ecs* ecs, Vec2 position, int amount)
+ecs_entity_t make_damage_indicator_particle(Ecs* ecs, Vec2 position, COLOR color, int amount)
 {
   char strnum[5];
   sprintf(strnum, "%d", amount);
@@ -681,7 +681,7 @@ ecs_entity_t make_make_damage_indicator_particle(Ecs* ecs, Vec2 position, int am
                             position,
                             VEC2(0.f, -30.f),
                             get_font(FONT_DAMAGE_INDICATOR),
-                            (COLOR){ 252, 78, 3, 255 });
+                            color);
 }
 
 ecs_entity_t make_item_picked_up_msg(Ecs* ecs, Vec2 position, const char* item_name)
@@ -790,10 +790,11 @@ ecs_entity_t make_spear(Ecs* ecs, u16 mask)
   thust            = ecs_add(ecs, entity, WEAPON_SKILL_THUST);
   thust->on_action = CHARACTER_ACTION_REGULAR_ATK;
 
-  attributes         = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
-  attributes->wearer = ECS_NULL_ENT;
-  attributes->atk    = 1;
-  attributes->mask   = mask;
+  attributes       = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
+  attributes->atk  = 1;
+  attributes->mask = mask;
+
+  ecs_add(ecs, entity, HOLDER);
 
   return entity;
 }
@@ -830,7 +831,7 @@ ecs_entity_t make_door(Ecs* ecs, Vec2 position)
   interactable->commands[0]  = TEXT_COMMAND_OPEN;
 
   door_info               = ecs_add(ecs, entity, DOOR_INFO);
-  door_info->required_key = 0;
+  door_info->required_key = ITEM_TYPE_KEY_1_1;
   door_info->state        = DOOR_STATE_CLOSE;
 
   return entity;
@@ -899,10 +900,65 @@ ecs_entity_t make_staff(Ecs* ecs, u16 mask)
   attributes          = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
   attributes->atk     = 1;
   attributes->mask    = mask;
-  attributes->wearer  = ECS_NULL_ENT;
   attributes->type_id = WEAPON_STAFF;
 
   castable = ecs_add(ecs, entity, CASTABLE);
+
+  ecs_add(ecs, entity, HOLDER);
+
+  return entity;
+}
+
+ecs_entity_t make_fire_ball(Ecs *ecs, Vec2 pos, Vec2 direction, u16 mask)
+{
+  (void)mask;
+  (void)direction;
+  ecs_entity_t entity = ecs_create(ecs);
+
+  Animation animation;
+
+  Visual*               visual;
+  Transform*            transform;
+  Motion*               motion;
+  Animator*             animator;
+  HitBox*               hitbox;
+  ProjectileAttributes* attributes;
+
+  visual           = ecs_add(ecs, entity, VISUAL);
+  visual->anchor.x = 15;
+  visual->anchor.y = 7;
+
+  transform           = ecs_add(ecs, entity, TRANSFORM);
+  transform->position = pos;
+  transform->rotation = SDL_atan2(direction.y, direction.x) * 57.2957795;
+
+  motion            = ecs_add(ecs, entity, MOTION);
+  motion->vel       = direction;
+  motion->friction  = 0.f;
+  motion->max_speed = 150.f;
+
+  animation_init(&animation, get_texture(TEX_FIRE_BALL), 0, 0, 1, 10, 26, 10);
+  animator = ecs_add(ecs, entity, ANIMATOR);
+  animator_init(animator, &animation, 1);
+
+  hitbox            = ecs_add(ecs, entity, HITBOX);
+  hitbox->size.x    = 26;
+  hitbox->size.y    = 10;
+  hitbox->anchor.x  = 18;
+  hitbox->anchor.y  = 5;
+  hitbox->category  = CATEGORY_PROJECTILE;
+  hitbox->mask_bits = mask;
+
+  attributes                   = ecs_add(ecs, entity, PROJECTILE_ATTRIBUTES);
+  attributes->damage           = 3;
+  attributes->destroy_when_hit = TRUE;
+  attributes->effect           = 0;
+  attributes->damage_type      = DAMAGE_TYPE_FIRE;
+  attributes->impact           = TRUE;
+  attributes->impact_force     = vec2_mul(vec2_unit_vec(direction), 100.f);
+  attributes->impact_time      = 16;
+
+  ecs_add(ecs, entity, REMOVE_IF_OFFSCREEN);
 
   return entity;
 }
@@ -951,6 +1007,10 @@ ecs_entity_t make_ice_arrow(Ecs* ecs, Vec2 pos, Vec2 direction, u16 mask)
   attributes->damage           = 3;
   attributes->destroy_when_hit = TRUE;
   attributes->effect           = 0;
+  attributes->damage_type      = DAMAGE_TYPE_ICE;
+  attributes->impact           = TRUE;
+  attributes->impact_force     = vec2_mul(vec2_unit_vec(direction), 100.f);
+  attributes->impact_time      = 16;
 
   ecs_add(ecs, entity, REMOVE_IF_OFFSCREEN);
 
@@ -986,4 +1046,102 @@ ecs_entity_t make_ice_cast_effect(Ecs* ecs, Vec2 pos)
 
   return entity;
 }
-ecs_entity_t make_fire_cast_effect(Ecs* ecs, Vec2 pos);
+
+ecs_entity_t make_fire_cast_effect(Ecs* ecs, Vec2 position)
+{
+  ecs_entity_t entity;
+
+  Animation anim;
+
+  Visual*    visual;
+  Transform* transform;
+  Animator*  animator;
+  LifeSpan*  life_span;
+
+  entity = ecs_create(ecs);
+
+  animation_init(&anim, get_texture(TEX_EFFECT_FIRE_CAST), 0, 0, 1, 28, 96, 96);
+
+  visual           = ecs_add(ecs, entity, VISUAL);
+  visual->anchor.x = 48;
+  visual->anchor.y = 48;
+
+  transform           = ecs_add(ecs, entity, TRANSFORM);
+  transform->position = position;
+
+  animator = ecs_add(ecs, entity, ANIMATOR);
+  animator_init(animator, &anim, 1);
+
+  life_span            = ecs_add(ecs, entity, LIFE_SPAN);
+  life_span->remaining = 28;
+
+  return entity;
+}
+
+ecs_entity_t make_fire_hit_effect(Ecs* ecs, Vec2 position)
+{
+
+  ecs_entity_t entity;
+
+  Animation animation;
+
+  Visual*    visual;
+  Transform* transform;
+  LifeSpan*  life_span;
+  Animator*  animator;
+
+  const int sw = 64;
+  const int sh = 64;
+
+  animation_init(&animation, get_texture(TEX_EFFECT_FIRE_HIT), 0, 0, 1, 44, sw, sh);
+
+  entity = ecs_create(ecs);
+
+  visual           = ecs_add(ecs, entity, VISUAL);
+  visual->anchor.x = sw / 2;
+  visual->anchor.y = sh / 2;
+
+  animator = ecs_add(ecs, entity, ANIMATOR);
+  animator_init(animator, &animation, 1);
+
+  transform           = ecs_add(ecs, entity, TRANSFORM);
+  transform->position = position;
+
+  life_span            = ecs_add(ecs, entity, LIFE_SPAN);
+  life_span->remaining = 44;
+
+  return entity;
+}
+ecs_entity_t make_ice_hit_effect(Ecs* ecs, Vec2 position)
+{
+  ecs_entity_t entity;
+
+  Animation animation;
+
+  Visual*    visual;
+  Transform* transform;
+  LifeSpan*  life_span;
+  Animator*  animator;
+
+  const int sw = 96;
+  const int sh = 96;
+
+  animation_init(&animation, get_texture(TEX_EFFECT_ICE_HIT), 0, 0, 1, 49, sw, sh);
+
+  entity = ecs_create(ecs);
+
+  visual           = ecs_add(ecs, entity, VISUAL);
+  visual->anchor.x = sw / 2;
+  visual->anchor.y = sh / 2;
+
+  animator = ecs_add(ecs, entity, ANIMATOR);
+  animator_init(animator, &animation, 1);
+
+  transform           = ecs_add(ecs, entity, TRANSFORM);
+  transform->position = position;
+
+  life_span            = ecs_add(ecs, entity, LIFE_SPAN);
+  life_span->remaining = 49;
+
+  return entity;
+}

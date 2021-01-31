@@ -48,6 +48,7 @@ static const char*  _texture_files[NUM_TEXS] = {
   [TEX_EFFECT_FIRE_HIT]      = "asserts/effect/frehit.png",
   [TEX_EFFECT_FIRE_CAST]     = "asserts/effect/firecast.png",
   [TEX_FIRE_BALL]            = "asserts/fireball.png",
+  [TEX_ELITE_KNIGHT]         = "asserts/elite_knight.png",
 };
 
 static Mix_Music*  _bg_musics[NUM_BG_MUSICS];

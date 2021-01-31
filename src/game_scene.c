@@ -9,10 +9,10 @@
 #include "resources.h"
 #include "scene.h"
 #include "session.h"
+#include "ui_dialogue.h"
 #include "ui_list.h"
 #include "ui_msgbox.h"
 #include "ui_quality.h"
-#include "ui_dialogue.h"
 #include "utils.h"
 
 #include "ecs/ecs.h"
@@ -22,14 +22,15 @@
 #include "system/ai_system.h"
 #include "system/animator_ctl_sys.h"
 #include "system/animator_sys.h"
+#include "system/block_input_system.h"
 #include "system/camera_sys.h"
-#include "system/chest_system.h"
 #include "system/casting_sys.h"
+#include "system/chest_system.h"
 #include "system/collision_mgr_sys.h"
-#include "system/door_system.h"
 #include "system/collision_sys.h"
 #include "system/dialogue_sys.h"
 #include "system/dmg_sys.h"
+#include "system/door_system.h"
 #include "system/drop_system.h"
 #include "system/equipment_sys.h"
 #include "system/following_system.h"
@@ -46,8 +47,6 @@
 #include "system/rendering_sys.h"
 #include "system/text_rendering_sys.h"
 #include "system/tile_collision_sys.h"
-#include "system/block_input_system.h"
-#include "system/interaction_system.h"
 
 #include "system/weapon_skill/charge.h"
 #include "system/weapon_skill/swing.h"
@@ -88,14 +87,17 @@ const Scene g_game_scene = {
 Ecs* g_ecs;
 
 static BOOL _has_next_level;
-static char _next_level[100];
-static char _spwan_location[100];
+static char _next_level[LEVEL_SWITCHER_MAX_LEVEL_NAME_LEN + 1];
+static char _spwan_location[LEVEL_SWITCHER_MAX_DEST_LEN + 1];
 static BOOL _paused;
+static char _current_level_name[LEVEL_SWITCHER_MAX_LEVEL_NAME_LEN + 1];
 
 static void spawn_player(Vec2 pos)
 {
   ecs_entity_t player;
   ecs_entity_t weapon;
+
+  // TODO: di chuyển data của player + vũ khí từ ecs registry tạm về lại ecs registry chính
 
   player = g_char_create_fn_tbl[g_session.job](g_ecs, pos);
   weapon = g_weapon_create_fn_tbl[g_session.weapon](g_ecs, BIT(CATEGORY_ENEMY));
@@ -120,11 +122,11 @@ static void on_load()
   dialogue_system_init();
   game_event_init();
   merchant_system_init();
-  door_system_init(); 
+  door_system_init();
   chest_system_init();
   player_controller_system_init();
 
-  //init ui
+  // init ui
   ui_dialogue_init();
 
   ems_connect(MSG_HIT_LADDER, NULL, on_player_hit_ladder);
@@ -180,7 +182,7 @@ static void on_update()
       pos.y += 30;
       spawn_player(pos);
     }
-    ems_broadcast(MSG_LEVEL_LOADED, _next_level);
+    ems_broadcast(MSG_LEVEL_LOADED, &(MSG_LevelLoaded){_next_level});
 
     _has_next_level = FALSE;
   }
@@ -209,7 +211,6 @@ static void on_update()
 
       weapon_skill_thust_update();
       thunder_storm_weapon_skl_system_update();
-
     }
     ui_dialogue_update();
 
@@ -229,9 +230,8 @@ static void on_update()
     ui_msgbox_draw();
     ui_dialogue_draw();
     ui_quality_draw();
-    
 
-#if 0
+#if 1
     // render debug
     // collision_system_render_debug();
     // path_rendering_system_update();
@@ -277,11 +277,12 @@ static void __callback_clear_entities(pointer_t arg, Ecs* ecs, ecs_entity_t enti
 
 static void unload_current_level()
 {
+  // TODO: copy dữ liệu của player sang ecs registry tạm
   ecs_entity_t player = get_player(g_ecs);
-  g_session.hp = get_entity_hit_points(g_ecs, player);
-  g_session.mp = get_entity_mana_points(g_ecs, player);
-  g_session.spell = get_spell(g_ecs, player);
-  g_session.weapon = get_equiped_weapon_type_id(g_ecs, player);
+  g_session.hp        = get_entity_hit_points(g_ecs, player);
+  g_session.mp        = get_entity_mana_points(g_ecs, player);
+  g_session.spell     = get_spell(g_ecs, player);
+  g_session.weapon    = get_equiped_weapon_type_id(g_ecs, player);
   ecs_each(g_ecs, NULL, __callback_clear_entities);
   map_clear();
 }

@@ -320,7 +320,7 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 position)
   equipment->weapon_anchor.x = 16 / 2;
   equipment->weapon_anchor.y = -6;
 
-  ecs_entity_t weapon = make_cleaver(ecs, BIT(CATEGORY_PLAYER));
+  ecs_entity_t weapon = make_spear(ecs, BIT(CATEGORY_PLAYER));
 
   equip(ecs, entity, weapon);
 
@@ -621,8 +621,7 @@ ecs_entity_t make_thunder(Ecs* ecs, Vec2 position, u16 mask_bits)
   return entity;
 }
 
-ecs_entity_t make_ladder(Ecs*        ecs,
-                         const NewLadderParams* params)
+ecs_entity_t make_ladder(Ecs* ecs, const NewLadderParams* params)
 {
   ecs_entity_t entity;
 
@@ -909,7 +908,7 @@ ecs_entity_t make_staff(Ecs* ecs, u16 mask)
   return entity;
 }
 
-ecs_entity_t make_fire_ball(Ecs *ecs, Vec2 pos, Vec2 direction, u16 mask)
+ecs_entity_t make_fire_ball(Ecs* ecs, Vec2 pos, Vec2 direction, u16 mask)
 {
   (void)mask;
   (void)direction;
@@ -1142,6 +1141,52 @@ ecs_entity_t make_ice_hit_effect(Ecs* ecs, Vec2 position)
 
   life_span            = ecs_add(ecs, entity, LIFE_SPAN);
   life_span->remaining = 49;
+
+  return entity;
+}
+
+ecs_entity_t make_npc_nova(Ecs* ecs, Vec2 position, u16 conversation_id)
+{
+  const int     sw     = 32;
+  const int     sh     = 32;
+  ecs_entity_t  entity = ecs_create(ecs);
+  HitBox*       hitbox;
+  Interactable* interactable;
+  Animator*     animator;
+  Visual*       visual;
+
+  TEXTURE*  texture;
+  Animation animations[NUM_ANIM_STATES];
+
+  texture = get_texture(TEX_ELITE_KNIGHT);
+  animation_init(&animations[ANIM_STATE_IDLE], texture, 0, 0, 1, 4, sw, sh);
+  animation_init(&animations[ANIM_STATE_RUN], texture, sw * 4, 0, 1, 4, sw, sh);
+  animation_init(&animations[ANIM_STATE_HIT], texture, 0, 0, 1, 1, sw, sh);
+  animation_init(&animations[ANIM_STATE_JUMP], texture, sw * 6, 0, 1, 1, sw, sh);
+
+  animations[ANIM_STATE_IDLE].frame_duration = 10;
+
+  ecs_add_w_data(ecs, entity, TRANSFORM, &(Transform){ .position = position });
+  ecs_add_w_data(ecs, entity, DIALOGUE, &(Dialogue){ conversation_id });
+
+  hitbox            = ecs_add(ecs, entity, HITBOX);
+  hitbox->category  = CATEGORY_INTERACABLE;
+  hitbox->mask_bits = 0;
+  hitbox->size.x    = 13;
+  hitbox->size.y    = 19;
+  hitbox->anchor.x  = 6;
+  hitbox->anchor.y  = 19;
+
+  interactable               = ecs_add(ecs, entity, INTERACTABLE);
+  interactable->num_commands = 1;
+  interactable->commands[0]  = TEXT_COMMAND_TALK;
+
+  animator = ecs_add(ecs, entity, ANIMATOR);
+  animator_init(animator, animations, NUM_ANIM_STATES);
+
+  visual = ecs_add(ecs, entity, VISUAL);
+  visual->anchor.x = 16;
+  visual->anchor.y = 32;
 
   return entity;
 }

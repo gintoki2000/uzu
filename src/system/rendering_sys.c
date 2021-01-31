@@ -59,14 +59,14 @@ void rendering_system_update(void)
         dst.x -= g_viewport.x;
         dst.y -= g_viewport.y;
         _buff[_count++] = (DrawCommand){
-          .texture = visuals[i].sprite.tex,
-          .src     = visuals[i].sprite.rect,
-          .dst     = dst,
-          .center  = visuals[i].anchor,
-          .rotation     = transform->rotation,
-          .flip    = visuals[i].flip,
-          .color   = visuals[i].color,
-          .z       = transform->z,
+          .texture  = visuals[i].sprite.tex,
+          .src      = visuals[i].sprite.rect,
+          .dst      = dst,
+          .center   = visuals[i].anchor,
+          .rotation = transform->rotation,
+          .flip     = visuals[i].flip,
+          .color    = visuals[i].color,
+          .z        = transform->z,
         };
       }
     }

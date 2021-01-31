@@ -7,24 +7,24 @@
   {                                                                                                \
     .size = sizeof(__T)                                                                            \
   }
-#define ECS_TYPE_EX(__T, __init_fn, __fini_fn)                                                     \
+#define ECS_TYPE_EX(__T, __init_fn, __fini_fn, __cpy_fn)                                           \
   {                                                                                                \
     .size = sizeof(__T), .init_fn = (ecs_comp_init_fn_t)__init_fn,                                 \
-    .fini_fn = (ecs_comp_fini_fn_t)__fini_fn                                                       \
+    .fini_fn = (ecs_comp_fini_fn_t)__fini_fn, .cpy_fn = (ecs_comp_cpy_fn_t)__cpy_fn,               \
   }
 
 static void transform_init(Transform* transform);
 static void holder_init(Holder* holder);
 
 const EcsType g_comp_types[NUM_COMPONENTS] = {
-  [VISUAL]                     = ECS_TYPE_EX(Visual, visual_init, NULL),
-  [TRANSFORM]                  = ECS_TYPE_EX(Transform, transform_init, NULL),
-  [ANIMATOR]                   = ECS_TYPE_EX(Animator, NULL, animator_fini),
+  [VISUAL]                     = ECS_TYPE_EX(Visual, visual_init, NULL, NULL),
+  [TRANSFORM]                  = ECS_TYPE_EX(Transform, transform_init, NULL, NULL),
+  [ANIMATOR]                   = ECS_TYPE_EX(Animator, NULL, animator_fini, NULL),
   [PLAYER_TAG]                 = ECS_TYPE(PlayerTag),
   [CONTROLLER]                 = ECS_TYPE(Controller),
   [EQUIPMENT]                  = ECS_TYPE(Equipment),
   [HEALTH]                     = ECS_TYPE(Health),
-  [HITBOX]                     = ECS_TYPE_EX(HitBox, hitbox_init, NULL),
+  [HITBOX]                     = ECS_TYPE_EX(HitBox, hitbox_init, NULL, NULL),
   [ENEMY_TAG]                  = ECS_TYPE(PlayerTag),
   [ENDABLE_TILE_COLLISION_TAG] = ECS_TYPE(EnableTileCollisionTag),
   [CHARACTER_ANIMATOR_TAG]     = ECS_TYPE(CharacterAnimatorTag),
@@ -40,7 +40,7 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
   [INVULNERABLE]               = ECS_TYPE(Invulnerable),
   [INPUT_BLOCKER]              = ECS_TYPE(InputBlocker),
   [CAMERA_TARGET_TAG]          = ECS_TYPE(CameraTargetTag),
-  [BRAIN]                      = ECS_TYPE_EX(Brain, NULL, brain_fini),
+  [BRAIN]                      = ECS_TYPE_EX(Brain, NULL, brain_fini, NULL),
   [DESTINATION]                = ECS_TYPE(Destination),
   [PATH]                       = ECS_TYPE(Path),
   [FOLLOWING_TARGET]           = ECS_TYPE(FollowingTarget),
@@ -61,7 +61,7 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
   [DOOR_INFO]                  = ECS_TYPE(DoorInfo),
   [REMOVE_IF_OFFSCREEN]        = ECS_TYPE(RemoveIfOffScreen),
   [PROJECTILE_ATTRIBUTES]      = ECS_TYPE(ProjectileAttributes),
-  [HOLDER]                     = ECS_TYPE_EX(Holder, holder_init, NULL),
+  [HOLDER]                     = ECS_TYPE_EX(Holder, holder_init, NULL, NULL),
 };
 
 Animation*

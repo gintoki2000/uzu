@@ -20,36 +20,33 @@ static void on_deal_damage(void* arg, const MSG_DealDamage* event)
     INFO("e" ECS_ENT_FMT_PATTERN " take %d damage\n",
          ECS_ENT_FMT_VARS(event->receiver),
          event->damage);
+    Invulnerable* invulnerable;
+    ems_broadcast(MSG_GET_DAMAGED,
+                  &(MSG_GetDamaged){
+                      .dealer  = event->dealer,
+                      .damagee = event->receiver,
+                      .damage  = event->damage,
+                      .type    = event->type,
+                  });
+    invulnerable            = ecs_add(g_ecs, event->receiver, INVULNERABLE);
+    invulnerable->remaining = 10;
+
+    if (event->impact && (motion = ecs_get(g_ecs, event->receiver, MOTION)))
+    {
+      motion->acc.x += event->force.x;
+      motion->acc.y += event->force.y;
+      motion->vz = event->zforce;
+      if (!ecs_has(g_ecs, event->receiver, INPUT_BLOCKER))
+      {
+        input_blocker            = ecs_add(g_ecs, event->receiver, INPUT_BLOCKER);
+        input_blocker->remaining = event->impact_time;
+      }
+    }
     if (health->hit_points <= 0)
     {
       health->hit_points = 0;
       ems_broadcast(MSG_ENTITY_DIED, &(MSG_EntityDied){ event->receiver });
       ecs_add(g_ecs, event->receiver, DESTROYED_TAG);
-    }
-    else
-    {
-      Invulnerable* invulnerable;
-      ems_broadcast(MSG_GET_DAMAGED,
-                    &(MSG_GetDamaged){
-                        .dealer  = event->dealer,
-                        .damagee = event->receiver,
-                        .damage  = event->damage,
-                        .type    = event->type,
-                    });
-      invulnerable            = ecs_add(g_ecs, event->receiver, INVULNERABLE);
-      invulnerable->remaining = 10;
-
-      if (event->impact && (motion = ecs_get(g_ecs, event->receiver, MOTION)))
-      {
-        motion->acc.x += event->force.x;
-        motion->acc.y += event->force.y;
-        motion->vz = event->zforce;
-        if (!ecs_has(g_ecs, event->receiver, INPUT_BLOCKER))
-        {
-          input_blocker            = ecs_add(g_ecs, event->receiver, INPUT_BLOCKER);
-          input_blocker->remaining = event->impact_time;
-        }
-      }
     }
   }
 }
@@ -60,7 +57,7 @@ static ecs_entity_t (*const _effect_fn_tbl[])(Ecs*, Vec2) = {
 };
 
 static COLOR _color_tbl[] = {
-  { 0xff, 0x00, 0x00, 0xff }, { 0xff, 0x00, 0x00, 0xff }, {0xfc, 0xad, 0x03, 0xff } ,
+  { 0xff, 0x00, 0x00, 0xff }, { 0xff, 0x00, 0x00, 0xff }, { 0xfc, 0xad, 0x03, 0xff },
   { 0xff, 0x00, 0x00, 0xff }, { 0x03, 0xba, 0xfc, 0xff },
 };
 
@@ -78,9 +75,9 @@ static void on_get_damaged(void* arg, const MSG_GetDamaged* event)
     particle_position.x = transform->position.x;
     particle_position.y = transform->position.y - 30.f;
     make_damage_indicator_particle(g_ecs,
-									particle_position,
-									_color_tbl[event->type],
-									event->damage);
+                                   particle_position,
+                                   _color_tbl[event->type],
+                                   event->damage);
   }
 
   if (transform && (hitbox = ecs_get(g_ecs, event->damagee, HITBOX)))

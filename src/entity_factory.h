@@ -70,4 +70,7 @@ ecs_entity_t make_fire_hit_effect(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_fire_ball(Ecs* ecs, Vec2 pos, Vec2 direction, u16 mask);
 ecs_entity_t make_ice_arrow(Ecs* ecs, Vec2 pos, Vec2 direction, u16 mask);
 
+// npcs
+ecs_entity_t make_npc_nova(Ecs* ecs, Vec2 position, u16 conversation_id);
+
 #endif // ENTITY_FACTORY_H

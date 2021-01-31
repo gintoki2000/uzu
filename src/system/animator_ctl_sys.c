@@ -26,6 +26,7 @@ void animator_controller_system_update()
   Animator*     animator;
   Motion*       motion;
   Visual*       visual;
+  Transform*    transform;
 
   float          vx, vy;
   AnimationState next_state;
@@ -35,7 +36,8 @@ void animator_controller_system_update()
   {
     if ((motion = ecs_get(g_ecs, entities[i], MOTION)) &&
         (visual = ecs_get(g_ecs, entities[i], VISUAL)) &&
-        (animator = ecs_get(g_ecs, entities[i], ANIMATOR)))
+        (animator = ecs_get(g_ecs, entities[i], ANIMATOR)) &&
+        (transform = ecs_get(g_ecs, entities[i], TRANSFORM)))
     {
 
       if (ecs_has(g_ecs, entities[i], INVULNERABLE))
@@ -55,11 +57,7 @@ void animator_controller_system_update()
       next_state = (absf(vx) > 0.1f || absf(vy) > 0.1f) ? ANIM_STATE_RUN : ANIM_STATE_IDLE;
 
       play_animation(animator, next_state);
-
-      if (absf(vx) > 0.1f)
-      {
-        visual->flip = vx > 0.f ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
-      }
+      visual->flip = transform->hdir < 0 ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
     }
   }
 }

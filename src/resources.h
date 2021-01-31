@@ -47,6 +47,7 @@ typedef enum
   TEX_EFFECT_FIRE_CAST,
   TEX_SCROLL,
   TEX_KEY,
+  TEX_ELITE_KNIGHT,
   NUM_TEXS
 } TextureId;
 

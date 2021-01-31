@@ -28,14 +28,17 @@ void equipment_system_update()
     weapon_transform = ecs_get(g_ecs, weapon, TRANSFORM);
     weapon_visual    = ecs_get(g_ecs, weapon, VISUAL);
 
-    sign = FLIP_TO_SIGN(visual->flip);
+    if (transform && visual && weapon_transform && weapon_visual)
+    {
 
-    weapon_transform->position.x =
-        transform->position.x + sign * (equiments[i].weapon_anchor.x + equiments[i].d.x);
-    weapon_transform->position.y =
-        transform->position.y + equiments[i].weapon_anchor.y + equiments[i].d.y - transform->z;
-    weapon_transform->hdir = transform->hdir;
+      sign = transform->hdir;
 
-    weapon_visual->flip = visual->flip;
+      weapon_transform->position.x =
+          transform->position.x + sign * (equiments[i].weapon_anchor.x + equiments[i].d.x);
+      weapon_transform->position.y =
+          transform->position.y + equiments[i].weapon_anchor.y + equiments[i].d.y - transform->z;
+      weapon_transform->hdir = transform->hdir;
+      weapon_visual->flip    = visual->flip;
+    }
   }
 }

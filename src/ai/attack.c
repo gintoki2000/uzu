@@ -1,4 +1,5 @@
 #include "attack.h"
+#include "utils.h"
 #include <components.h>
 #include <constances.h>
 
@@ -8,10 +9,10 @@ struct Attack
   BOOL is_running;
 };
 
-static void    attack_vtbl_init(BTNodeVtbl* vtbl);
-static Attack* attack_init(Attack* self);
-static void    attack_finish(Attack* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status);
-static void    attack_abort(Attack* self, Ecs* ecs, ecs_entity_t entity);
+static void     attack_vtbl_init(BTNodeVtbl* vtbl);
+static Attack*  attack_init(Attack* self);
+static void     attack_finish(Attack* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status);
+static void     attack_abort(Attack* self, Ecs* ecs, ecs_entity_t entity);
 static BTStatus attack_exec(Attack* self, Ecs* ecs, ecs_entity_t entity);
 
 BT_VTBL_INST_FN(BTNode, attack)
@@ -55,14 +56,23 @@ static void attack_finish(Attack* self, Ecs* ecs, ecs_entity_t entity, BTStatus 
 
 static BTStatus attack_exec(Attack* self, Ecs* ecs, ecs_entity_t entity)
 {
-  Controller* controller;
+  Controller*  controller;
+  ecs_entity_t player;
+  Vec2         entity_position, player_position;
+  Transform*   transform;
 
   controller = ecs_get(ecs, entity, CONTROLLER);
 
   if (!self->is_running)
   {
-    if (controller->in_action)
+    player = get_player(ecs);
+    if (controller->in_action || ecs_has(ecs, entity, INPUT_BLOCKER) || player == ECS_NULL_ENT)
       return BT_STATUS_FAILURE;
+    transform       = ecs_get(ecs, entity, TRANSFORM);
+    entity_position = transform->position;
+    player_position = get_entity_position(ecs, player);
+
+    transform->hdir = (entity_position.x < player_position.x) ? 1 : -1;
 
     controller->action = CHARACTER_ACTION_REGULAR_ATK;
     self->is_running   = TRUE;

@@ -206,10 +206,10 @@ void map_draw(int layer)
 
   tileset = get_texture(TEX_TILESET);
 
-  for (s32 y = start_y; y < end_y; ++y)
+  for (s32 y = start_y; y <= end_y; ++y)
   {
     begin_row = y * _col_cnt;
-    for (s32 x = start_x; x < end_x; ++x)
+    for (s32 x = start_x; x <= end_x; ++x)
     {
       dst.x = x * TILE_SIZE + _position_x - g_viewport.x;
       dst.y = y * TILE_SIZE + _position_y - g_viewport.y;

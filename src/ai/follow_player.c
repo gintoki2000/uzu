@@ -34,12 +34,11 @@ static BTTask_FollowPlayer* __init(BTTask_FollowPlayer* self, float radius)
   return self;
 }
 
-static void
-__finish(BTTask_FollowPlayer* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status)
+static void __finish(BTTask_FollowPlayer* self,
+                     SDL_UNUSED Ecs*         ecs,
+                     SDL_UNUSED ecs_entity_t entity,
+                     SDL_UNUSED BTStatus     finish_status)
 {
-  (void)ecs;
-  (void)entity;
-  (void)finish_status;
   self->is_running = FALSE;
 }
 

@@ -2,6 +2,7 @@
 #include "collision_sys.h"
 #include "constances.h"
 #include "inventory.h"
+#include "resources.h"
 #include "ui_list.h"
 
 #include "event_messaging_sys.h"
@@ -39,9 +40,9 @@ static void on_list_select(SDL_UNUSED pointer_t arg, const char* item)
 
 static void on_level_unloaded(pointer_t arg, pointer_t event)
 {
-	(void)arg;
-	(void)event;
-	g_curr_iteractable_entity = ECS_NULL_ENT;
+  (void)arg;
+  (void)event;
+  g_curr_iteractable_entity = ECS_NULL_ENT;
 }
 
 struct CBPlayerController_QueryInteracableEntitiesArgs
@@ -178,6 +179,7 @@ void player_controller_system_update()
         {
           Motion* motion = ecs_get(g_ecs, player, MOTION);
           motion->vz     = 100.f;
+          Mix_PlayChannel(-1, get_sfx(SFX_MOV_JUMP), 0);
         }
       }
     }
@@ -192,5 +194,5 @@ void player_controller_system_update()
 
 void player_controller_system_init(void)
 {
-	ems_connect(MSG_LEVEL_UNLOADED, NULL, on_level_unloaded);
+  ems_connect(MSG_LEVEL_UNLOADED, NULL, on_level_unloaded);
 }

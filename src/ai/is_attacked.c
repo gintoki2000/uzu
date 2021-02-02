@@ -34,5 +34,6 @@ static BTCondition_IsAttacked* __init(BTCondition_IsAttacked* self)
 
 static BOOL __pred(SDL_UNUSED BTCondition_IsAttacked* self, Ecs* ecs, ecs_entity_t entity)
 {
-  return ecs_has(ecs, entity, ATTACKER);
+  Attacker* attacker = ecs_get(ecs, entity, ATTACKER);
+  return attacker && ecs_is_valid(ecs, attacker->value);
 }

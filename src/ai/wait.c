@@ -1,7 +1,7 @@
 #include "wait.h"
 
 BT_VTBL_INST_FN(BTNode, wait)
-BT_ALLOC_FN(Wait, wait)
+BT_ALLOC_FN(BTTask_Wait, wait)
 
 void wait_vtbl_init(BTNodeVtbl* vtbl)
 {
@@ -12,12 +12,12 @@ void wait_vtbl_init(BTNodeVtbl* vtbl)
   vtbl->finish = (bt_finish_fn_t)wait_finish;
 }
 
-Wait* wait_new(int total_ticks)
+BTTask_Wait* wait_new(int total_ticks)
 {
   return wait_init(wait_alloc(), total_ticks);
 }
 
-Wait* wait_init(Wait* self, int total_ticks)
+BTTask_Wait* wait_init(BTTask_Wait* self, int total_ticks)
 {
   bt_node_init((BTNode*)self);
   self->total_ticks = total_ticks;
@@ -25,7 +25,7 @@ Wait* wait_init(Wait* self, int total_ticks)
   return self;
 }
 
-void wait_finish(Wait* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status)
+void wait_finish(BTTask_Wait* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status)
 {
   (void)ecs;
   (void)entity;
@@ -33,14 +33,14 @@ void wait_finish(Wait* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_stat
   self->remaining = self->total_ticks;
 }
 
-void wait_abort(Wait* self, Ecs* ecs, ecs_entity_t entity)
+void wait_abort(BTTask_Wait* self, Ecs* ecs, ecs_entity_t entity)
 {
   (void)ecs;
   (void)entity;
   self->remaining = self->total_ticks;
 }
 
-BTStatus wait_exec(Wait* self, Ecs* ecs, ecs_entity_t entity)
+BTStatus wait_exec(BTTask_Wait* self, Ecs* ecs, ecs_entity_t entity)
 {
   (void)ecs;
   (void)entity;

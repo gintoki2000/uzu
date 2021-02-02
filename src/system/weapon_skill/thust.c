@@ -3,6 +3,7 @@
 #include "../event_messaging_sys.h"
 #include <components.h>
 #include <ecs/ecs.h>
+#include "resources.h"
 
 extern Ecs* g_ecs;
 
@@ -98,6 +99,7 @@ void weapon_skill_thust_update()
           transform->rotation   = 0.0;
           skl[i].state          = 3;
           skl[i].timer          = 7;
+          Mix_PlayChannel(-1, get_sfx(SFX_PUNCH), 0);
         }
         break;
       case 3:

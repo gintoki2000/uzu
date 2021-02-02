@@ -271,7 +271,7 @@ SDL_bool ecs_has(Ecs* self, ecs_entity_t entity, ecs_size_t type_id)
   return ecs_pool_contains(self->pools[type_id], entity);
 }
 
-void ecs_connect(Ecs* self, int sig, void* udata, void(*func)())
+void ecs_connect(Ecs* self, int sig, void* udata, void (*func)())
 {
   dispatcher_connect(self->dispatcher, sig, udata, func);
 }
@@ -310,13 +310,9 @@ void ecs_add_or_set(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const vo
   }
 
   if (self->types[type_id].cpy_fn != NULL)
-  {
     self->types[type_id].cpy_fn(raw, data);
-  }
   else
-  {
     memcpy(raw, data, self->types[type_id].size);
-  }
 }
 
 void* ecs_add_w_data(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const void* data)

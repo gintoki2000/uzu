@@ -27,6 +27,12 @@ static const Scene* _curr_scr = NULL;
 extern SDL_Renderer* g_renderer;
 extern SDL_Window*   g_window;
 
+#define SHOW_FPS 1
+
+#if SHOW_FPS
+static FONT* _fps_font;
+#endif
+
 static void on_game_quit();
 static BOOL on_game_init();
 static void on_game_fini();
@@ -50,6 +56,10 @@ static BOOL on_game_init()
 
   set_scene(&g_main_menu);
 
+#if SHOW_FPS
+  _fps_font = get_font(FONT_DAMAGE_INDICATOR);
+#endif
+
   return TRUE;
 }
 
@@ -62,8 +72,10 @@ static void on_game_fini()
 
 static void on_game_loop()
 {
+  u32 start = SDL_GetTicks();
   if (_curr_scr != NULL)
     _curr_scr->on_update();
+  FC_Draw(_fps_font, g_renderer, 0, 0, "%dms", SDL_GetTicks() - start);
 }
 
 static void on_event(const SDL_Event* e)

@@ -5,10 +5,10 @@
 const BTNodeVtbl* is_player_out_of_spot_vtbl_inst();
 void              is_player_out_of_spot_vtbl_init(BTConditionVtbl* vtbl);
 
-IsPlayerOutOfSpot* is_player_out_of_spot_init(IsPlayerOutOfSpot* self);
-BOOL is_player_out_of_spot_pred(IsPlayerOutOfSpot* self, Ecs* ecs, ecs_entity_t entity);
+BTCondition_IsPlayerOutOfSpot* is_player_out_of_spot_init(BTCondition_IsPlayerOutOfSpot* self);
+BOOL is_player_out_of_spot_pred(BTCondition_IsPlayerOutOfSpot* self, Ecs* ecs, ecs_entity_t entity);
 
-BT_ALLOC_FN(IsPlayerOutOfSpot, is_player_out_of_spot)
+BT_ALLOC_FN(BTCondition_IsPlayerOutOfSpot, is_player_out_of_spot)
 BT_VTBL_INST_FN(BTCondition, is_player_out_of_spot)
 
 void is_player_out_of_spot_vtbl_init(BTConditionVtbl* vtbl)
@@ -18,18 +18,18 @@ void is_player_out_of_spot_vtbl_init(BTConditionVtbl* vtbl)
   vtbl->pred                  = (bt_pred_fn_t)is_player_out_of_spot_pred;
 }
 
-IsPlayerOutOfSpot* is_player_out_of_spot_new()
+BTCondition_IsPlayerOutOfSpot* is_player_out_of_spot_new()
 {
   return is_player_out_of_spot_init(is_player_out_of_spot_alloc());
 }
 
-IsPlayerOutOfSpot* is_player_out_of_spot_init(IsPlayerOutOfSpot* self)
+BTCondition_IsPlayerOutOfSpot* is_player_out_of_spot_init(BTCondition_IsPlayerOutOfSpot* self)
 {
   bt_condition_init((BTCondition*)self, TRUE);
   return self;
 }
 
-BOOL is_player_out_of_spot_pred(IsPlayerOutOfSpot* self, Ecs* ecs, ecs_entity_t entity)
+BOOL is_player_out_of_spot_pred(BTCondition_IsPlayerOutOfSpot* self, Ecs* ecs, ecs_entity_t entity)
 {
   (void)self;
 

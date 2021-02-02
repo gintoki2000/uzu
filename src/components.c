@@ -63,6 +63,8 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
   [PROJECTILE_ATTRIBUTES]      = ECS_TYPE(ProjectileAttributes),
   [HOLDER]                     = ECS_TYPE_EX(Holder, holder_init, NULL, NULL),
   [ATTACK_MASK]                = ECS_TYPE(AttackMask),
+  [SELF_DESTRUCTION]           = ECS_TYPE(SelfDestruction),
+  [ATTACKER]                   = ECS_TYPE(Attacker),
 };
 
 Animation*

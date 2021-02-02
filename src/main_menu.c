@@ -44,6 +44,7 @@ static void on_load()
   _font    = get_font(FONT_DAMAGE_INDICATOR);
   _select  = 0;
   keybroad_push_state(process_key_input);
+  Mix_PlayMusic(get_bg_mus(BG_MUS_TILE_SCREEN), -1);
 }
 
 static void on_unload()

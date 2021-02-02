@@ -29,6 +29,7 @@ system_source_files = files(
   './block_input_system.c',
   './chest_system.c',
   './casting_sys.c',
+  './self_destruction.c',
   #weapon skill systems
   './weapon_skill/swing.c',
   './weapon_skill/charge.c',

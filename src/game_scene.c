@@ -45,6 +45,7 @@
 #include "system/pickup_sys.h"
 #include "system/player_ctl_sys.h"
 #include "system/rendering_sys.h"
+#include "system/self_destruction.h"
 #include "system/text_rendering_sys.h"
 #include "system/tile_collision_sys.h"
 
@@ -74,6 +75,8 @@ static void on_entity_died(pointer_t arg, const MSG_EntityDied* event);
 static void unload_current_level(void);
 
 static void __callback_clear_entities(pointer_t arg, Ecs* ecs, ecs_entity_t entity);
+
+static void music_player_on_level_loaded(void* arg, const MSG_LevelLoaded* event);
 
 extern EcsType g_comp_types[];
 
@@ -133,6 +136,7 @@ static void on_load()
 
   ems_connect(MSG_HIT_LADDER, NULL, on_player_hit_ladder);
   ems_connect(MSG_ENTITY_DIED, NULL, on_entity_died);
+  ems_connect(MSG_LEVEL_LOADED, NULL, music_player_on_level_loaded);
 
   keybroad_push_state(player_controller_system_update);
 
@@ -153,6 +157,7 @@ static void on_load()
     ems_broadcast(MSG_LEVEL_LOADED, &(MSG_LevelLoaded){ g_session.level });
     spawn_player(g_session.pos);
   }
+
 }
 
 static void on_unload()
@@ -166,9 +171,8 @@ static void on_unload()
   g_ecs = NULL;
 }
 
-static void on_event(const SDL_Event* evt)
+static void on_event(const SDL_UNUSED SDL_Event* evt)
 {
-  (void)evt;
 }
 
 static void on_update()
@@ -209,6 +213,7 @@ static void on_update()
       map_update_animated_cells();
       following_system_update();
       input_blocking_system();
+      self_destruction_system();
 
       //  skl
       swing_weapon_skl_system_update();
@@ -221,6 +226,7 @@ static void on_update()
     ui_dialogue_update();
 
     // render
+#if 1
     map_draw(MAP_LAYER_FLOOR);
     map_draw(MAP_LAYER_BACK_WALL);
     rendering_system_update();
@@ -236,6 +242,7 @@ static void on_update()
     ui_msgbox_draw();
     ui_dialogue_draw();
     ui_quality_draw();
+#endif
 
 #if 0
     // render debug
@@ -266,13 +273,19 @@ static void on_player_hit_ladder(pointer_t arg, const MSG_HitLadder* event)
   strcpy(_spwan_location, lsw->dest);
 }
 
-static void on_entity_died(pointer_t arg, const MSG_EntityDied* event)
+static void on_entity_died(SDL_UNUSED pointer_t arg, SDL_UNUSED const MSG_EntityDied* event)
 {
-  (void)arg;
-  if (ecs_get(g_ecs, event->entity, PLAYER_TAG))
-  {
-    //
-  }
+}
+
+static void music_player_on_level_loaded(SDL_UNUSED void* arg, const MSG_LevelLoaded* event)
+{
+  u16 musid = BG_MUS_ID_NULL;
+  if (strcmp(event->level_name, "0") == 0)
+    musid = BG_MUS_LV1;
+  else if (strcmp(event->level_name, "1") == 0)
+    musid = BG_MUS_LV2;
+  if (musid != BG_MUS_ID_NULL)
+    Mix_PlayMusic(get_bg_mus(musid), -1);
 }
 
 static void __callback_clear_entities(pointer_t arg, Ecs* ecs, ecs_entity_t entity)

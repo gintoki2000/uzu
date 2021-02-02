@@ -78,6 +78,7 @@ void swing_weapon_skl_system_update(void)
         Vec2 particle_position = { transform->position.x + skl[i].range / 2.f * transform->hdir,
                                    transform->position.y - 13};
         make_slash_effect(g_ecs, particle_position, flip);
+        Mix_PlayChannel(-1, get_sfx(SFX_WEAPON_SWORD), 0);
       }
       break;
     case 2:

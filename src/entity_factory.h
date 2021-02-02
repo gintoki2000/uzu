@@ -69,6 +69,7 @@ ecs_entity_t make_fire_cast_effect(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_ice_hit_effect(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_fire_hit_effect(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_slash_effect(Ecs* ecs, Vec2 pos, SDL_RendererFlip flip);
+ecs_entity_t make_fire_bust_effect(Ecs* ecs, Vec2 pos);
 
 // projectile
 ecs_entity_t make_fire_ball(Ecs* ecs, Vec2 pos, Vec2 direction, u16 mask);

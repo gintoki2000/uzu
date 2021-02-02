@@ -29,7 +29,7 @@ static void cast_fire_ball(Ecs* ecs, SDL_UNUSED ecs_entity_t caster, ecs_entity_
 
   make_fire_ball(ecs, transform->position, speed, attributes->mask);
 
-  Mix_PlayChannel(-1, get_sfx(SFX_ICE_SHOOT), 0);
+  Mix_PlayChannel(-1, get_sfx(SFX_FIRE_BALL_LAUCH), 0);
 }
 
 static void cast_ice_arrow(Ecs* ecs, SDL_UNUSED ecs_entity_t caster, ecs_entity_t weapon)

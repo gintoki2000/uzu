@@ -1,3 +1,6 @@
+#include "ai/equip.c"
+#include "ai/follow_attacker.h"
+#include "ai/is_attacked.h"
 #include <ai/attack.h>
 #include <ai/follow_player.h>
 #include <ai/is_player_cross_spot.h>
@@ -250,7 +253,13 @@ ecs_entity_t make_huge_demon(Ecs* ecs, Vec2 position)
 
 ecs_entity_t make_imp(Ecs* ecs, Vec2 position)
 {
-  return make_monster_base(ecs, &(NewMonsterParams){ position, TEX_IMP, 5, k_small_size });
+  ecs_entity_t entity =
+      make_monster_base(ecs, &(NewMonsterParams){ position, TEX_IMP, 5, k_small_size });
+  ecs_add_w_data(ecs,
+                 entity,
+                 SELF_DESTRUCTION,
+                 &(SelfDestruction){ .emiting_interval = 10, .range = 16, .target = ECS_NULL_ENT });
+  return entity;
 }
 
 ecs_entity_t make_wogol(Ecs* ecs, Vec2 position)
@@ -284,22 +293,22 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 position)
 
   controller = ecs_add(ecs, entity, CONTROLLER);
 
-  BTRoot*              root;
-  MoveTo*              move_to;
-  Wait *               wait, *wait_a_momment;
-  BTSelector*          hostile;
-  Attack*              attack;
-  BTSequence*          attack_seq;
-  IsPlayerCrossSpot*   is_player_cross_spot;
-  BTSequence*          back_to_spot_seq;
-  SetDestToSpot*       set_dest_to_spot;
-  BTSelector*          selector;
-  IsPlayerOutOfSpot*   is_player_out_of_spot;
-  BTTask_FollowPlayer* chase;
+  BTRoot*                        root;
+  BTTask_MoveTo*                 move_to;
+  BTTask_Wait *                  wait, *wait_a_momment;
+  BTSelector*                    hostile;
+  BTTask_Attack*                 attack;
+  BTSequence*                    attack_seq;
+  BTCondition_IsPlayerCrossSpot* is_player_cross_spot;
+  BTSequence*                    back_to_spot_seq;
+  BTTask_SetDestToSpot*          set_dest_to_spot;
+  BTSelector*                    selector;
+  BTCondition_IsPlayerOutOfSpot* is_player_out_of_spot;
+  BTTask_FollowPlayer*           chase;
 
   root                  = bt_root_new();
   wait                  = wait_new(30);
-  attack                = attack_new();
+  attack                = bt_task_attack_new(BTTASK_ATTACK_MODE_PLAYER);
   hostile               = bt_selector_new();
   attack_seq            = bt_sequence_new();
   is_player_cross_spot  = is_player_cross_spot_new();
@@ -914,8 +923,6 @@ ecs_entity_t make_staff(Ecs* ecs, u16 mask)
 
 ecs_entity_t make_fire_ball(Ecs* ecs, Vec2 pos, Vec2 direction, u16 mask)
 {
-  (void)mask;
-  (void)direction;
   ecs_entity_t entity = ecs_create(ecs);
 
   Animation animation;
@@ -960,6 +967,7 @@ ecs_entity_t make_fire_ball(Ecs* ecs, Vec2 pos, Vec2 direction, u16 mask)
   attributes->impact           = TRUE;
   attributes->impact_force     = vec2_mul(vec2_unit_vec(direction), 100.f);
   attributes->impact_time      = 16;
+  attributes->sfx              = SFX_ID_NULL;
 
   ecs_add(ecs, entity, REMOVE_IF_OFFSCREEN);
 
@@ -1014,6 +1022,7 @@ ecs_entity_t make_ice_arrow(Ecs* ecs, Vec2 pos, Vec2 direction, u16 mask)
   attributes->impact           = TRUE;
   attributes->impact_force     = vec2_mul(vec2_unit_vec(direction), 100.f);
   attributes->impact_time      = 16;
+  attributes->sfx              = SFX_ID_NULL;
 
   ecs_add(ecs, entity, REMOVE_IF_OFFSCREEN);
 
@@ -1077,6 +1086,40 @@ ecs_entity_t make_fire_cast_effect(Ecs* ecs, Vec2 position)
 
   life_span            = ecs_add(ecs, entity, LIFE_SPAN);
   life_span->remaining = 28;
+
+  return entity;
+}
+
+ecs_entity_t make_fire_bust_effect(Ecs* ecs, Vec2 position)
+{
+  ecs_entity_t entity;
+
+  Animation animation;
+
+  Visual*    visual;
+  Transform* transform;
+  LifeSpan*  life_span;
+  Animator*  animator;
+
+  const int sw = 64;
+  const int sh = 64;
+
+  animation_init(&animation, get_texture(TEX_EFFECT_FIRE_BUST), 0, 0, 1, 29, sw, sh);
+
+  entity = ecs_create(ecs);
+
+  visual           = ecs_add(ecs, entity, VISUAL);
+  visual->anchor.x = sw / 2;
+  visual->anchor.y = sh / 2;
+
+  animator = ecs_add(ecs, entity, ANIMATOR);
+  animator_init(animator, &animation, 1);
+
+  transform           = ecs_add(ecs, entity, TRANSFORM);
+  transform->position = position;
+
+  life_span            = ecs_add(ecs, entity, LIFE_SPAN);
+  life_span->remaining = 29;
 
   return entity;
 }
@@ -1204,6 +1247,7 @@ ecs_entity_t make_npc_nova(Ecs* ecs, Vec2 position, u16 conversation_id)
   animation_init(&animations[ANIM_STATE_JUMP], texture, sw * 6, 0, 1, 1, sw, sh);
 
   animations[ANIM_STATE_IDLE].frame_duration = 16;
+  animations[ANIM_STATE_RUN].frame_duration  = 10;
 
   ecs_add_w_data(ecs, entity, TRANSFORM, &(Transform){ .position = position });
   ecs_add_w_data(ecs, entity, DIALOGUE, &(Dialogue){ conversation_id });
@@ -1219,6 +1263,8 @@ ecs_entity_t make_npc_nova(Ecs* ecs, Vec2 position, u16 conversation_id)
       HEAL_BAR,
       &(HealthBar){ .color = { 0x03, 0xb6, 0xfc, 0xff }, .len = 20, .anchor = { 6, 23 } });
   ecs_add_w_data(ecs, entity, DROP, &(Drop){ .item1 = ITEM_TYPE_KEY_1_1, .change1 = 100 });
+  ecs_add_w_data(ecs, entity, MOTION, &(Motion){ .max_speed = 60.f });
+  ecs_add(ecs, entity, CHARACTER_ANIMATOR_TAG);
 
   hitbox            = ecs_add(ecs, entity, HITBOX);
   hitbox->category  = CATEGORY_INTERACABLE;
@@ -1238,6 +1284,47 @@ ecs_entity_t make_npc_nova(Ecs* ecs, Vec2 position, u16 conversation_id)
   visual           = ecs_add(ecs, entity, VISUAL);
   visual->anchor.x = 16;
   visual->anchor.y = 32;
+
+  ecs_add(ecs, entity, CONTROLLER);
+
+  BTRoot*                 root;
+  BTTask_FollowAttacker*  follow_attacker;
+  BTCondition_IsAttacked* is_attacked;
+  BTTask_Attack*          attack;
+  BTTask_Equip*           task_equip;
+  BTSelector*             selector1;
+  BTSelector*             selector2;
+  BTSequence*             sequence;
+  BTTask_Wait*            wait_affter_attack;
+
+  root               = bt_root_new();
+  follow_attacker    = bt_task_follow_attacker_new(16.f);
+  is_attacked        = bt_condition_is_attacked_new();
+  attack             = bt_task_attack_new(BTTASK_ATTACK_MODE_ATTACKER);
+  task_equip         = bt_task_equip_new(WEAPON_ANIME_SWORD);
+  selector1          = bt_selector_new();
+  selector2          = bt_selector_new();
+  wait_affter_attack = wait_new(40);
+  sequence           = bt_sequence_new();
+
+  bt_root_set_child(root, (BTNode*)is_attacked);
+  bt_decorator_set_child((BTDecorator*)is_attacked, (BTNode*)selector1);
+
+  bt_selector_add(selector1, (BTNode*)follow_attacker);
+  bt_selector_add(selector1, (BTNode*)selector2);
+
+  bt_selector_add(selector2, (BTNode*)sequence);
+  bt_selector_add(selector2, (BTNode*)task_equip);
+
+  bt_sequence_add(sequence, (BTNode*)attack);
+  bt_sequence_add(sequence, (BTNode*)wait_affter_attack);
+
+  ecs_add_w_data(ecs, entity, BRAIN, &(Brain){ (BTNode*)root });
+
+  ecs_add_w_data(ecs,
+                 entity,
+                 EQUIPMENT,
+                 &(Equipment){ .weapon = ECS_NULL_ENT, .weapon_anchor = { 8, -9 } });
 
   return entity;
 }
@@ -1260,7 +1347,7 @@ ecs_entity_t make_trigger(Ecs* ecs, Vec2 pos, Vec2 size, u16 mask)
   return entity;
 }
 
-ecs_entity_t make_key_1_1(Ecs *ecs, Vec2 pos) 
+ecs_entity_t make_key_1_1(Ecs* ecs, Vec2 pos)
 {
   return make_pickupable_entity(ecs, TEX_KEY, ITEM_TYPE_KEY_1_1, pos);
 }

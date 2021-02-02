@@ -31,6 +31,11 @@ static void on_deal_damage(void* arg, const MSG_DealDamage* event)
     invulnerable            = ecs_add(g_ecs, event->receiver, INVULNERABLE);
     invulnerable->remaining = 10;
 
+    if (event->dealer != ECS_NULL_ENT)
+    {
+      ecs_add_or_set(g_ecs, event->receiver, ATTACKER, &(Attacker){ event->dealer });
+    }
+
     if (event->impact && (motion = ecs_get(g_ecs, event->receiver, MOTION)))
     {
       motion->acc.x += event->force.x;
@@ -61,6 +66,12 @@ static COLOR _color_tbl[] = {
   { 0xff, 0x00, 0x00, 0xff }, { 0x03, 0xba, 0xfc, 0xff },
 };
 
+static u16 _hit_sound_tbl[] = {
+  SFX_SWORD_HIT, SFX_SWORD_HIT, SFX_SWORD_HIT, SFX_SWORD_HIT, SFX_SWORD_HIT,
+};
+
+extern RECT g_viewport;
+
 // TODO: tạo một hệ thống react lại các  event và sinh ra các effect
 static void on_get_damaged(void* arg, const MSG_GetDamaged* event)
 {
@@ -69,6 +80,7 @@ static void on_get_damaged(void* arg, const MSG_GetDamaged* event)
   HitBox*    hitbox;
   Vec2       particle_position;
   Vec2       damagee_topleft;
+  POINT      p;
 
   if ((transform = ecs_get(g_ecs, event->damagee, TRANSFORM)))
   {
@@ -78,6 +90,11 @@ static void on_get_damaged(void* arg, const MSG_GetDamaged* event)
                                    particle_position,
                                    _color_tbl[event->type],
                                    event->damage);
+
+    p.x = transform->position.x;
+    p.y = transform->position.y;
+    if (SDL_PointInRect(&p, &g_viewport))
+      Mix_PlayChannel(-1, get_sfx(_hit_sound_tbl[event->type]), 0);
   }
 
   if (transform && (hitbox = ecs_get(g_ecs, event->damagee, HITBOX)))

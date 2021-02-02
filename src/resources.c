@@ -50,40 +50,31 @@ static const char*  _texture_files[NUM_TEXS] = {
   [TEX_FIRE_BALL]            = "asserts/fireball.png",
   [TEX_ELITE_KNIGHT]         = "asserts/elite_knight.png",
   [TEX_EFFECT_SLASH]         = "asserts/SwordFx.png",
+  [TEX_EFFECT_FIRE_BUST]     = "asserts/effect/fire_bust.png",
 };
 
 static Mix_Music*  _bg_musics[NUM_BG_MUSICS];
 static const char* _bg_mus_files[NUM_BG_MUSICS] = {
-  [BG_MUS_AROUND_THE_BEND]            = "asserts/sound/bg/Around the Bend.WAV",
-  [BG_MUS_BEHIND_THE_COLUMN]          = "asserts/sound/bg/Behind the column.WAV",
-  [BG_MUS_CATCH_THE_MYSTERY]          = "asserts/sound/bg/Catch The Mystery.WAV",
-  [BG_MUS_DARK_INTENSIONS]            = "asserts/sound/bg/Dark Intentions.WAV",
-  [BG_MUS_FANCY_CAKES]                = "asserts/sound/bg/Fancy Cakes.WAV",
-  [BG_MUS_IN_DENFESE_OF_MY_STUFF]     = "asserts/sound/bg/Fancy Cakes.WAV",
-  [BG_MUS_IN_EARLY_TIME]              = "asserts/sound/bg/In early time.WAV",
-  [BG_MUS_INSIDE_DREAM]               = "asserts/sound/bg/Inside Dreams.WAV",
-  [BG_MUS_IN_BACK_POCKET]             = "asserts/sound/bg/In the back pocket_100 BPM.WAV",
-  [BG_MUS_IN_THE_CHAMP_ELYSEES]       = "asserts/sound/bg/In The Champ Elysees.WAV",
-  [BG_MUS_IN_THE_DEPTHS_OF_CAVE]      = "asserts/sound/bg/In the depths of the cave.WAV",
-  [BG_MUS_IN_THE_SPINNING]            = "asserts/sound/bg/In the spinning world.WAV",
-  [BG_MUS_KILLING_FLIES]              = "asserts/sound/bg/Killing Flies.WAV",
-  [BG_MUS_THE_CARANE_DANCE]           = "asserts/sound/bg/The Crane Dance.WAV",
-  [BG_MUS_THE_ESSENSE_OF_GOOD_THINGS] = "asserts/sound/bg/The essence of good things.WAV",
-  [BG_MUS_UNDER_HOT_SUN]              = "asserts/sound/bg/Under the hot sun.WAV",
-  [BG_MUS_WAITING_FOR_EVENT]          = "asserts/sound/bg/Waiting For Events.WAV",
-  [BG_MUS_WITH_DIRTY_HAND]            = "asserts/sound/bg/With Dirty Hands.WAV",
-  [BG_MUS_WITH_LOOSE_CORDS]           = "asserts/sound/bg/With loose cords.WAV",
-  [BG_MUS_WITH_TORN_PANTS]            = "asserts/sound/bg/With torn pants.WAV",
+  [BG_MUS_LV1]         = "asserts/sound/bg/lv1.wav",
+  [BG_MUS_LV2]         = "asserts/sound/bg/lv2.wav",
+  [BG_MUS_BOSS]        = "asserts/sound/bg/boss.wav",
+  [BG_MUS_TILE_SCREEN] = "asserts/sound/bg/tile_screen.wav",
 };
 
 static Mix_Chunk*  _sfx[NUM_SFXS];
 static const char* _sfx_files[NUM_SFXS] = {
-  [SFX_SWORD_HIT]   = "asserts/sound/fx/sword_hit.wav",
-  [SFX_THUNDER]     = "asserts/sound/fx/thunder_2v.wav",
-  [SFX_INTERACTION] = "asserts/sound/fx/interaction1_0.75v.wav",
-  [SFX_CLAW_HIT]    = "asserts/sound/fx/claw_hit.wav",
-  [SFX_BUTTON]      = "asserts/sound/fx/button1.wav",
-  [SFX_ICE_SHOOT]   = "asserts/sound/fx/ice_shoot.wav",
+  [SFX_SWORD_HIT]       = "asserts/sound/fx/sword_hit.wav",
+  [SFX_THUNDER]         = "asserts/sound/fx/thunder_2v.wav",
+  [SFX_INTERACTION]     = "asserts/sound/fx/interaction1_0.75v.wav",
+  [SFX_CLAW_HIT]        = "asserts/sound/fx/claw_hit.wav",
+  [SFX_BUTTON]          = "asserts/sound/fx/button1.wav",
+  [SFX_ICE_SHOOT]       = "asserts/sound/fx/ice_shoot.wav",
+  [SFX_PUNCH]           = "asserts/sound/fx/sfx_wpn_punch4.wav",
+  [SFX_HIT_THUST]       = "asserts/sound/fx/claw_hit.wav",
+  [SFX_MOV_JUMP]        = "asserts/sound/fx/sfx_movement_jump1.wav",
+  [SFX_WEAPON_SWORD]    = "asserts/sound/fx/sword sound.wav",
+  [SFX_EXPOLOSION]      = "asserts/sound/fx/8bit_bomb_explosion.wav",
+  [SFX_FIRE_BALL_LAUCH] = "asserts/sound/fx/fire_proj.wav",
 };
 
 static FONT* _fonts[NUM_FONTS];

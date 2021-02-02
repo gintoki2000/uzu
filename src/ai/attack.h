@@ -1,7 +1,12 @@
 #ifndef ATTACK_H
 #define ATTACK_H
 #include <behaviour_tree.h>
-typedef struct Attack Attack;
+enum BTTask_Attack_Mode
+{
+	BTTASK_ATTACK_MODE_PLAYER,
+	BTTASK_ATTACK_MODE_ATTACKER,
+};
+typedef struct BTTask_Attack BTTask_Attack;
 
-Attack*               attack_new();
+BTTask_Attack* bt_task_attack_new(u16 mode);
 #endif // ATTACK_H

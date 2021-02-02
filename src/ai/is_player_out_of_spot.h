@@ -4,7 +4,7 @@
 typedef struct
 {
   BT_EXTEND_NODE(BTCondition)
-} IsPlayerOutOfSpot;
+} BTCondition_IsPlayerOutOfSpot;
 
-IsPlayerOutOfSpot* is_player_out_of_spot_new();
+BTCondition_IsPlayerOutOfSpot* is_player_out_of_spot_new();
 #endif // IS_PLAYER_OUT_OF_SPOT_H

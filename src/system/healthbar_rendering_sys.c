@@ -40,7 +40,11 @@ void healthbar_rendering_system_update()
     inner.y = border.y + 1;
     inner.w = health_bar[i].len * p;
     inner.h = 1;
-    SDL_SetRenderDrawColor(g_renderer, 0, 200, 0, 255);
+    SDL_SetRenderDrawColor(g_renderer,
+    		health_bar[i].color.r,
+			health_bar[i].color.g,
+			health_bar[i].color.b,
+			health_bar->color.a);
     SDL_RenderFillRect(g_renderer, &inner);
   }
 }

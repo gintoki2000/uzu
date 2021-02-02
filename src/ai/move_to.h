@@ -5,7 +5,7 @@ typedef struct
 {
   BT_EXTEND_NODE(BTNode)
   float arrive_radius;
-} MoveTo;
+} BTTask_MoveTo;
 
-MoveTo* move_to_new(float arrive_radius);
+BTTask_MoveTo* move_to_new(float arrive_radius);
 #endif // MOVE_TO_H

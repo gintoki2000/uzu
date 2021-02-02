@@ -56,6 +56,7 @@ typedef enum
   ATTACK_MASK,
   REMOVE_IF_OFFSCREEN,
   ATTACKER,
+  SELF_DESTRUCTION,
   NUM_COMPONENTS
 } ComponentId;
 
@@ -190,6 +191,7 @@ typedef struct ProjectileAttributes
   Vec2  impact_force;
   float impact_force_z;
   u16   impact_time;
+  u16   sfx;
 } ProjectileAttributes;
 
 typedef enum DoorState
@@ -366,8 +368,16 @@ typedef struct AttackMask
 
 typedef struct Attacker
 {
-  ecs_entity_t value; 
+  ecs_entity_t value;
 } Attacker;
+
+typedef struct SelfDestruction
+{
+  u16          range;
+  ecs_entity_t target;
+  u16          emiting_timer;
+  u16          emiting_interval;
+} SelfDestruction;
 
 Animation*
 animation_init(Animation* anim, SDL_Texture* tex, u32 x, u32 y, u32 row, u32 col, u32 sw, u32 sh);

@@ -1,9 +1,9 @@
-#include "engine.h"
-#include "keyboard.h"
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_mixer.h>
-#include <toolbox/toolbox.h>
+#include "engine/engine.h"
+#include "SDL.h"
+#include "SDL_image.h"
+#include "SDL_mixer.h"
+#include "engine/keyboard.h"
+#include "toolbox/toolbox.h"
 
 static SDL_bool _is_running = SDL_FALSE;
 static Uint32   _delay_ticks;

@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
-#include <toolbox/array.h>
+#include "toolbox/array.h"
 #define ARRAY_DEFAULT_CAP 16
 
 Array* _array_new(u32 el_size) { return array_init(malloc(sizeof(Array)), el_size); }

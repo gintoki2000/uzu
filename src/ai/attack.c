@@ -1,7 +1,8 @@
-#include "attack.h"
-#include "utils.h"
-#include <components.h>
-#include <constances.h>
+#include "ai/attack.h"
+
+#include "../../include/entity_utils.h"
+#include "components.h"
+#include "constances.h"
 
 struct BTTask_Attack
 {

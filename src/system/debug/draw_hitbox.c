@@ -1,19 +1,12 @@
-#include "draw_hitbox.h"
+#include "system/debug/draw_hitbox.h"
 
-#include <components.h>
+#include "components.h"
 
 extern SDL_Rect      g_viewport;
 extern SDL_Renderer* g_renderer;
 extern Ecs*          g_ecs;
 
-static void draw_rect(Rect* r, SDL_Renderer* g_renderer)
-{
-  SDL_SetRenderDrawColor(g_renderer, 67, 63, 196, 0xff);
-  SDL_RenderDrawLine(g_renderer, r->v1.x, r->v1.y, r->v2.x, r->v2.y);
-  SDL_RenderDrawLine(g_renderer, r->v2.x, r->v2.y, r->v3.x, r->v3.y);
-  SDL_RenderDrawLine(g_renderer, r->v3.x, r->v3.y, r->v4.x, r->v4.y);
-  SDL_RenderDrawLine(g_renderer, r->v4.x, r->v4.y, r->v1.x, r->v1.y);
-}
+
 
 void hitbox_rendering_system_update()
 {
@@ -21,27 +14,19 @@ void hitbox_rendering_system_update()
   ecs_size_t    cnt;
   HitBox*       hitboxs;
   Transform*    transform;
-  Rect          rect;
-  float         x, y, w, h;
+  RECT rect;
 
   ecs_raw(g_ecs, HITBOX, &entities, (void**)&hitboxs, &cnt);
 
+  SDL_SetRenderDrawColor(g_renderer, 0xff, 0x00, 0xff, 0xff);
   for (int i = 0; i < cnt; ++i)
   {
     transform = ecs_get(g_ecs, entities[i], TRANSFORM);
 
-    x = transform->position.x - hitboxs[i].anchor.x - g_viewport.x;
-    y = transform->position.y - hitboxs[i].anchor.y - g_viewport.y;
-    w = hitboxs[i].size.x;
-    h = hitboxs[i].size.y;
-    rect_init_full(&rect,
-                   x,
-                   y,
-                   w,
-                   h,
-                   hitboxs[i].anchor.x,
-                   hitboxs[i].anchor.y,
-                   transform->rotation);
-    draw_rect(&rect, g_renderer);
+    rect.x = transform->position.x - hitboxs[i].anchor.x - g_viewport.x;
+    rect.y = transform->position.y - hitboxs[i].anchor.y - g_viewport.y;
+    rect.w = hitboxs[i].size.x;
+    rect.h = hitboxs[i].size.y;
+    SDL_RenderDrawRect(g_renderer, &rect);
   }
 }

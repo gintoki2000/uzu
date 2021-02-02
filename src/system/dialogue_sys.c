@@ -1,13 +1,14 @@
-#include "dialogue_sys.h"
+#include "system/dialogue_sys.h"
+
+#include "../../include/entity_utils.h"
 #include "components.h"
 #include "constances.h"
 #include "ecs/ecs.h"
 #include "engine/keyboard.h"
-#include "event_messaging_sys.h"
 #include "resources.h"
+#include "system/event_messaging_sys.h"
 #include "ui_dialogue.h"
 #include "ui_helper.h"
-#include "utils.h"
 
 //<-------------------------------------event callbacks---------------------------------->//
 

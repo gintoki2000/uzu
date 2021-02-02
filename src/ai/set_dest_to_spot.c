@@ -1,4 +1,4 @@
-#include "set_dest_to_spot.h"
+#include "ai/set_dest_to_spot.h"
 #include <behaviour_tree.h>
 #include <components.h>
 

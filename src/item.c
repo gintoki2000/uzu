@@ -2,7 +2,7 @@
 #include "resources.h"
 #include "types.h"
 #include "ui_msgbox.h"
-#include "utils.h"
+#include "entity_utils.h"
 
 static void scroll_use_callback(const void* data, Ecs* ecs, ecs_entity_t entity);
 static void healing_item_use_callback(const void* data, Ecs* ecs, ecs_entity_t entity);

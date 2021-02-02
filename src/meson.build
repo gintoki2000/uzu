@@ -3,6 +3,7 @@ subdir('ecs')
 subdir('toolbox')
 subdir('system')
 subdir('ai')
+subdir('game_event')
 source_files = files(
   'dungeon.c', 
   'components.c',
@@ -12,7 +13,7 @@ source_files = files(
   'inventory.c',
   'behaviour_tree.c', 
   'path_finder.c',
-  'utils.c',
+  'entity_utils.c',
   'read_all.c',
   'game_scene.c',
   'item.c',
@@ -30,4 +31,10 @@ source_files = files(
   'level_loader.c',
   'ui_dialogue.c',
   'spells.c',
-) + engine_source_files + ecs_source_files + toolbox_source_files + system_source_files + ai_source_files
+) + engine_source_files \
+  + ecs_source_files \
+  + toolbox_source_files \
+  + system_source_files \
+  + ai_source_files \
+  + game_event_source_files
+

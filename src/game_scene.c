@@ -13,8 +13,6 @@
 #include "ui_list.h"
 #include "ui_msgbox.h"
 #include "ui_quality.h"
-#include "utils.h"
-
 #include "ecs/ecs.h"
 
 #include "engine/keyboard.h"
@@ -54,7 +52,7 @@
 #include "system/weapon_skill/thunder_storm.h"
 #include "system/weapon_skill/thust.h"
 
-#include "system/game_event/game_event.h"
+#include "game_event/game_event.h"
 
 #include "system/debug/draw_hitbox.h"
 #include "system/debug/draw_path.h"
@@ -63,6 +61,7 @@
 
 #include <json-c/json.h>
 
+#include "../include/entity_utils.h"
 #include "json_helper.h"
 #include "system/event_messaging_sys.h"
 

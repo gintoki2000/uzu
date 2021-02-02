@@ -1,6 +1,7 @@
-#include "following_system.h"
-#include <components.h>
-#include <utils.h>
+#include "system/following_system.h"
+
+#include "../../include/entity_utils.h"
+#include "components.h"
 
 extern Ecs* g_ecs;
 

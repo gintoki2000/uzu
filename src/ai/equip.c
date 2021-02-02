@@ -1,8 +1,9 @@
 #include "ai/equip.h"
+
+#include "../../include/entity_utils.h"
 #include "behaviour_tree.h"
 #include "components.h"
 #include "types.h"
-#include "utils.h"
 
 struct BTTask_Equip
 {

@@ -1,4 +1,4 @@
-#include "draw_path.h"
+#include "system/debug/draw_path.h"
 #include <components.h>
 #include <constances.h>
 extern SDL_Rect      g_viewport;

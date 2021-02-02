@@ -1,9 +1,9 @@
 #ifndef COLLISION_FILTER_H
 #define COLLISION_FILTER_H
-#include "collision_mgr_sys.h"
+#include "system/collision_mgr_sys.h"
 
-#include "event_messaging_sys.h"
-#include <components.h>
+#include "system/event_messaging_sys.h"
+#include "components.h"
 #include <toolbox/toolbox.h>
 
 extern Ecs* g_ecs;

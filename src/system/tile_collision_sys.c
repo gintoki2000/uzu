@@ -1,6 +1,6 @@
-#include "tile_collision_sys.h"
-#include "event_messaging_sys.h"
-#include <components.h>
+#include "system/tile_collision_sys.h"
+#include "system/event_messaging_sys.h"
+#include "components.h"
 #include <constances.h>
 #include <map.h>
 #include <toolbox/toolbox.h>

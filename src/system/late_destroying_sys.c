@@ -1,8 +1,8 @@
-#include "late_destroying_sys.h"
+#include "system/late_destroying_sys.h"
 
-#include <components.h>
-#include <toolbox/toolbox.h>
-#include <utils.h>
+#include "../../include/entity_utils.h"
+#include "components.h"
+#include "toolbox/toolbox.h"
 
 extern Ecs* g_ecs;
 extern RECT g_viewport;

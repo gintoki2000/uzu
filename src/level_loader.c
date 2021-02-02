@@ -5,7 +5,7 @@
 #include "json_helper.h"
 #include "map.h"
 #include "types.h"
-#include "utils.h"
+#include "entity_utils.h"
 
 extern Ecs* g_ecs;
 

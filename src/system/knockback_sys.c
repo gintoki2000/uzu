@@ -1,6 +1,6 @@
-#include "knockback_sys.h"
-#include "event_messaging_sys.h"
-#include <components.h>
+#include "system/knockback_sys.h"
+#include "system/event_messaging_sys.h"
+#include "components.h"
 
 //<--------------------------event callback(s)----------------------->//
 //====================================================================//

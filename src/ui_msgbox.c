@@ -3,7 +3,7 @@
 #include "engine/keyboard.h"
 #include "resources.h"
 #include "ui_helper.h"
-#include <toolbox/toolbox.h>
+#include "toolbox/toolbox.h"
 
 static BOOL _visible;
 static s32  _ticks;

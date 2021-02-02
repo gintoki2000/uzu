@@ -1,5 +1,5 @@
-#include "entity_pool.h"
-#include "common.h"
+#include "ecs/entity_pool.h"
+#include "ecs/common.h"
 #include <stdlib.h>
 
 #define ECS_ENTITY_POOL_DEFAULT_SIZE 16

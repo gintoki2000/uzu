@@ -1,20 +1,21 @@
+#include "entity_factory.h"
+
+#include "../include/entity_utils.h"
+#include "ai/attack.h"
 #include "ai/equip.c"
 #include "ai/follow_attacker.h"
+#include "ai/follow_player.h"
 #include "ai/is_attacked.h"
-#include <ai/attack.h>
-#include <ai/follow_player.h>
-#include <ai/is_player_cross_spot.h>
-#include <ai/is_player_out_of_spot.h>
-#include <ai/move_to.h>
-#include <ai/set_dest_to_spot.h>
-#include <ai/wait.h>
-#include <behaviour_tree.h>
-#include <components.h>
-#include <constances.h>
-#include <ecs/ecs.h>
-#include <entity_factory.h>
-#include <resources.h>
-#include <utils.h>
+#include "ai/is_player_cross_spot.h"
+#include "ai/is_player_out_of_spot.h"
+#include "ai/move_to.h"
+#include "ai/set_dest_to_spot.h"
+#include "ai/wait.h"
+#include "behaviour_tree.h"
+#include "components.h"
+#include "constances.h"
+#include "ecs/ecs.h"
+#include "resources.h"
 
 ecs_entity_t make_anime_sword(Ecs* ecs, u16 mask)
 {

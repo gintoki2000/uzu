@@ -5,7 +5,7 @@ project('uzu', 'c',
 subdir('src')
 
 project_name = 'uzu'
-incdirs = include_directories('src')
+incdirs = include_directories('include')
 deps = [
   dependency('SDL2', required: true), 
   dependency('SDL2_image', required: true), 

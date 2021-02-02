@@ -1,8 +1,8 @@
-#include "motion_sys.h"
+#include "system/motion_sys.h"
 
-#include <components.h>
-#include <ecs/ecs.h>
-#include <toolbox/toolbox.h>
+#include "components.h"
+#include "ecs/ecs.h"
+#include "toolbox/toolbox.h"
 
 #define DT 0.0166f
 #define SPEED_LIMIT 200.f

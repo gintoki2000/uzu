@@ -1,24 +1,19 @@
 #include "behaviour_tree.h"
-#include <SDL2/SDL_image.h>
-
+#include "SDL_image.h"
+#include "toolbox/toolbox.h"
+#include "components.h"
+#include "constances.h"
+#include "dungeon.h"
+#include "entity_factory.h"
+#include "map.h"
+#include "resources.h"
+#include "scene.h"
+#include "ecs/ecs.h"
+#include "engine/engine.h"
+#include "engine/keyboard.h"
+#include "session.h"
 #include <stdio.h>
 #include <stdlib.h>
-
-#include <toolbox/toolbox.h>
-
-#include <components.h>
-#include <constances.h>
-#include <dungeon.h>
-#include <entity_factory.h>
-#include <map.h>
-#include <resources.h>
-#include <scene.h>
-
-#include <ecs/ecs.h>
-
-#include <engine/engine.h>
-#include <engine/keyboard.h>
-#include <session.h>
 
 SDL_Rect g_viewport;
 

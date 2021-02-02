@@ -1,6 +1,6 @@
-#include "is_player_out_of_spot.h"
+#include "ai/is_player_out_of_spot.h"
 #include <components.h>
-#include <utils.h>
+#include "../../include/entity_utils.h"
 
 const BTNodeVtbl* is_player_out_of_spot_vtbl_inst();
 void              is_player_out_of_spot_vtbl_init(BTConditionVtbl* vtbl);

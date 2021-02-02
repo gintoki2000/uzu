@@ -1,11 +1,12 @@
-#include <SDL2/SDL.h>
-#include <ecs/common.h>
-#include <ecs/ecs.h>
-#include <ecs/entity_pool.h>
-#include <ecs/pool.h>
+#include "ecs/common.h"
+#include "ecs/ecs.h"
+#include "ecs/entity_pool.h"
+#include "ecs/pool.h"
+#include "toolbox/toolbox.h"
+
 #include <stdlib.h>
 #include <string.h>
-#include <toolbox/toolbox.h>
+
 
 INLINE EcsPool* get_pool(Ecs* self, ecs_size_t type)
 {

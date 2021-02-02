@@ -1,8 +1,8 @@
-#include "collision_sys.h"
-#include "event_messaging_sys.h"
-#include <components.h>
-#include <game_scene.h>
-#include <toolbox/toolbox.h>
+#include "system/collision_sys.h"
+#include "system/event_messaging_sys.h"
+#include "components.h"
+#include "game_scene.h"
+#include "toolbox/toolbox.h"
 
 #define BUFF_SIZE 300
 

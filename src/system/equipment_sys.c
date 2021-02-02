@@ -1,5 +1,5 @@
 #include "system/equipment_sys.h"
-#include <components.h>
+#include "components.h"
 
 extern Ecs* g_ecs;
 

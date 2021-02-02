@@ -1,4 +1,4 @@
-#include "wait.h"
+#include "ai/wait.h"
 
 BT_VTBL_INST_FN(BTNode, wait)
 BT_ALLOC_FN(BTTask_Wait, wait)

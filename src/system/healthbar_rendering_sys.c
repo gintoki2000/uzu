@@ -1,6 +1,6 @@
-#include "healthbar_rendering_sys.h"
-#include <components.h>
-#include <ecs/ecs.h>
+#include "system/healthbar_rendering_sys.h"
+#include "components.h"
+#include "ecs/ecs.h"
 
 extern SDL_Rect      g_viewport;
 extern SDL_Renderer* g_renderer;

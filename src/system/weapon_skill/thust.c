@@ -1,6 +1,6 @@
-#include "thust.h"
-#include "../collision_sys.h"
-#include "../event_messaging_sys.h"
+#include "system/weapon_skill/thust.h"
+#include "system/collision_sys.h"
+#include "system/event_messaging_sys.h"
 #include <components.h>
 #include <ecs/ecs.h>
 #include "resources.h"

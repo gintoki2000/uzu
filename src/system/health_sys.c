@@ -1,8 +1,8 @@
-#include "health_sys.h"
+#include "system/health_sys.h"
 
 #include "entity_factory.h"
-#include "event_messaging_sys.h"
-#include <components.h>
+#include "system/event_messaging_sys.h"
+#include "components.h"
 
 extern Ecs* g_ecs;
 

@@ -1,7 +1,7 @@
-#include "is_player_cross_spot.h"
+#include "ai/is_player_cross_spot.h"
 #include <behaviour_tree.h>
 #include <components.h>
-#include <utils.h>
+#include "../../include/entity_utils.h"
 struct IsPlayerCrossSpot
 {
   BT_EXTEND_NODE(BTCondition)

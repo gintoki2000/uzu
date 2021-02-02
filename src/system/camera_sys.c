@@ -1,5 +1,5 @@
-#include "camera_sys.h"
-#include <components.h>
+#include "system/camera_sys.h"
+#include "components.h"
 
 extern SDL_Rect g_viewport;
 extern Ecs*     g_ecs;

@@ -1,8 +1,9 @@
 #include "system/self_destruction.h"
+
+#include "../../include/entity_utils.h"
 #include "components.h"
 #include "entity_factory.h"
 #include "system/event_messaging_sys.h"
-#include "utils.h"
 #include "resources.h"
 
 extern Ecs* g_ecs;

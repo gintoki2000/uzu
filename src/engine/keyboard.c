@@ -1,6 +1,6 @@
-#include <engine/keyboard.h>
+#include "engine/keyboard.h"
 #include <string.h>
-#include <toolbox/toolbox.h>
+#include "toolbox/toolbox.h"
 
 static const int _key_to_scancode_tbl[NUM_KEYS] = {
   [KEY_A] = SDL_SCANCODE_A,          [KEY_B] = SDL_SCANCODE_S,

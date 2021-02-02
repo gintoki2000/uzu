@@ -6,7 +6,7 @@
 #include "types.h"
 #include "ui_helper.h"
 #include "ui_list.h"
-#include "utils.h"
+#include "entity_utils.h"
 
 #define INV_CELL_SIZE 16
 #define INV_CELL_GAP 1

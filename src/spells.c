@@ -1,7 +1,7 @@
+#include "../include/entity_utils.h"
 #include "entity_factory.h"
 #include "resources.h"
 #include "types.h"
-#include "utils.h"
 
 static void cast_fire_ball(Ecs* ecs, ecs_entity_t caster, ecs_entity_t weapon);
 static void cast_ice_arrow(Ecs* ecs, ecs_entity_t caster, ecs_entity_t weapon);

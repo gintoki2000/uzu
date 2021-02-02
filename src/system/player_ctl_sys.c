@@ -1,15 +1,15 @@
-#include "player_ctl_sys.h"
-#include "collision_sys.h"
+#include "system/player_ctl_sys.h"
+
+#include "../../include/entity_utils.h"
+#include "components.h"
 #include "constances.h"
+#include "ecs/ecs.h"
+#include "engine/keyboard.h"
 #include "inventory.h"
 #include "resources.h"
+#include "system/collision_sys.h"
+#include "system/event_messaging_sys.h"
 #include "ui_list.h"
-
-#include "event_messaging_sys.h"
-#include <components.h>
-#include <ecs/ecs.h>
-#include <engine/keyboard.h>
-#include <utils.h>
 
 extern Ecs* g_ecs;
 

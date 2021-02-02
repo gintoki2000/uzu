@@ -1,10 +1,10 @@
-#include "chest_system.h"
-#include "event_messaging_sys.h"
-#include <components.h>
-#include <constances.h>
-#include <inventory.h>
+#include "system/chest_system.h"
+#include "system/event_messaging_sys.h"
+#include "components.h"
+#include "constances.h"
+#include "inventory.h"
 #include <string.h>
-#include <ui_msgbox.h>
+#include "ui_msgbox.h"
 
 extern Ecs* g_ecs;
 

@@ -1,0 +1,111 @@
+#ifndef RESOURCES_H
+#define RESOURCES_H
+#include "SDL_mixer.h"
+#include "toolbox/toolbox.h"
+#include "types.h"
+typedef enum
+{
+  TEX_BIG_DEMON,
+  TEX_CHORT,
+  TEX_WOGOL,
+  TEX_IMP,
+  TEX_KNIGHT,
+  TEX_AXE,
+  TEX_ANIME_SWORD,
+  TEX_BLOOD,
+  TEX_BOW,
+  TEX_ARROW,
+  TEX_RED_THUNDER,
+  TEX_YELLOW_THUNDER,
+  TEX_GOLDEN_SWORD,
+  TEX_GOLDEN_CROSS_HIT,
+  TEX_TILESET,
+  TEX_FLASK_RED_BIG,
+  TEX_FLASK_RED,
+  TEX_PLAYER_HEALTH_BAR,
+  TEX_CLEAVER,
+  TEX_WIZZARD,
+  TEX_PONITER_DOWN,
+  TEX_BLUE_FLASK,
+  TEX_CHEST,
+  TEX_SWING_EFFECT,
+  TEX_RED_STAFF,
+  TEX_SPEAR,
+  TEX_UI_MAIN_MENU,
+  TEX_UI_MAIN_MENU_POINTER,
+  TEX_UI_DIALOGUE,
+  TEX_DOOR,
+  TEX_LIZZARD,
+  TEX_EFFECT_BLOOD_1,
+  TEX_EFFECT_BLOOD_2,
+  TEX_ICE_ARROW,
+  TEX_FIRE_BALL,
+  TEX_EFFECT_ICE_CAST,
+  TEX_EFFECT_ICE_HIT,
+  TEX_EFFECT_FIRE_HIT,
+  TEX_EFFECT_FIRE_CAST,
+  TEX_EFFECT_SLASH,
+  TEX_SCROLL,
+  TEX_KEY,
+  TEX_EFFECT_FIRE_BUST,
+  TEX_ELITE_KNIGHT,
+  NUM_TEXS
+} TextureId;
+
+typedef enum
+{
+  BG_MUS_LV1,
+  BG_MUS_LV2,
+  BG_MUS_BOSS,
+  BG_MUS_TILE_SCREEN,
+  NUM_BG_MUSICS
+} BgMusId;
+
+#define BG_MUS_ID_NULL NUM_BG_MUSICS
+
+typedef enum
+{
+  FONT_DAMAGE_INDICATOR,
+  FONT_ITEM_PICKED_UP,
+  NUM_FONTS,
+} FontId;
+
+typedef enum
+{
+  SFX_SWORD_HIT,
+  SFX_THUNDER,
+  SFX_INTERACTION,
+  SFX_CLAW_HIT,
+  SFX_BUTTON,
+  SFX_PUNCH,
+  SFX_ICE_SHOOT,
+  SFX_HIT_THUST,
+  SFX_MOV_JUMP,
+  SFX_WEAPON_SWORD,
+  SFX_EXPOLOSION,
+  SFX_FIRE_BALL_LAUCH,
+  NUM_SFXS,
+} SfxId;
+
+#define SFX_ID_NULL NUM_SFXS
+
+typedef enum
+{
+  CONVERSATION_DEMO1,
+  CONVERSATION_DEMO2,
+  CONVERSATION_DEMO3,
+  CONVERSATION_NOVA_00,
+  CONVERSATION_NOVA_01,
+  CONVERSATION_NOVA_02,
+  NUM_CONVERSATIONS,
+} ConversationId;
+
+BOOL          resources_load(void);
+void          resources_unload(void);
+SDL_Texture*  get_texture(TextureId id);
+Mix_Music*    get_bg_mus(BgMusId id);
+Mix_Chunk*    get_sfx(SfxId id);
+FONT*         get_font(FontId id);
+Conversation* get_conversation(ConversationId id);
+
+#endif // RESOURCES_H

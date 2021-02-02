@@ -1,7 +1,7 @@
-#include "ai_system.h"
-#include <behaviour_tree.h>
-#include <components.h>
-#include <ecs/ecs.h>
+#include "system/ai_system.h"
+#include "behaviour_tree.h"
+#include "components.h"
+#include "ecs/ecs.h"
 
 extern Ecs* g_ecs;
 

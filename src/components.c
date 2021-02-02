@@ -1,7 +1,7 @@
 #include "components.h"
 #include <stdlib.h>
 #include <string.h>
-#include <toolbox/sprite-sheet.h>
+#include "toolbox/sprite-sheet.h"
 
 #define ECS_TYPE(__T)                                                                              \
   {                                                                                                \

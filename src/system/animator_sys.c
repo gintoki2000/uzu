@@ -1,5 +1,6 @@
-#include <components.h>
-#include "animator_sys.h"
+#include "components.h"
+#include "system/animator_sys.h"
+#include "ecs/ecs.h"
 
 extern Ecs* g_ecs;
 

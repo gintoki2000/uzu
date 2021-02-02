@@ -1,14 +1,14 @@
-#include "merchant_sys.h"
+#include "system/merchant_sys.h"
 #include "constances.h"
 #include "engine/keyboard.h"
-#include "event_messaging_sys.h"
+#include "system/event_messaging_sys.h"
 #include "resources.h"
 #include "ui_quality.h"
-#include <components.h>
-#include <ecs/ecs.h>
-#include <inventory.h>
-#include <types.h>
-#include <ui_helper.h>
+#include "components.h"
+#include "ecs/ecs.h"
+#include "inventory.h"
+#include "types.h"
+#include "ui_helper.h"
 
 extern Ecs*          g_ecs;
 extern SDL_Renderer* g_renderer;

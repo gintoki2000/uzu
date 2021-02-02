@@ -1,6 +1,6 @@
-#include "rendering_sys.h"
-#include <components.h>
-#include <ecs/ecs.h>
+#include "system/rendering_sys.h"
+#include "components.h"
+#include "ecs/ecs.h"
 #include <stdlib.h>
 
 extern SDL_Rect      g_viewport;

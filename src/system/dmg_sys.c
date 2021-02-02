@@ -1,8 +1,8 @@
-#include "dmg_sys.h"
-#include "event_messaging_sys.h"
-#include <components.h>
-#include <resources.h>
-#include <toolbox/toolbox.h>
+#include "system/dmg_sys.h"
+#include "system/event_messaging_sys.h"
+#include "components.h"
+#include "resources.h"
+#include "toolbox/toolbox.h"
 
 extern Ecs* g_ecs;
 

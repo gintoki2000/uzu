@@ -1,6 +1,7 @@
-#include "follow_player.h"
-#include <components.h>
-#include <utils.h>
+#include "ai/follow_player.h"
+
+#include "../../include/entity_utils.h"
+#include "components.h"
 static const BTNodeVtbl*    __vtbl_inst();
 static void                 __vtbl_init(BTNodeVtbl* vtbl);
 static BTTask_FollowPlayer* __init(BTTask_FollowPlayer* self, float radius);

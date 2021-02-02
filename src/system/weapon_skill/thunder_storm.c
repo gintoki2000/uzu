@@ -1,6 +1,6 @@
-#include "thunder_storm.h"
-#include <components.h>
-#include <entity_factory.h>
+#include "system/weapon_skill/thunder_storm.h"
+#include "components.h"
+#include "entity_factory.h"
 #include <stdlib.h>
 
 extern Ecs* g_ecs;

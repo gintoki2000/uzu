@@ -1,5 +1,5 @@
-#include "charge.h"
-#include <components.h>
+#include "system/weapon_skill/charge.h"
+#include "components.h"
 
 #define SYS_WEAPON_SKILL_CHARGE_TIME 60
 

@@ -1,7 +1,8 @@
-#include "hud_system.h"
-#include <components.h>
-#include <resources.h>
-#include <utils.h>
+#include "system/hud_system.h"
+
+#include "../../include/entity_utils.h"
+#include "components.h"
+#include "resources.h"
 
 static const SDL_Rect _start = { 0, 0, 4, 9 };
 

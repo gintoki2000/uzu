@@ -53,8 +53,9 @@ typedef enum
   MANA_POOL,
   DOOR_INFO,
   HOLDER,
+  ATTACK_MASK,
   REMOVE_IF_OFFSCREEN,
-
+  ATTACKER,
   NUM_COMPONENTS
 } ComponentId;
 
@@ -118,9 +119,9 @@ typedef struct
 typedef struct
 {
   CharacterAction on_action;
-  int             timer;
-  int             step;
-  BOOL            is_active;
+  u16             timer;
+  u16             state;
+  u32             range;
 } wpskl_Swing;
 
 typedef struct
@@ -264,8 +265,6 @@ typedef struct
   int remaining;
 } Invulnerable;
 
-typedef ecs_entity_t Attacker;
-
 typedef struct
 {
   BTNode* root;
@@ -359,6 +358,16 @@ typedef struct Holder
 {
   ecs_entity_t value;
 } Holder;
+
+typedef struct AttackMask
+{
+  u16 value;
+} AttackMask;
+
+typedef struct Attacker
+{
+  ecs_entity_t value; 
+} Attacker;
 
 Animation*
 animation_init(Animation* anim, SDL_Texture* tex, u32 x, u32 y, u32 row, u32 col, u32 sw, u32 sh);

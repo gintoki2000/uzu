@@ -18,7 +18,7 @@ void ems_connect(int sig_id, pointer_t udata, funcptr_t func)
   dispatcher_connect(_dispatcher, sig_id, udata, func);
 }
 
-void ems_broadcast(int sig_id, const pointer_t event)
+void ems_broadcast(int sig_id, const void* event)
 {
   dispatcher_emit(_dispatcher, sig_id, event);
 }

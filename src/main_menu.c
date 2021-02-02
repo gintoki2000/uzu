@@ -30,6 +30,7 @@ static const RECT _dst             = { 117, 78, 89, 85 };
 static const char _text_new_game[] = "New Game";
 static const char _text_exit[]     = "Exit";
 static const char _text_about[]    = "About";
+static const char _text_load[]     = "Load";
 static s8         _select;
 
 static const char* const _options[MAIN_MENU_NUM_OPS] = { _text_new_game, _text_about, _text_exit };
@@ -73,10 +74,10 @@ static void on_update()
   SDL_RenderCopy(g_renderer, _pointer, NULL, &(RECT){ x, y, 5, 5 });
 }
 
-static void on_event(const SDL_Event* e)
+static void on_event(const SDL_UNUSED SDL_Event* e)
 {
-  (void)e;
 }
+
 static void process_key_input(void)
 {
   if (key_just_pressed(KEY_DOWN) && _select < MAIN_MENU_NUM_OPS - 1)

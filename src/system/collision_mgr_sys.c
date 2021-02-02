@@ -19,6 +19,8 @@ static void player_vs_ladder(ecs_entity_t player, ecs_entity_t ladder);
 static void ladder_vs_player(ecs_entity_t ladder, ecs_entity_t player);
 static void interacable_vs_entity(ecs_entity_t interacable, ecs_entity_t entity);
 static void entity_vs_interacable(ecs_entity_t entity, ecs_entity_t interacable);
+static void entity_vs_trigger(ecs_entity_t entity, ecs_entity_t trigger);
+static void trigger_vs_entity(ecs_entity_t trigger, ecs_entity_t entity);
 
 static void (*_table[NUM_CATEGORIES][NUM_CATEGORIES])(ecs_entity_t, ecs_entity_t) =
 {
@@ -28,15 +30,16 @@ static void (*_table[NUM_CATEGORIES][NUM_CATEGORIES])(ecs_entity_t, ecs_entity_t
     [CATEGORY_ITEM] = player_vs_item, 
     [CATEGORY_LADDER] = player_vs_ladder,
     [CATEGORY_INTERACABLE] = entity_vs_interacable,
+    [CATEGORY_TRIGGER] = entity_vs_trigger
   },
   [CATEGORY_ENEMY] = {
     [CATEGORY_WEAPON ] = entity_vs_weapon,
     [CATEGORY_PROJECTILE] = entity_vs_projectile,
-    [CATEGORY_INTERACABLE] = entity_vs_interacable,
   },
   [CATEGORY_PROJECTILE] = {
     [CATEGORY_ENEMY] = projectile_vs_entity,
     [CATEGORY_PLAYER] = projectile_vs_entity,
+    [CATEGORY_INTERACABLE] = projectile_vs_entity
   },
   [CATEGORY_WEAPON] = {
     [CATEGORY_ENEMY] = weapon_vs_entity,
@@ -51,7 +54,11 @@ static void (*_table[NUM_CATEGORIES][NUM_CATEGORIES])(ecs_entity_t, ecs_entity_t
   [CATEGORY_INTERACABLE] = {
     [CATEGORY_ENEMY] = interacable_vs_entity,
     [CATEGORY_PLAYER] = interacable_vs_entity,
-  }
+    [CATEGORY_PROJECTILE] = interacable_vs_entity,
+  },
+  [CATEGORY_TRIGGER] = {
+    [CATEGORY_PLAYER] = trigger_vs_entity,
+  },
 };
 
 void collision_manager_system_init()
@@ -154,5 +161,15 @@ static void interacable_vs_entity(ecs_entity_t interacable, ecs_entity_t entity)
 static void entity_vs_interacable(ecs_entity_t entity, ecs_entity_t interacable)
 {
   interacable_vs_entity(interacable, entity);
+}
+
+static void entity_vs_trigger(ecs_entity_t entity, ecs_entity_t trigger)
+{
+  ems_broadcast(MSG_HIT_TRIGGER, &(MSG_HitTrigger){ .entity = entity, .trigger = trigger });
+}
+
+static void trigger_vs_entity(ecs_entity_t trigger, ecs_entity_t entity)
+{
+  ems_broadcast(MSG_HIT_TRIGGER, &(MSG_HitTrigger){ .entity = entity, .trigger = trigger });
 }
 #endif // COLLISION_FILTER_H

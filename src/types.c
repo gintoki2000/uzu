@@ -6,7 +6,7 @@ ecs_entity_t (*const g_weapon_create_fn_tbl[NUM_WEAPONS])(Ecs*, u16) = {
   make_spear,
   make_cleaver,
   make_golden_sword,
-  NULL,
+  make_anime_sword,
   make_staff,
   NULL,
 };

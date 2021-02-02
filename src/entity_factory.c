@@ -13,22 +13,38 @@
 #include <resources.h>
 #include <utils.h>
 
-ecs_entity_t make_anime_sword(Ecs* ecs)
+ecs_entity_t make_anime_sword(Ecs* ecs, u16 mask)
 {
+
   ecs_entity_t entity;
 
-  /*component*/
-  Visual*    visual;
-  Transform* transform;
+  TEXTURE* texture;
 
-  entity = ecs_create(ecs);
+  entity  = ecs_create(ecs);
+  texture = get_texture(TEX_ANIME_SWORD);
+
+  Transform*        transform;
+  Visual*           visual;
+  WeaponAttributes* attributes;
+  wpskl_Swing*      sklswing;
 
   transform = ecs_add(ecs, entity, TRANSFORM);
 
   visual = ecs_add(ecs, entity, VISUAL);
-  sprite_init(&visual->sprite, get_texture(TEX_ANIME_SWORD));
+  sprite_init(&visual->sprite, texture);
   visual->anchor.x = visual->sprite.rect.w / 2;
-  visual->anchor.y = visual->sprite.rect.h;
+  visual->anchor.y = visual->sprite.rect.h + 4;
+
+  attributes          = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
+  attributes->atk     = 2;
+  attributes->type_id = WEAPON_ANIME_SWORD;
+  attributes->mask    = mask;
+
+  sklswing            = ecs_add(ecs, entity, WEAPON_SKILL_SWING);
+  sklswing->on_action = CHARACTER_ACTION_REGULAR_ATK;
+  sklswing->range     = 40;
+
+  ecs_add(ecs, entity, HOLDER);
 
   return entity;
 }
@@ -363,7 +379,7 @@ ecs_entity_t make_cleaver(Ecs* ecs, u16 mask_bits)
   Transform*        transform;
   Visual*           visual;
   WeaponAttributes* attributes;
-  wpskl_Swing*      wpskl_swing;
+  wpskl_Swing*      sklswing;
 
   transform = ecs_add(ecs, entity, TRANSFORM);
 
@@ -377,11 +393,9 @@ ecs_entity_t make_cleaver(Ecs* ecs, u16 mask_bits)
   attributes->type_id = WEAPON_CLEAVER;
   attributes->mask    = mask_bits;
 
-  wpskl_swing            = ecs_add(ecs, entity, WEAPON_SKILL_SWING);
-  wpskl_swing->is_active = FALSE;
-  wpskl_swing->on_action = CHARACTER_ACTION_REGULAR_ATK;
-  wpskl_swing->step      = 0;
-  wpskl_swing->timer     = 0;
+  sklswing            = ecs_add(ecs, entity, WEAPON_SKILL_SWING);
+  sklswing->on_action = CHARACTER_ACTION_REGULAR_ATK;
+  sklswing->range     = 20;
 
   ecs_add(ecs, entity, HOLDER);
 
@@ -419,20 +433,6 @@ ecs_entity_t make_blood_stain_effect(Ecs* ecs, Vec2 position)
   return stain_effect;
 }
 
-ecs_entity_t make_bow(Ecs* ecs)
-{
-  UNUSED(ecs);
-  return ECS_NULL_ENT;
-}
-
-ecs_entity_t make_arrow(Ecs* ecs, Vec2 position, Vec2 vel)
-{
-  UNUSED(ecs);
-  UNUSED(position);
-  UNUSED(vel);
-  return ECS_NULL_ENT;
-}
-
 ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
 {
   ecs_entity_t entity;
@@ -445,7 +445,7 @@ ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
   Transform*          transform;
   Visual*             visual;
   WeaponAttributes*   attributes;
-  wpskl_Swing*        wpskl_swing;
+  wpskl_Swing*        sklswing;
   wpskl_ThunderStorm* wpskl_thunder_storm;
 
   transform = ecs_add(ecs, entity, TRANSFORM);
@@ -460,11 +460,9 @@ ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
   attributes->type_id = WEAPON_LAVIS_SWORD;
   attributes->mask    = mask_bits;
 
-  wpskl_swing            = ecs_add(ecs, entity, WEAPON_SKILL_SWING);
-  wpskl_swing->is_active = FALSE;
-  wpskl_swing->on_action = CHARACTER_ACTION_REGULAR_ATK;
-  wpskl_swing->step      = 0;
-  wpskl_swing->timer     = 0;
+  sklswing            = ecs_add(ecs, entity, WEAPON_SKILL_SWING);
+  sklswing->on_action = CHARACTER_ACTION_REGULAR_ATK;
+  sklswing->range     = 100;
 
   wpskl_thunder_storm            = ecs_add(ecs, entity, WEAPON_SKILL_THUNDER_STORM);
   wpskl_thunder_storm->on_action = CHARACTER_ACTION_SPECIAL_ATK;
@@ -509,20 +507,21 @@ ecs_entity_t make_golden_cross_hit_effect(Ecs* ecs, Vec2 position)
 
 ecs_entity_t make_big_red_flask(Ecs* ecs, Vec2 position)
 {
-  return make_flask_base(ecs, TEX_FLASK_RED_BIG, ITEM_TYPE_BIG_RED_FLASK, position);
+  return make_pickupable_entity(ecs, TEX_FLASK_RED_BIG, ITEM_TYPE_BIG_RED_FLASK, position);
 }
 
 ecs_entity_t make_red_flask(Ecs* ecs, Vec2 position)
 {
-  return make_flask_base(ecs, TEX_FLASK_RED, ITEM_TYPE_RED_FLASK, position);
+  return make_pickupable_entity(ecs, TEX_FLASK_RED, ITEM_TYPE_RED_FLASK, position);
 }
 
 ecs_entity_t make_blue_flask(Ecs* ecs, Vec2 position)
 {
-  return make_flask_base(ecs, TEX_BLUE_FLASK, ITEM_TYPE_BLUE_FLASK, position);
+  return make_pickupable_entity(ecs, TEX_BLUE_FLASK, ITEM_TYPE_BLUE_FLASK, position);
 }
 
-ecs_entity_t make_flask_base(Ecs* ecs, TextureId texture_id, ItemTypeId item_type_id, Vec2 position)
+ecs_entity_t
+make_pickupable_entity(Ecs* ecs, TextureId texture_id, ItemTypeId item_type_id, Vec2 position)
 {
   ecs_entity_t entity;
   TEXTURE*     texture;
@@ -579,6 +578,11 @@ ecs_entity_t make_player(Ecs* ecs, ecs_entity_t character, ecs_entity_t weapon)
   mana_pool                  = ecs_add(ecs, character, MANA_POOL);
   mana_pool->mana_points     = 10;
   mana_pool->max_mana_points = 10;
+
+  ecs_add_w_data(ecs,
+                 character,
+                 ATTACK_MASK,
+                 &(AttackMask){ BIT(CATEGORY_ENEMY) | BIT(CATEGORY_INTERACABLE) });
 
   return character;
 }
@@ -1077,6 +1081,41 @@ ecs_entity_t make_fire_cast_effect(Ecs* ecs, Vec2 position)
   return entity;
 }
 
+ecs_entity_t make_slash_effect(Ecs* ecs, Vec2 position, SDL_RendererFlip flip)
+{
+  ecs_entity_t entity;
+
+  Animation animation;
+
+  Visual*    visual;
+  Transform* transform;
+  LifeSpan*  life_span;
+  Animator*  animator;
+
+  const int sw = 48;
+  const int sh = 48;
+
+  animation_init(&animation, get_texture(TEX_EFFECT_SLASH), 0, 0, 1, 10, sw, sh);
+
+  entity = ecs_create(ecs);
+
+  visual           = ecs_add(ecs, entity, VISUAL);
+  visual->anchor.x = sw / 2;
+  visual->anchor.y = sh / 2;
+  visual->flip     = flip;
+
+  animator = ecs_add(ecs, entity, ANIMATOR);
+  animator_init(animator, &animation, 1);
+
+  transform           = ecs_add(ecs, entity, TRANSFORM);
+  transform->position = position;
+
+  life_span            = ecs_add(ecs, entity, LIFE_SPAN);
+  life_span->remaining = 10;
+
+  return entity;
+}
+
 ecs_entity_t make_fire_hit_effect(Ecs* ecs, Vec2 position)
 {
 
@@ -1164,14 +1203,26 @@ ecs_entity_t make_npc_nova(Ecs* ecs, Vec2 position, u16 conversation_id)
   animation_init(&animations[ANIM_STATE_HIT], texture, 0, 0, 1, 1, sw, sh);
   animation_init(&animations[ANIM_STATE_JUMP], texture, sw * 6, 0, 1, 1, sw, sh);
 
-  animations[ANIM_STATE_IDLE].frame_duration = 10;
+  animations[ANIM_STATE_IDLE].frame_duration = 16;
 
   ecs_add_w_data(ecs, entity, TRANSFORM, &(Transform){ .position = position });
   ecs_add_w_data(ecs, entity, DIALOGUE, &(Dialogue){ conversation_id });
+  ecs_add_w_data(ecs, entity, NAME, &(Name){ .value = "nova" });
+  ecs_add_w_data(ecs,
+                 entity,
+                 ATTACK_MASK,
+                 &(AttackMask){ BIT(CATEGORY_PLAYER) | BIT(CATEGORY_ENEMY) });
+  ecs_add_w_data(ecs, entity, HEALTH, &(Health){ 15, 15 });
+  ecs_add_w_data(
+      ecs,
+      entity,
+      HEAL_BAR,
+      &(HealthBar){ .color = { 0x03, 0xb6, 0xfc, 0xff }, .len = 20, .anchor = { 6, 23 } });
+  ecs_add_w_data(ecs, entity, DROP, &(Drop){ .item1 = ITEM_TYPE_KEY_1_1, .change1 = 100 });
 
   hitbox            = ecs_add(ecs, entity, HITBOX);
   hitbox->category  = CATEGORY_INTERACABLE;
-  hitbox->mask_bits = 0;
+  hitbox->mask_bits = BIT(CATEGORY_PROJECTILE);
   hitbox->size.x    = 13;
   hitbox->size.y    = 19;
   hitbox->anchor.x  = 6;
@@ -1184,9 +1235,32 @@ ecs_entity_t make_npc_nova(Ecs* ecs, Vec2 position, u16 conversation_id)
   animator = ecs_add(ecs, entity, ANIMATOR);
   animator_init(animator, animations, NUM_ANIM_STATES);
 
-  visual = ecs_add(ecs, entity, VISUAL);
+  visual           = ecs_add(ecs, entity, VISUAL);
   visual->anchor.x = 16;
   visual->anchor.y = 32;
 
   return entity;
+}
+
+ecs_entity_t make_trigger(Ecs* ecs, Vec2 pos, Vec2 size, u16 mask)
+{
+  ecs_entity_t entity;
+
+  HitBox* hitbox;
+
+  entity = ecs_create(ecs);
+
+  hitbox            = ecs_add(ecs, entity, HITBOX);
+  hitbox->size      = size;
+  hitbox->mask_bits = mask;
+  hitbox->category  = CATEGORY_TRIGGER;
+
+  ecs_add_w_data(ecs, entity, TRANSFORM, &(Transform){ .position = pos });
+
+  return entity;
+}
+
+ecs_entity_t make_key_1_1(Ecs *ecs, Vec2 pos) 
+{
+  return make_pickupable_entity(ecs, TEX_KEY, ITEM_TYPE_KEY_1_1, pos);
 }

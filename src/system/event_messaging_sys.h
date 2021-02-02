@@ -27,6 +27,7 @@ enum
   MSG_GAME_SCENE_UNLOAD,
   MSG_GAME_SCENE_LOADED,
   MSG_HIT_DOOR,
+  MSG_HIT_TRIGGER,
   NUM_MSGS,
 };
 
@@ -147,10 +148,16 @@ typedef struct
   ecs_entity_t door;
 } MSG_HitDoor;
 
+typedef struct 
+{
+  ecs_entity_t entity;
+  ecs_entity_t trigger;
+} MSG_HitTrigger;
+
 void ems_init();
 void ems_fini();
 void ems_connect(int sig_id, pointer_t arg, funcptr_t func);
 void ems_disconnect(int sig_id, pointer_t func_or_instance);
-void ems_broadcast(int sig_id, const pointer_t event);
+void ems_broadcast(int sig_id, const void* event);
 
 #endif // MEDIATOR_H

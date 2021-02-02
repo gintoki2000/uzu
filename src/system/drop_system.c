@@ -1,13 +1,14 @@
 #include "drop_system.h"
+#include "event_messaging_sys.h"
 #include <components.h>
 #include <entity_factory.h>
 #include <types.h>
-#include "event_messaging_sys.h"
 
 static ecs_entity_t (*create_fn_tbl[NUM_ITEM_TYPES])(Ecs*, Vec2) = {
   [ITEM_TYPE_RED_FLASK]     = make_red_flask,
   [ITEM_TYPE_BIG_RED_FLASK] = make_big_red_flask,
   [ITEM_TYPE_BLUE_FLASK]    = make_blue_flask,
+  [ITEM_TYPE_KEY_1_1]       = make_key_1_1,
 };
 
 extern Ecs* g_ecs;

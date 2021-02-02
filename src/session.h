@@ -17,4 +17,6 @@ struct Session
 extern struct Session g_session;
 
 void new_game(u16 starting_class);
+void save_game_data();
+void load_game_data();
 #endif // SESSION_H

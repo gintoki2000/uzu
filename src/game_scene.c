@@ -100,7 +100,9 @@ static void spawn_player(Vec2 pos)
   // TODO: di chuyển data của player + vũ khí từ ecs registry tạm về lại ecs registry chính
 
   player = g_char_create_fn_tbl[g_session.job](g_ecs, pos);
-  weapon = g_weapon_create_fn_tbl[g_session.weapon](g_ecs, BIT(CATEGORY_ENEMY));
+  weapon =
+      g_weapon_create_fn_tbl[g_session.weapon](g_ecs,
+                                               BIT(CATEGORY_ENEMY) | BIT(CATEGORY_INTERACABLE));
 
   make_player(g_ecs, player, weapon);
 
@@ -140,6 +142,10 @@ static void on_load()
     ems_broadcast(MSG_NEW_GAME, NULL);
     ems_broadcast(MSG_LEVEL_LOADED, &(MSG_LevelLoaded){ "0" });
     spawn_player(g_session.pos);
+    add_to_inv(ITEM_TYPE_ANIME_SWORD, 1);
+    add_to_inv(ITEM_TYPE_CLEAVER, 1);
+    add_to_inv(ITEM_TYPE_SPEAR, 1);
+    add_to_inv(ITEM_TYPE_STAFF, 1);
   }
   else
   {
@@ -182,7 +188,7 @@ static void on_update()
       pos.y += 30;
       spawn_player(pos);
     }
-    ems_broadcast(MSG_LEVEL_LOADED, &(MSG_LevelLoaded){_next_level});
+    ems_broadcast(MSG_LEVEL_LOADED, &(MSG_LevelLoaded){ _next_level });
 
     _has_next_level = FALSE;
   }
@@ -231,11 +237,11 @@ static void on_update()
     ui_dialogue_draw();
     ui_quality_draw();
 
-#if 1
+#if 0
     // render debug
     // collision_system_render_debug();
     // path_rendering_system_update();
-    //move_target_rendering_system_update();
+    // move_target_rendering_system_update();
     hitbox_rendering_system_update();
     position_rendering_system_update();
 #endif

@@ -13,11 +13,11 @@ typedef struct CBThust_QueryHitEntitiesArgs
   int          direction; // -1 / 1
 } CBThust_QueryHitEntitiesArgs;
 
-static const Vec2 IMPACT_FORCE = { 100.f, 0.f };
+static const Vec2 k_impact_force = { 100.f, 0.f };
 
 static BOOL __cb_query_hit_entities(CBThust_QueryHitEntitiesArgs* args, ecs_entity_t e)
 {
-  Vec2 force = vec2_mul(IMPACT_FORCE, args->direction);
+  Vec2 force = vec2_mul(k_impact_force, args->direction);
   ems_broadcast(MSG_DEAL_DAMAGE,
                 &(MSG_DealDamage){
                     .dealer      = args->dealer,
@@ -25,7 +25,7 @@ static BOOL __cb_query_hit_entities(CBThust_QueryHitEntitiesArgs* args, ecs_enti
                     .damage      = args->damage,
                     .impact      = TRUE,
                     .force       = force,
-                    .impact_time = 10,
+                    .impact_time = 15,
                     .type        = DAMAGE_TYPE_THUST,
                 });
   return TRUE;

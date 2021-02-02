@@ -32,7 +32,8 @@ static void on_projectile_hit(void* arg, const MSG_ProjectileHit* event)
 {
   (void)arg;
   ProjectileAttributes* attributes;
-  if ((attributes = ecs_get(g_ecs, event->projectile, PROJECTILE_ATTRIBUTES)))
+  if ((attributes = ecs_get(g_ecs, event->projectile, PROJECTILE_ATTRIBUTES)) &&
+      ecs_has(g_ecs, event->entity, HEALTH))
   {
     ems_broadcast(MSG_DEAL_DAMAGE,
                   &(MSG_DealDamage){
@@ -40,10 +41,10 @@ static void on_projectile_hit(void* arg, const MSG_ProjectileHit* event)
                       .dealer      = ECS_NULL_ENT,
                       .receiver    = event->entity,
                       .type        = attributes->damage_type,
-					  .impact      = attributes->impact,
-					  .force       = attributes->impact_force,
-					  .impact_time = attributes->impact_time,
-					  .zforce      = attributes->impact_force_z,
+                      .impact      = attributes->impact,
+                      .force       = attributes->impact_force,
+                      .impact_time = attributes->impact_time,
+                      .zforce      = attributes->impact_force_z,
                   });
     if (attributes->destroy_when_hit)
     {

@@ -43,7 +43,5 @@ system_source_files = files(
 
   #game events
   './game_event/game_event.c',
-  './game_event/get_weapon.c',
-  './game_event/kill_monsters.c',
   './game_event/begining.c',
 )

@@ -158,7 +158,27 @@ BOOL add_to_inv(ItemTypeId type_id, u8 quality)
 
 BOOL has_item(ItemTypeId type_id)
 {
-	return find_item(type_id) != -1;
+  return find_item(type_id) != -1;
+}
+
+Item* get_item(ItemTypeId type_id)
+{
+  u16 category = g_item_types[type_id].category;
+  int index    = find_item(type_id);
+  if (index != -1)
+  {
+    return &_items[category][index];
+  }
+  else
+  {
+    return NULL;
+  }
+}
+
+u8 get_item_count(ItemTypeId type_id)
+{
+  const Item* item = get_item(type_id);
+  return item ? item->num_items : 0;
 }
 
 void inventory_display()
@@ -212,13 +232,13 @@ void inventory_draw()
                        &tp->sprite.rect,
                        &cell_rect);
         if (items[idx].num_items > 1)
-			FC_DrawColor(get_font(FONT_DAMAGE_INDICATOR),
-						 g_renderer,
-						 cell_rect.x + 3,
-						 cell_rect.y + 3,
-						 (COLOR){ 232, 39, 194, 255 },
-						 "%d",
-						 items[idx].num_items);
+          FC_DrawColor(get_font(FONT_DAMAGE_INDICATOR),
+                       g_renderer,
+                       cell_rect.x + 3,
+                       cell_rect.y + 3,
+                       (COLOR){ 232, 39, 194, 255 },
+                       "%d",
+                       items[idx].num_items);
       }
     }
   }

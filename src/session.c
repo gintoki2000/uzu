@@ -12,6 +12,8 @@ void new_game(u16 starting_job)
   g_session.new_game = TRUE;
   g_session.pos.x    = TILE_SIZE * 5;
   g_session.pos.y    = TILE_SIZE * 7;
+  
+  strcpy(g_session.level, "0");
 
   switch (starting_job)
   {

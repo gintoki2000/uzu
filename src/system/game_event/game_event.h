@@ -7,6 +7,28 @@ typedef enum
   GAME_EVENT_KILL_MONSTER,
 } GameEventCode;
 
+#define EVENT_SAVE_AND_LOAD_FN()                                                                   \
+  static BOOL load_save_data()                                                                     \
+  {                                                                                                \
+    FILE* file;                                                                                    \
+    if ((file = fopen(FILE_DATA_NAME, "r")) != NULL)                                               \
+    {                                                                                              \
+      fread(&_save_block, sizeof(_save_block), 1, file);                                           \
+      fclose(file);                                                                                \
+      return TRUE;                                                                                 \
+    }                                                                                              \
+    return FALSE;                                                                                  \
+  }                                                                                                \
+  static void write_save_data()                                                                    \
+  {                                                                                                \
+    FILE* file;                                                                                    \
+    if ((file = fopen(FILE_DATA_NAME, "w")) != NULL)                                               \
+    {                                                                                              \
+      fwrite(&_save_block, sizeof(_save_block), 1, file);                                          \
+      fclose(file);                                                                                \
+    }                                                                                              \
+  }
+
 void game_event_init(void);
 void game_event_fini(void);
 void notify_game_event_finished(GameEventCode event_code);

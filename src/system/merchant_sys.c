@@ -34,7 +34,7 @@ static void process_key_input();
 
 void merchant_system_init()
 {
-  ems_connect(MSG_COMANND_SELECTED, NULL, (slot_t)on_command_selected);
+  ems_connect(MSG_COMANND_SELECTED, NULL, on_command_selected);
 }
 
 void merchant_system_update()

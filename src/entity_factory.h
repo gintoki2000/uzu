@@ -5,12 +5,12 @@
 #include <ecs/ecs.h>
 #include <toolbox/toolbox.h>
 
-ecs_entity_t make_anime_sword(Ecs* ecs);
 ecs_entity_t make_axe(Ecs* ecs);
 ecs_entity_t make_bow(Ecs* ecs);
 ecs_entity_t make_arrow(Ecs* ecs, Vec2 pos, Vec2 vel);
 ecs_entity_t make_golden_cross_hit_effect(Ecs* ecs, Vec2 pos);
-ecs_entity_t make_flask_base(Ecs* ecs, TextureId texture_id, ItemTypeId item_type_id, Vec2 pos);
+ecs_entity_t
+             make_pickupable_entity(Ecs* ecs, TextureId texture_id, ItemTypeId item_type_id, Vec2 pos);
 ecs_entity_t make_thunder_storm(Ecs* ecs, Vec2 center);
 ecs_entity_t make_thunder(Ecs* ecs, Vec2 pos, u16 mask_bits);
 
@@ -35,6 +35,7 @@ ecs_entity_t make_spear(Ecs* ecs, u16 mask);
 ecs_entity_t make_cleaver(Ecs* ecs, u16 mask);
 ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask);
 ecs_entity_t make_staff(Ecs* ecs, u16 mask);
+ecs_entity_t make_anime_sword(Ecs* ecs, u16 mask);
 
 // chars
 ecs_entity_t make_wizzard(Ecs* ecs, Vec2 pos);
@@ -46,6 +47,7 @@ ecs_entity_t make_dragon(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_big_red_flask(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_red_flask(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_blue_flask(Ecs* ecs, Vec2 pos);
+ecs_entity_t make_key_1_1(Ecs* ecs, Vec2 pos);
 
 // monsters
 ecs_entity_t make_huge_demon(Ecs* ecs, Vec2 pos);
@@ -56,6 +58,7 @@ ecs_entity_t make_imp(Ecs* ecs, Vec2 pos);
 // other
 ecs_entity_t make_door(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_chest(Ecs* ecs, Vec2 pos, Item items[CHEST_MAX_ITEMS], u16 cnt);
+ecs_entity_t make_trigger(Ecs* ecs, Vec2 pos, Vec2 size, u16 mask);
 
 // effects
 ecs_entity_t make_blood_loss_particle(Ecs* ecs, Vec2 position);
@@ -65,6 +68,7 @@ ecs_entity_t make_ice_cast_effect(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_fire_cast_effect(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_ice_hit_effect(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_fire_hit_effect(Ecs* ecs, Vec2 pos);
+ecs_entity_t make_slash_effect(Ecs* ecs, Vec2 pos, SDL_RendererFlip flip);
 
 // projectile
 ecs_entity_t make_fire_ball(Ecs* ecs, Vec2 pos, Vec2 direction, u16 mask);

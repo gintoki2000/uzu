@@ -1,0 +1,12 @@
+{
+  "name": "nova_00",
+  "sentences": [
+    "You are also a treasure hunter",
+    "It looks like you're stuck here",
+    "I will show you how to get to the next place if you help me"
+  ],
+  "responses": [
+    "yes",
+    "no"
+  ]
+}

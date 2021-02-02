@@ -62,6 +62,7 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
   [REMOVE_IF_OFFSCREEN]        = ECS_TYPE(RemoveIfOffScreen),
   [PROJECTILE_ATTRIBUTES]      = ECS_TYPE(ProjectileAttributes),
   [HOLDER]                     = ECS_TYPE_EX(Holder, holder_init, NULL, NULL),
+  [ATTACK_MASK]                = ECS_TYPE(AttackMask),
 };
 
 Animation*

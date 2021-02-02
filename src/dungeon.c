@@ -48,7 +48,6 @@ static BOOL on_game_init()
     return FALSE;
   }
 
-  new_game(JOB_KNIGHT);
   set_scene(&g_main_menu);
 
   return TRUE;

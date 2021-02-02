@@ -188,7 +188,7 @@ static void narrow_phase(Ecs* ecs)
 void collision_system_init()
 {
   _rtree = rtree_new();
-  ecs_connect(g_ecs, ECS_SIG_COMP_RMV, NULL, SLOT(on_component_remove));
+  ecs_connect(g_ecs, ECS_SIG_COMP_RMV, NULL, on_component_remove);
 }
 
 void collision_system_fini()

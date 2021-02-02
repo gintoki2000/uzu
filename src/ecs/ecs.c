@@ -271,9 +271,9 @@ SDL_bool ecs_has(Ecs* self, ecs_entity_t entity, ecs_size_t type_id)
   return ecs_pool_contains(self->pools[type_id], entity);
 }
 
-void ecs_connect(Ecs* self, int sig, void* udata, slot_t slot)
+void ecs_connect(Ecs* self, int sig, void* udata, void(*func)())
 {
-  dispatcher_connect(self->dispatcher, sig, udata, slot);
+  dispatcher_connect(self->dispatcher, sig, udata, func);
 }
 
 void ecs_clear(Ecs* self)

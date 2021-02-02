@@ -49,6 +49,7 @@ static const char*  _texture_files[NUM_TEXS] = {
   [TEX_EFFECT_FIRE_CAST]     = "asserts/effect/firecast.png",
   [TEX_FIRE_BALL]            = "asserts/fireball.png",
   [TEX_ELITE_KNIGHT]         = "asserts/elite_knight.png",
+  [TEX_EFFECT_SLASH]         = "asserts/SwordFx.png",
 };
 
 static Mix_Music*  _bg_musics[NUM_BG_MUSICS];
@@ -89,9 +90,12 @@ static FONT* _fonts[NUM_FONTS];
 
 static Conversation _conversations[NUM_CONVERSATIONS];
 static char*        _conversation_files[NUM_CONVERSATIONS] = {
-  [CONVERSATION_DEMO1] = "asserts/conversation/demo1.json",
-  [CONVERSATION_DEMO2] = "asserts/conversation/demo2.json",
-  [CONVERSATION_DEMO3] = "asserts/conversation/demo3.json",
+  [CONVERSATION_DEMO1]   = "asserts/conversation/demo1.json",
+  [CONVERSATION_DEMO2]   = "asserts/conversation/demo2.json",
+  [CONVERSATION_DEMO3]   = "asserts/conversation/demo3.json",
+  [CONVERSATION_NOVA_00] = "asserts/conversation/nova_00.json",
+  [CONVERSATION_NOVA_01] = "asserts/conversation/nova_01.json",
+  [CONVERSATION_NOVA_02] = "asserts/conversation/nova_02.json",
 };
 
 extern SDL_Renderer* g_renderer;

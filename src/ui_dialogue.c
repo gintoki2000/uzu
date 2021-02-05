@@ -3,7 +3,7 @@
 #include "ecs/ecs.h"
 #include "engine/keyboard.h"
 #include "resources.h"
-#include "types.h"
+#include "global.h"
 #include "ui_list.h"
 
 #define MAX_TEXT_LENGTH 255

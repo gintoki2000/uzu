@@ -1,4 +1,4 @@
-#include "system/life_span_sys.h"
+#include "system/game_logic.h"
 #include "components.h"
 #include "system/event_messaging_sys.h"
 

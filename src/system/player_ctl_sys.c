@@ -1,6 +1,6 @@
-#include "system/player_ctl_sys.h"
+#include "system/game_logic.h"
 
-#include "../../include/entity_utils.h"
+#include "entity_utils.h"
 #include "components.h"
 #include "constances.h"
 #include "ecs/ecs.h"
@@ -126,10 +126,9 @@ void player_controller_system_update()
   Controller*  controller;
   Motion*      motion;
 
-  find_interacable_entity();
-
   if ((player = get_player(g_ecs)) == ECS_NULL_ENT)
     return;
+  find_interacable_entity();
 
   controller = ecs_get(g_ecs, player, CONTROLLER);
   motion     = ecs_get(g_ecs, player, MOTION);

@@ -28,6 +28,8 @@ enum
   MSG_GAME_SCENE_LOADED,
   MSG_HIT_DOOR,
   MSG_HIT_TRIGGER,
+  MSG_ITEM_PICKED_UP,
+  MSG_COIN_PICKED_UP,
   NUM_MSGS,
 };
 
@@ -86,11 +88,11 @@ typedef struct
   int          type;
 } MSG_GetDamaged;
 
-typedef struct
+typedef struct MSG_HitPickupableEntity
 {
   ecs_entity_t player;
-  ecs_entity_t item;
-} MSG_PlayerHitItem;
+  ecs_entity_t pickupable_entity;
+} MSG_HitPickupableEntity;
 
 typedef struct
 {
@@ -139,7 +141,7 @@ typedef struct
 
 typedef struct
 {
-	const char* level_name;
+  const char* level_name;
 } MSG_LevelUnloaded;
 
 typedef struct
@@ -148,11 +150,24 @@ typedef struct
   ecs_entity_t door;
 } MSG_HitDoor;
 
-typedef struct 
+typedef struct
 {
   ecs_entity_t entity;
   ecs_entity_t trigger;
 } MSG_HitTrigger;
+
+typedef struct
+{
+  ecs_entity_t pickupable_entity;
+  u16          item_type_id;
+  Vec2         position;
+} MSG_ItemPickedUp;
+
+typedef struct
+{
+  u16  amount;
+  Vec2 position;
+} MSG_CoinPickedUp;
 
 void ems_init();
 void ems_fini();

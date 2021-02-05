@@ -1,5 +1,5 @@
 #include "constances.h"
-#include "types.h"
+#include "global.h"
 
 const COLOR UI_COLOR_BG            = { 0xd2, 0xbd, 0xa7, 0xff };
 const COLOR UI_COLOR_BORDER        = { 0xa9, 0x8b, 0x79, 0xff };

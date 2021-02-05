@@ -1,6 +1,6 @@
-#include "system/dialogue_sys.h"
+#include "system/game_logic.h"
 
-#include "../../include/entity_utils.h"
+#include "entity_utils.h"
 #include "components.h"
 #include "constances.h"
 #include "ecs/ecs.h"

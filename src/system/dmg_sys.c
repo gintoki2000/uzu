@@ -1,4 +1,4 @@
-#include "system/dmg_sys.h"
+#include "system/game_logic.h"
 #include "system/event_messaging_sys.h"
 #include "components.h"
 #include "resources.h"
@@ -38,7 +38,7 @@ static void on_projectile_hit(void* arg, const MSG_ProjectileHit* event)
     ems_broadcast(MSG_DEAL_DAMAGE,
                   &(MSG_DealDamage){
                       .damage      = attributes->damage,
-                      .dealer      = ECS_NULL_ENT,
+                      .dealer      = attributes->shooter,
                       .receiver    = event->entity,
                       .type        = attributes->damage_type,
                       .impact      = attributes->impact,

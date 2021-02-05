@@ -1,5 +1,5 @@
 #include "struct_meta_data.h"
-#include "types.h"
+#include "global.h"
 
 static FieldMetaData CONVERSATION_FIELDS[] = {
   JSON_FIELD(Conversation, JSON_FIELD_TYPE_STRING, name),

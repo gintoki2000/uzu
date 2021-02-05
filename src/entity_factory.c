@@ -120,8 +120,8 @@ ecs_entity_t make_character_base(Ecs* ecs, Vec2 position, u16 texture_id)
   motion->max_force = 10;
 
   heath                 = ecs_add(ecs, entity, HEALTH);
-  heath->hit_points     = 40;
-  heath->max_hit_points = 40;
+  heath->hit_points     = 12;
+  heath->max_hit_points = 12;
 
   ecs_add(ecs, entity, ENDABLE_TILE_COLLISION_TAG);
   ecs_add(ecs, entity, CHARACTER_ANIMATOR_TAG);
@@ -152,8 +152,8 @@ typedef struct NewMonsterParams
   Vec2 size;
 } NewMonsterParams;
 
-static const Vec2 k_big_size   = { 20.f, 20.f };
-static const Vec2 k_small_size = { 10.f, 12.f };
+static const Vec2 s_big_size   = { 20.f, 20.f };
+static const Vec2 s_small_size = { 10.f, 12.f };
 
 ecs_entity_t make_monster_base(Ecs* ecs, const NewMonsterParams* params)
 {
@@ -249,29 +249,45 @@ ecs_entity_t make_monster_base(Ecs* ecs, const NewMonsterParams* params)
 
 ecs_entity_t make_huge_demon(Ecs* ecs, Vec2 position)
 {
-  return make_monster_base(ecs, &(NewMonsterParams){ position, TEX_BIG_DEMON, 30, k_big_size });
+  return make_monster_base(ecs, &(NewMonsterParams){ position, TEX_BIG_DEMON, 30, s_big_size });
 }
 
 ecs_entity_t make_imp(Ecs* ecs, Vec2 position)
 {
   ecs_entity_t entity =
-      make_monster_base(ecs, &(NewMonsterParams){ position, TEX_IMP, 5, k_small_size });
+      make_monster_base(ecs, &(NewMonsterParams){ position, TEX_IMP, 5, s_small_size });
   ecs_add_w_data(ecs,
                  entity,
                  SELF_DESTRUCTION,
                  &(SelfDestruction){ .emiting_interval = 10, .range = 16, .target = ECS_NULL_ENT });
+
+  BTRoot*                     root;
+  BTCondition_IsPlayerInSpot* is_player_in_spot;
+  BTTask_FollowPlayer*        follow_player;
+
+  root              = bt_root_new();
+  is_player_in_spot = bt_condition_is_player_in_spot_new();
+  follow_player     = bt_task_follow_player_new(16);
+
+  ecs_add(ecs, entity, CONTROLLER);
+
+  bt_root_set_child(root, (BTNode*)is_player_in_spot);
+  bt_decorator_set_child((BTDecorator*)is_player_in_spot, (BTNode*)follow_player);
+
+  ecs_add_w_data(ecs, entity, BRAIN, &(Brain){ (BTNode*)root });
+  ecs_add_w_data(ecs, entity, SPOT, &(Spot){ .position = position, .radius = 100.f });
   return entity;
 }
 
 ecs_entity_t make_wogol(Ecs* ecs, Vec2 position)
 {
-  return make_monster_base(ecs, &(NewMonsterParams){ position, TEX_WOGOL, 5, k_small_size });
+  return make_monster_base(ecs, &(NewMonsterParams){ position, TEX_WOGOL, 5, s_small_size });
 }
 
 ecs_entity_t make_chort(Ecs* ecs, Vec2 position)
 {
   ecs_entity_t entity =
-      make_monster_base(ecs, &(NewMonsterParams){ position, TEX_CHORT, 5, k_small_size });
+      make_monster_base(ecs, &(NewMonsterParams){ position, TEX_CHORT, 5, s_small_size });
 
   /*components */
   Drop*       drop;
@@ -287,8 +303,8 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 position)
   ecs_add(ecs, entity, ENEMY_TAG);
 
   drop          = ecs_add(ecs, entity, DROP);
-  drop->item1   = ITEM_TYPE_RED_FLASK;
-  drop->item2   = ITEM_TYPE_BLUE_FLASK;
+  drop->item1   = PICKUPABLE_RED_FLASK;
+  drop->item2   = PICKUPABLE_BLUE_FLASK;
   drop->change1 = 70;
   drop->change2 = 60;
 
@@ -300,7 +316,7 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 position)
   BTSelector*                    hostile;
   BTTask_Attack*                 attack;
   BTSequence*                    attack_seq;
-  BTCondition_IsPlayerCrossSpot* is_player_cross_spot;
+  BTCondition_IsPlayerInSpot*    is_player_cross_spot;
   BTSequence*                    back_to_spot_seq;
   BTTask_SetDestToSpot*          set_dest_to_spot;
   BTSelector*                    selector;
@@ -308,17 +324,17 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 position)
   BTTask_FollowPlayer*           chase;
 
   root                  = bt_root_new();
-  wait                  = wait_new(30);
+  wait                  = bt_task_wait_new(30);
   attack                = bt_task_attack_new(BTTASK_ATTACK_MODE_PLAYER);
   hostile               = bt_selector_new();
   attack_seq            = bt_sequence_new();
-  is_player_cross_spot  = is_player_cross_spot_new();
-  move_to               = move_to_new(2.f);
+  is_player_cross_spot  = bt_condition_is_player_in_spot_new();
+  move_to               = bt_task_move_to_new(2.f);
   back_to_spot_seq      = bt_sequence_new();
-  set_dest_to_spot      = set_dest_to_spot_new();
+  set_dest_to_spot      = bt_task_set_dest_to_spot_new();
   selector              = bt_selector_new();
-  is_player_out_of_spot = is_player_out_of_spot_new();
-  wait_a_momment        = wait_new(50);
+  is_player_out_of_spot = bt_condition_is_player_out_of_spot_new();
+  wait_a_momment        = bt_task_wait_new(50);
   chase                 = bt_task_follow_player_new(16.f);
   bt_root_set_child(root, (BTNode*)selector);
 
@@ -517,29 +533,28 @@ ecs_entity_t make_golden_cross_hit_effect(Ecs* ecs, Vec2 position)
 
 ecs_entity_t make_big_red_flask(Ecs* ecs, Vec2 position)
 {
-  return make_pickupable_entity(ecs, TEX_FLASK_RED_BIG, ITEM_TYPE_BIG_RED_FLASK, position);
+  return make_pickupable_entity(ecs, TEX_FLASK_RED_BIG, PICKUPABLE_BIG_RED_FLASK, position);
 }
 
 ecs_entity_t make_red_flask(Ecs* ecs, Vec2 position)
 {
-  return make_pickupable_entity(ecs, TEX_FLASK_RED, ITEM_TYPE_RED_FLASK, position);
+  return make_pickupable_entity(ecs, TEX_FLASK_RED, PICKUPABLE_RED_FLASK, position);
 }
 
 ecs_entity_t make_blue_flask(Ecs* ecs, Vec2 position)
 {
-  return make_pickupable_entity(ecs, TEX_BLUE_FLASK, ITEM_TYPE_BLUE_FLASK, position);
+  return make_pickupable_entity(ecs, TEX_BLUE_FLASK, PICKUPABLE_BLUE_FLASK, position);
 }
 
-ecs_entity_t
-make_pickupable_entity(Ecs* ecs, TextureId texture_id, ItemTypeId item_type_id, Vec2 position)
+ecs_entity_t make_pickupable_entity(Ecs* ecs, u16 texture_id, u16 id, Vec2 position)
 {
   ecs_entity_t entity;
   TEXTURE*     texture;
 
-  Visual*    visual;
-  Transform* transform;
-  HitBox*    hitbox;
-  ItemTag*   tag;
+  Visual*               visual;
+  Transform*            transform;
+  HitBox*               hitbox;
+  PickupableAttributes* attrs;
 
   texture = get_texture(texture_id);
 
@@ -559,8 +574,14 @@ make_pickupable_entity(Ecs* ecs, TextureId texture_id, ItemTypeId item_type_id, 
   hitbox->category  = CATEGORY_ITEM;
   hitbox->mask_bits = BIT(CATEGORY_PLAYER);
 
-  tag          = ecs_add(ecs, entity, ITEM_TAG);
-  tag->item_id = item_type_id;
+  attrs      = ecs_add(ecs, entity, PICKUPABLE_ATTRIBUTES);
+  attrs->id  = id;
+  attrs->sfx = SFX_INTERACTION;
+
+  ecs_add_w_data(ecs,
+                 entity,
+                 MOTION,
+                 &(Motion){ .friction = .2f, .max_speed = 150.f, .bounching = .8f });
   return entity;
 }
 
@@ -922,7 +943,7 @@ ecs_entity_t make_staff(Ecs* ecs, u16 mask)
   return entity;
 }
 
-ecs_entity_t make_fire_ball(Ecs* ecs, Vec2 pos, Vec2 direction, u16 mask)
+ecs_entity_t make_fire_ball(Ecs* ecs, ecs_entity_t shooter, Vec2 pos, Vec2 direction, u16 mask)
 {
   ecs_entity_t entity = ecs_create(ecs);
 
@@ -969,16 +990,15 @@ ecs_entity_t make_fire_ball(Ecs* ecs, Vec2 pos, Vec2 direction, u16 mask)
   attributes->impact_force     = vec2_mul(vec2_unit_vec(direction), 100.f);
   attributes->impact_time      = 16;
   attributes->sfx              = SFX_ID_NULL;
+  attributes->shooter          = shooter;
 
   ecs_add(ecs, entity, REMOVE_IF_OFFSCREEN);
 
   return entity;
 }
 
-ecs_entity_t make_ice_arrow(Ecs* ecs, Vec2 pos, Vec2 direction, u16 mask)
+ecs_entity_t make_ice_arrow(Ecs* ecs, ecs_entity_t shooter, Vec2 pos, Vec2 direction, u16 mask)
 {
-  (void)mask;
-  (void)direction;
   ecs_entity_t entity = ecs_create(ecs);
 
   Animation animation;
@@ -1024,6 +1044,7 @@ ecs_entity_t make_ice_arrow(Ecs* ecs, Vec2 pos, Vec2 direction, u16 mask)
   attributes->impact_force     = vec2_mul(vec2_unit_vec(direction), 100.f);
   attributes->impact_time      = 16;
   attributes->sfx              = SFX_ID_NULL;
+  attributes->shooter          = shooter;
 
   ecs_add(ecs, entity, REMOVE_IF_OFFSCREEN);
 
@@ -1248,7 +1269,7 @@ ecs_entity_t make_npc_nova(Ecs* ecs, Vec2 position, u16 conversation_id)
   animation_init(&animations[ANIM_STATE_JUMP], texture, sw * 6, 0, 1, 1, sw, sh);
 
   animations[ANIM_STATE_IDLE].frame_duration = 16;
-  animations[ANIM_STATE_RUN].frame_duration  = 10;
+  animations[ANIM_STATE_RUN].frame_duration  = 3;
 
   ecs_add_w_data(ecs, entity, TRANSFORM, &(Transform){ .position = position });
   ecs_add_w_data(ecs, entity, DIALOGUE, &(Dialogue){ conversation_id });
@@ -1263,7 +1284,7 @@ ecs_entity_t make_npc_nova(Ecs* ecs, Vec2 position, u16 conversation_id)
       entity,
       HEAL_BAR,
       &(HealthBar){ .color = { 0x03, 0xb6, 0xfc, 0xff }, .len = 20, .anchor = { 6, 23 } });
-  ecs_add_w_data(ecs, entity, DROP, &(Drop){ .item1 = ITEM_TYPE_KEY_1_1, .change1 = 100 });
+  ecs_add_w_data(ecs, entity, DROP, &(Drop){ .item1 = PICKUPABLE_KEY_1_1, .change1 = 100, .change2 = 0 });
   ecs_add_w_data(ecs, entity, MOTION, &(Motion){ .max_speed = 60.f });
   ecs_add(ecs, entity, CHARACTER_ANIMATOR_TAG);
 
@@ -1305,7 +1326,7 @@ ecs_entity_t make_npc_nova(Ecs* ecs, Vec2 position, u16 conversation_id)
   task_equip         = bt_task_equip_new(WEAPON_ANIME_SWORD);
   selector1          = bt_selector_new();
   selector2          = bt_selector_new();
-  wait_affter_attack = wait_new(40);
+  wait_affter_attack = bt_task_wait_new(40);
   sequence           = bt_sequence_new();
 
   bt_root_set_child(root, (BTNode*)is_attacked);
@@ -1327,6 +1348,7 @@ ecs_entity_t make_npc_nova(Ecs* ecs, Vec2 position, u16 conversation_id)
                  EQUIPMENT,
                  &(Equipment){ .weapon = ECS_NULL_ENT, .weapon_anchor = { 8, -9 } });
 
+  ecs_add(ecs, entity, ENDABLE_TILE_COLLISION_TAG);
   return entity;
 }
 
@@ -1348,7 +1370,51 @@ ecs_entity_t make_trigger(Ecs* ecs, Vec2 pos, Vec2 size, u16 mask)
   return entity;
 }
 
+ecs_entity_t make_coin(Ecs* ecs, Vec2 position)
+{
+  ecs_entity_t entity;
+  Animation    anim;
+
+  Visual*               visual;
+  Transform*            transform;
+  HitBox*               hitbox;
+  PickupableAttributes* attrs;
+  Animator*             animator;
+
+  animation_init(&anim, get_texture(TEX_COIN), 0, 0, 1, 4, 8, 8);
+  anim.frame_duration = 6;
+
+  entity = ecs_create(ecs);
+
+  visual         = ecs_add(ecs, entity, VISUAL);
+  visual->anchor = (POINT){ 4, 4 };
+
+  animator = ecs_add(ecs, entity, ANIMATOR);
+  animator_init(animator, &anim, 1);
+
+  transform           = ecs_add(ecs, entity, TRANSFORM);
+  transform->position = position;
+
+  hitbox            = ecs_add(ecs, entity, HITBOX);
+  hitbox->size      = (Vec2){ 8.f, 8.f };
+  hitbox->anchor    = (Vec2){ 4.f, 4.f };
+  hitbox->proxy_id  = RTREE_NULL_NODE;
+  hitbox->category  = CATEGORY_ITEM;
+  hitbox->mask_bits = BIT(CATEGORY_PLAYER);
+
+  attrs      = ecs_add(ecs, entity, PICKUPABLE_ATTRIBUTES);
+  attrs->id  = PICKUPABLE_COIN;
+  attrs->sfx = SFX_COIN;
+  attrs->coins = 5;
+
+  ecs_add_w_data(ecs,
+                 entity,
+                 MOTION,
+                 &(Motion){ .friction = .2f, .max_speed = 150.f, .bounching = .8f });
+  return entity;
+}
+
 ecs_entity_t make_key_1_1(Ecs* ecs, Vec2 pos)
 {
-  return make_pickupable_entity(ecs, TEX_KEY, ITEM_TYPE_KEY_1_1, pos);
+  return make_pickupable_entity(ecs, TEX_KEY, PICKUPABLE_KEY_1_1, pos);
 }

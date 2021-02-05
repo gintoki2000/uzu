@@ -1,4 +1,6 @@
-#include "system/merchant_sys.h"
+#include "system/game_logic.h"
+
+#include "global.h"
 #include "constances.h"
 #include "engine/keyboard.h"
 #include "system/event_messaging_sys.h"
@@ -7,7 +9,6 @@
 #include "components.h"
 #include "ecs/ecs.h"
 #include "inventory.h"
-#include "types.h"
 #include "ui_helper.h"
 
 extern Ecs*          g_ecs;

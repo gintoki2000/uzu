@@ -9,11 +9,11 @@ struct IsPlayerCrossSpot
 
 const BTNodeVtbl* is_player_cross_spot_vtbl_inst();
 void               is_player_cross_spot_vtbl_init(BTConditionVtbl* vtbl);
-BTCondition_IsPlayerCrossSpot* is_player_cross_spot_init(BTCondition_IsPlayerCrossSpot* self);
-BOOL is_player_cross_spot_pred(BTCondition_IsPlayerCrossSpot* self, Ecs* ecs, ecs_entity_t entity);
+BTCondition_IsPlayerInSpot* is_player_cross_spot_init(BTCondition_IsPlayerInSpot* self);
+BOOL is_player_cross_spot_pred(BTCondition_IsPlayerInSpot* self, Ecs* ecs, ecs_entity_t entity);
 
 BT_VTBL_INST_FN(BTCondition, is_player_cross_spot)
-BT_ALLOC_FN(BTCondition_IsPlayerCrossSpot, is_player_cross_spot)
+BT_ALLOC_FN(BTCondition_IsPlayerInSpot, is_player_cross_spot)
 
 void is_player_cross_spot_vtbl_init(BTConditionVtbl* vtbl)
 {
@@ -21,18 +21,18 @@ void is_player_cross_spot_vtbl_init(BTConditionVtbl* vtbl)
   vtbl->pred = (bt_pred_fn_t)is_player_cross_spot_pred;
 }
 
-BTCondition_IsPlayerCrossSpot* is_player_cross_spot_new()
+BTCondition_IsPlayerInSpot* bt_condition_is_player_in_spot_new()
 {
   return is_player_cross_spot_init(is_player_cross_spot_alloc());
 }
 
-BTCondition_IsPlayerCrossSpot* is_player_cross_spot_init(BTCondition_IsPlayerCrossSpot* self)
+BTCondition_IsPlayerInSpot* is_player_cross_spot_init(BTCondition_IsPlayerInSpot* self)
 {
   bt_condition_init((BTCondition*)self, TRUE);
   return self;
 }
 
-BOOL is_player_cross_spot_pred(BTCondition_IsPlayerCrossSpot* self, Ecs* ecs, ecs_entity_t entity)
+BOOL is_player_cross_spot_pred(BTCondition_IsPlayerInSpot* self, Ecs* ecs, ecs_entity_t entity)
 {
   (void)self;
 

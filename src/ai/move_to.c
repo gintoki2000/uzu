@@ -21,7 +21,7 @@ void move_to_vtbl_init(BTNodeVtbl* vtbl)
   vtbl->abort  = (bt_abort_fn_t)move_to_abort;
 }
 
-BTTask_MoveTo* move_to_new(float arrive_radius)
+BTTask_MoveTo* bt_task_move_to_new(float arrive_radius)
 {
   return move_to_init(move_to_alloc(), arrive_radius);
 }

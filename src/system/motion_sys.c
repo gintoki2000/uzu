@@ -1,4 +1,4 @@
-#include "system/motion_sys.h"
+#include "system/game_logic.h"
 
 #include "components.h"
 #include "ecs/ecs.h"
@@ -61,14 +61,17 @@ void motion_system_update()
     transform->prev_position = transform->position;
     transform->position.x += motion_raw_array[i].vel.x * DT;
     transform->position.y += motion_raw_array[i].vel.y * DT;
+
+    if (absf(motion_raw_array[i].vz) < 0.1f)
+      motion_raw_array[i].vz = 0.f;
     transform->z += motion_raw_array[i].vz * DT;
     if (transform->z < 0.f)
     {
-      motion_raw_array[i].vz = 0.f;
-      transform->z           = 0.f;
+      motion_raw_array[i].vz *= -motion_raw_array[i].bounching;
+      transform->z = 0.f;
     }
 
-    if (!ecs_has(g_ecs, entities[i], INPUT_BLOCKER) && absf(motion_raw_array[i].vel.x) > 0.1f)
+    if ((!ecs_has(g_ecs, entities[i], INPUT_BLOCKER) && absf(motion_raw_array[i].vel.x) > 0.1f))
     {
       transform->hdir = motion_raw_array[i].vel.x > 0.f ? 1 : -1;
     }

@@ -1,3 +1,4 @@
+#include "../../include/global.h"
 #include "ecs/ecs.h"
 #include "entity_factory.h"
 #include "inventory.h"
@@ -5,7 +6,6 @@
 #include "system/collision_sys.h"
 #include "system/event_messaging_sys.h"
 #include "game_event/game_event.h"
-#include "types.h"
 #include "ui_msgbox.h"
 
 #define FILE_DATA_NAME "begining"

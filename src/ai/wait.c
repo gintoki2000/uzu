@@ -12,7 +12,7 @@ void wait_vtbl_init(BTNodeVtbl* vtbl)
   vtbl->finish = (bt_finish_fn_t)wait_finish;
 }
 
-BTTask_Wait* wait_new(int total_ticks)
+BTTask_Wait* bt_task_wait_new(int total_ticks)
 {
   return wait_init(wait_alloc(), total_ticks);
 }

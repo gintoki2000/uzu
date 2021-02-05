@@ -1,9 +1,9 @@
 #include "system/weapon_skill/thust.h"
+#include "resources.h"
 #include "system/collision_sys.h"
 #include "system/event_messaging_sys.h"
 #include <components.h>
 #include <ecs/ecs.h>
-#include "resources.h"
 
 extern Ecs* g_ecs;
 
@@ -31,8 +31,6 @@ static BOOL __cb_query_hit_entities(CBThust_QueryHitEntitiesArgs* args, ecs_enti
                 });
   return TRUE;
 }
-
-#define TIMER_TICK(__timer) ((__timer) > 0 && --(__timer) == 0)
 
 void weapon_skill_thust_update()
 {
@@ -68,7 +66,7 @@ void weapon_skill_thust_update()
             holder_controller->in_action = TRUE;
             holder_controller->action    = CHARACTER_ACTION_NONE;
 
-            transform->rotation = -15.0 * transform->hdir;
+            transform->rotation  = -15.0 * transform->hdir;
 
             skl[i].state = 1;
             skl[i].timer = 7;
@@ -115,6 +113,7 @@ void weapon_skill_thust_update()
             holder_equipment->d.x        = 0;
             holder_equipment->d.y        = 0;
             skl[i].state                 = 0;
+            transform->lock_hdir         = FALSE;
 
             damage_area.x = transform->position.x - 20;
             damage_area.y = transform->position.y - 9;
@@ -135,4 +134,3 @@ void weapon_skill_thust_update()
   }
 }
 
-#undef TIMER_TICK

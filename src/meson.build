@@ -25,7 +25,7 @@ source_files = files(
   'constances.c',
   'json_helper.c',
   'struct_meta_data.c',
-  'types.c',
+  'global.c',
   'main_menu.c',
   'session.c',
   'level_loader.c',

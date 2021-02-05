@@ -1,8 +1,8 @@
 #ifndef RESOURCES_H
 #define RESOURCES_H
 #include "SDL_mixer.h"
+#include "global.h"
 #include "toolbox/toolbox.h"
-#include "types.h"
 typedef enum
 {
   TEX_BIG_DEMON,
@@ -49,6 +49,7 @@ typedef enum
   TEX_KEY,
   TEX_EFFECT_FIRE_BUST,
   TEX_ELITE_KNIGHT,
+  TEX_COIN,
   NUM_TEXS
 } TextureId;
 
@@ -84,6 +85,7 @@ typedef enum
   SFX_WEAPON_SWORD,
   SFX_EXPOLOSION,
   SFX_FIRE_BALL_LAUCH,
+  SFX_COIN,
   NUM_SFXS,
 } SfxId;
 

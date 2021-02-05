@@ -10,6 +10,7 @@ struct Session
   u16  mp;
   u16  new_game;
   u16  spell;
+  u16  coins;
   Vec2 pos;
   char level[255];
 };

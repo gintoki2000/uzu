@@ -1,4 +1,4 @@
-#include "system/healthbar_rendering_sys.h"
+#include "system/rendering.h"
 #include "components.h"
 #include "ecs/ecs.h"
 

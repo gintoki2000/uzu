@@ -1,4 +1,4 @@
-#include "system/text_rendering_sys.h"
+#include "system/game_logic.h"
 #include "components.h"
 #include "ecs/ecs.h"
 #include "toolbox/toolbox.h"

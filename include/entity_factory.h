@@ -1,16 +1,15 @@
 #ifndef ENTITY_FACTORY_H
 #define ENTITY_FACTORY_H
 #include "components.h"
-#include "resources.h"
 #include "ecs/ecs.h"
+#include "resources.h"
 #include "toolbox/toolbox.h"
 
 ecs_entity_t make_axe(Ecs* ecs);
 ecs_entity_t make_bow(Ecs* ecs);
 ecs_entity_t make_arrow(Ecs* ecs, Vec2 pos, Vec2 vel);
 ecs_entity_t make_golden_cross_hit_effect(Ecs* ecs, Vec2 pos);
-ecs_entity_t
-             make_pickupable_entity(Ecs* ecs, TextureId texture_id, ItemTypeId item_type_id, Vec2 pos);
+ecs_entity_t make_pickupable_entity(Ecs* ecs, u16 texture_id, u16 item_type_id, Vec2 pos);
 ecs_entity_t make_thunder_storm(Ecs* ecs, Vec2 center);
 ecs_entity_t make_thunder(Ecs* ecs, Vec2 pos, u16 mask_bits);
 
@@ -48,6 +47,7 @@ ecs_entity_t make_big_red_flask(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_red_flask(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_blue_flask(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_key_1_1(Ecs* ecs, Vec2 pos);
+ecs_entity_t make_coin(Ecs* ecs, Vec2 pos);
 
 // monsters
 ecs_entity_t make_huge_demon(Ecs* ecs, Vec2 pos);
@@ -71,9 +71,9 @@ ecs_entity_t make_fire_hit_effect(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_slash_effect(Ecs* ecs, Vec2 pos, SDL_RendererFlip flip);
 ecs_entity_t make_fire_bust_effect(Ecs* ecs, Vec2 pos);
 
-// projectile
-ecs_entity_t make_fire_ball(Ecs* ecs, Vec2 pos, Vec2 direction, u16 mask);
-ecs_entity_t make_ice_arrow(Ecs* ecs, Vec2 pos, Vec2 direction, u16 mask);
+// projectiles
+ecs_entity_t make_fire_ball(Ecs* ecs, ecs_entity_t shooter, Vec2 pos, Vec2 direction, u16 mask);
+ecs_entity_t make_ice_arrow(Ecs* ecs, ecs_entity_t shooter, Vec2 pos, Vec2 direction, u16 mask);
 
 // npcs
 ecs_entity_t make_npc_nova(Ecs* ecs, Vec2 position, u16 conversation_id);

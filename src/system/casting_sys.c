@@ -1,7 +1,7 @@
-#include "system/casting_sys.h"
+#include "system/game_logic.h"
+#include "global.h"
 #include "components.h"
 #include "ecs/ecs.h"
-#include "types.h"
 
 extern const Spell g_spell_tbl[];
 extern Ecs*        g_ecs;

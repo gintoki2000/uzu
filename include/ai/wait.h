@@ -11,7 +11,7 @@ typedef struct
 const BTNodeVtbl* wait_vtbl_inst();
 void               wait_vtbl_init(BTNodeVtbl* vtbl);
 
-BTTask_Wait*     wait_new(int total_ticks);
+BTTask_Wait*     bt_task_wait_new(int total_ticks);
 BTTask_Wait*     wait_init(BTTask_Wait* self, int total_ticks);
 void      wait_abort(BTTask_Wait* self, Ecs* ecs, ecs_entity_t entity);
 void      wait_finish(BTTask_Wait* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status);

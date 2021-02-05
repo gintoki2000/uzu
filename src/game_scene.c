@@ -2,6 +2,7 @@
 #include "SDL_mixer.h"
 #include "components.h"
 #include "constances.h"
+#include "ecs/ecs.h"
 #include "entity_factory.h"
 #include "inventory.h"
 #include "level_loader.h"
@@ -13,39 +14,12 @@
 #include "ui_list.h"
 #include "ui_msgbox.h"
 #include "ui_quality.h"
-#include "ecs/ecs.h"
 
 #include "engine/keyboard.h"
 
-#include "system/ai_system.h"
-#include "system/animator_ctl_sys.h"
-#include "system/animator_sys.h"
-#include "system/block_input_system.h"
-#include "system/camera_sys.h"
-#include "system/casting_sys.h"
-#include "system/chest_system.h"
-#include "system/collision_mgr_sys.h"
 #include "system/collision_sys.h"
-#include "system/dialogue_sys.h"
-#include "system/dmg_sys.h"
-#include "system/door_system.h"
-#include "system/drop_system.h"
-#include "system/equipment_sys.h"
-#include "system/following_system.h"
-#include "system/health_sys.h"
-#include "system/healthbar_rendering_sys.h"
-#include "system/hud_system.h"
-#include "system/interaction_system.h"
-#include "system/late_destroying_sys.h"
-#include "system/life_span_sys.h"
-#include "system/merchant_sys.h"
-#include "system/motion_sys.h"
-#include "system/pickup_sys.h"
-#include "system/player_ctl_sys.h"
-#include "system/rendering_sys.h"
-#include "system/self_destruction.h"
-#include "system/text_rendering_sys.h"
-#include "system/tile_collision_sys.h"
+#include "system/game_logic.h"
+#include "system/rendering.h"
 
 #include "system/weapon_skill/charge.h"
 #include "system/weapon_skill/swing.h"
@@ -61,8 +35,7 @@
 
 #include <json-c/json.h>
 
-#include "../include/entity_utils.h"
-#include "json_helper.h"
+#include "entity_utils.h"
 #include "system/event_messaging_sys.h"
 
 static void on_load(void);
@@ -129,6 +102,7 @@ static void on_load()
   door_system_init();
   chest_system_init();
   player_controller_system_init();
+  effect_system_init();
 
   // init ui
   ui_dialogue_init();
@@ -152,15 +126,16 @@ static void on_load()
   }
   else
   {
+    inventory_load();
     load_level(g_session.level);
     ems_broadcast(MSG_LEVEL_LOADED, &(MSG_LevelLoaded){ g_session.level });
     spawn_player(g_session.pos);
   }
-
 }
 
 static void on_unload()
 {
+  inventory_save();
   ui_dialogue_fini();
   ems_broadcast(MSG_GAME_SCENE_UNLOAD, NULL);
   dialogue_system_fini();
@@ -243,9 +218,9 @@ static void on_update()
     ui_quality_draw();
 #endif
 
-#if 0
+#if 1
     // render debug
-    // collision_system_render_debug();
+    collision_system_render_debug();
     // path_rendering_system_update();
     // move_target_rendering_system_update();
     hitbox_rendering_system_update();

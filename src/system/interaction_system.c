@@ -1,6 +1,6 @@
-#include "system/interaction_system.h"
+#include "system/game_logic.h"
 
-#include "../../include/entity_utils.h"
+#include "entity_utils.h"
 #include "system/collision_sys.h"
 #include "components.h"
 #include "constances.h"

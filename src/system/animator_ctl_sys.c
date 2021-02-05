@@ -1,5 +1,4 @@
-#include "system/animator_ctl_sys.h"
-
+#include "system/game_logic.h"
 #include "components.h"
 
 extern Ecs* g_ecs;

@@ -1,7 +1,7 @@
 #include "../include/entity_utils.h"
+#include "../include/global.h"
 #include "entity_factory.h"
 #include "resources.h"
-#include "types.h"
 
 static void cast_fire_ball(Ecs* ecs, ecs_entity_t caster, ecs_entity_t weapon);
 static void cast_ice_arrow(Ecs* ecs, ecs_entity_t caster, ecs_entity_t weapon);
@@ -27,7 +27,7 @@ static void cast_fire_ball(Ecs* ecs, SDL_UNUSED ecs_entity_t caster, ecs_entity_
 
   attributes = ecs_get(ecs, weapon, WEAPON_ATTRIBUTES);
 
-  make_fire_ball(ecs, transform->position, speed, attributes->mask);
+  make_fire_ball(ecs, caster, transform->position, speed, attributes->mask);
 
   Mix_PlayChannel(-1, get_sfx(SFX_FIRE_BALL_LAUCH), 0);
 }
@@ -43,7 +43,7 @@ static void cast_ice_arrow(Ecs* ecs, SDL_UNUSED ecs_entity_t caster, ecs_entity_
 
   attributes = ecs_get(ecs, weapon, WEAPON_ATTRIBUTES);
 
-  make_ice_arrow(ecs, transform->position, speed, attributes->mask);
+  make_ice_arrow(ecs, caster, transform->position, speed, attributes->mask);
 
   Mix_PlayChannel(-1, get_sfx(SFX_ICE_SHOOT), 0);
 }

@@ -2,9 +2,10 @@
 #include "ecs/ecs.h"
 #include "entity_factory.h"
 #include "json-c/json.h"
+
+#include "../include/global.h"
 #include "json_helper.h"
 #include "map.h"
-#include "types.h"
 #include "entity_utils.h"
 
 extern Ecs* g_ecs;

@@ -1,6 +1,5 @@
-#include "system/block_input_system.h"
-
-#include "../../include/entity_utils.h"
+#include "system/game_logic.h"
+#include "entity_utils.h"
 #include "components.h"
 
 extern Ecs* g_ecs;

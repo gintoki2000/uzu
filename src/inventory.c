@@ -1,12 +1,13 @@
 #include "inventory.h"
+
+#include "../include/global.h"
 #include "constances.h"
 #include "engine/keyboard.h"
+#include "entity_utils.h"
 #include "game_scene.h"
 #include "resources.h"
-#include "types.h"
 #include "ui_helper.h"
 #include "ui_list.h"
-#include "entity_utils.h"
 
 #define INV_CELL_SIZE 16
 #define INV_CELL_GAP 1
@@ -258,5 +259,23 @@ void inventory_draw()
                     },
                     UI_COLOR_TEXT,
                     g_item_types[items[idx].type_id].description);
+  }
+}
+void inventory_save(void)
+{
+  FILE* file = fopen("inventory", "w");
+  if (file != NULL)
+  {
+    fwrite(_items, sizeof(_items), 0, file);
+    fclose(file);
+  }
+}
+void inventory_load(void)
+{
+  FILE* file = fopen("inventory", "r");
+  if (file != NULL)
+  {
+    fread(_items, sizeof(_items), 0, file);
+    fclose(file);
   }
 }

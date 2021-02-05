@@ -1,6 +1,5 @@
-#include "system/late_destroying_sys.h"
-
-#include "../../include/entity_utils.h"
+#include "system/game_logic.h"
+#include "entity_utils.h"
 #include "components.h"
 #include "toolbox/toolbox.h"
 
@@ -12,7 +11,7 @@ static void destroy_offscreen_entities()
   ecs_entity_t* entities;
   ecs_size_t    cnt;
 
-  Vec2               position;
+  Vec2 position;
 
   ecs_raw(g_ecs, REMOVE_IF_OFFSCREEN, &entities, NULL, &cnt);
 
@@ -20,7 +19,7 @@ static void destroy_offscreen_entities()
   {
     position = get_entity_position(g_ecs, entities[i]);
 
-    if (!SDL_PointInRect(&(POINT){position.x, position.y}, &g_viewport))
+    if (!SDL_PointInRect(&(POINT){ position.x, position.y }, &g_viewport))
     {
       ecs_destroy(g_ecs, entities[i]);
     }
@@ -40,7 +39,8 @@ static void destroy_tagged_entities()
   {
     if ((equipment = ecs_get(g_ecs, entities[i], EQUIPMENT)))
     {
-      ecs_destroy(g_ecs, equipment->weapon);
+      if (equipment->weapon != ECS_NULL_ENT)
+        ecs_destroy(g_ecs, equipment->weapon);
     }
     ecs_destroy(g_ecs, entities[i]);
   }

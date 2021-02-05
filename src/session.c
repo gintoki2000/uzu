@@ -1,33 +1,27 @@
 #include "session.h"
+
+#include "../include/global.h"
 #include "constances.h"
-#include "types.h"
 
 struct Session g_session;
+
+static u16 s_starting_weapon_tbl[] = {
+  WEAPON_CLEAVER,
+  WEAPON_SPEAR,
+  WEAPON_STAFF,
+  WEAPON_BOW,
+};
 
 void new_game(u16 starting_job)
 {
   g_session.job      = starting_job;
-  g_session.hp       = 40;
-  g_session.mp       = 5;
+  g_session.hp       = 12;
+  g_session.mp       = 10;
   g_session.new_game = TRUE;
   g_session.pos.x    = TILE_SIZE * 5;
   g_session.pos.y    = TILE_SIZE * 7;
-  
+  g_session.weapon   = s_starting_weapon_tbl[starting_job]; 
+
   strcpy(g_session.level, "0");
 
-  switch (starting_job)
-  {
-  case JOB_DRAGON:
-    g_session.weapon = WEAPON_SPEAR;
-    break;
-  case JOB_HUNTER:
-    g_session.weapon = WEAPON_BOW;
-    break;
-  case JOB_KNIGHT:
-    g_session.weapon = WEAPON_LAVIS_SWORD;
-    break;
-  case JOB_WIZZARD:
-    g_session.weapon = WEAPON_STAFF;
-    break;
-  }
 }

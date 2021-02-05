@@ -2,9 +2,9 @@
 #include "SDL_image.h"
 #include "SDL_mixer.h"
 #include "SDL_ttf.h"
+#include "engine/engine.h"
 #include "json_helper.h"
 #include "struct_meta_data.h"
-#include "engine/engine.h"
 static SDL_Texture* _textures[NUM_TEXS];
 static const char*  _texture_files[NUM_TEXS] = {
   [TEX_BIG_DEMON]            = "asserts/big_demon.png",
@@ -51,6 +51,7 @@ static const char*  _texture_files[NUM_TEXS] = {
   [TEX_ELITE_KNIGHT]         = "asserts/elite_knight.png",
   [TEX_EFFECT_SLASH]         = "asserts/SwordFx.png",
   [TEX_EFFECT_FIRE_BUST]     = "asserts/effect/fire_bust.png",
+  [TEX_COIN]                 = "asserts/coin.png",
 };
 
 static Mix_Music*  _bg_musics[NUM_BG_MUSICS];
@@ -75,6 +76,7 @@ static const char* _sfx_files[NUM_SFXS] = {
   [SFX_WEAPON_SWORD]    = "asserts/sound/fx/sword sound.wav",
   [SFX_EXPOLOSION]      = "asserts/sound/fx/8bit_bomb_explosion.wav",
   [SFX_FIRE_BALL_LAUCH] = "asserts/sound/fx/fire_proj.wav",
+  [SFX_COIN]            = "asserts/sound/fx/sfx_coin_single3.wav",
 };
 
 static FONT* _fonts[NUM_FONTS];

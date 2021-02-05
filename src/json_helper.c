@@ -1,6 +1,6 @@
 #include "json_helper.h"
 #include "read_all.h"
-#include "types.h"
+#include "global.h"
 
 static void json_to_int(void* field, struct json_object*);
 static void json_to_string(void* field, struct json_object*);

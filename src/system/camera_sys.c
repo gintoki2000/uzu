@@ -1,4 +1,4 @@
-#include "system/camera_sys.h"
+#include "system/game_logic.h"
 #include "components.h"
 
 extern SDL_Rect g_viewport;

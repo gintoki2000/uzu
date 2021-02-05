@@ -18,7 +18,7 @@ void is_player_out_of_spot_vtbl_init(BTConditionVtbl* vtbl)
   vtbl->pred                  = (bt_pred_fn_t)is_player_out_of_spot_pred;
 }
 
-BTCondition_IsPlayerOutOfSpot* is_player_out_of_spot_new()
+BTCondition_IsPlayerOutOfSpot* bt_condition_is_player_out_of_spot_new()
 {
   return is_player_out_of_spot_init(is_player_out_of_spot_alloc());
 }

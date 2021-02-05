@@ -1,4 +1,4 @@
-#include "system/knockback_sys.h"
+#include "system/game_logic.h"
 #include "system/event_messaging_sys.h"
 #include "components.h"
 

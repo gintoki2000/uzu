@@ -47,7 +47,7 @@ static BTStatus set_dest_to_spot_exec(BTTask_SetDestToSpot* self, Ecs* ecs, ecs_
   return BT_STATUS_SUCCESS;
 }
 
-BTTask_SetDestToSpot* set_dest_to_spot_new()
+BTTask_SetDestToSpot* bt_task_set_dest_to_spot_new()
 {
   return set_dest_to_spot_init(set_dest_to_spot_alloc());
 }

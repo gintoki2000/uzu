@@ -1,6 +1,6 @@
-#include "system/following_system.h"
+#include "system/game_logic.h"
 
-#include "../../include/entity_utils.h"
+#include "entity_utils.h"
 #include "components.h"
 
 extern Ecs* g_ecs;

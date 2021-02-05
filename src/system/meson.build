@@ -30,6 +30,7 @@ system_source_files = files(
   './chest_system.c',
   './casting_sys.c',
   './self_destruction.c',
+  './effect_system.c',
   #weapon skill systems
   './weapon_skill/swing.c',
   './weapon_skill/charge.c',

@@ -2,9 +2,9 @@
 #define COMPONENTS_H
 #include "SDL_FontCache.h"
 #include "behaviour_tree.h"
+#include "global.h"
 #include "path_finder.h"
 #include "toolbox/toolbox.h"
-#include "types.h"
 
 typedef enum
 {
@@ -26,7 +26,7 @@ typedef enum
   DAMAGE_OUTPUT,
   WEAPON_ATTRIBUTES,
   DROP,
-  ITEM_TAG,
+  PICKUPABLE_ATTRIBUTES,
   INVULNERABLE,
   INPUT_BLOCKER,
   ENEMY_TAG,
@@ -69,6 +69,7 @@ typedef struct
   float friction;
   float vz;
   float gravity_scale;
+  float bounching;
 } Motion;
 
 typedef struct
@@ -78,6 +79,7 @@ typedef struct
   double rotation;
   float  z;
   int    hdir;
+  BOOL   lock_hdir;
 } Transform;
 
 typedef struct
@@ -192,6 +194,7 @@ typedef struct ProjectileAttributes
   float impact_force_z;
   u16   impact_time;
   u16   sfx;
+  u16   shooter;
 } ProjectileAttributes;
 
 typedef enum DoorState
@@ -208,11 +211,12 @@ typedef struct DoorInfo
   u16 state;
 } DoorInfo;
 
-typedef struct
+typedef struct PickupableAttributes
 {
-  ItemTypeId item_id;
-} ItemTag;
-
+  u16 id;
+  u16 sfx;
+  u16 coins;
+} PickupableAttributes;
 typedef struct
 {
   s32 hit_points;
@@ -251,10 +255,10 @@ typedef struct LifeSpan
 
 typedef struct
 {
-  ItemTypeId item1;
-  ItemTypeId item2;
-  int        change1;
-  int        change2;
+  u16 item1;
+  u16 item2;
+  u8  change1;
+  u8  change2;
 } Drop;
 
 typedef struct
@@ -378,6 +382,11 @@ typedef struct SelfDestruction
   u16          emiting_timer;
   u16          emiting_interval;
 } SelfDestruction;
+
+typedef struct Flags 
+{
+  u32 value;
+} Flags;
 
 Animation*
 animation_init(Animation* anim, SDL_Texture* tex, u32 x, u32 y, u32 row, u32 col, u32 sw, u32 sh);

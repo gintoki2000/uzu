@@ -51,7 +51,7 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
   [TEXT]                       = ECS_TYPE(Text),
   [INTERACTABLE]               = { .size = sizeof(Interactable) },
   [DIALOGUE]                   = { .size = sizeof(Dialogue) },
-  [ITEM_TAG]                   = { .size = sizeof(ItemTag) },
+  [PICKUPABLE_ATTRIBUTES]                   = { .size = sizeof(PickupableAttributes) },
   [MERCHANT]                   = { .size = sizeof(Merchant) },
   [CHEST]                      = ECS_TYPE(Chest),
   [ATTUNEMENT_SLOT]            = ECS_TYPE(AttunementSlot),

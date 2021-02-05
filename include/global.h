@@ -1,5 +1,5 @@
-#ifndef TYPES_H
-#define TYPES_H
+#ifndef GLOBAL_H
+#define GLOBAL_H
 
 #include "ecs/ecs.h"
 #include "toolbox/toolbox.h"
@@ -80,6 +80,18 @@ typedef enum
   ITEM_TYPE_CLEAVER,
   NUM_ITEM_TYPES,
 } ItemTypeId;
+#define ITEM_TYPE_ID_NULL NUM_ITEM_TYPES
+
+// PickupableEntity ID
+typedef enum
+{
+  PICKUPABLE_RED_FLASK,
+  PICKUPABLE_BIG_RED_FLASK,
+  PICKUPABLE_BLUE_FLASK,
+  PICKUPABLE_COIN,
+  PICKUPABLE_KEY_1_1,
+  NUM_PICKUPABLE_TYPES,
+} PickupableId;
 
 typedef enum
 {
@@ -139,6 +151,7 @@ typedef enum
   SPELL_FIRE_BALL,
   NUM_SPELLS
 } SpellType;
+#define SPELL_ID_NULL NUM_SPELLS
 
 typedef struct Spell
 {
@@ -193,7 +206,8 @@ extern ecs_entity_t (*const g_projectile_create_fn[])(Ecs*, Vec2 pos, Vec2 dir, 
 extern ecs_entity_t (*const g_cast_effect_fn_tbl[NUM_CAST_EFFECTS])(Ecs* ecs, Vec2 pos);
 extern const ItemType g_item_types[NUM_ITEM_TYPES];
 extern const Spell    g_spell_tbl[NUM_SPELLS];
+extern const u16      g_pickupable_to_item_type_id_tbl[];
 
 Conversation* conversation_init(Conversation* self);
 void          conversation_fini(Conversation* self);
-#endif // TYPES_H
+#endif // GLOBAL_H

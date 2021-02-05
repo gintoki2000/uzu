@@ -1,6 +1,6 @@
+#include "../include/global.h"
 #include "components.h"
 #include "resources.h"
-#include "types.h"
 #include "ui_msgbox.h"
 #include "entity_utils.h"
 

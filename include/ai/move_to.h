@@ -7,5 +7,5 @@ typedef struct
   float arrive_radius;
 } BTTask_MoveTo;
 
-BTTask_MoveTo* move_to_new(float arrive_radius);
+BTTask_MoveTo* bt_task_move_to_new(float arrive_radius);
 #endif // MOVE_TO_H

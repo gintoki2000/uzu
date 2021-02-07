@@ -65,7 +65,6 @@ static BOOL _has_next_level;
 static char _next_level[LEVEL_SWITCHER_MAX_LEVEL_NAME_LEN + 1];
 static char _spwan_location[LEVEL_SWITCHER_MAX_DEST_LEN + 1];
 static BOOL _paused;
-static char _current_level_name[LEVEL_SWITCHER_MAX_LEVEL_NAME_LEN + 1];
 
 static void spawn_player(Vec2 pos)
 {

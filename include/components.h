@@ -51,7 +51,7 @@ typedef enum
   ATTUNEMENT_SLOT,
   CASTABLE,
   MANA_POOL,
-  DOOR_INFO,
+  DOOR_ATTRIBUTES,
   HOLDER,
   ATTACK_MASK,
   REMOVE_IF_OFFSCREEN,
@@ -209,7 +209,7 @@ typedef struct DoorInfo
 {
   s16 required_key;
   u16 state;
-} DoorInfo;
+} DoorAttributes;
 
 typedef struct PickupableAttributes
 {

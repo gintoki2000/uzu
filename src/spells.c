@@ -1,5 +1,5 @@
-#include "../include/entity_utils.h"
-#include "../include/global.h"
+#include "entity_utils.h"
+#include "global.h"
 #include "entity_factory.h"
 #include "resources.h"
 
@@ -16,6 +16,8 @@ ecs_entity_t (*const g_cast_effect_fn_tbl[NUM_CAST_EFFECTS])(Ecs* ecs, Vec2 pos)
   [CAST_EFFECT_FIRE] = make_fire_cast_effect,
 };
 
+#define play_sound(__sound_id) Mix_PlayChannel(-1, get_sfx(__sound_id), 0)
+
 static void cast_fire_ball(Ecs* ecs, SDL_UNUSED ecs_entity_t caster, ecs_entity_t weapon)
 {
   WeaponAttributes* attributes;
@@ -28,8 +30,7 @@ static void cast_fire_ball(Ecs* ecs, SDL_UNUSED ecs_entity_t caster, ecs_entity_
   attributes = ecs_get(ecs, weapon, WEAPON_ATTRIBUTES);
 
   make_fire_ball(ecs, caster, transform->position, speed, attributes->mask);
-
-  Mix_PlayChannel(-1, get_sfx(SFX_FIRE_BALL_LAUCH), 0);
+  play_sound(SFX_FIRE_BALL_LAUCH);
 }
 
 static void cast_ice_arrow(Ecs* ecs, SDL_UNUSED ecs_entity_t caster, ecs_entity_t weapon)
@@ -45,5 +46,7 @@ static void cast_ice_arrow(Ecs* ecs, SDL_UNUSED ecs_entity_t caster, ecs_entity_
 
   make_ice_arrow(ecs, caster, transform->position, speed, attributes->mask);
 
-  Mix_PlayChannel(-1, get_sfx(SFX_ICE_SHOOT), 0);
+  play_sound(SFX_ICE_SHOOT);
 }
+
+#undef play_sound

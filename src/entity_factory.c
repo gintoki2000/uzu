@@ -840,7 +840,7 @@ ecs_entity_t make_door(Ecs* ecs, Vec2 position)
   HitBox*       hitbox;
   Visual*       visual;
   Transform*    transform;
-  DoorInfo*     door_info;
+  DoorAttributes*     door_info;
   Interactable* interactable;
 
   entity = ecs_create(ecs);
@@ -864,7 +864,7 @@ ecs_entity_t make_door(Ecs* ecs, Vec2 position)
   interactable->num_commands = 1;
   interactable->commands[0]  = TEXT_COMMAND_OPEN;
 
-  door_info               = ecs_add(ecs, entity, DOOR_INFO);
+  door_info               = ecs_add(ecs, entity, DOOR_ATTRIBUTES);
   door_info->required_key = ITEM_TYPE_KEY_1_1;
   door_info->state        = DOOR_STATE_CLOSE;
 

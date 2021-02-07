@@ -28,9 +28,28 @@ static int compare_draw_command(const DrawCommand* lhs, const DrawCommand* rhs)
   return (lhs->dst.y + lhs->dst.h) - (rhs->dst.y + rhs->dst.h);
 }
 
-static void sort()
+static void sort_by_bottom(void)
 {
   qsort(_buff, _count, sizeof(DrawCommand), (__compar_fn_t)compare_draw_command);
+}
+
+static void draw_all(void)
+{
+	RECT dst;
+	for (int i = 0; i < _count; ++i)
+	  {
+	    dst = _buff[i].dst;
+	    dst.y -= _buff[i].z;
+	    SDL_SetTextureColorMod(_buff[i].texture, _buff[i].color.r, _buff[i].color.g, _buff[i].color.b);
+	    SDL_RenderCopyEx(g_renderer,
+	                     _buff[i].texture,
+	                     &_buff[i].src,
+	                     &dst,
+	                     _buff[i].rotation,
+	                     &_buff[i].center,
+	                     _buff[i].flip);
+	    SDL_SetTextureColorMod(_buff[i].texture, 0xff, 0xff, 0xff);
+	  }
 }
 
 void rendering_system_update(void)
@@ -72,20 +91,6 @@ void rendering_system_update(void)
     }
   }
 
-  sort();
-
-  for (int i = 0; i < _count; ++i)
-  {
-    dst = _buff[i].dst;
-    dst.y -= _buff[i].z;
-    SDL_SetTextureColorMod(_buff[i].texture, _buff[i].color.r, _buff[i].color.g, _buff[i].color.b);
-    SDL_RenderCopyEx(g_renderer,
-                     _buff[i].texture,
-                     &_buff[i].src,
-                     &dst,
-                     _buff[i].rotation,
-                     &_buff[i].center,
-                     _buff[i].flip);
-    SDL_SetTextureColorMod(_buff[i].texture, 0xff, 0xff, 0xff);
-  }
+  sort_by_bottom();
+  draw_all();
 }

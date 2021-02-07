@@ -1,7 +1,7 @@
 #include "ai/equip.h"
 
-#include "../../include/entity_utils.h"
-#include "../../include/global.h"
+#include "entity_utils.h"
+#include "global.h"
 #include "behaviour_tree.h"
 #include "components.h"
 

@@ -1,6 +1,6 @@
 #include "inventory.h"
 
-#include "../include/global.h"
+#include "global.h"
 #include "constances.h"
 #include "engine/keyboard.h"
 #include "entity_utils.h"

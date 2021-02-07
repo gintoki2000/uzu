@@ -1,4 +1,4 @@
-#include "../../include/global.h"
+#include "global.h"
 #include "ecs/ecs.h"
 #include "entity_factory.h"
 #include "inventory.h"

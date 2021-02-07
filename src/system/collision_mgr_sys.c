@@ -152,7 +152,7 @@ static void ladder_vs_player(ecs_entity_t ladder, ecs_entity_t player)
 
 static void interacable_vs_entity(ecs_entity_t interacable, ecs_entity_t entity)
 {
-  if (ecs_has(g_ecs, interacable, DOOR_INFO))
+  if (ecs_has(g_ecs, interacable, DOOR_ATTRIBUTES))
   {
     ems_broadcast(MSG_HIT_DOOR, &(MSG_HitDoor){ .door = interacable, .entity = entity });
   }

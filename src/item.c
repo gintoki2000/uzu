@@ -1,4 +1,4 @@
-#include "../include/global.h"
+#include "global.h"
 #include "components.h"
 #include "resources.h"
 #include "ui_msgbox.h"

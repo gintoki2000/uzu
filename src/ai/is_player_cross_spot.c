@@ -1,7 +1,7 @@
 #include "ai/is_player_cross_spot.h"
 #include <behaviour_tree.h>
 #include <components.h>
-#include "../../include/entity_utils.h"
+#include "entity_utils.h"
 struct IsPlayerCrossSpot
 {
   BT_EXTEND_NODE(BTCondition)
@@ -49,5 +49,5 @@ BOOL is_player_cross_spot_pred(BTCondition_IsPlayerInSpot* self, Ecs* ecs, ecs_e
   ASSERT(spot != NULL);
   ASSERT(player_transform != NULL);
 
-  return vec2_mag(vec2_sub(player_transform->position, spot->position)) < spot->radius;
+  return vec2_dist(player_transform->position, spot->position) < spot->radius;
 }

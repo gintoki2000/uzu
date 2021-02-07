@@ -1,6 +1,6 @@
 #include "ai/attack.h"
 
-#include "../../include/entity_utils.h"
+#include "entity_utils.h"
 #include "components.h"
 #include "constances.h"
 

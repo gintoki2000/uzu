@@ -38,5 +38,4 @@ void tile_collision_system_update(void);
 void init_all_systems(void);
 void shutdown_all_systems(void);
 
-#define TIMER_TICK(__timer) ((__timer) > 0 && --(__timer) == 0)
 #endif //GAME_LOGIC_H

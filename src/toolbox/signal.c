@@ -82,6 +82,7 @@ static void signal_internal_disconnect(Signal* sig, pointer_t func_or_instance)
 
 void signal_disconnect(Signal* sig, pointer_t func_or_instance)
 {
+  ASSERT(!sig->is_emiting);
   if (sig->is_emiting)
   {
     if (sig->disconnect_buff_cnt == sig->disconnect_buff_cap)
@@ -91,12 +92,11 @@ void signal_disconnect(Signal* sig, pointer_t func_or_instance)
     }
     sig->disconnect_buff[sig->disconnect_buff_cnt++] = func_or_instance;
   }
-  else 
+  else
   {
-    signal_internal_disconnect(sig, func_or_instance);    
+    signal_internal_disconnect(sig, func_or_instance);
   }
 }
-
 
 static void signal_do_removing(Signal* sig)
 {

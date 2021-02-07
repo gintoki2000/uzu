@@ -36,6 +36,8 @@ typedef struct
 #define RENDERER SDL_Renderer
 #define TEXTURE SDL_Texture
 
+#define TIMER_TICK(__timer) ((__timer) > 0 && --(__timer) == 0)
+
 #define UNUSED(__var) (void)__var
 
 #define FLIP_TO_SIGN(__f) (__f == SDL_FLIP_NONE ? 1 : -1)
@@ -88,13 +90,7 @@ typedef struct
     __b               = __tmp;                                                                     \
   })
 
-#define SIN SDL_sin
-#define COS SDL_cos
-#define SQRTF SDL_sqrtf
-
 #define EPSILON 0.001f
-
-#define play_sound_effect(__sound_id) Mix_PlayChannel(-1, get_sfx(__sound_id), 0)
 
 typedef struct
 {
@@ -102,7 +98,7 @@ typedef struct
   float y;
 } Vec2;
 
-typedef struct 
+typedef struct
 {
   float x;
   float y;
@@ -174,7 +170,7 @@ INLINE Vec2 vec2_mul(Vec2 a, float k)
 
 INLINE float vec2_mag(Vec2 v)
 {
-  return SQRTF(v.x * v.x + v.y * v.y);
+  return SDL_sqrt(v.x * v.x + v.y * v.y);
 }
 
 INLINE float vec2_normalize(Vec2* v)
@@ -202,7 +198,9 @@ INLINE float invsqrt(float x)
 
 INLINE void vec2_scale_to_length(Vec2* v, float len)
 {
-  vec2_normalize(v);
+  float ivlen = invsqrt(v->x * v->x + v->y * v->y);
+  v->x *= ivlen;
+  v->y *= ivlen;
   v->x *= len;
   v->y *= len;
 }
@@ -221,7 +219,7 @@ INLINE Vec2 vec2_unit_vec(Vec2 v)
 
 INLINE Vec2 vec2_trunc(Vec2 v, float max_len)
 {
-  if (vec2_mag(v) > max_len)
+  if (vec2_mag2(v) > max_len * max_len)
   {
     return vec2_mul(vec2_unit_vec(v), max_len);
   }

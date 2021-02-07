@@ -1,6 +1,6 @@
 #include "session.h"
 
-#include "../include/global.h"
+#include "global.h"
 #include "constances.h"
 
 struct Session g_session;

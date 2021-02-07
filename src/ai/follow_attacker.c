@@ -1,6 +1,6 @@
 #include "ai/follow_attacker.h"
 
-#include "../../include/entity_utils.h"
+#include "entity_utils.h"
 #include "behaviour_tree.h"
 #include "components.h"
 

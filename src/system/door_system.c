@@ -1,9 +1,9 @@
 #include "system/game_logic.h"
 #include "system/event_messaging_sys.h"
-#include <components.h>
-#include <constances.h>
+#include "components.h"
+#include "constances.h"
 
-#include <toolbox/toolbox.h>
+#include "toolbox/toolbox.h"
 #include "ui_msgbox.h"
 #include "inventory.h"
 
@@ -24,20 +24,20 @@ void door_system_init()
 static void on_command_selected(SDL_UNUSED void* arg, const MSG_CommandSelected* event)
 {
 
-  DoorInfo*     door_info;
+  DoorAttributes*     attrs;
   Visual*       visual;
   Interactable* interactable;
 
-  if ((door_info = ecs_get(g_ecs, event->entity, DOOR_INFO)))
+  if ((attrs = ecs_get(g_ecs, event->entity, DOOR_ATTRIBUTES)))
   {
     visual       = ecs_get(g_ecs, event->entity, VISUAL);
     interactable = ecs_get(g_ecs, event->entity, INTERACTABLE);
     if (strcmp(event->cmd, TEXT_COMMAND_OPEN) == 0)
     {
-      if (door_info->required_key == DOOR_NO_REQUIRED_KEY || has_item(door_info->required_key))
+      if (attrs->required_key == DOOR_NO_REQUIRED_KEY || has_item(attrs->required_key))
       {
 		  visual->sprite.rect       = RECT_DOOR_OPEN;
-		  door_info->state          = DOOR_STATE_OPEN;
+		  attrs->state          = DOOR_STATE_OPEN;
 		  interactable->commands[0] = TEXT_COMMAND_CLOSE;
       } else
       {
@@ -47,7 +47,7 @@ static void on_command_selected(SDL_UNUSED void* arg, const MSG_CommandSelected*
     else if (strcmp(event->cmd, TEXT_COMMAND_CLOSE) == 0)
     {
       visual->sprite.rect       = RECT_DOOR_CLOSE;
-      door_info->state          = DOOR_STATE_CLOSE;
+      attrs->state          = DOOR_STATE_CLOSE;
       interactable->commands[0] = TEXT_COMMAND_OPEN;
     }
   }
@@ -56,14 +56,14 @@ static void on_command_selected(SDL_UNUSED void* arg, const MSG_CommandSelected*
 static void on_entity_collied_door(SDL_UNUSED void* arg, const MSG_HitDoor* event)
 {
 
-  DoorInfo*  door_info;
+  DoorAttributes*  door_info;
   HitBox *   eh, *dh;
   Transform *etx, *dtx;
 
   RECT er;
   RECT dr;
 
-  door_info = ecs_get(g_ecs, event->door, DOOR_INFO);
+  door_info = ecs_get(g_ecs, event->door, DOOR_ATTRIBUTES);
 
   if (door_info->state == DOOR_STATE_OPEN)
     return;

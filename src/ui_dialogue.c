@@ -96,7 +96,7 @@ static void process_key_input(void)
   if (key_just_pressed(KEY_A) || key_just_pressed(KEY_B))
   {
     next_sentence();
-    play_sound_effect(SFX_BUTTON);
+    Mix_PlayChannel(-1, get_sfx(SFX_BUTTON), 0);
   }
 }
 

@@ -158,14 +158,6 @@ typedef struct
   Vec2 force;
 } DamageOutput;
 
-typedef struct
-{
-  int w;
-  int h;
-  int cx;
-  int cy;
-} DamageArea;
-
 /*entity tags*/
 typedef int PlayerTag;
 
@@ -217,7 +209,8 @@ typedef struct PickupableAttributes
   u16 sfx;
   u16 coins;
 } PickupableAttributes;
-typedef struct
+
+typedef struct Health
 {
   s32 hit_points;
   s32 max_hit_points;
@@ -377,13 +370,16 @@ typedef struct Attacker
 
 typedef struct SelfDestruction
 {
-  u16          range;
+  u32          range;
   ecs_entity_t target;
-  u16          emiting_timer;
-  u16          emiting_interval;
 } SelfDestruction;
 
-typedef struct Flags 
+enum FlagValues
+{
+  FLAG_INVULNERABLE,
+};
+
+typedef struct Flags
 {
   u32 value;
 } Flags;

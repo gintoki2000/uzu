@@ -259,7 +259,7 @@ ecs_entity_t make_imp(Ecs* ecs, Vec2 position)
   ecs_add_w_data(ecs,
                  entity,
                  SELF_DESTRUCTION,
-                 &(SelfDestruction){ .emiting_interval = 10, .range = 16, .target = ECS_NULL_ENT });
+                 &(SelfDestruction){  .range = 16, .target = ECS_NULL_ENT });
 
   BTRoot*                     root;
   BTCondition_IsPlayerInSpot* is_player_in_spot;

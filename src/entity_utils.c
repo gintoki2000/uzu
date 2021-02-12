@@ -1,4 +1,4 @@
-#include "../include/entity_utils.h"
+#include "entity_utils.h"
 #include "components.h"
 ecs_entity_t get_player(Ecs* ecs)
 {

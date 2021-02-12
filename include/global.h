@@ -172,7 +172,6 @@ typedef enum
   WEAPON_BOW,
   NUM_WEAPONS,
 } WeaponType;
-
 #define WEAPON_ID_NULL NUM_WEAPONS
 
 typedef enum

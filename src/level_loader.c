@@ -3,27 +3,35 @@
 #include "entity_factory.h"
 #include "json-c/json.h"
 
-#include "../include/global.h"
+#include "entity_utils.h"
+#include "global.h"
 #include "json_helper.h"
 #include "map.h"
-#include "entity_utils.h"
 
 extern Ecs* g_ecs;
 
-static void level_name_to_file_name(const char* level_name, char* dest)
+typedef struct ParseFnParams
 {
-  strcpy(dest, "asserts/level/");
-  strcat(dest, level_name);
-  strcat(dest, ".json");
-}
+  Vec2         position;
+  Vec2         size;
+  const char*  name;
+  json_object* properties;
+} ParseFnParams;
 
-static char* _layer_name_tbl[NUM_MAP_LAYERS] = {
+typedef struct ParseFnTblItem
+{
+  const char* name;
+  void (*const fn)(const ParseFnParams*);
+} ParseFnTblItem;
+
+//<Helper functions>//
+static char* s_layer_name_tbl[NUM_MAP_LAYERS] = {
   [MAP_LAYER_FLOOR]      = "floor",
   [MAP_LAYER_BACK_WALL]  = "back-wall",
   [MAP_LAYER_FRONT_WALL] = "front-wall",
 };
 
-static const char* _item_name_tbl[NUM_ITEM_TYPES] = {
+static const char* s_item_name_tbl[NUM_ITEM_TYPES] = {
   [ITEM_TYPE_RED_FLASK]        = "RedFlask",
   [ITEM_TYPE_BIG_RED_FLASK]    = "BigRedFlask",
   [ITEM_TYPE_BLUE_FLASK]       = "BlueFlask",
@@ -32,10 +40,17 @@ static const char* _item_name_tbl[NUM_ITEM_TYPES] = {
   [ITEM_TYPE_KEY_1_1]          = "Key_1_1",
 };
 
+static void level_name_to_file_name(const char* level_name, char* dest)
+{
+  strcpy(dest, "asserts/level/");
+  strcat(dest, level_name);
+  strcat(dest, ".json");
+}
+
 static int item_name_to_id(const char* name)
 {
   for (int i = 0; i < NUM_ITEM_TYPES; ++i)
-    if (strcmp(_item_name_tbl[i], name) == 0)
+    if (strcmp(s_item_name_tbl[i], name) == 0)
       return i;
   return -1;
 }
@@ -43,10 +58,35 @@ static int item_name_to_id(const char* name)
 static int layer_name_to_id(const char* name)
 {
   for (int i = 0; i < NUM_MAP_LAYERS; ++i)
-    if (strcmp(_layer_name_tbl[i], name) == 0)
+    if (strcmp(s_layer_name_tbl[i], name) == 0)
       return i;
   return -1;
 }
+//**********************************************************************//
+
+static int parse_tilelayer(const json_object* tilelayer_json_obj);
+static int parse_objectgroup(const json_object* object_group_json_obj);
+
+static void parse_imp(const ParseFnParams* params);
+static void parse_wogol(const ParseFnParams* params);
+static void parse_huge_demon(const ParseFnParams* params);
+static void parse_chest(const ParseFnParams* params);
+static void parse_ladder(const ParseFnParams* params);
+static void parse_chort(const ParseFnParams* params);
+static void parse_door(const ParseFnParams* params);
+
+
+static ParseFnTblItem s_parse_fn_tbl[] = {
+  {"Imp"      , parse_imp       },
+  {"Wogol"    , parse_wogol     },
+  {"BigDemon" , parse_huge_demon},
+  {"Chest"    , parse_chest     },
+  {"Ladder"   , parse_ladder    },
+  {"Chort"    , parse_chort     },
+  {"Door"     , parse_door      }
+};
+
+
 
 static void parse_item(Item* item, json_object* json)
 {
@@ -115,13 +155,13 @@ static int parse_tilelayer(const json_object* tilelayer_json_obj)
 static int parse_objectgroup(const json_object* object_group_json_obj)
 {
   const json_object* objects_json_obj;
-  const json_object* props_json_obj;
   int                objcnt;
   const char*        objtype;
   const json_object* obj_json_obj;
-  Vec2               pos;
-  Vec2               size;
-  const char*        name;
+
+  ParseFnParams params;
+
+
 
   objects_json_obj = json_object_object_get(object_group_json_obj, "objects");
   objcnt           = json_object_array_length(objects_json_obj);
@@ -132,62 +172,22 @@ static int parse_objectgroup(const json_object* object_group_json_obj)
 
     // common attributes
     objtype = json_object_object_get_as_string(obj_json_obj, "type");
-    pos.x   = json_object_object_get_as_double(obj_json_obj, "x");
-    pos.y   = json_object_object_get_as_double(obj_json_obj, "y");
-    size.x  = json_object_object_get_as_double(obj_json_obj, "width");
-    size.y  = json_object_object_get_as_double(obj_json_obj, "height");
-    name    = json_object_object_get_as_string(obj_json_obj, "name");
+    params.position.x   = json_object_object_get_as_double(obj_json_obj, "x");
+    params.position.y   = json_object_object_get_as_double(obj_json_obj, "y");
+    params.size.x       = json_object_object_get_as_double(obj_json_obj, "width");
+    params.size.y       = json_object_object_get_as_double(obj_json_obj, "height");
+    params.name         = json_object_object_get_as_string(obj_json_obj, "name");
+    params.properties   = json_object_object_get(obj_json_obj, "properties");
 
-    if (strcmp(objtype, "Chort") == 0)
+    for (int i = 0; s_parse_fn_tbl[i].name != NULL; ++i)
     {
-      make_chort(g_ecs, VEC2(pos.x + size.x / 2, pos.y + size.y));
-    }
-    else if (strcmp(objtype, "Ladder") == 0)
-    {
-
-      props_json_obj = json_object_object_get(obj_json_obj, "properties");
-
-      NewLadderParams params;
-      params.level = json_object_object_get_as_string(props_json_obj, "level");
-      params.dest  = json_object_object_get_as_string(props_json_obj, "dest");
-      params.name  = name;
-      params.pos   = pos;
-      params.size  = size;
-
-      make_ladder(g_ecs, &params);
-    }
-    else if (strcmp(objtype, "BigDemon") == 0)
-    {
-      make_huge_demon(g_ecs, VEC2(pos.x + size.x / 2, pos.y + size.y));
-    }
-    else if (strcmp(objtype, "NPC") == 0)
-    {
-      make_wizzard_npc(g_ecs, VEC2(pos.x + size.x / 2.f, pos.y + size.y));
-    }
-    else if (strcmp(objtype, "Wogol") == 0)
-    {
-      make_wogol(g_ecs, VEC2(pos.x + size.x / 2, pos.y + size.y));
-    }
-    else if (strcmp(objtype, "Imp") == 0)
-    {
-      make_imp(g_ecs, VEC2(pos.x + size.x / 2, pos.y + size.y));
-    }
-    else if (strcmp(objtype, "Door") == 0)
-    {
-      make_door(g_ecs, VEC2(pos.x + size.x / 2, pos.y + size.y));
-    }
-    else if (strcmp(objtype, "Chest") == 0)
-    {
-
-      props_json_obj = json_object_object_get(obj_json_obj, "properties");
-
-      Item items[CHEST_MAX_ITEMS];
-      int  num_items;
-
-      parse_item_list(items, &num_items, json_object_object_get_as_string(props_json_obj, "items"));
-      make_chest(g_ecs, VEC2(pos.x + size.x / 2, pos.y + size.y), items, num_items);
+      if (strcmp(objtype, s_parse_fn_tbl[i].name) == 0)
+      {
+        s_parse_fn_tbl[i].fn(&params);
+      }
     }
   }
+
   return 0;
 }
 
@@ -236,4 +236,59 @@ int load_level(const char* level_name)
     return LOAD_LEVEL_FAIL_TO_LOAD_FILE;
   parse(json_map_data);
   return LOAD_LEVEL_OK;
+}
+
+//*****************************************************************************//
+static void parse_imp(const ParseFnParams* params)
+{
+  Vec2 real_position = { params->position.x + params->size.x / 2.f, 
+                         params->position.y + params->size.y };
+  make_imp(g_ecs, real_position);
+}
+static void parse_wogol(const ParseFnParams* params)
+{
+  Vec2 real_position = { params->position.x + params->size.x / 2.f, 
+                         params->position.y + params->size.y };
+  make_wogol(g_ecs, real_position);
+}
+static void parse_huge_demon(const ParseFnParams* params)
+{
+  Vec2 real_position = { params->position.x + params->size.x / 2.f, 
+                         params->position.y + params->size.y };
+  make_huge_demon(g_ecs, real_position);
+}
+static void parse_chest(const ParseFnParams* params)
+{
+  Vec2 real_position = { params->position.x + params->size.x / 2.f, 
+                         params->position.y + params->size.y };
+
+
+  Item items[CHEST_MAX_ITEMS];
+  int  num_items;
+
+  parse_item_list(items, &num_items, json_object_object_get_as_string(params->properties, "items"));
+  make_chest(g_ecs, real_position, items, num_items);
+}
+static void parse_ladder(const ParseFnParams* _params)
+{
+  NewLadderParams params;
+  params.level = json_object_object_get_as_string(_params->properties, "level");
+  params.dest  = json_object_object_get_as_string(_params->properties, "dest");
+  params.name  = _params->name;
+  params.pos   = _params->position;
+  params.size  = _params->size;
+
+  make_ladder(g_ecs, &params);
+}
+static void parse_chort(const ParseFnParams* params)
+{
+  Vec2 real_position = { params->position.x + params->size.x / 2.f, 
+                         params->position.y + params->size.y };
+  make_chort(g_ecs, real_position);
+}
+static void parse_door(const ParseFnParams* params)
+{
+  Vec2 real_position = { params->position.x + params->size.x / 2.f, 
+                         params->position.y + params->size.y };
+  make_door(g_ecs, real_position);
 }

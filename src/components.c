@@ -1,7 +1,7 @@
 #include "components.h"
+#include "toolbox/sprite-sheet.h"
 #include <stdlib.h>
 #include <string.h>
-#include "toolbox/sprite-sheet.h"
 
 #define ECS_TYPE(__T)                                                                              \
   {                                                                                                \
@@ -51,14 +51,14 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
   [TEXT]                       = ECS_TYPE(Text),
   [INTERACTABLE]               = { .size = sizeof(Interactable) },
   [DIALOGUE]                   = { .size = sizeof(Dialogue) },
-  [PICKUPABLE_ATTRIBUTES]                   = { .size = sizeof(PickupableAttributes) },
+  [PICKUPABLE_ATTRIBUTES]      = { .size = sizeof(PickupableAttributes) },
   [MERCHANT]                   = { .size = sizeof(Merchant) },
   [CHEST]                      = ECS_TYPE(Chest),
   [ATTUNEMENT_SLOT]            = ECS_TYPE(AttunementSlot),
   [CASTABLE]                   = ECS_TYPE(Castable),
   [MANA_POOL]                  = ECS_TYPE(ManaPool),
   [WEAPON_SKILL_THUST]         = ECS_TYPE(wpskl_Thust),
-  [DOOR_ATTRIBUTES]                  = ECS_TYPE(DoorAttributes),
+  [DOOR_ATTRIBUTES]            = ECS_TYPE(DoorAttributes),
   [REMOVE_IF_OFFSCREEN]        = ECS_TYPE(RemoveIfOffScreen),
   [PROJECTILE_ATTRIBUTES]      = ECS_TYPE(ProjectileAttributes),
   [HOLDER]                     = ECS_TYPE_EX(Holder, holder_init, NULL, NULL),

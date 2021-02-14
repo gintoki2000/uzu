@@ -45,7 +45,7 @@ void animator_controller_system_update()
         return;
       }
 
-      if (motion->vz > 1.f)
+      if (motion->vz > .1f)
       {
         force_play_animation(animator, ANIM_STATE_JUMP);
         return;

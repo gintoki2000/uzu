@@ -14,6 +14,7 @@
 #include "ui_list.h"
 #include "ui_msgbox.h"
 #include "ui_quality.h"
+#include "ui_subtile.h"
 
 #include "engine/keyboard.h"
 
@@ -45,6 +46,11 @@ static void on_update();
 static void on_player_hit_ladder(pointer_t arg, const MSG_HitLadder* event);
 static void on_entity_died(pointer_t arg, const MSG_EntityDied* event);
 static void unload_current_level(void);
+static void update_ui(void);
+static void render_ui(void);
+static void update_game_logic(void);
+static void render_game_world(void);
+static void next_level(void);
 
 static void __callback_clear_entities(pointer_t arg, Ecs* ecs, ecs_entity_t entity);
 
@@ -65,6 +71,7 @@ static BOOL _has_next_level;
 static char _next_level[LEVEL_SWITCHER_MAX_LEVEL_NAME_LEN + 1];
 static char _spwan_location[LEVEL_SWITCHER_MAX_DEST_LEN + 1];
 static BOOL _paused;
+static BOOL _player_died;
 
 static void spawn_player(Vec2 pos)
 {
@@ -105,6 +112,7 @@ static void on_load()
 
   // init ui
   ui_dialogue_init();
+  ui_subtile_init();
 
   ems_connect(MSG_HIT_LADDER, NULL, on_player_hit_ladder);
   ems_connect(MSG_ENTITY_DIED, NULL, on_entity_died);
@@ -122,6 +130,7 @@ static void on_load()
     add_to_inv(ITEM_TYPE_CLEAVER, 1);
     add_to_inv(ITEM_TYPE_SPEAR, 1);
     add_to_inv(ITEM_TYPE_STAFF, 1);
+    g_session.new_game = FALSE;
   }
   else
   {
@@ -152,76 +161,24 @@ static void on_update()
 {
   if (_has_next_level)
   {
-
     unload_current_level();
-    load_level(_next_level);
-
-    ecs_entity_t ladder;
-
-    if ((ladder = find_ladder(g_ecs, _spwan_location)) != ECS_NULL_ENT)
-    {
-      Vec2 pos = get_entity_position(g_ecs, ladder);
-      pos.x += 8;
-      pos.y += 30;
-      spawn_player(pos);
-    }
-    ems_broadcast(MSG_LEVEL_LOADED, &(MSG_LevelLoaded){ _next_level });
-
-    _has_next_level = FALSE;
+    next_level();
   }
   else
   {
     // update
     if (!_paused)
     {
-      motion_system_update();
-      tile_collision_system_update();
-      collision_system_update();
-      equipment_system_update();
-      animator_controller_system_update();
-      animator_system_update();
-      ai_system_update();
-      health_system_update();
-      camera_system_update();
-      map_update_animated_cells();
-      following_system_update();
-      input_blocking_system();
-      self_destruction_system();
-
-      //  skl
-      swing_weapon_skl_system_update();
-      casting_system_update();
-      charge_weapon_skl_system();
-
-      weapon_skill_thust_update();
-      thunder_storm_weapon_skl_system_update();
+      update_game_logic();
     }
-    ui_dialogue_update();
 
-    // render
-#if 1
-    map_draw(MAP_LAYER_FLOOR);
-    map_draw(MAP_LAYER_BACK_WALL);
-    rendering_system_update();
-    healthbar_rendering_system_update();
-    map_draw(MAP_LAYER_FRONT_WALL);
-    text_rendering_system_update();
-    interactable_pointer_rendering_system_update();
-    hub_system_update();
-    ui_list_draw();
-    dialogue_system_update();
-    inventory_draw();
-    merchant_system_update();
-    ui_msgbox_draw();
-    ui_dialogue_draw();
-    ui_quality_draw();
-#endif
+    update_ui();
+    render_game_world();
+    render_ui();
 
-#if 1
+#if 0
     // render debug
     collision_system_render_debug();
-    // path_rendering_system_update();
-    // move_target_rendering_system_update();
     hitbox_rendering_system_update();
     position_rendering_system_update();
 #endif
@@ -232,38 +189,51 @@ static void on_update()
   }
 }
 
-static void on_player_hit_ladder(pointer_t arg, const MSG_HitLadder* event)
+static void on_player_hit_ladder(SDL_UNUSED pointer_t arg, const MSG_HitLadder* event)
 {
-  (void)arg;
-
-  LevelSwitcher* lsw;
-
-  lsw = ecs_get(g_ecs, event->ladder, LEVEL_SWITCHER);
-
+  LadderAttributes* attrs = ecs_get(g_ecs, event->ladder, LADDER_ATTRIBUTES);
+  strcpy(_next_level, attrs->level);
+  strcpy(_spwan_location, attrs->dest);
   _has_next_level = TRUE;
-
-  strcpy(_next_level, lsw->level);
-  strcpy(_spwan_location, lsw->dest);
 }
 
 static void on_entity_died(SDL_UNUSED pointer_t arg, SDL_UNUSED const MSG_EntityDied* event)
 {
+  if (ecs_has(g_ecs, event->entity, PLAYER_TAG))
+    _player_died = TRUE;
+}
+
+typedef struct MusTblItem
+{
+  const char* level_name;
+  u16         mus_id;
+} MusTblItem;
+
+static MusTblItem _mustbl[] = {
+  {"0", BG_MUS_LV1},
+  {"1", BG_MUS_LV2},
+  {NULL, 0}
+};
+
+static Mix_Music* get_music_for_level(const char* level_name)
+{
+  for (int i = 0; _mustbl[i].level_name != NULL; ++i)
+  {
+    if (strcmp(level_name, _mustbl[i].level_name) == 0)
+      return get_bg_mus(_mustbl[i].mus_id);
+  }
+  return NULL;
 }
 
 static void music_player_on_level_loaded(SDL_UNUSED void* arg, const MSG_LevelLoaded* event)
 {
-  u16 musid = BG_MUS_ID_NULL;
-  if (strcmp(event->level_name, "0") == 0)
-    musid = BG_MUS_LV1;
-  else if (strcmp(event->level_name, "1") == 0)
-    musid = BG_MUS_LV2;
-  if (musid != BG_MUS_ID_NULL)
-    Mix_PlayMusic(get_bg_mus(musid), -1);
+  Mix_Music* mus = get_music_for_level(event->level_name);
+  if (mus != NULL)
+    Mix_PlayMusic(mus, -1);
 }
 
-static void __callback_clear_entities(pointer_t arg, Ecs* ecs, ecs_entity_t entity)
+static void __callback_clear_entities(SDL_UNUSED pointer_t arg, Ecs* ecs, ecs_entity_t entity)
 {
-  (void)arg;
   ecs_destroy(ecs, entity);
 }
 
@@ -287,4 +257,74 @@ void game_scene_pause()
 void game_scene_resume()
 {
   _paused = FALSE;
+}
+static void update_ui()
+{
+  ui_dialogue_update();
+  ui_subtile_update();
+}
+
+static void render_ui()
+{
+  inventory_draw();
+  ui_list_draw();
+  ui_msgbox_draw();
+  ui_dialogue_draw();
+  ui_quality_draw();
+  ui_subtile_draw();
+}
+static void update_game_logic(void)
+{
+  motion_system_update();
+  tile_collision_system_update();
+  collision_system_update();
+  equipment_system_update();
+  animator_controller_system_update();
+  animator_system_update();
+  ai_system_update();
+  health_system_update();
+  camera_system_update();
+  map_update_animated_cells();
+  following_system_update();
+  input_blocking_system();
+  self_destruction_system();
+
+  //  skl
+  swing_weapon_skl_system_update();
+  casting_system_update();
+  charge_weapon_skl_system();
+
+  weapon_skill_thust_update();
+  thunder_storm_weapon_skl_system_update();
+}
+
+static void render_game_world(void)
+{
+  map_draw(MAP_LAYER_FLOOR);
+  map_draw(MAP_LAYER_BACK_WALL);
+  rendering_system_update();
+  healthbar_rendering_system_update();
+  map_draw(MAP_LAYER_FRONT_WALL);
+  text_rendering_system_update();
+  interactable_pointer_rendering_system_update();
+  hub_system_update();
+  dialogue_system_update();
+  merchant_system_update();
+}
+
+static void next_level(void)
+{
+  load_level(_next_level);
+  ecs_entity_t ladder;
+
+  if ((ladder = find_ladder(g_ecs, _spwan_location)) != ECS_NULL_ENT)
+  {
+    Vec2 pos = get_entity_position(g_ecs, ladder);
+    pos.x += 8;
+    pos.y += 30;
+    spawn_player(pos);
+  }
+  ems_broadcast(MSG_LEVEL_LOADED, &(MSG_LevelLoaded){ _next_level });
+
+  _has_next_level = FALSE;
 }

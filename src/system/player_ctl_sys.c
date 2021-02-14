@@ -1,10 +1,10 @@
 #include "system/game_logic.h"
 
-#include "entity_utils.h"
 #include "components.h"
 #include "constances.h"
 #include "ecs/ecs.h"
 #include "engine/keyboard.h"
+#include "entity_utils.h"
 #include "inventory.h"
 #include "resources.h"
 #include "system/collision_sys.h"
@@ -58,7 +58,7 @@ __cb_query_interacable_entities(struct CBPlayerController_QueryInteracableEntiti
 {
   Vec2  entity_position = get_entity_position(g_ecs, e);
   float dist            = vec2_dist(args->player_position, entity_position);
-  if (dist < args->closest_distance)
+  if (dist < args->closest_distance && ecs_has(g_ecs, e, INTERACTABLE))
   {
     args->closest_distance = dist;
     args->closest_entity   = e;
@@ -87,7 +87,7 @@ static void find_interacable_entity()
     cbargs.closest_distance = 9999.f;
 
     collision_box_query(&rect,
-                        MASK_INTERACABLE_ENTITY,
+                        0xffff,
                         CALLBACK_1(&cbargs, __cb_query_interacable_entities));
     g_curr_iteractable_entity = cbargs.closest_entity;
   }
@@ -98,7 +98,8 @@ static void find_interacable_entity()
     player_pos  = get_player_position(g_ecs);
     ientity_pos = get_entity_position(g_ecs, g_curr_iteractable_entity);
 
-    if (vec2_dist(player_pos, ientity_pos) > INTERACTABLE_DISTANCE)
+    if (vec2_dist(player_pos, ientity_pos) > INTERACTABLE_DISTANCE ||
+        !ecs_has(g_ecs, g_curr_iteractable_entity, INTERACTABLE))
     {
       g_curr_iteractable_entity = ECS_NULL_ENT;
     }
@@ -107,16 +108,13 @@ static void find_interacable_entity()
 
 static void begin_interact(ecs_entity_t entity)
 {
-  Interactable* interactable;
-  INFO("begin interact with e" ECS_ENT_FMT_PATTERN "\n", ECS_ENT_FMT_VARS(entity));
-
-  ems_broadcast(MSG_BEGIN_INTERACTION, &(MSG_BeginInteraction){ entity });
-
-  interactable = ecs_get(g_ecs, entity, INTERACTABLE);
-
+  Interactable* interactable = ecs_get(g_ecs, entity, INTERACTABLE);
+  if (!interactable)
+    return;
   ui_list_display((const char**)interactable->commands, interactable->num_commands);
   ui_list_set_pos(120, 120);
   ui_list_hook(UI_LIST_ON_SELECT, CALLBACK_2(on_list_select));
+  ems_broadcast(MSG_BEGIN_INTERACTION, &(MSG_BeginInteraction){ entity });
 }
 
 void player_controller_system_update()

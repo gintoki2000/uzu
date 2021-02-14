@@ -2,7 +2,7 @@
 
 extern SDL_Renderer* g_renderer;
 
-void draw_box_w_border(const SDL_Rect* rect, SDL_Color background_color, SDL_Color border_color)
+void draw_bordered_box(const SDL_Rect* rect, SDL_Color background_color, SDL_Color border_color)
 {
   SDL_SetRenderDrawColor(g_renderer,
                          background_color.r,

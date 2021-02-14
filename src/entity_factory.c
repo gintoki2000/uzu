@@ -673,7 +673,7 @@ ecs_entity_t make_ladder(Ecs* ecs, const NewLadderParams* params)
   hitbox->mask_bits = BIT(CATEGORY_PLAYER);
   hitbox->category  = CATEGORY_LADDER;
 
-  level_switcher_init(ecs_add(ecs, entity, LEVEL_SWITCHER), params->level, params->dest);
+  level_switcher_init(ecs_add(ecs, entity, LADDER_ATTRIBUTES), params->level, params->dest);
 
   name_init(ecs_add(ecs, entity, NAME), params->name);
 

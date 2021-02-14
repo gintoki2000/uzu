@@ -57,6 +57,6 @@ void ui_msgbox_draw()
     close();
   }
 
-  draw_box_w_border(&BOX_RECT, COLOR_BLACK, COLOR_WHITE);
+  draw_bordered_box(&BOX_RECT, COLOR_BLACK, COLOR_WHITE);
   FC_DrawBoxEffect(get_font(FONT_ITEM_PICKED_UP), g_renderer, TEXT_RECT, TEXT_EFFECT, _msg);
 }

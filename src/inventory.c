@@ -217,7 +217,7 @@ void inventory_draw()
         INV_CELL_SIZE,
         INV_CELL_SIZE,
       };
-      draw_box_w_border(&cell_rect,
+      draw_bordered_box(&cell_rect,
                         UI_COLOR_BG,
                         i == _curr_row && j == _curr_col ? UI_COLOR_BORDER_SELECT
                                                          : UI_COLOR_BORDER);
@@ -246,7 +246,7 @@ void inventory_draw()
 
   idx = _curr_col + _curr_row * INV_COL;
 
-  draw_box_w_border(&_description_rect, UI_COLOR_BG, UI_COLOR_BORDER);
+  draw_bordered_box(&_description_rect, UI_COLOR_BG, UI_COLOR_BORDER);
   if (items[idx].num_items > 0)
   {
     FC_DrawBoxColor(get_font(FONT_DAMAGE_INDICATOR),

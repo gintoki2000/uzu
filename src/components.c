@@ -46,7 +46,7 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
   [FOLLOWING_TARGET]           = ECS_TYPE(FollowingTarget),
   [SPOT]                       = ECS_TYPE(Spot),
   [WEAPON_SKILL_THUNDER_STORM] = ECS_TYPE(wpskl_ThunderStorm),
-  [LEVEL_SWITCHER]             = ECS_TYPE(LevelSwitcher),
+  [LADDER_ATTRIBUTES]             = ECS_TYPE(LadderAttributes),
   [NAME]                       = ECS_TYPE(Name),
   [TEXT]                       = ECS_TYPE(Text),
   [INTERACTABLE]               = { .size = sizeof(Interactable) },
@@ -121,7 +121,7 @@ void hitbox_init(HitBox* h)
   h->proxy_id = RTREE_NULL_NODE;
 }
 
-void level_switcher_init(LevelSwitcher* sw, const char* level, const char* dest)
+void level_switcher_init(LadderAttributes* sw, const char* level, const char* dest)
 {
   ASSERT(level != NULL && dest != NULL);
   strncpy(sw->level, level, LEVEL_SWITCHER_MAX_LEVEL_NAME_LEN);

@@ -46,7 +46,7 @@ void merchant_system_update()
 
   RECT bg = { SHOP_X, SHOP_Y, 110, MAX_DISPLAYABLE * CELL_HEIGHT };
 
-  draw_box_w_border(&bg, UI_COLOR_BG, UI_COLOR_BORDER);
+  draw_bordered_box(&bg, UI_COLOR_BG, UI_COLOR_BORDER);
 
   for (u32 i = 0; i < merchant->num_payloads; ++i)
   {

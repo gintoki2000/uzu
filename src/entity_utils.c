@@ -45,10 +45,10 @@ ecs_entity_t find_ladder(Ecs* ecs, const char* _name)
   ecs_entity_t* entities;
   ecs_size_t    cnt;
 
-  LevelSwitcher* switchers;
+  LadderAttributes* switchers;
   Name*          name;
 
-  ecs_raw(ecs, LEVEL_SWITCHER, &entities, (pointer_t*)&switchers, &cnt);
+  ecs_raw(ecs, LADDER_ATTRIBUTES, &entities, (pointer_t*)&switchers, &cnt);
   for (int i = 0; i < cnt; ++i)
   {
     if ((name = ecs_get(ecs, entities[i], NAME)))

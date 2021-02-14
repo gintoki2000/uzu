@@ -41,7 +41,7 @@ typedef enum
   PATH,
   FOLLOWING_TARGET,
   SPOT,
-  LEVEL_SWITCHER,
+  LADDER_ATTRIBUTES,
   NAME,
   INTERACTABLE,
   TEXT,
@@ -292,7 +292,7 @@ typedef struct
   char      level[LEVEL_SWITCHER_MAX_LEVEL_NAME_LEN + 1];
   char      dest[LEVEL_SWITCHER_MAX_DEST_LEN + 1];
   Direction exit_direction;
-} LevelSwitcher;
+} LadderAttributes;
 
 #define NAME_MAX_LEN 15
 typedef struct
@@ -395,7 +395,7 @@ void      animator_fini(Animator* animator);
 void visual_set_anchor_to_center(Visual* v);
 void brain_fini(Brain* ai_agent);
 void hitbox_init(HitBox* h);
-void level_switcher_init(LevelSwitcher* sw, const char* level, const char* dest);
+void level_switcher_init(LadderAttributes* sw, const char* level, const char* dest);
 void name_init(Name* name, const char* value);
 void text_init(Text* text, const char* value, FONT* font, COLOR color);
 void visual_init(Visual* v);

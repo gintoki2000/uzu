@@ -1,12 +1,13 @@
-#include "global.h"
 #include "ecs/ecs.h"
 #include "entity_factory.h"
+#include "game_event/game_event.h"
+#include "global.h"
 #include "inventory.h"
 #include "resources.h"
 #include "system/collision_sys.h"
 #include "system/event_messaging_sys.h"
-#include "game_event/game_event.h"
 #include "ui_msgbox.h"
+#include "ui_subtile.h"
 
 #define FILE_DATA_NAME "begining"
 
@@ -31,14 +32,25 @@ static Vec2 k_nova_positions[] = {
 
 static RECT k_zone = { 340.f, 60.f, 258.f, 195.f };
 
+static const char* _hit_sub[] = { "fuck", "why are you hit me...", NULL };
+
+static const char* _die_sub[] = { "uhh...", NULL };
+
+BOOL _sub1_is_showed;
+
 EVENT_SAVE_AND_LOAD_FN()
 
 //<-----------------------------------event callbacks-------------------------------->//
+//> globals
 static void on_level_loaded(pointer_t arg, const MSG_LevelLoaded* event);
 static void on_game_scene_unload(pointer_t arg, const void* event);
-static void phase_0_on_conversation_finished(pointer_t arg, const MSG_ConversationFinished* event);
-static void on_entity_died(pointer_t arg, const MSG_EntityDied* event);
 static void on_level_unload(pointer_t arg, const MSG_LevelUnloaded* event);
+static void on_entity_died(pointer_t arg, const MSG_EntityDied* event);
+static void on_entity_get_damage(pointer_t arg, const MSG_GetDamaged* event);
+//> phase 0
+static void phase_0_on_conversation_finished(pointer_t arg, const MSG_ConversationFinished* event);
+
+//> phase 1
 static void phase_1a_on_entity_died(pointer_t arg, const MSG_EntityDied* event);
 //====================================================================================//
 
@@ -54,7 +66,6 @@ static void on_level_loaded(SDL_UNUSED pointer_t arg, const MSG_LevelLoaded* eve
   if (!_save_block.nova_alive)
     return;
 
-  ems_connect(MSG_ENTITY_DIED, NULL, on_entity_died);
   ems_connect(MSG_LEVEL_UNLOADED, NULL, on_level_unload);
 
   switch (_save_block.state)
@@ -64,12 +75,16 @@ static void on_level_loaded(SDL_UNUSED pointer_t arg, const MSG_LevelLoaded* eve
     {
       make_npc_nova(g_ecs, k_nova_positions[PHASE_0], CONVERSATION_NOVA_00);
       ems_connect(MSG_CONVERSATION_FINISHED, NULL, phase_0_on_conversation_finished);
+      ems_connect(MSG_GET_DAMAGED, NULL, on_entity_get_damage);
+      ems_connect(MSG_ENTITY_DIED, NULL, on_entity_died);
     }
     break;
   case PHASE_1A:
     if (event->level_name && strcmp(event->level_name, "0") == 0)
     {
       make_npc_nova(g_ecs, k_nova_positions[PHASE_1A], CONVERSATION_NOVA_01);
+      ems_connect(MSG_GET_DAMAGED, NULL, on_entity_get_damage);
+      ems_connect(MSG_ENTITY_DIED, NULL, on_entity_died);
     }
   }
 }
@@ -77,11 +92,25 @@ static void on_level_loaded(SDL_UNUSED pointer_t arg, const MSG_LevelLoaded* eve
 static void on_level_unload(SDL_UNUSED pointer_t arg, SDL_UNUSED const MSG_LevelUnloaded* event)
 {
   ems_disconnect(MSG_ENTITY_DIED, (pointer_t)on_entity_died);
+  ems_disconnect(MSG_GET_DAMAGED, (pointer_t)on_entity_get_damage);
 }
 
 static void on_game_scene_unload(SDL_UNUSED pointer_t arg, SDL_UNUSED const void* event)
 {
   write_save_data();
+}
+
+static void on_entity_get_damage(SDL_UNUSED pointer_t arg, const MSG_GetDamaged* event)
+{
+  if (_sub1_is_showed)
+    return;
+  Name* name = ecs_get(g_ecs, event->damagee, NAME);
+  if (name != NULL && strcmp(name->value, "nova") == 0)
+  {
+    ui_subtile_show(_hit_sub);
+    ecs_rmv(g_ecs, event->damagee, INTERACTABLE);
+    _sub1_is_showed = TRUE;
+  }
 }
 
 static void phase_0_on_conversation_finished(SDL_UNUSED pointer_t            arg,
@@ -120,6 +149,7 @@ static void on_entity_died(SDL_UNUSED pointer_t arg, const MSG_EntityDied* event
   if (name != NULL && strcmp(name->value, "nova") == 0)
   {
     _save_block.nova_alive = FALSE;
+    ui_subtile_show(_die_sub);
   }
 }
 

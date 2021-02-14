@@ -83,7 +83,7 @@ void ui_quality_draw()
   FONT*     font   = get_font(FONT_DAMAGE_INDICATOR);
   FC_Effect effect = { .scale = { 1.f, 1.f }, .alignment = FC_ALIGN_CENTER, .color = COLOR_WHITE };
 
-  draw_box_w_border(&BOX_RECT, COLOR_BLACK, COLOR_WHITE);
+  draw_bordered_box(&BOX_RECT, COLOR_BLACK, COLOR_WHITE);
 
   FC_DrawBoxColor(font, g_renderer, TILE_RECT, COLOR_WHITE, _title);
   FC_DrawBoxEffect(font, g_renderer, QUALITY_RECT, effect, "< %u >", _val);

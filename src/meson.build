@@ -30,6 +30,7 @@ source_files = files(
   'session.c',
   'level_loader.c',
   'ui_dialogue.c',
+  'ui_subtile.c',
   'spells.c',
 ) + engine_source_files \
   + ecs_source_files \

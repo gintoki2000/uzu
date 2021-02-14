@@ -85,7 +85,7 @@ void ui_list_draw()
   if (!_visible)
     return;
 
-  draw_box_w_border(&(RECT){ _pos_x, _pos_y, UI_LIST_WIDTH, _cnt * 20 },
+  draw_bordered_box(&(RECT){ _pos_x, _pos_y, UI_LIST_WIDTH, _cnt * 20 },
                     UI_COLOR_BG,
                     UI_COLOR_BORDER);
 

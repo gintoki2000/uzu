@@ -57,6 +57,36 @@ typedef enum
   NUM_ANIM_STATES,
 } AnimationState;
 
+typedef struct Sprite
+{
+  u16      texture_id;
+  SDL_Rect rect;
+} Sprite, Icon;
+
+void sprite_init(Sprite *s, u16 texture_id);
+
+typedef struct SpriteSheet
+{
+  u16 texture_id;
+  u16 offset_x;
+  u16 offset_y;
+  u16 sprite_width;
+  u16 sprite_height;
+  u16 count;
+} SpriteSheet;
+
+typedef struct
+{
+  u16 frame_duration;
+  u16 mode;
+  u16 texture_id;
+  u16 offset_x;
+  u16 offset_y;
+  u16 sprite_width;
+  u16 sprite_height;
+  u16 count;
+} Animation;
+
 typedef struct
 {
   char*     name;
@@ -110,12 +140,7 @@ typedef struct ItemType
   BOOL         stackable;
   void (*use)(const void* data, Ecs*, ecs_entity_t);
   const void* data;
-  struct
-  {
-    u32  texture_id;
-    RECT rect;
-  } sprite;
-
+  Icon        icon;
 } ItemType;
 
 typedef struct Item
@@ -137,13 +162,6 @@ typedef enum
   ANIM_PLAY_MODE_NORMAL,
   ANIM_PLAY_MODE_LOOP,
 } AnimationPlayMode;
-
-typedef struct
-{
-  u16         frame_duration;
-  u16         mode;
-  SpriteSheet sheet;
-} Animation;
 
 typedef enum
 {

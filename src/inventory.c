@@ -229,8 +229,8 @@ void inventory_draw()
       if (items[idx].num_items > 0)
       {
         SDL_RenderCopy(g_renderer,
-                       get_texture(tp->sprite.texture_id),
-                       &tp->sprite.rect,
+                       get_texture(tp->icon.texture_id),
+                       &tp->icon.rect,
                        &cell_rect);
         if (items[idx].num_items > 1)
           FC_DrawColor(get_font(FONT_DAMAGE_INDICATOR),

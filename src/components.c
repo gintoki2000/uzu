@@ -1,5 +1,4 @@
 #include "components.h"
-#include "toolbox/sprite-sheet.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -19,7 +18,7 @@ static void holder_init(Holder* holder);
 const EcsType g_comp_types[NUM_COMPONENTS] = {
   [VISUAL]                     = ECS_TYPE_EX(Visual, visual_init, NULL, NULL),
   [TRANSFORM]                  = ECS_TYPE_EX(Transform, transform_init, NULL, NULL),
-  [ANIMATOR]                   = ECS_TYPE_EX(Animator, NULL, animator_fini, NULL),
+  [ANIMATOR]                   = ECS_TYPE(Animator),
   [PLAYER_TAG]                 = ECS_TYPE(PlayerTag),
   [CONTROLLER]                 = ECS_TYPE(Controller),
   [EQUIPMENT]                  = ECS_TYPE(Equipment),
@@ -46,7 +45,7 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
   [FOLLOWING_TARGET]           = ECS_TYPE(FollowingTarget),
   [SPOT]                       = ECS_TYPE(Spot),
   [WEAPON_SKILL_THUNDER_STORM] = ECS_TYPE(wpskl_ThunderStorm),
-  [LADDER_ATTRIBUTES]             = ECS_TYPE(LadderAttributes),
+  [LADDER_ATTRIBUTES]          = ECS_TYPE(LadderAttributes),
   [NAME]                       = ECS_TYPE(Name),
   [TEXT]                       = ECS_TYPE(Text),
   [INTERACTABLE]               = { .size = sizeof(Interactable) },
@@ -67,53 +66,16 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
   [ATTACKER]                   = ECS_TYPE(Attacker),
 };
 
-Animation*
-animation_init(Animation* anim, SDL_Texture* tex, u32 x, u32 y, u32 row, u32 col, u32 sw, u32 sh)
-{
-  sprite_sheet_init_1(&anim->sheet, tex, x, y, sw, sh, row, col);
-  anim->frame_duration = 1;
-  return anim;
-}
-
-void animation_fini(Animation* anim)
-{
-  sprite_sheet_fini(&anim->sheet);
-}
-
-Animator* animator_init(Animator* animator, const Animation* anims, u32 cnt)
-{
-  animator->anims        = malloc(cnt * sizeof(Animation));
-  animator->cnt          = cnt;
-  animator->elapsed      = 0;
-  animator->current_anim = 0;
-  memmove(animator->anims, anims, cnt * sizeof(Animation));
-  return animator;
-}
-
-static void transform_init(Transform* transform)
-{
-  *transform = (Transform){ .hdir = 1 };
-}
-
-void animator_fini(Animator* animator)
-{
-  for (u32 i = 0; i < animator->cnt; ++i)
-  {
-    animation_fini(&animator->anims[i]);
-  }
-  free(animator->anims);
-}
-
 void visual_set_anchor_to_center(Visual* v)
 {
   v->anchor.x = v->sprite.rect.w / 2;
   v->anchor.y = v->sprite.rect.h / 2;
 }
 
-void brain_fini(Brain* ai_agent)
+void brain_fini(Brain* brain)
 {
-  bt_node_del(ai_agent->root);
-  ai_agent->root = NULL;
+  bt_node_del(brain->root);
+  brain->root = NULL;
 }
 
 void hitbox_init(HitBox* h)
@@ -121,13 +83,13 @@ void hitbox_init(HitBox* h)
   h->proxy_id = RTREE_NULL_NODE;
 }
 
-void level_switcher_init(LadderAttributes* sw, const char* level, const char* dest)
+void ladder_attrs_init(LadderAttributes* attrs, const char* level, const char* dest)
 {
   ASSERT(level != NULL && dest != NULL);
-  strncpy(sw->level, level, LEVEL_SWITCHER_MAX_LEVEL_NAME_LEN);
-  sw->level[LEVEL_SWITCHER_MAX_LEVEL_NAME_LEN] = '\0';
-  strncpy(sw->dest, dest, LEVEL_SWITCHER_MAX_DEST_LEN);
-  sw->dest[LEVEL_SWITCHER_MAX_LEVEL_NAME_LEN] = '\0';
+  strncpy(attrs->level, level, LEVEL_SWITCHER_MAX_LEVEL_NAME_LEN);
+  attrs->level[LEVEL_SWITCHER_MAX_LEVEL_NAME_LEN] = '\0';
+  strncpy(attrs->dest, dest, LEVEL_SWITCHER_MAX_DEST_LEN);
+  attrs->dest[LEVEL_SWITCHER_MAX_LEVEL_NAME_LEN] = '\0';
 }
 
 void name_init(Name* name, const char* value)
@@ -154,11 +116,20 @@ void visual_init(Visual* v)
   v->opacity = 255;
   v->color   = (COLOR){ 255, 255, 255, 255 };
   v->anchor  = (POINT){ 0, 0 };
-  v->sprite  = (Sprite){ .tex = NULL };
+  v->sprite  = (Sprite){ 0 };
   v->flip    = SDL_FLIP_NONE;
 }
 
 static void holder_init(Holder* holder)
 {
-  *holder = (Holder){ .value = ECS_NULL_ENT };
+  holder->value = ECS_NULL_ENT;
+}
+
+static void transform_init(Transform* t)
+{
+  t->hdir          = 1;
+  t->prev_position = t->position = (Vec2){ 0.f, 0.f };
+  t->rotation                    = 0.0;
+  t->z                           = 0.f;
+  t->lock_hdir                   = 0;
 }

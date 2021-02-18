@@ -87,13 +87,13 @@ static void draw_item(const ItemPayload* payload, s32 x, s32 y, BOOL selected)
   const ItemType* item_type = &g_item_types[payload->type_id];
   FONT*           font      = get_font(FONT_DAMAGE_INDICATOR);
 
-  RECT dst = { x, y, item_type->sprite.rect.w, item_type->sprite.rect.h };
+  RECT dst = { x, y, item_type->icon.rect.w, item_type->icon.rect.h };
 
   char name[MAX_LENGTH_OF_ITEM_NAME];
 
   SDL_RenderCopy(g_renderer,
-                 get_texture(item_type->sprite.texture_id),
-                 &item_type->sprite.rect,
+                 get_texture(item_type->icon.texture_id),
+                 &item_type->icon.rect,
                  &dst);
 
   if (payload->available == MERCHANT_INIFINTE)

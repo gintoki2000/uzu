@@ -218,10 +218,9 @@ typedef struct Health
 
 typedef struct
 {
-  u32        current_anim;
-  u32        elapsed;
-  u32        cnt;
-  Animation* anims;
+  u32              current_anim;
+  u16              elapsed;
+  const Animation* anims;
 } Animator;
 
 typedef struct
@@ -384,18 +383,10 @@ typedef struct Flags
   u32 value;
 } Flags;
 
-Animation*
-animation_init(Animation* anim, SDL_Texture* tex, u32 x, u32 y, u32 row, u32 col, u32 sw, u32 sh);
-
-void animation_fini(Animation* anim);
-
-Animator* animator_init(Animator* animator, const Animation* anims, u32 cnt);
-void      animator_fini(Animator* animator);
-
 void visual_set_anchor_to_center(Visual* v);
 void brain_fini(Brain* ai_agent);
 void hitbox_init(HitBox* h);
-void level_switcher_init(LadderAttributes* sw, const char* level, const char* dest);
+void ladder_attrs_init(LadderAttributes* sw, const char* level, const char* dest);
 void name_init(Name* name, const char* value);
 void text_init(Text* text, const char* value, FONT* font, COLOR color);
 void visual_init(Visual* v);

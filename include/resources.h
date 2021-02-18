@@ -50,6 +50,7 @@ typedef enum
   TEX_EFFECT_FIRE_BUST,
   TEX_ELITE_KNIGHT,
   TEX_COIN,
+  TEX_ELF,
   NUM_TEXS
 } TextureId;
 

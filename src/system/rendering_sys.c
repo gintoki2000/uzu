@@ -1,6 +1,7 @@
-#include "system/game_logic.h"
 #include "components.h"
 #include "ecs/ecs.h"
+#include "resources.h"
+#include "system/game_logic.h"
 #include <stdlib.h>
 
 extern SDL_Rect      g_viewport;
@@ -35,21 +36,21 @@ static void sort_by_bottom(void)
 
 static void draw_all(void)
 {
-	RECT dst;
-	for (int i = 0; i < _count; ++i)
-	  {
-	    dst = _buff[i].dst;
-	    dst.y -= _buff[i].z;
-	    SDL_SetTextureColorMod(_buff[i].texture, _buff[i].color.r, _buff[i].color.g, _buff[i].color.b);
-	    SDL_RenderCopyEx(g_renderer,
-	                     _buff[i].texture,
-	                     &_buff[i].src,
-	                     &dst,
-	                     _buff[i].rotation,
-	                     &_buff[i].center,
-	                     _buff[i].flip);
-	    SDL_SetTextureColorMod(_buff[i].texture, 0xff, 0xff, 0xff);
-	  }
+  RECT dst;
+  for (int i = 0; i < _count; ++i)
+  {
+    dst = _buff[i].dst;
+    dst.y -= _buff[i].z;
+    SDL_SetTextureColorMod(_buff[i].texture, _buff[i].color.r, _buff[i].color.g, _buff[i].color.b);
+    SDL_RenderCopyEx(g_renderer,
+                     _buff[i].texture,
+                     &_buff[i].src,
+                     &dst,
+                     _buff[i].rotation,
+                     &_buff[i].center,
+                     _buff[i].flip);
+    SDL_SetTextureColorMod(_buff[i].texture, 0xff, 0xff, 0xff);
+  }
 }
 
 void rendering_system_update(void)
@@ -78,7 +79,7 @@ void rendering_system_update(void)
         dst.x -= g_viewport.x;
         dst.y -= g_viewport.y;
         _buff[_count++] = (DrawCommand){
-          .texture  = visuals[i].sprite.tex,
+          .texture  = get_texture(visuals[i].sprite.texture_id),
           .src      = visuals[i].sprite.rect,
           .dst      = dst,
           .center   = visuals[i].anchor,

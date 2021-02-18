@@ -1,6 +1,4 @@
 #include "entity_factory.h"
-
-#include "../include/entity_utils.h"
 #include "ai/attack.h"
 #include "ai/equip.c"
 #include "ai/follow_attacker.h"
@@ -11,10 +9,12 @@
 #include "ai/move_to.h"
 #include "ai/set_dest_to_spot.h"
 #include "ai/wait.h"
+#include "animations.h"
 #include "behaviour_tree.h"
 #include "components.h"
 #include "constances.h"
 #include "ecs/ecs.h"
+#include "entity_utils.h"
 #include "resources.h"
 
 ecs_entity_t make_anime_sword(Ecs* ecs, u16 mask)
@@ -22,27 +22,24 @@ ecs_entity_t make_anime_sword(Ecs* ecs, u16 mask)
 
   ecs_entity_t entity;
 
-  TEXTURE* texture;
-
-  entity  = ecs_create(ecs);
-  texture = get_texture(TEX_ANIME_SWORD);
+  entity = ecs_create(ecs);
 
   Transform*        transform;
   Visual*           visual;
-  WeaponAttributes* attributes;
+  WeaponAttributes* attrs;
   wpskl_Swing*      sklswing;
 
   transform = ecs_add(ecs, entity, TRANSFORM);
 
   visual = ecs_add(ecs, entity, VISUAL);
-  sprite_init(&visual->sprite, texture);
+  sprite_init(&visual->sprite, TEX_ANIME_SWORD);
   visual->anchor.x = visual->sprite.rect.w / 2;
   visual->anchor.y = visual->sprite.rect.h + 4;
 
-  attributes          = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
-  attributes->atk     = 2;
-  attributes->type_id = WEAPON_ANIME_SWORD;
-  attributes->mask    = mask;
+  attrs          = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
+  attrs->atk     = 2;
+  attrs->type_id = WEAPON_ANIME_SWORD;
+  attrs->mask    = mask;
 
   sklswing            = ecs_add(ecs, entity, WEAPON_SKILL_SWING);
   sklswing->on_action = CHARACTER_ACTION_REGULAR_ATK;
@@ -58,16 +55,14 @@ ecs_entity_t make_anime_sword(Ecs* ecs, u16 mask)
 
 typedef struct NewCharacterParams
 {
-  Vec2 position;
-  u16  texture_id;
-  u16  hit_points;
+  Vec2             position;
+  const Animation* animations;
+  u16              hit_points;
 } NewCharacterParams;
 
-ecs_entity_t make_character_base(Ecs* ecs, Vec2 position, u16 texture_id)
+ecs_entity_t make_character_base(Ecs* ecs, const NewCharacterParams* params)
 {
   ecs_entity_t entity;
-  TEXTURE*     texture;
-  Animation    anims[NUM_ANIM_STATES];
 
   /*components */
   Transform*  transform;
@@ -79,24 +74,14 @@ ecs_entity_t make_character_base(Ecs* ecs, Vec2 position, u16 texture_id)
   Motion*     motion;
   Health*     heath;
 
-  texture = get_texture(texture_id);
-  animation_init(&anims[ANIM_STATE_HIT], texture, 0, 0, 1, 1, 16, 28);
-  animation_init(&anims[ANIM_STATE_IDLE], texture, 16 * 1, 0, 1, 4, 16, 28);
-  animation_init(&anims[ANIM_STATE_RUN], texture, 16 * 5, 0, 1, 4, 16, 28);
-  animation_init(&anims[ANIM_STATE_JUMP], texture, 16 * 6, 0, 1, 1, 16, 28);
-
-  anims[ANIM_STATE_IDLE].frame_duration = 8;
-  anims[ANIM_STATE_RUN].frame_duration  = 4;
-
   entity = ecs_create(ecs);
 
   transform           = ecs_add(ecs, entity, TRANSFORM);
-  transform->position = position;
+  transform->position = params->position;
 
   visual           = ecs_add(ecs, entity, VISUAL);
   visual->anchor.x = 16 / 2;
   visual->anchor.y = 28;
-  // visual->color    = (COLOR){ 0xff, 0x00, 0x00, 0xff };
 
   equipment                  = ecs_add(ecs, entity, EQUIPMENT);
   equipment->weapon          = ECS_NULL_ENT;
@@ -105,10 +90,10 @@ ecs_entity_t make_character_base(Ecs* ecs, Vec2 position, u16 texture_id)
 
   controller = ecs_add(ecs, entity, CONTROLLER);
 
-  animator = ecs_add(ecs, entity, ANIMATOR);
-  animator_init(animator, anims, NUM_ANIM_STATES);
+  animator               = ecs_add(ecs, entity, ANIMATOR);
   animator->current_anim = ANIM_STATE_IDLE;
   animator->elapsed      = 0;
+  animator->anims        = params->animations;
 
   hitbox           = ecs_add(ecs, entity, HITBOX);
   hitbox->size     = VEC2(6.f, 10.f);
@@ -120,8 +105,8 @@ ecs_entity_t make_character_base(Ecs* ecs, Vec2 position, u16 texture_id)
   motion->max_force = 10;
 
   heath                 = ecs_add(ecs, entity, HEALTH);
-  heath->hit_points     = 12;
-  heath->max_hit_points = 12;
+  heath->hit_points     = params->hit_points;
+  heath->max_hit_points = params->hit_points;
 
   ecs_add(ecs, entity, ENDABLE_TILE_COLLISION_TAG);
   ecs_add(ecs, entity, CHARACTER_ANIMATOR_TAG);
@@ -131,25 +116,25 @@ ecs_entity_t make_character_base(Ecs* ecs, Vec2 position, u16 texture_id)
 
 ecs_entity_t make_knight(Ecs* ecs, Vec2 position)
 {
-  return make_character_base(ecs, position, TEX_KNIGHT);
+  return make_character_base(ecs, &(NewCharacterParams){ position, g_anims_knight_m, 13 });
 }
 
 ecs_entity_t make_wizzard(Ecs* ecs, Vec2 position)
 {
-  return make_character_base(ecs, position, TEX_WIZZARD);
+  return make_character_base(ecs, &(NewCharacterParams){ position, g_anims_wizzard_m, 9 });
 }
 
 ecs_entity_t make_dragon(Ecs* ecs, Vec2 position)
 {
-  return make_character_base(ecs, position, TEX_LIZZARD);
+  return make_character_base(ecs, &(NewCharacterParams){ position, g_anims_lizzard_m, 11 });
 }
 
 typedef struct NewMonsterParams
 {
-  Vec2 position;
-  u16  texture_id;
-  u16  hit_points;
-  Vec2 size;
+  Vec2             position;
+  const Animation* anims;
+  u16              hit_points;
+  Vec2             size;
 } NewMonsterParams;
 
 static const Vec2 s_big_size   = { 20.f, 20.f };
@@ -158,9 +143,6 @@ static const Vec2 s_small_size = { 10.f, 12.f };
 ecs_entity_t make_monster_base(Ecs* ecs, const NewMonsterParams* params)
 {
   ecs_entity_t entity;
-
-  TEXTURE*  texture;
-  Animation anims[NUM_ANIM_STATES];
 
   /*components */
   Transform* transform;
@@ -171,39 +153,8 @@ ecs_entity_t make_monster_base(Ecs* ecs, const NewMonsterParams* params)
   HealthBar* health_bar;
   Motion*    motion;
 
-  int texture_width;
-  int texture_height;
-  int sprite_width;
-  int sprite_height;
-
-  texture = get_texture(params->texture_id);
-
-  SDL_QueryTexture(texture, NULL, NULL, &texture_width, &texture_height);
-
-  sprite_height = texture_height;
-  sprite_width  = texture_width / 8;
-
-  animation_init(&anims[ANIM_STATE_HIT],
-                 texture,
-                 6 * sprite_width,
-                 0,
-                 1,
-                 1,
-                 sprite_width,
-                 sprite_height);
-  animation_init(&anims[ANIM_STATE_IDLE], texture, 0, 0, 1, 4, sprite_width, sprite_height);
-  animation_init(&anims[ANIM_STATE_RUN],
-                 texture,
-                 4 * sprite_width,
-                 0,
-                 1,
-                 4,
-                 sprite_width,
-                 sprite_height);
-  animation_init(&anims[ANIM_STATE_JUMP], texture, 0, 0, 1, 1, sprite_width, sprite_height);
-
-  anims[ANIM_STATE_IDLE].frame_duration = 8;
-  anims[ANIM_STATE_RUN].frame_duration  = 6;
+  const int sprite_width  = params->anims[0].sprite_width;
+  const int sprite_height = params->anims[0].sprite_height;
 
   entity = ecs_create(ecs);
 
@@ -212,13 +163,13 @@ ecs_entity_t make_monster_base(Ecs* ecs, const NewMonsterParams* params)
 
   visual = ecs_add(ecs, entity, VISUAL);
 
-  visual->anchor.x = sprite_width / 2;
-  visual->anchor.y = sprite_height;
+  visual->anchor.x = params->anims[0].sprite_width / 2;
+  visual->anchor.y = params->anims[0].sprite_height;
 
-  animator = ecs_add(ecs, entity, ANIMATOR);
-  animator_init(animator, anims, NUM_ANIM_STATES);
+  animator               = ecs_add(ecs, entity, ANIMATOR);
   animator->current_anim = ANIM_STATE_RUN;
   animator->elapsed      = 0;
+  animator->anims        = params->anims;
 
   hitbox            = ecs_add(ecs, entity, HITBOX);
   hitbox->size      = params->size;
@@ -234,7 +185,7 @@ ecs_entity_t make_monster_base(Ecs* ecs, const NewMonsterParams* params)
   heath->hit_points     = params->hit_points;
 
   health_bar         = ecs_add(ecs, entity, HEAL_BAR);
-  health_bar->len    = sprite_width;
+  health_bar->len    = params->anims[0].sprite_width;
   health_bar->anchor = (SDL_Point){ sprite_width / 2, sprite_height };
 
   motion            = ecs_add(ecs, entity, MOTION);
@@ -249,17 +200,18 @@ ecs_entity_t make_monster_base(Ecs* ecs, const NewMonsterParams* params)
 
 ecs_entity_t make_huge_demon(Ecs* ecs, Vec2 position)
 {
-  return make_monster_base(ecs, &(NewMonsterParams){ position, TEX_BIG_DEMON, 30, s_big_size });
+  return make_monster_base(ecs,
+                           &(NewMonsterParams){ position, g_anims_huge_demon, 30, s_big_size });
 }
 
 ecs_entity_t make_imp(Ecs* ecs, Vec2 position)
 {
   ecs_entity_t entity =
-      make_monster_base(ecs, &(NewMonsterParams){ position, TEX_IMP, 5, s_small_size });
+      make_monster_base(ecs, &(NewMonsterParams){ position, g_anims_imp, 5, s_small_size });
   ecs_add_w_data(ecs,
                  entity,
                  SELF_DESTRUCTION,
-                 &(SelfDestruction){  .range = 16, .target = ECS_NULL_ENT });
+                 &(SelfDestruction){ .range = 16, .target = ECS_NULL_ENT });
 
   BTRoot*                     root;
   BTCondition_IsPlayerInSpot* is_player_in_spot;
@@ -281,13 +233,13 @@ ecs_entity_t make_imp(Ecs* ecs, Vec2 position)
 
 ecs_entity_t make_wogol(Ecs* ecs, Vec2 position)
 {
-  return make_monster_base(ecs, &(NewMonsterParams){ position, TEX_WOGOL, 5, s_small_size });
+  return make_monster_base(ecs, &(NewMonsterParams){ position, g_anims_wogol, 5, s_small_size });
 }
 
 ecs_entity_t make_chort(Ecs* ecs, Vec2 position)
 {
   ecs_entity_t entity =
-      make_monster_base(ecs, &(NewMonsterParams){ position, TEX_CHORT, 5, s_small_size });
+      make_monster_base(ecs, &(NewMonsterParams){ position, g_anims_chort, 5, s_small_size });
 
   /*components */
   Drop*       drop;
@@ -371,21 +323,18 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 position)
 
 ecs_entity_t make_axe(Ecs* ecs)
 {
-  TEXTURE*     texture;
   ecs_entity_t axe;
 
   /*component*/
   Visual*    visual;
   Transform* transform;
 
-  texture = get_texture(TEX_AXE);
-
   axe = ecs_create(ecs);
 
   transform = ecs_add(ecs, axe, TRANSFORM);
 
   visual = ecs_add(ecs, axe, VISUAL);
-  sprite_init(&visual->sprite, texture);
+  sprite_init(&visual->sprite, TEX_AXE);
   visual->anchor.x = visual->sprite.rect.w / 2;
   visual->anchor.y = visual->sprite.rect.h;
 
@@ -404,20 +353,20 @@ ecs_entity_t make_cleaver(Ecs* ecs, u16 mask_bits)
 
   Transform*        transform;
   Visual*           visual;
-  WeaponAttributes* attributes;
+  WeaponAttributes* attrs;
   wpskl_Swing*      sklswing;
 
   transform = ecs_add(ecs, entity, TRANSFORM);
 
   visual = ecs_add(ecs, entity, VISUAL);
-  sprite_init(&visual->sprite, texture);
+  sprite_init(&visual->sprite, TEX_CLEAVER);
   visual->anchor.x = visual->sprite.rect.w / 2;
   visual->anchor.y = visual->sprite.rect.h;
 
-  attributes          = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
-  attributes->atk     = 2;
-  attributes->type_id = WEAPON_CLEAVER;
-  attributes->mask    = mask_bits;
+  attrs          = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
+  attrs->atk     = 2;
+  attrs->type_id = WEAPON_CLEAVER;
+  attrs->mask    = mask_bits;
 
   sklswing            = ecs_add(ecs, entity, WEAPON_SKILL_SWING);
   sklswing->on_action = CHARACTER_ACTION_REGULAR_ATK;
@@ -428,63 +377,29 @@ ecs_entity_t make_cleaver(Ecs* ecs, u16 mask_bits)
   return entity;
 }
 
-ecs_entity_t make_blood_stain_effect(Ecs* ecs, Vec2 position)
-{
-  ecs_entity_t stain_effect;
-
-  Visual*    visual;
-  Animator*  animator;
-  Transform* transform;
-  LifeSpan*  life_span;
-
-  Animation animation;
-  TEXTURE*  texture;
-  texture = get_texture(TEX_BLOOD);
-  animation_init(&animation, texture, 0, 0, 1, 4, 16, 16);
-
-  stain_effect = ecs_create(ecs);
-
-  visual         = ecs_add(ecs, stain_effect, VISUAL);
-  visual->anchor = (SDL_Point){ 8, 8 };
-
-  animator = ecs_add(ecs, stain_effect, ANIMATOR);
-  animator_init(animator, &animation, 1);
-
-  transform           = ecs_add(ecs, stain_effect, TRANSFORM);
-  transform->position = position;
-
-  life_span            = ecs_add(ecs, stain_effect, LIFE_SPAN);
-  life_span->remaining = 15; // frames
-
-  return stain_effect;
-}
-
 ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
 {
   ecs_entity_t entity;
 
-  TEXTURE* texture;
-
-  entity  = ecs_create(ecs);
-  texture = get_texture(TEX_GOLDEN_SWORD);
+  entity = ecs_create(ecs);
 
   Transform*          transform;
   Visual*             visual;
-  WeaponAttributes*   attributes;
+  WeaponAttributes*   attrs;
   wpskl_Swing*        sklswing;
   wpskl_ThunderStorm* wpskl_thunder_storm;
 
   transform = ecs_add(ecs, entity, TRANSFORM);
 
   visual = ecs_add(ecs, entity, VISUAL);
-  sprite_init(&visual->sprite, texture);
+  sprite_init(&visual->sprite, TEX_GOLDEN_SWORD);
   visual->anchor.x = visual->sprite.rect.w / 2;
   visual->anchor.y = visual->sprite.rect.h;
 
-  attributes          = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
-  attributes->atk     = 2;
-  attributes->type_id = WEAPON_LAVIS_SWORD;
-  attributes->mask    = mask_bits;
+  attrs          = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
+  attrs->atk     = 2;
+  attrs->type_id = WEAPON_LAVIS_SWORD;
+  attrs->mask    = mask_bits;
 
   sklswing            = ecs_add(ecs, entity, WEAPON_SKILL_SWING);
   sklswing->on_action = CHARACTER_ACTION_REGULAR_ATK;
@@ -496,37 +411,6 @@ ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
   wpskl_thunder_storm->total     = 5;
 
   ecs_add(ecs, entity, HOLDER);
-
-  return entity;
-}
-
-ecs_entity_t make_golden_cross_hit_effect(Ecs* ecs, Vec2 position)
-{
-  ecs_entity_t entity;
-  TEXTURE*     texture;
-  Animation    animation;
-
-  Transform* transform;
-  Visual*    visual;
-  Animator*  animator;
-  LifeSpan*  life_span;
-
-  texture = get_texture(TEX_GOLDEN_CROSS_HIT);
-  animation_init(&animation, texture, 0, 0, 1, 10, 48, 48);
-
-  entity = ecs_create(ecs);
-
-  transform           = ecs_add(ecs, entity, TRANSFORM);
-  transform->position = position;
-
-  visual         = ecs_add(ecs, entity, VISUAL);
-  visual->anchor = (SDL_Point){ 24, 24 };
-
-  animator = ecs_add(ecs, entity, ANIMATOR);
-  animator_init(animator, &animation, 1);
-
-  life_span            = ecs_add(ecs, entity, LIFE_SPAN);
-  life_span->remaining = animation.sheet.count * animation.frame_duration;
 
   return entity;
 }
@@ -549,20 +433,23 @@ ecs_entity_t make_blue_flask(Ecs* ecs, Vec2 position)
 ecs_entity_t make_pickupable_entity(Ecs* ecs, u16 texture_id, u16 id, Vec2 position)
 {
   ecs_entity_t entity;
-  TEXTURE*     texture;
 
   Visual*               visual;
   Transform*            transform;
   HitBox*               hitbox;
   PickupableAttributes* attrs;
 
-  texture = get_texture(texture_id);
-
   entity = ecs_create(ecs);
 
-  visual = ecs_add(ecs, entity, VISUAL);
-  sprite_init(&visual->sprite, texture);
-  visual_set_anchor_to_center(visual);
+  visual                    = ecs_add(ecs, entity, VISUAL);
+  visual->sprite.texture_id = texture_id;
+  SDL_QueryTexture(get_texture(texture_id),
+                   NULL,
+                   NULL,
+                   &visual->sprite.rect.w,
+                   &visual->sprite.rect.h);
+  visual->anchor.x = visual->sprite.rect.w / 2;
+  visual->anchor.y = visual->sprite.rect.h;
 
   transform           = ecs_add(ecs, entity, TRANSFORM);
   transform->position = position;
@@ -618,42 +505,9 @@ ecs_entity_t make_player(Ecs* ecs, ecs_entity_t character, ecs_entity_t weapon)
   return character;
 }
 
-ecs_entity_t make_thunder(Ecs* ecs, Vec2 position, u16 mask_bits)
+ecs_entity_t make_thunder(SDL_UNUSED Ecs* ecs, SDL_UNUSED Vec2 position, SDL_UNUSED u16 mask_bits)
 {
-  ecs_entity_t entity;
-
-  Transform* transform;
-  Visual*    visual;
-  Animator*  animator;
-  LifeSpan*  life_span;
-  HitBox*    hitbox;
-
-  Animation animation;
-  animation_init(&animation, get_texture(TEX_YELLOW_THUNDER), 0, 0, 1, 8, 64, 256);
-  animation.frame_duration = 4;
-
-  entity = ecs_create(ecs);
-
-  transform           = ecs_add(ecs, entity, TRANSFORM);
-  transform->position = position;
-
-  visual         = ecs_add(ecs, entity, VISUAL);
-  visual->anchor = (SDL_Point){ 32, 224 };
-
-  animator = ecs_add(ecs, entity, ANIMATOR);
-  animator_init(animator, &animation, 1);
-
-  life_span            = ecs_add(ecs, entity, LIFE_SPAN);
-  life_span->remaining = (animation.sheet.count) * animation.frame_duration;
-
-  hitbox            = ecs_add(ecs, entity, HITBOX);
-  hitbox->size      = VEC2(16.f, 16.f);
-  hitbox->anchor    = VEC2(8.f, 16.f);
-  hitbox->category  = CATEGORY_PROJECTILE;
-  hitbox->mask_bits = mask_bits;
-  hitbox->proxy_id  = RTREE_NULL_NODE;
-
-  return entity;
+  return ECS_NULL_ENT;
 }
 
 ecs_entity_t make_ladder(Ecs* ecs, const NewLadderParams* params)
@@ -672,8 +526,10 @@ ecs_entity_t make_ladder(Ecs* ecs, const NewLadderParams* params)
   hitbox->size      = params->size;
   hitbox->mask_bits = BIT(CATEGORY_PLAYER);
   hitbox->category  = CATEGORY_LADDER;
+  hitbox->anchor.x  = 0;
+  hitbox->anchor.y  = 0;
 
-  level_switcher_init(ecs_add(ecs, entity, LADDER_ATTRIBUTES), params->level, params->dest);
+  ladder_attrs_init(ecs_add(ecs, entity, LADDER_ATTRIBUTES), params->level, params->dest);
 
   name_init(ecs_add(ecs, entity, NAME), params->name);
 
@@ -776,12 +632,12 @@ ecs_entity_t make_chest(Ecs* ecs, Vec2 position, Item items[CHEST_MAX_ITEMS], u1
   HitBox*       hitbox;
   Transform*    transform;
 
-  entity              = ecs_create(ecs);
-  visual              = ecs_add(ecs, entity, VISUAL);
-  visual->sprite.tex  = get_texture(TEX_CHEST);
-  visual->sprite.rect = RECT_CHEST_CLOSE;
-  visual->anchor.x    = 8.f;
-  visual->anchor.y    = 16.f;
+  entity                    = ecs_create(ecs);
+  visual                    = ecs_add(ecs, entity, VISUAL);
+  visual->sprite.texture_id = TEX_CHEST;
+  visual->sprite.rect       = RECT_CHEST_CLOSE;
+  visual->anchor.x          = 8.f;
+  visual->anchor.y          = 16.f;
 
   chest = ecs_add(ecs, entity, CHEST);
   memcpy(chest->items, items, cnt * sizeof(Item));
@@ -810,12 +666,12 @@ ecs_entity_t make_spear(Ecs* ecs, u16 mask)
   Visual*           visual;
   Transform*        transform;
   wpskl_Thust*      thust;
-  WeaponAttributes* attributes;
+  WeaponAttributes* attrs;
 
   entity = ecs_create(ecs);
 
   visual = ecs_add(ecs, entity, VISUAL);
-  sprite_init(&visual->sprite, get_texture(TEX_SPEAR));
+  sprite_init(&visual->sprite, TEX_SPEAR);
   visual->anchor.x = visual->sprite.rect.w / 2;
   visual->anchor.y = 3;
 
@@ -824,9 +680,9 @@ ecs_entity_t make_spear(Ecs* ecs, u16 mask)
   thust            = ecs_add(ecs, entity, WEAPON_SKILL_THUST);
   thust->on_action = CHARACTER_ACTION_REGULAR_ATK;
 
-  attributes       = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
-  attributes->atk  = 1;
-  attributes->mask = mask;
+  attrs       = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
+  attrs->atk  = 1;
+  attrs->mask = mask;
 
   ecs_add(ecs, entity, HOLDER);
 
@@ -837,19 +693,19 @@ ecs_entity_t make_door(Ecs* ecs, Vec2 position)
 {
   ecs_entity_t entity;
 
-  HitBox*       hitbox;
-  Visual*       visual;
-  Transform*    transform;
-  DoorAttributes*     door_info;
-  Interactable* interactable;
+  HitBox*         hitbox;
+  Visual*         visual;
+  Transform*      transform;
+  DoorAttributes* door_info;
+  Interactable*   interactable;
 
   entity = ecs_create(ecs);
 
-  visual              = ecs_add(ecs, entity, VISUAL);
-  visual->sprite.tex  = get_texture(TEX_DOOR);
-  visual->sprite.rect = RECT_DOOR_CLOSE;
-  visual->anchor.x    = 16;
-  visual->anchor.y    = 34;
+  visual                    = ecs_add(ecs, entity, VISUAL);
+  visual->sprite.texture_id = TEX_DOOR;
+  visual->sprite.rect       = RECT_DOOR_CLOSE;
+  visual->anchor.x          = 16;
+  visual->anchor.y          = 34;
 
   transform           = ecs_add(ecs, entity, TRANSFORM);
   transform->position = position;
@@ -871,31 +727,26 @@ ecs_entity_t make_door(Ecs* ecs, Vec2 position)
   return entity;
 }
 
-static const u16 kBloodParticleTexureTbl[] = {
-  TEX_EFFECT_BLOOD_1,
-  TEX_EFFECT_BLOOD_2,
+static const Animation* _blood_effect_tbl[] = {
+  &g_anim_blood_loss_1,
+  &g_anim_blood_loss_2,
 };
 
-#define kNumBloodParticleTextures 2
+#define NUM_BLOOD_LOSS_EFFECTS 2
 
 ecs_entity_t make_blood_loss_particle(Ecs* ecs, Vec2 position)
 {
   ecs_entity_t entity;
 
-  Animation animation;
-
   Visual*    visual;
   Transform* transform;
   LifeSpan*  life_span;
-  Animator*  animator;
 
   const int sw = 100;
   const int sh = 100;
   int       i;
 
-  i = rand() % kNumBloodParticleTextures;
-
-  animation_init(&animation, get_texture(kBloodParticleTexureTbl[i]), 0, 0, 1, 28, sw, sh);
+  i = rand() % NUM_BLOOD_LOSS_EFFECTS;
 
   entity = ecs_create(ecs);
 
@@ -903,8 +754,7 @@ ecs_entity_t make_blood_loss_particle(Ecs* ecs, Vec2 position)
   visual->anchor.x = sw / 2;
   visual->anchor.y = sh / 2;
 
-  animator = ecs_add(ecs, entity, ANIMATOR);
-  animator_init(animator, &animation, 1);
+  ecs_add_w_data(ecs, entity, ANIMATOR, &(Animator){ .anims = _blood_effect_tbl[i] });
 
   transform           = ecs_add(ecs, entity, TRANSFORM);
   transform->position = position;
@@ -921,20 +771,20 @@ ecs_entity_t make_staff(Ecs* ecs, u16 mask)
 
   Transform*        transform;
   Visual*           visual;
-  WeaponAttributes* attributes;
+  WeaponAttributes* attrs;
   Castable*         castable;
 
   transform = ecs_add(ecs, entity, TRANSFORM);
 
   visual = ecs_add(ecs, entity, VISUAL);
-  sprite_init(&visual->sprite, get_texture(TEX_RED_STAFF));
+  sprite_init(&visual->sprite, (TEX_RED_STAFF));
   visual->anchor.x = visual->sprite.rect.w / 2;
   visual->anchor.y = visual->sprite.rect.h / 2;
 
-  attributes          = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
-  attributes->atk     = 1;
-  attributes->mask    = mask;
-  attributes->type_id = WEAPON_STAFF;
+  attrs          = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
+  attrs->atk     = 1;
+  attrs->mask    = mask;
+  attrs->type_id = WEAPON_STAFF;
 
   castable = ecs_add(ecs, entity, CASTABLE);
 
@@ -945,16 +795,12 @@ ecs_entity_t make_staff(Ecs* ecs, u16 mask)
 
 ecs_entity_t make_fire_ball(Ecs* ecs, ecs_entity_t shooter, Vec2 pos, Vec2 direction, u16 mask)
 {
-  ecs_entity_t entity = ecs_create(ecs);
-
-  Animation animation;
-
+  ecs_entity_t          entity = ecs_create(ecs);
   Visual*               visual;
   Transform*            transform;
   Motion*               motion;
-  Animator*             animator;
   HitBox*               hitbox;
-  ProjectileAttributes* attributes;
+  ProjectileAttributes* attrs;
 
   visual           = ecs_add(ecs, entity, VISUAL);
   visual->anchor.x = 15;
@@ -968,10 +814,6 @@ ecs_entity_t make_fire_ball(Ecs* ecs, ecs_entity_t shooter, Vec2 pos, Vec2 direc
   motion->vel       = direction;
   motion->friction  = 0.f;
   motion->max_speed = 150.f;
-
-  animation_init(&animation, get_texture(TEX_FIRE_BALL), 0, 0, 1, 10, 26, 10);
-  animator = ecs_add(ecs, entity, ANIMATOR);
-  animator_init(animator, &animation, 1);
 
   hitbox            = ecs_add(ecs, entity, HITBOX);
   hitbox->size.x    = 26;
@@ -981,18 +823,20 @@ ecs_entity_t make_fire_ball(Ecs* ecs, ecs_entity_t shooter, Vec2 pos, Vec2 direc
   hitbox->category  = CATEGORY_PROJECTILE;
   hitbox->mask_bits = mask;
 
-  attributes                   = ecs_add(ecs, entity, PROJECTILE_ATTRIBUTES);
-  attributes->damage           = 3;
-  attributes->destroy_when_hit = TRUE;
-  attributes->effect           = 0;
-  attributes->damage_type      = DAMAGE_TYPE_FIRE;
-  attributes->impact           = TRUE;
-  attributes->impact_force     = vec2_mul(vec2_unit_vec(direction), 100.f);
-  attributes->impact_time      = 16;
-  attributes->sfx              = SFX_ID_NULL;
-  attributes->shooter          = shooter;
+  attrs                   = ecs_add(ecs, entity, PROJECTILE_ATTRIBUTES);
+  attrs->damage           = 3;
+  attrs->destroy_when_hit = TRUE;
+  attrs->effect           = 0;
+  attrs->damage_type      = DAMAGE_TYPE_FIRE;
+  attrs->impact           = TRUE;
+  attrs->impact_force     = vec2_mul(vec2_unit_vec(direction), 100.f);
+  attrs->impact_time      = 16;
+  attrs->sfx              = SFX_ID_NULL;
+  attrs->shooter          = shooter;
 
   ecs_add(ecs, entity, REMOVE_IF_OFFSCREEN);
+
+  ecs_add_w_data(ecs, entity, ANIMATOR, &(Animator){ .anims = &g_anim_fire_ball });
 
   return entity;
 }
@@ -1001,14 +845,11 @@ ecs_entity_t make_ice_arrow(Ecs* ecs, ecs_entity_t shooter, Vec2 pos, Vec2 direc
 {
   ecs_entity_t entity = ecs_create(ecs);
 
-  Animation animation;
-
   Visual*               visual;
   Transform*            transform;
   Motion*               motion;
-  Animator*             animator;
   HitBox*               hitbox;
-  ProjectileAttributes* attributes;
+  ProjectileAttributes* attrs;
 
   visual           = ecs_add(ecs, entity, VISUAL);
   visual->anchor.x = 15;
@@ -1023,9 +864,7 @@ ecs_entity_t make_ice_arrow(Ecs* ecs, ecs_entity_t shooter, Vec2 pos, Vec2 direc
   motion->friction  = 0.f;
   motion->max_speed = 150.f;
 
-  animation_init(&animation, get_texture(TEX_ICE_ARROW), 0, 0, 1, 30, 32, 15);
-  animator = ecs_add(ecs, entity, ANIMATOR);
-  animator_init(animator, &animation, 1);
+  ecs_add_w_data(ecs, entity, ANIMATOR, &(Animator){ .anims = &g_anim_ice_arrow });
 
   hitbox            = ecs_add(ecs, entity, HITBOX);
   hitbox->size.x    = 32;
@@ -1035,16 +874,16 @@ ecs_entity_t make_ice_arrow(Ecs* ecs, ecs_entity_t shooter, Vec2 pos, Vec2 direc
   hitbox->category  = CATEGORY_PROJECTILE;
   hitbox->mask_bits = mask;
 
-  attributes                   = ecs_add(ecs, entity, PROJECTILE_ATTRIBUTES);
-  attributes->damage           = 3;
-  attributes->destroy_when_hit = TRUE;
-  attributes->effect           = 0;
-  attributes->damage_type      = DAMAGE_TYPE_ICE;
-  attributes->impact           = TRUE;
-  attributes->impact_force     = vec2_mul(vec2_unit_vec(direction), 100.f);
-  attributes->impact_time      = 16;
-  attributes->sfx              = SFX_ID_NULL;
-  attributes->shooter          = shooter;
+  attrs                   = ecs_add(ecs, entity, PROJECTILE_ATTRIBUTES);
+  attrs->damage           = 3;
+  attrs->destroy_when_hit = TRUE;
+  attrs->effect           = 0;
+  attrs->damage_type      = DAMAGE_TYPE_ICE;
+  attrs->impact           = TRUE;
+  attrs->impact_force     = vec2_mul(vec2_unit_vec(direction), 100.f);
+  attrs->impact_time      = 16;
+  attrs->sfx              = SFX_ID_NULL;
+  attrs->shooter          = shooter;
 
   ecs_add(ecs, entity, REMOVE_IF_OFFSCREEN);
 
@@ -1054,16 +893,10 @@ ecs_entity_t make_ice_cast_effect(Ecs* ecs, Vec2 pos)
 {
   ecs_entity_t entity;
 
-  Animation anim;
-
   Visual*    visual;
   Transform* transform;
-  Animator*  animator;
-  LifeSpan*  life_span;
 
   entity = ecs_create(ecs);
-
-  animation_init(&anim, get_texture(TEX_EFFECT_ICE_CAST), 0, 0, 1, 28, 96, 96);
 
   visual           = ecs_add(ecs, entity, VISUAL);
   visual->anchor.x = 48;
@@ -1072,12 +905,8 @@ ecs_entity_t make_ice_cast_effect(Ecs* ecs, Vec2 pos)
   transform           = ecs_add(ecs, entity, TRANSFORM);
   transform->position = pos;
 
-  animator = ecs_add(ecs, entity, ANIMATOR);
-  animator_init(animator, &anim, 1);
-
-  life_span            = ecs_add(ecs, entity, LIFE_SPAN);
-  life_span->remaining = 28;
-
+  ecs_add_w_data(ecs, entity, ANIMATOR, &(Animator){ .anims = &g_anim_ice_cast });
+  ecs_add_w_data(ecs, entity, LIFE_SPAN, &(LifeSpan){ 29 });
   return entity;
 }
 
@@ -1085,16 +914,10 @@ ecs_entity_t make_fire_cast_effect(Ecs* ecs, Vec2 position)
 {
   ecs_entity_t entity;
 
-  Animation anim;
-
   Visual*    visual;
   Transform* transform;
-  Animator*  animator;
-  LifeSpan*  life_span;
 
   entity = ecs_create(ecs);
-
-  animation_init(&anim, get_texture(TEX_EFFECT_FIRE_CAST), 0, 0, 1, 28, 96, 96);
 
   visual           = ecs_add(ecs, entity, VISUAL);
   visual->anchor.x = 48;
@@ -1103,46 +926,8 @@ ecs_entity_t make_fire_cast_effect(Ecs* ecs, Vec2 position)
   transform           = ecs_add(ecs, entity, TRANSFORM);
   transform->position = position;
 
-  animator = ecs_add(ecs, entity, ANIMATOR);
-  animator_init(animator, &anim, 1);
-
-  life_span            = ecs_add(ecs, entity, LIFE_SPAN);
-  life_span->remaining = 28;
-
-  return entity;
-}
-
-ecs_entity_t make_fire_bust_effect(Ecs* ecs, Vec2 position)
-{
-  ecs_entity_t entity;
-
-  Animation animation;
-
-  Visual*    visual;
-  Transform* transform;
-  LifeSpan*  life_span;
-  Animator*  animator;
-
-  const int sw = 64;
-  const int sh = 64;
-
-  animation_init(&animation, get_texture(TEX_EFFECT_FIRE_BUST), 0, 0, 1, 29, sw, sh);
-
-  entity = ecs_create(ecs);
-
-  visual           = ecs_add(ecs, entity, VISUAL);
-  visual->anchor.x = sw / 2;
-  visual->anchor.y = sh / 2;
-
-  animator = ecs_add(ecs, entity, ANIMATOR);
-  animator_init(animator, &animation, 1);
-
-  transform           = ecs_add(ecs, entity, TRANSFORM);
-  transform->position = position;
-
-  life_span            = ecs_add(ecs, entity, LIFE_SPAN);
-  life_span->remaining = 29;
-
+  ecs_add_w_data(ecs, entity, ANIMATOR, &(Animator){ .anims = &g_anim_fire_cast });
+  ecs_add_w_data(ecs, entity, LIFE_SPAN, &(LifeSpan){ 29 });
   return entity;
 }
 
@@ -1150,17 +935,12 @@ ecs_entity_t make_slash_effect(Ecs* ecs, Vec2 position, SDL_RendererFlip flip)
 {
   ecs_entity_t entity;
 
-  Animation animation;
-
   Visual*    visual;
   Transform* transform;
   LifeSpan*  life_span;
-  Animator*  animator;
 
   const int sw = 48;
   const int sh = 48;
-
-  animation_init(&animation, get_texture(TEX_EFFECT_SLASH), 0, 0, 1, 10, sw, sh);
 
   entity = ecs_create(ecs);
 
@@ -1169,9 +949,7 @@ ecs_entity_t make_slash_effect(Ecs* ecs, Vec2 position, SDL_RendererFlip flip)
   visual->anchor.y = sh / 2;
   visual->flip     = flip;
 
-  animator = ecs_add(ecs, entity, ANIMATOR);
-  animator_init(animator, &animation, 1);
-
+  ecs_add_w_data(ecs, entity, ANIMATOR, &(Animator){ .anims = &g_anim_slash });
   transform           = ecs_add(ecs, entity, TRANSFORM);
   transform->position = position;
 
@@ -1186,17 +964,12 @@ ecs_entity_t make_fire_hit_effect(Ecs* ecs, Vec2 position)
 
   ecs_entity_t entity;
 
-  Animation animation;
-
   Visual*    visual;
   Transform* transform;
   LifeSpan*  life_span;
-  Animator*  animator;
 
   const int sw = 64;
   const int sh = 64;
-
-  animation_init(&animation, get_texture(TEX_EFFECT_FIRE_HIT), 0, 0, 1, 44, sw, sh);
 
   entity = ecs_create(ecs);
 
@@ -1204,8 +977,7 @@ ecs_entity_t make_fire_hit_effect(Ecs* ecs, Vec2 position)
   visual->anchor.x = sw / 2;
   visual->anchor.y = sh / 2;
 
-  animator = ecs_add(ecs, entity, ANIMATOR);
-  animator_init(animator, &animation, 1);
+  ecs_add_w_data(ecs, entity, ANIMATOR, &(Animator){ .anims = &g_anim_fire_hit });
 
   transform           = ecs_add(ecs, entity, TRANSFORM);
   transform->position = position;
@@ -1219,17 +991,12 @@ ecs_entity_t make_ice_hit_effect(Ecs* ecs, Vec2 position)
 {
   ecs_entity_t entity;
 
-  Animation animation;
-
   Visual*    visual;
   Transform* transform;
   LifeSpan*  life_span;
-  Animator*  animator;
 
   const int sw = 96;
   const int sh = 96;
-
-  animation_init(&animation, get_texture(TEX_EFFECT_ICE_HIT), 0, 0, 1, 49, sw, sh);
 
   entity = ecs_create(ecs);
 
@@ -1237,8 +1004,7 @@ ecs_entity_t make_ice_hit_effect(Ecs* ecs, Vec2 position)
   visual->anchor.x = sw / 2;
   visual->anchor.y = sh / 2;
 
-  animator = ecs_add(ecs, entity, ANIMATOR);
-  animator_init(animator, &animation, 1);
+  ecs_add_w_data(ecs, entity, ANIMATOR, &(Animator){ .anims = &g_anim_ice_hit });
 
   transform           = ecs_add(ecs, entity, TRANSFORM);
   transform->position = position;
@@ -1251,25 +1017,11 @@ ecs_entity_t make_ice_hit_effect(Ecs* ecs, Vec2 position)
 
 ecs_entity_t make_npc_nova(Ecs* ecs, Vec2 position, u16 conversation_id)
 {
-  const int     sw     = 32;
-  const int     sh     = 32;
   ecs_entity_t  entity = ecs_create(ecs);
   HitBox*       hitbox;
   Interactable* interactable;
   Animator*     animator;
   Visual*       visual;
-
-  TEXTURE*  texture;
-  Animation animations[NUM_ANIM_STATES];
-
-  texture = get_texture(TEX_ELITE_KNIGHT);
-  animation_init(&animations[ANIM_STATE_IDLE], texture, 0, 0, 1, 4, sw, sh);
-  animation_init(&animations[ANIM_STATE_RUN], texture, sw * 4, 0, 1, 4, sw, sh);
-  animation_init(&animations[ANIM_STATE_HIT], texture, 0, 0, 1, 1, sw, sh);
-  animation_init(&animations[ANIM_STATE_JUMP], texture, sw * 6, 0, 1, 1, sw, sh);
-
-  animations[ANIM_STATE_IDLE].frame_duration = 16;
-  animations[ANIM_STATE_RUN].frame_duration  = 3;
 
   ecs_add_w_data(ecs, entity, TRANSFORM, &(Transform){ .position = position });
   ecs_add_w_data(ecs, entity, DIALOGUE, &(Dialogue){ conversation_id });
@@ -1284,7 +1036,10 @@ ecs_entity_t make_npc_nova(Ecs* ecs, Vec2 position, u16 conversation_id)
       entity,
       HEAL_BAR,
       &(HealthBar){ .color = { 0x03, 0xb6, 0xfc, 0xff }, .len = 20, .anchor = { 6, 23 } });
-  ecs_add_w_data(ecs, entity, DROP, &(Drop){ .item1 = PICKUPABLE_KEY_1_1, .change1 = 100, .change2 = 0 });
+  ecs_add_w_data(ecs,
+                 entity,
+                 DROP,
+                 &(Drop){ .item1 = PICKUPABLE_KEY_1_1, .change1 = 100, .change2 = 0 });
   ecs_add_w_data(ecs, entity, MOTION, &(Motion){ .max_speed = 60.f });
   ecs_add(ecs, entity, CHARACTER_ANIMATOR_TAG);
 
@@ -1300,8 +1055,8 @@ ecs_entity_t make_npc_nova(Ecs* ecs, Vec2 position, u16 conversation_id)
   interactable->num_commands = 1;
   interactable->commands[0]  = TEXT_COMMAND_TALK;
 
-  animator = ecs_add(ecs, entity, ANIMATOR);
-  animator_init(animator, animations, NUM_ANIM_STATES);
+  animator        = ecs_add(ecs, entity, ANIMATOR);
+  animator->anims = g_anims_elite_knight;
 
   visual           = ecs_add(ecs, entity, VISUAL);
   visual->anchor.x = 16;
@@ -1381,7 +1136,6 @@ ecs_entity_t make_coin(Ecs* ecs, Vec2 position)
   PickupableAttributes* attrs;
   Animator*             animator;
 
-  animation_init(&anim, get_texture(TEX_COIN), 0, 0, 1, 4, 8, 8);
   anim.frame_duration = 6;
 
   entity = ecs_create(ecs);
@@ -1389,8 +1143,8 @@ ecs_entity_t make_coin(Ecs* ecs, Vec2 position)
   visual         = ecs_add(ecs, entity, VISUAL);
   visual->anchor = (POINT){ 4, 4 };
 
-  animator = ecs_add(ecs, entity, ANIMATOR);
-  animator_init(animator, &anim, 1);
+  animator        = ecs_add(ecs, entity, ANIMATOR);
+  animator->anims = &g_anim_coin;
 
   transform           = ecs_add(ecs, entity, TRANSFORM);
   transform->position = position;
@@ -1402,9 +1156,9 @@ ecs_entity_t make_coin(Ecs* ecs, Vec2 position)
   hitbox->category  = CATEGORY_ITEM;
   hitbox->mask_bits = BIT(CATEGORY_PLAYER);
 
-  attrs      = ecs_add(ecs, entity, PICKUPABLE_ATTRIBUTES);
-  attrs->id  = PICKUPABLE_COIN;
-  attrs->sfx = SFX_COIN;
+  attrs        = ecs_add(ecs, entity, PICKUPABLE_ATTRIBUTES);
+  attrs->id    = PICKUPABLE_COIN;
+  attrs->sfx   = SFX_COIN;
   attrs->coins = 5;
 
   ecs_add_w_data(ecs,

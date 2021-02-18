@@ -41,3 +41,9 @@ void conversation_fini(Conversation* self)
   self->responses = NULL;
   self->sentences = NULL;
 }
+
+void sprite_init(Sprite *s, u16 texture_id)
+{
+  s->texture_id = texture_id;
+  SDL_QueryTexture(get_texture(texture_id), NULL, NULL, &s->rect.w, &s->rect.h);
+}

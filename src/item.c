@@ -46,7 +46,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
           .category    = ITEM_CATEGORY_CONSUMABLE,
           .use      = healing_item_use_callback,
           .data = &k_healing_item_data_red_flask,
-          .sprite      = {.texture_id = TEX_FLASK_RED, .rect = {0, 0, 16, 16}},
+          .icon      = {.texture_id = TEX_FLASK_RED, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_BIG_RED_FLASK] =
       {
@@ -56,7 +56,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
           .category    = ITEM_CATEGORY_CONSUMABLE,
           .use      = healing_item_use_callback,
           .data = &k_healing_item_data_big_red_flask,
-          .sprite      = {.texture_id = TEX_FLASK_RED_BIG, .rect = {0, 0, 16, 16}},
+          .icon      = {.texture_id = TEX_FLASK_RED_BIG, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_BLUE_FLASK] =
       {
@@ -66,7 +66,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
           .category    = ITEM_CATEGORY_CONSUMABLE,
           .use      = healing_item_use_callback,
           .data = &k_healing_item_data_blue_flask,
-          .sprite      = {.texture_id =  TEX_BLUE_FLASK, .rect = {0, 0, 16, 16}},
+          .icon      = {.texture_id =  TEX_BLUE_FLASK, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_SCROLL_ICE_ARROW] = 
       {
@@ -76,7 +76,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
           .category  = ITEM_CATEGORY_SCROLL,
           .use = scroll_use_callback,
           .data = &k_scroll_data_ice_arrow,
-          .sprite = {.texture_id = TEX_SCROLL, .rect = {0, 0, 16, 16}},
+          .icon = {.texture_id = TEX_SCROLL, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_SCROLL_FIRE_BALL] = 
       {
@@ -86,7 +86,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
           .category  = ITEM_CATEGORY_SCROLL,
           .use = scroll_use_callback,
           .data = &k_scrool_data_fire_ball,
-          .sprite = {.texture_id = TEX_SCROLL, .rect = {0, 0, 16, 16}},
+          .icon = {.texture_id = TEX_SCROLL, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_KEY_1_1] =
       {
@@ -96,7 +96,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
           .category  = ITEM_CATEGORY_KEY,
           .use = do_nothing_callback,
           .data = NULL,
-          .sprite = {.texture_id = TEX_KEY, .rect = {0, 0, 16, 16}},
+          .icon = {.texture_id = TEX_KEY, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_ANIME_SWORD] =
       {
@@ -106,7 +106,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
           .category  = ITEM_CATEGORY_EQUIPMENT,
           .use = equipment_item_use_callback,
           .data = &k_equipemt_item_data_anime_sword,
-          .sprite = {.texture_id = TEX_KEY, .rect = {0, 0, 16, 16}},
+          .icon = {.texture_id = TEX_KEY, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_SPEAR] =
       {
@@ -116,7 +116,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
           .category  = ITEM_CATEGORY_EQUIPMENT,
           .use = equipment_item_use_callback,
           .data = &k_equipemt_item_data_spear,
-          .sprite = {.texture_id = TEX_KEY, .rect = {0, 0, 16, 16}},
+          .icon = {.texture_id = TEX_KEY, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_STAFF] =
       {
@@ -126,7 +126,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
           .category  = ITEM_CATEGORY_EQUIPMENT,
           .use = equipment_item_use_callback,
           .data = &k_equipemt_item_data_staff,
-          .sprite = {.texture_id = TEX_KEY, .rect = {0, 0, 16, 16}},
+          .icon = {.texture_id = TEX_KEY, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_CLEAVER] =
       {
@@ -136,7 +136,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
           .category  = ITEM_CATEGORY_EQUIPMENT,
           .use = equipment_item_use_callback,
           .data = &k_equipemt_item_data_cleaver,
-          .sprite = {.texture_id = TEX_KEY, .rect = {0, 0, 16, 16}},
+          .icon = {.texture_id = TEX_KEY, .rect = {0, 0, 16, 16}},
       },
   
 };

@@ -2,8 +2,6 @@
 #define TOOLBOX_H
 #include "log.h"
 #include "common.h"
-#include "sprite.h"
-#include "sprite-sheet.h"
 #include "signal.h"
 #include "rtree.h"
 #include "heap.h"

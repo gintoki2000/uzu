@@ -235,6 +235,7 @@ int load_level(const char* level_name)
   if ((json_map_data = load_json_from_file(filename)) == NULL)
     return LOAD_LEVEL_FAIL_TO_LOAD_FILE;
   parse(json_map_data);
+  json_object_put(json_map_data);
   return LOAD_LEVEL_OK;
 }
 

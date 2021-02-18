@@ -133,6 +133,7 @@ static void dispatcher_fini(Dispatcher* dp)
   {
     signal_fini(dp->signals + i);
   }
+  free (dp->signals);
 }
 
 Dispatcher* dispatcher_new(u32 num_singals)

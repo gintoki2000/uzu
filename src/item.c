@@ -101,7 +101,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
   [ITEM_TYPE_ANIME_SWORD] =
       {
           .name = "anime sword",
-          .description = "a sword used by Nova Knight",
+          .description = "anime sword",
           .stackable = FALSE,
           .category  = ITEM_CATEGORY_EQUIPMENT,
           .use = equipment_item_use_callback,
@@ -121,7 +121,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
   [ITEM_TYPE_STAFF] =
       {
           .name = "staff",
-          .description = "able to cast spell",
+          .description = "red staff",
           .stackable = FALSE,
           .category  = ITEM_CATEGORY_EQUIPMENT,
           .use = equipment_item_use_callback,
@@ -131,7 +131,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
   [ITEM_TYPE_CLEAVER] =
       {
           .name = "cleaver",
-          .description = "",
+          .description = "cleaver",
           .stackable = FALSE,
           .category  = ITEM_CATEGORY_EQUIPMENT,
           .use = equipment_item_use_callback,

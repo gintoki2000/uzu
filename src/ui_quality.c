@@ -17,11 +17,13 @@ static Callback _callbacks[UI_QUALITY_NUM_EVENTS];
 #define UI_QUALITY_X 50
 #define UI_QUALITY_Y 50
 
-static const RECT BOX_RECT     = { UI_QUALITY_X, UI_QUALITY_Y, 50, 30 };
-static const RECT TILE_RECT    = { UI_QUALITY_X + 3, UI_QUALITY_Y + 3, 44, 24 };
-static const RECT QUALITY_RECT = { UI_QUALITY_X, UI_QUALITY_Y + 12, 44, 24 };
+static const RECT  BOX_RECT     = { UI_QUALITY_X, UI_QUALITY_Y, 50, 30 };
+static const RECT  TILE_RECT    = { UI_QUALITY_X + 3, UI_QUALITY_Y + 3, 44, 24 };
+static const RECT  QUALITY_RECT = { UI_QUALITY_X, UI_QUALITY_Y + 12, 44, 24 };
+const static COLOR BG_COLOR     = { 0x00, 0x00, 0x00, 0x90 };
+const static COLOR BORDER_COLOR = { 0xff, 0xff, 0xff, 0x80 };
 
-static void process_key_input()
+static void        process_key_input()
 {
   if (key_just_pressed(KEY_A))
   {
@@ -83,7 +85,7 @@ void ui_quality_draw()
   FONT*     font   = get_font(FONT_DAMAGE_INDICATOR);
   FC_Effect effect = { .scale = { 1.f, 1.f }, .alignment = FC_ALIGN_CENTER, .color = COLOR_WHITE };
 
-  draw_bordered_box(&BOX_RECT, COLOR_BLACK, COLOR_WHITE);
+  draw_bordered_box(&BOX_RECT, BG_COLOR, BORDER_COLOR);
 
   FC_DrawBoxColor(font, g_renderer, TILE_RECT, COLOR_WHITE, _title);
   FC_DrawBoxEffect(font, g_renderer, QUALITY_RECT, effect, "< %u >", _val);

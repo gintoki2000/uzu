@@ -9,7 +9,7 @@
 #include "ui_helper.h"
 #include "ui_list.h"
 
-#define INV_CELL_SIZE 16
+#define INV_CELL_SIZE 20
 #define INV_CELL_GAP 1
 #define INV_X 16
 #define INV_Y 32
@@ -23,7 +23,7 @@ static s32          _curr_col, _curr_row;
 static BOOL         _visible;
 static ItemCategory _category = ITEM_CATEGORY_CONSUMABLE;
 
-static const RECT _description_rect = { 100, INV_Y, 100, 25 };
+static const RECT _description_rect = { 130, INV_Y, 100, 25 };
 
 static const char        INV_TEXT_USE[]  = "USE";
 static const char        INV_TEXT_DROP[] = "DROP";
@@ -201,7 +201,7 @@ void inventory_draw()
   if (!_visible)
     return;
 
-  RECT cell_rect;
+  RECT cell_rect, item_rect;
   int  idx;
 
   Item*           items = _items[_category];
@@ -217,6 +217,7 @@ void inventory_draw()
         INV_CELL_SIZE,
         INV_CELL_SIZE,
       };
+
       draw_bordered_box(&cell_rect,
                         UI_COLOR_BG,
                         i == _curr_row && j == _curr_col ? UI_COLOR_BORDER_SELECT
@@ -226,12 +227,16 @@ void inventory_draw()
 
       tp = &g_item_types[items[idx].type_id];
 
+      item_rect.w = tp->icon.rect.w;
+      item_rect.h = tp->icon.rect.h;
+      item_rect.x = cell_rect.x + (INV_CELL_SIZE - item_rect.w) / 2;
+      item_rect.y = cell_rect.y + (INV_CELL_SIZE - item_rect.h) / 2;
       if (items[idx].num_items > 0)
       {
         SDL_RenderCopy(g_renderer,
                        get_texture(tp->icon.texture_id),
                        &tp->icon.rect,
-                       &cell_rect);
+                       &item_rect);
         if (items[idx].num_items > 1)
           FC_DrawColor(get_font(FONT_DAMAGE_INDICATOR),
                        g_renderer,

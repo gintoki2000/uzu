@@ -176,7 +176,7 @@ static void on_update()
     render_game_world();
     render_ui();
 
-#if 1
+#if 0
     // render debug
     collision_system_render_debug();
     hitbox_rendering_system_update();

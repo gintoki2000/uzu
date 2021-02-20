@@ -16,6 +16,10 @@ static int      _pos_x;
 static int      _pos_y;
 static int      _selected;
 
+
+const static COLOR BG_COLOR     = { 0x00, 0x00, 0x00, 0x90 };
+const static COLOR BORDER_COLOR = { 0xff, 0xff, 0xff, 0x80 };
+
 extern SDL_Renderer* g_renderer;
 
 static void process_key_input()

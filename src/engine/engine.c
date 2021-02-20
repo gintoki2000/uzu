@@ -37,6 +37,7 @@ static SDL_bool init(const GameSetting* setting)
     ERROR("open audio failed\n");
     return FALSE;
   }
+  SDL_SetRenderDrawBlendMode(g_renderer, SDL_BLENDMODE_BLEND);
   keybroad_init();
   engine_set_frame_rate(setting->frame_rate);
   return SDL_TRUE;

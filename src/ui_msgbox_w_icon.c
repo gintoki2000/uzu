@@ -1,7 +1,7 @@
 #include "ui_msgbox_w_icon.h"
+#include "constances.h"
 #include "engine/keyboard.h"
 #include "resources.h"
-#include "constances.h"
 
 extern RENDERER* g_renderer;
 
@@ -12,11 +12,13 @@ extern RENDERER* g_renderer;
 #define POSITION_X ((WIN_WIDTH / 2) - (ENTRY_WIDTH / 2))
 #define POSITION_Y (WIN_HEIGHT / 2)
 #define GAP (2)
+#define INITIAL_ENTRY_X 50
 
 static const COLOR _entry_color = { 0x00, 0x00, 0x00, 0xd0 };
 static const COLOR _text_color  = { 0xff, 0xff, 0xff, 0xff };
 
 static ENTRY _entries[MAX_NENTRY];
+static float _entry_x[MAX_NENTRY];
 static u16   _nentry;
 static FONT* _font;
 static BOOL  _visible;
@@ -45,11 +47,11 @@ void ui_msgbox_w_icon_draw(void)
     return;
   RECT icon_rect;
   RECT entry_rect;
-  int ry = POSITION_Y - ((ENTRY_HEIGHT + GAP) * _nentry) / 2;
+  int  ry = POSITION_Y - ((ENTRY_HEIGHT + GAP) * _nentry) / 2;
   for (int i = 0; i < _nentry; ++i)
   {
 
-    entry_rect.x = POSITION_X;
+    entry_rect.x = POSITION_X + _entry_x[i];
     entry_rect.y = ry + i * (ENTRY_HEIGHT + GAP);
     entry_rect.w = ENTRY_WIDTH;
     entry_rect.h = ENTRY_HEIGHT;
@@ -62,7 +64,7 @@ void ui_msgbox_w_icon_draw(void)
 
     SDL_RenderFillRect(g_renderer, &entry_rect);
 
-    icon_rect.x = POSITION_X;
+    icon_rect.x = POSITION_X + _entry_x[i];
     icon_rect.y = ry + i * (ENTRY_HEIGHT + GAP);
     icon_rect.w = 16;
     icon_rect.h = 16;
@@ -71,12 +73,23 @@ void ui_msgbox_w_icon_draw(void)
                    &_entries[i].icon.rect,
                    &icon_rect);
 
-    FC_DrawColor(_font, g_renderer, icon_rect.x + 18, icon_rect.y + 5, _text_color, _entries[i].text);
+    FC_DrawColor(_font,
+                 g_renderer,
+                 icon_rect.x + 18,
+                 icon_rect.y + 5,
+                 _text_color,
+                 _entries[i].text);
   }
 }
 
 void ui_msgbox_w_icon_update(void)
 {
+  if (!_visible)
+    return;
+  for (int i = 0; i < _nentry; ++i)
+  {
+    _entry_x[i] += (0 - _entry_x[i]) / 4;
+  }
 }
 
 void ui_msgbox_w_icon_show(const ENTRY* entries, u16 nentry)
@@ -84,7 +97,11 @@ void ui_msgbox_w_icon_show(const ENTRY* entries, u16 nentry)
   nentry = min(nentry, 5);
   memcpy(_entries, entries, sizeof(ENTRY) * nentry);
   _visible = TRUE;
-  _nentry = nentry;
+  _nentry  = nentry;
+  for (int i = 0; i < nentry; ++i)
+  {
+    _entry_x[i] = INITIAL_ENTRY_X + i * 10;
+  }
   keybroad_push_state(process_input);
 }
 #undef ENTRY

@@ -23,8 +23,9 @@ const Scene g_main_menu = {
 #define MAIN_MENU_POS_Y 78
 #define MAIN_MENU_NUM_OPS 3
 
-static TEXTURE*   _texture;
+static TEXTURE*   _table;
 static TEXTURE*   _pointer;
+static TEXTURE*   _bg;
 static FONT*      _font;
 static const RECT _dst             = { 117, 78, 89, 85 };
 static const char _text_new_game[] = "New Game";
@@ -32,6 +33,7 @@ static const char _text_exit[]     = "Exit";
 static const char _text_about[]    = "About";
 static const char _text_load[]     = "Load";
 static s8         _select;
+//static const RECT _bg_rect = { 0, 0, WIN_WIDTH, WIN_HEIGHT };
 
 static const char* const _options[MAIN_MENU_NUM_OPS] = { _text_new_game, _text_about, _text_exit };
 
@@ -39,9 +41,10 @@ extern RENDERER* g_renderer;
 
 static void on_load()
 {
-  _texture = get_texture(TEX_UI_MAIN_MENU);
+  _table   = get_texture(TEX_UI_MAIN_MENU);
   _pointer = get_texture(TEX_UI_MAIN_MENU_POINTER);
   _font    = get_font(FONT_DAMAGE_INDICATOR);
+  _bg      = get_texture(TEX_TILESCR_BG);
   _select  = 0;
   keybroad_push_state(process_key_input);
   Mix_PlayMusic(get_bg_mus(BG_MUS_TILE_SCREEN), -1);
@@ -56,7 +59,8 @@ static void on_update()
   int       x, y;
   FC_Effect effect;
 
-  SDL_RenderCopy(g_renderer, _texture, NULL, &_dst);
+  SDL_RenderCopy(g_renderer, _bg, NULL, NULL);
+  SDL_RenderCopy(g_renderer, _table, NULL, &_dst);
 
   effect = (FC_Effect){
     .color     = COLOR_WHITE,

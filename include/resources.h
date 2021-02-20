@@ -51,6 +51,7 @@ typedef enum
   TEX_ELITE_KNIGHT,
   TEX_COIN,
   TEX_ELF,
+  TEX_TILESCR_BG,
   NUM_TEXS
 } TextureId;
 

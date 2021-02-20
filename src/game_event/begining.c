@@ -36,7 +36,6 @@ static const char* _hit_sub[] = { "fuck", "why are you hit me...", NULL };
 
 static const char* _die_sub[] = { "uhh...", NULL };
 
-BOOL _sub1_is_showed;
 
 EVENT_SAVE_AND_LOAD_FN()
 
@@ -102,14 +101,12 @@ static void on_game_scene_unload(SDL_UNUSED pointer_t arg, SDL_UNUSED const void
 
 static void on_entity_get_damage(SDL_UNUSED pointer_t arg, const MSG_GetDamaged* event)
 {
-  if (_sub1_is_showed)
-    return;
   Name* name = ecs_get(g_ecs, event->damagee, NAME);
   if (name != NULL && strcmp(name->value, "nova") == 0)
   {
     ui_subtile_show(_hit_sub);
     ecs_rmv(g_ecs, event->damagee, INTERACTABLE);
-    _sub1_is_showed = TRUE;
+    ems_disconnect(MSG_GET_DAMAGED, (pointer_t)on_entity_get_damage);
   }
 }
 

@@ -31,6 +31,7 @@ source_files = files(
   'level_loader.c',
   'ui_dialogue.c',
   'ui_subtile.c',
+  'ui_msgbox_w_icon.c',
   'spells.c',
   'animations.c',
 ) + engine_source_files \

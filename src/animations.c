@@ -175,7 +175,7 @@ const Animation g_anims_elf_m[] = {
 const Animation g_anims_chort[] = {
   {
       .mode           = ANIM_PLAY_MODE_LOOP,
-      .frame_duration = 5,
+      .frame_duration = 8,
       .texture_id     = TEX_CHORT,
       .offset_x       = 0,
       .offset_y       = 0,
@@ -185,9 +185,9 @@ const Animation g_anims_chort[] = {
   },
   {
       .mode           = ANIM_PLAY_MODE_LOOP,
-      .frame_duration = 5,
+      .frame_duration = 6,
       .texture_id     = TEX_CHORT,
-      .offset_x       = 48,
+      .offset_x       = 16 * 4,
       .offset_y       = 0,
       .sprite_width   = 16,
       .sprite_height  = 24,

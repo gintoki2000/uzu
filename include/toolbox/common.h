@@ -92,6 +92,8 @@ typedef struct
 
 #define EPSILON 0.001f
 
+#define STREQ(a, b) (SDL_strcmp(a, b) == 0)
+
 typedef struct
 {
   float x;

@@ -1,10 +1,11 @@
-#include "system/game_logic.h"
-#include "system/event_messaging_sys.h"
 #include "components.h"
 #include "constances.h"
 #include "inventory.h"
-#include <string.h>
+#include "system/event_messaging_sys.h"
+#include "system/game_logic.h"
 #include "ui_msgbox.h"
+#include "ui_msgbox_w_icon.h"
+#include <string.h>
 
 extern Ecs* g_ecs;
 
@@ -21,17 +22,17 @@ static void open_chest(ecs_entity_t entity)
   }
   else
   {
-    char msg[255] = "you got";
-    char tmp[100];
+    UI_MsgBoxWIcon_Entry entries[chest->num_items];
     for (int i = 0; i < chest->num_items; ++i)
     {
       add_to_inv(chest->items[i].type_id, chest->items[i].num_items);
-      sprintf(tmp, " %dx%s", chest->items[i].num_items, g_item_types[chest->items[i].type_id].name);
-      strcat(msg, tmp);
+      SDL_strlcpy(entries[i].text,
+                  g_item_types[chest->items[i].type_id].name,
+                  UI_MSGBOX_W_ICON_MAX_TEXT_LEN);
+      entries[i].icon = g_item_types[chest->items[i].type_id].icon;
     }
-    ui_msgbox_display(msg);
-    chest->num_items = 0;
-
+    ui_msgbox_w_icon_show(entries, chest->num_items);
+    chest->num_items    = 0;
     visual              = ecs_get(g_ecs, entity, VISUAL);
     visual->sprite.rect = RECT_CHEST_OPEN;
   }

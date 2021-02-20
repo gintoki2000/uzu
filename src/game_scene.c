@@ -15,6 +15,7 @@
 #include "ui_msgbox.h"
 #include "ui_quality.h"
 #include "ui_subtile.h"
+#include "ui_msgbox_w_icon.h"
 
 #include "engine/keyboard.h"
 
@@ -113,6 +114,7 @@ static void on_load()
   // init ui
   ui_dialogue_init();
   ui_subtile_init();
+  ui_msgbox_w_icon_init(); 
 
   ems_connect(MSG_HIT_LADDER, NULL, on_player_hit_ladder);
   ems_connect(MSG_ENTITY_DIED, NULL, on_entity_died);
@@ -215,11 +217,11 @@ static MusTblItem _mustbl[] = {
   {NULL, 0}
 };
 
-static Mix_Music* get_music_for_level(const char* level_name)
+static Mix_Music* get_bgmusic_by_level_name(const char* level_name)
 {
   for (int i = 0; _mustbl[i].level_name != NULL; ++i)
   {
-    if (strcmp(level_name, _mustbl[i].level_name) == 0)
+    if (STREQ(level_name, _mustbl[i].level_name))
       return get_bg_mus(_mustbl[i].mus_id);
   }
   return NULL;
@@ -227,7 +229,7 @@ static Mix_Music* get_music_for_level(const char* level_name)
 
 static void music_player_on_level_loaded(SDL_UNUSED void* arg, const MSG_LevelLoaded* event)
 {
-  Mix_Music* mus = get_music_for_level(event->level_name);
+  Mix_Music* mus = get_bgmusic_by_level_name(event->level_name);
   if (mus != NULL)
     Mix_PlayMusic(mus, -1);
 }
@@ -262,6 +264,7 @@ static void update_ui()
 {
   ui_dialogue_update();
   ui_subtile_update();
+  ui_msgbox_w_icon_update();
 }
 
 static void render_ui()
@@ -269,6 +272,7 @@ static void render_ui()
   inventory_draw();
   ui_list_draw();
   ui_msgbox_draw();
+  ui_msgbox_w_icon_draw();
   ui_dialogue_draw();
   ui_quality_draw();
   ui_subtile_draw();
@@ -292,10 +296,10 @@ static void update_game_logic(void)
   //  skl
   swing_weapon_skl_system_update();
   casting_system_update();
-  charge_weapon_skl_system();
-
   weapon_skill_thust_update();
   thunder_storm_weapon_skl_system_update();
+  //charge_weapon_skl_system();
+
 }
 
 static void render_game_world(void)

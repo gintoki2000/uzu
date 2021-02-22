@@ -25,19 +25,19 @@ static struct
   BOOL nova_alive;
 } _save_block;
 
-static Vec2 k_nova_positions[] = {
+static Vec2 _nova_pos[] = {
   [PHASE_0]  = { 704.f, 54.f },
   [PHASE_1A] = { 319.f, 61.f },
 };
 
-static RECT k_zone = { 340.f, 60.f, 258.f, 195.f };
+static RECT _zone_to_clear = { 340.f, 60.f, 258.f, 195.f };
 
 static const char* _hit_sub[] = { "fuck", "why are you hit me...", NULL };
 
 static const char* _die_sub[] = { "uhh...", NULL };
 
 
-EVENT_SAVE_AND_LOAD_FN()
+EVENT_SAVE_AND_LOAD_FN(FILE_DATA_NAME)
 
 //<-----------------------------------event callbacks-------------------------------->//
 //> globals
@@ -72,7 +72,7 @@ static void on_level_loaded(SDL_UNUSED pointer_t arg, const MSG_LevelLoaded* eve
   case 0:
     if (strcmp(event->level_name, "1") == 0)
     {
-      make_npc_nova(g_ecs, k_nova_positions[PHASE_0], CONVERSATION_NOVA_00);
+      make_npc_nova(g_ecs, _nova_pos[PHASE_0], CONVERSATION_NOVA_00);
       ems_connect(MSG_CONVERSATION_FINISHED, NULL, phase_0_on_conversation_finished);
       ems_connect(MSG_GET_DAMAGED, NULL, on_entity_get_damage);
       ems_connect(MSG_ENTITY_DIED, NULL, on_entity_died);
@@ -81,7 +81,7 @@ static void on_level_loaded(SDL_UNUSED pointer_t arg, const MSG_LevelLoaded* eve
   case PHASE_1A:
     if (event->level_name && strcmp(event->level_name, "0") == 0)
     {
-      make_npc_nova(g_ecs, k_nova_positions[PHASE_1A], CONVERSATION_NOVA_01);
+      make_npc_nova(g_ecs, _nova_pos[PHASE_1A], CONVERSATION_NOVA_01);
       ems_connect(MSG_GET_DAMAGED, NULL, on_entity_get_damage);
       ems_connect(MSG_ENTITY_DIED, NULL, on_entity_died);
     }
@@ -123,7 +123,7 @@ static void phase_0_on_conversation_finished(SDL_UNUSED pointer_t            arg
     {
       _save_block.state = PHASE_1A;
       item->num_items -= 2;
-      ui_msgbox_display("give x2 red flask to Nova Knight");
+      ui_msgbox_display("give x2 red flask to Nova");
       ecs_set(g_ecs, event->npc, DIALOGUE, &(Dialogue){ CONVERSATION_NOVA_01 });
       ems_connect(MSG_ENTITY_DIED, NULL, phase_1a_on_entity_died);
     }
@@ -147,14 +147,15 @@ static void on_entity_died(SDL_UNUSED pointer_t arg, const MSG_EntityDied* event
   {
     _save_block.nova_alive = FALSE;
     ui_subtile_show(_die_sub);
+    ems_disconnect(MSG_ENTITY_DIED, (pointer_t)on_entity_died);
   }
 }
 
-static BOOL __callback_collision_query(BOOL* are_there_enemy_in_zone, ecs_entity_t e)
+static BOOL __callback_collision_query(BOOL* has_enemies, ecs_entity_t e)
 {
   if (ecs_has(g_ecs, e, ENEMY_TAG))
   {
-    *are_there_enemy_in_zone = TRUE;
+    *has_enemies = TRUE;
     return FALSE;
   }
   return TRUE;
@@ -165,20 +166,18 @@ static void phase_1a_on_entity_died(SDL_UNUSED pointer_t arg, const MSG_EntityDi
   Transform* transform = ecs_get(g_ecs, event->entity, TRANSFORM);
   BOOL       is_enemy  = ecs_has(g_ecs, event->entity, ENEMY_TAG);
   POINT      point;
-  BOOL       are_there_enemy_in_zone;
+  BOOL       has_enemies;
   if (transform != NULL && is_enemy)
   {
     point.x = transform->position.x;
     point.y = transform->position.y;
 
-    if (SDL_PointInRect(&point, &k_zone))
+    if (SDL_PointInRect(&point, &_zone_to_clear))
     {
-      collision_box_query(&k_zone,
+      collision_box_query(&_zone_to_clear,
                           BIT(CATEGORY_ENEMY),
-                          CALLBACK_1(&are_there_enemy_in_zone, __callback_collision_query));
-      // TODO: player đã giết toàn bộ quái trong "zone" npc có thể quay về khu vực trung tâm an
-      // toàn
-      ems_disconnect(MSG_ENTITY_DIED, (pointer_t)phase_1a_on_entity_died);
+                          CALLBACK_1(&has_enemies, __callback_collision_query));
+
     }
   }
 }

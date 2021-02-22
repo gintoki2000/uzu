@@ -1,10 +1,10 @@
 #include "inventory.h"
 
-#include "global.h"
 #include "constances.h"
 #include "engine/keyboard.h"
 #include "entity_utils.h"
 #include "game_scene.h"
+#include "global.h"
 #include "resources.h"
 #include "ui_helper.h"
 #include "ui_list.h"
@@ -132,8 +132,13 @@ BOOL add_to_inv(ItemTypeId type_id, u8 quality)
 {
   ItemCategory cat   = g_item_types[type_id].category;
   Item*        items = _items[cat];
-  int          idx   = find_item(type_id);
+  int          idx;
   int          empty_slot;
+
+  if (type_id == ITEM_TYPE_ID_NULL)
+    return FALSE;
+
+  idx = find_item(type_id);
 
   if (idx == -1)
   {
@@ -233,10 +238,7 @@ void inventory_draw()
       item_rect.y = cell_rect.y + (INV_CELL_SIZE - item_rect.h) / 2;
       if (items[idx].num_items > 0)
       {
-        SDL_RenderCopy(g_renderer,
-                       get_texture(tp->icon.texture_id),
-                       &tp->icon.rect,
-                       &item_rect);
+        SDL_RenderCopy(g_renderer, get_texture(tp->icon.texture_id), &tp->icon.rect, &item_rect);
         if (items[idx].num_items > 1)
           FC_DrawColor(get_font(FONT_DAMAGE_INDICATOR),
                        g_renderer,

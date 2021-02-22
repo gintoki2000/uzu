@@ -53,6 +53,9 @@ typedef enum
   TEX_ELF,
   TEX_TILESCR_BG,
   TEX_KEYS,
+  TEX_ICON_FIRE_BALL, 
+  TEX_ICON_ICE_ARROW,
+  TEX_SPELL_FRAME,
   NUM_TEXS
 } TextureId;
 

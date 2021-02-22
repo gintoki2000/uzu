@@ -1,8 +1,8 @@
-#include "global.h"
 #include "components.h"
+#include "entity_utils.h"
+#include "global.h"
 #include "resources.h"
 #include "ui_msgbox.h"
-#include "entity_utils.h"
 
 static void scroll_use_callback(const void* data, Ecs* ecs, ecs_entity_t entity);
 static void healing_item_use_callback(const void* data, Ecs* ecs, ecs_entity_t entity);
@@ -76,7 +76,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
           .category  = ITEM_CATEGORY_SCROLL,
           .use = scroll_use_callback,
           .data = &k_scroll_data_ice_arrow,
-          .icon = {.texture_id = TEX_SCROLL, .rect = {0, 0, 16, 16}},
+          .icon = {.texture_id = TEX_ICON_ICE_ARROW, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_SCROLL_FIRE_BALL] = 
       {
@@ -86,7 +86,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
           .category  = ITEM_CATEGORY_SCROLL,
           .use = scroll_use_callback,
           .data = &k_scrool_data_fire_ball,
-          .icon = {.texture_id = TEX_SCROLL, .rect = {0, 0, 16, 16}},
+          .icon = {.texture_id = TEX_ICON_FIRE_BALL, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_KEY_1_1] =
       {

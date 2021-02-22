@@ -1,8 +1,8 @@
-#include "system/rendering.h"
 #include "components.h"
 #include "entity_utils.h"
 #include "resources.h"
 #include "session.h"
+#include "system/rendering.h"
 #include <string.h>
 
 static const SDL_Rect _start = { 0, 0, 4, 9 };
@@ -19,10 +19,10 @@ static const SDL_Color mana_active = { 87, 152, 203, 255 };
 
 static const SDL_Color mana_inactive = { 96, 47, 86, 255 };
 
-#define HUD_HEALTH_BAR_POSITION_X 5
+#define HUD_HEALTH_BAR_POSITION_X 32
 #define HUD_HEALTH_BAR_POSITION_Y 5
-#define HUD_MANA_BAR_POSITION_X 5
-#define HUD_MANA_BAR_POSITION_Y 20
+#define HUD_MANA_BAR_POSITION_X 32
+#define HUD_MANA_BAR_POSITION_Y 18
 #define SPELL_NAME_POSITION_X 5
 #define SPELL_NAME_POSITION_Y 40
 #define COINS_POSITION_X 5
@@ -46,6 +46,7 @@ static void draw_player_health_bar(ecs_entity_t player);
 static void draw_player_mana_bar(ecs_entity_t player);
 static void draw_spell_name(ecs_entity_t player);
 static void draw_coins(void);
+static void draw_spell_icon(ecs_entity_t player);
 
 void hub_system_update()
 {
@@ -54,7 +55,8 @@ void hub_system_update()
   {
     draw_player_health_bar(player);
     draw_player_mana_bar(player);
-    draw_spell_name(player);
+    draw_spell_icon(player);
+    //draw_spell_name(player);
     draw_coins();
   }
 }
@@ -176,4 +178,24 @@ static void draw_coins()
                (COLOR){ 245, 185, 66, 255 },
                "%s$",
                str_coins);
+}
+
+static void draw_spell_icon(ecs_entity_t player)
+{
+  static const RECT icon_dst  = { 7, 7, 16, 16 };
+  static const RECT frame_dst = { 0, 0, 30, 30 };
+
+  AttunementSlot* aslot;
+  const Spell*    spell;
+  Icon            icon;
+
+  SDL_RenderCopy(g_renderer, get_texture(TEX_SPELL_FRAME), NULL, &frame_dst);
+
+  aslot = ecs_get(g_ecs, player, ATTUNEMENT_SLOT);
+  if (aslot->spell_id == SPELL_ID_NULL)
+    return;
+  spell = &g_spell_tbl[aslot->spell_id];
+  icon  = spell->icon;
+
+  SDL_RenderCopy(g_renderer, get_texture(icon.texture_id), &icon.rect, &icon_dst);
 }

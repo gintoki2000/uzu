@@ -47,6 +47,8 @@ void casting_system_update()
         (mana_pool = ecs_get(g_ecs, holder->value, MANA_POOL)) &&
         (transform = ecs_get(g_ecs, entities[i], TRANSFORM)))
     {
+      if (attunement_slot->spell_id == SPELL_ID_NULL)
+        continue;
       spell     = &g_spell_tbl[attunement_slot->spell_id];
       trigger   = holder_controller->action == CHARACTER_ACTION_REGULAR_ATK;
       enough_mp = mana_pool->mana_points >= spell->cost;

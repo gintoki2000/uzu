@@ -213,6 +213,7 @@ ecs_entity_t make_monster_base(Ecs* ecs, const NewMonsterParams* params)
   health_bar         = ecs_add(ecs, entity, HEAL_BAR);
   health_bar->len    = params->anims[0].sprite_width;
   health_bar->anchor = (SDL_Point){ sprite_width / 2, sprite_height };
+  health_bar->color  = (SDL_Color){ 0x42, 0xde, 0x23, 0xd0 };
 
   motion            = ecs_add(ecs, entity, MOTION);
   motion->max_speed = 60.f;
@@ -516,7 +517,7 @@ ecs_entity_t make_player(Ecs* ecs, ecs_entity_t character, ecs_entity_t weapon)
                       BIT(CATEGORY_LADDER) | BIT(CATEGORY_INTERACABLE);
 
   attunement_slot           = ecs_add(ecs, character, ATTUNEMENT_SLOT);
-  attunement_slot->spell_id = SPELL_ICE_ARROW;
+  attunement_slot->spell_id = SPELL_ID_NULL;
 
   ecs_add_w_data(ecs,
                  character,

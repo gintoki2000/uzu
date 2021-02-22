@@ -3,9 +3,9 @@
 #include "SDL_mixer.h"
 #include "SDL_ttf.h"
 #include "engine/engine.h"
+#include "engine/keyboard.h"
 #include "json_helper.h"
 #include "struct_meta_data.h"
-#include "engine/keyboard.h"
 static SDL_Texture* _textures[NUM_TEXS];
 static const char*  _texture_files[NUM_TEXS] = {
   [TEX_BIG_DEMON]            = "asserts/big_demon.png",
@@ -56,6 +56,9 @@ static const char*  _texture_files[NUM_TEXS] = {
   [TEX_ELF]                  = "asserts/elf_m.png",
   [TEX_TILESCR_BG]           = "asserts/tilescreenbg.png",
   [TEX_KEYS]                 = "asserts/ui/keys.png",
+  [TEX_ICON_ICE_ARROW]       = "asserts/icon_ice_arrow.png",
+  [TEX_ICON_FIRE_BALL]       = "asserts/icon_fire_ball.png",
+  [TEX_SPELL_FRAME]          = "asserts/spell_frame.png",
 };
 
 static Mix_Music*  _bg_musics[NUM_BG_MUSICS];

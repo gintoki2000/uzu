@@ -63,7 +63,7 @@ typedef struct Sprite
   SDL_Rect rect;
 } Sprite, Icon;
 
-void sprite_init(Sprite *s, u16 texture_id);
+void sprite_init(Sprite* s, u16 texture_id);
 
 typedef struct SpriteSheet
 {
@@ -175,9 +175,10 @@ typedef struct Spell
 {
   const char* name;
   void (*cast)(Ecs* ecs, ecs_entity_t caster, ecs_entity_t weapon);
-  u16 cost;
-  u16 cast_spd;
-  u16 casting_effect;
+  u16  cost;
+  u16  cast_spd;
+  u16  casting_effect;
+  Icon icon;
 } Spell;
 
 typedef enum

@@ -56,9 +56,9 @@ static const char*  _texture_files[NUM_TEXS] = {
   [TEX_ELF]                  = "asserts/elf_m.png",
   [TEX_TILESCR_BG]           = "asserts/tilescreenbg.png",
   [TEX_KEYS]                 = "asserts/ui/keys.png",
-  [TEX_ICON_ICE_ARROW]       = "asserts/icon_ice_arrow.png",
-  [TEX_ICON_FIRE_BALL]       = "asserts/icon_fire_ball.png",
-  [TEX_SPELL_FRAME]          = "asserts/spell_frame.png",
+  [TEX_ICON_ICE_ARROW]       = "asserts/ui/icon_ice_arrow.png",
+  [TEX_ICON_FIRE_BALL]       = "asserts/ui/icon_fire_ball.png",
+  [TEX_SPELL_FRAME]          = "asserts/ui/spell_frame.png",
 };
 
 static Mix_Music*  _bg_musics[NUM_BG_MUSICS];

@@ -34,6 +34,7 @@ source_files = files(
   'ui_msgbox_w_icon.c',
   'spells.c',
   'animations.c',
+  'select_character.c'
 ) + engine_source_files \
   + ecs_source_files \
   + toolbox_source_files \

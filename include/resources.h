@@ -61,6 +61,7 @@ typedef enum
   BG_MUS_LV2,
   BG_MUS_BOSS,
   BG_MUS_TILE_SCREEN,
+  BG_MUS_SELECT_CHAR,
   NUM_BG_MUSICS
 } BgMusId;
 

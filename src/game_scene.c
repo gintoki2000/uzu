@@ -13,9 +13,9 @@
 #include "ui_dialogue.h"
 #include "ui_list.h"
 #include "ui_msgbox.h"
+#include "ui_msgbox_w_icon.h"
 #include "ui_quality.h"
 #include "ui_subtile.h"
-#include "ui_msgbox_w_icon.h"
 
 #include "engine/keyboard.h"
 
@@ -74,17 +74,19 @@ static char _spwan_location[LEVEL_SWITCHER_MAX_DEST_LEN + 1];
 static BOOL _paused;
 static BOOL _player_died;
 
-static void spawn_player(Vec2 pos)
+static void spawn_player(Vec2 position)
 {
   ecs_entity_t player;
   ecs_entity_t weapon;
+  ecs_entity_t (*make_weapon_fn)(Ecs*, u16);
+  ecs_entity_t (*make_character_fn)(Ecs*, Vec2);
+  u16 mask = BIT(CATEGORY_ENEMY) | BIT(CATEGORY_INTERACABLE);
 
-  // TODO: di chuyển data của player + vũ khí từ ecs registry tạm về lại ecs registry chính
+  make_weapon_fn    = g_weapon_create_fn_tbl[g_session.weapon];
+  make_character_fn = g_char_create_fn_tbl[g_session.job];
 
-  player = g_char_create_fn_tbl[g_session.job](g_ecs, pos);
-  weapon =
-      g_weapon_create_fn_tbl[g_session.weapon](g_ecs,
-                                               BIT(CATEGORY_ENEMY) | BIT(CATEGORY_INTERACABLE));
+  player = make_character_fn(g_ecs, position);
+  weapon = make_weapon_fn(g_ecs, mask);
 
   make_player(g_ecs, player, weapon);
 
@@ -114,7 +116,7 @@ static void on_load()
   // init ui
   ui_dialogue_init();
   ui_subtile_init();
-  ui_msgbox_w_icon_init(); 
+  ui_msgbox_w_icon_init();
 
   ems_connect(MSG_HIT_LADDER, NULL, on_player_hit_ladder);
   ems_connect(MSG_ENTITY_DIED, NULL, on_entity_died);
@@ -128,10 +130,6 @@ static void on_load()
     ems_broadcast(MSG_NEW_GAME, NULL);
     ems_broadcast(MSG_LEVEL_LOADED, &(MSG_LevelLoaded){ "0" });
     spawn_player(g_session.pos);
-    add_to_inv(ITEM_TYPE_ANIME_SWORD, 1);
-    add_to_inv(ITEM_TYPE_CLEAVER, 1);
-    add_to_inv(ITEM_TYPE_SPEAR, 1);
-    add_to_inv(ITEM_TYPE_STAFF, 1);
     g_session.new_game = FALSE;
   }
   else
@@ -211,11 +209,7 @@ typedef struct MusTblItem
   u16         mus_id;
 } MusTblItem;
 
-static MusTblItem _mustbl[] = {
-  {"0", BG_MUS_LV1},
-  {"1", BG_MUS_LV2},
-  {NULL, 0}
-};
+static MusTblItem _mustbl[] = { { "0", BG_MUS_LV1 }, { "1", BG_MUS_LV2 }, { NULL, 0 } };
 
 static Mix_Music* get_bgmusic_by_level_name(const char* level_name)
 {
@@ -298,8 +292,7 @@ static void update_game_logic(void)
   casting_system_update();
   weapon_skill_thust_update();
   thunder_storm_weapon_skl_system_update();
-  //charge_weapon_skl_system();
-
+  // charge_weapon_skl_system();
 }
 
 static void render_game_world(void)
@@ -316,17 +309,25 @@ static void render_game_world(void)
   merchant_system_update();
 }
 
+static Vec2 get_spawn_localtion(ecs_entity_t ladder)
+{
+
+  Vec2 position = get_entity_position(g_ecs, ladder);
+  position.x += 8;
+  position.y += 30;
+  return position;
+}
+
 static void next_level(void)
 {
-  load_level(_next_level);
   ecs_entity_t ladder;
+  Vec2         spawn_localtion;
+  load_level(_next_level);
 
   if ((ladder = find_ladder(g_ecs, _spwan_location)) != ECS_NULL_ENT)
   {
-    Vec2 pos = get_entity_position(g_ecs, ladder);
-    pos.x += 8;
-    pos.y += 30;
-    spawn_player(pos);
+    spawn_localtion = get_spawn_localtion(ladder);
+    spawn_player(spawn_localtion);
   }
   ems_broadcast(MSG_LEVEL_LOADED, &(MSG_LevelLoaded){ _next_level });
 

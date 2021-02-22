@@ -5,7 +5,7 @@
 extern const Animation g_anims_knight_m[];
 extern const Animation g_anims_wizzard_m[];
 extern const Animation g_anims_lizzard_m[];
-extern const Animation g_anims_hunter_m[];
+extern const Animation g_anims_elf_m[];
 
 extern const Animation g_anims_imp[];
 extern const Animation g_anims_wogol[];

@@ -435,7 +435,7 @@ const Animation g_anim_blood_loss_2 = {
 const Animation g_anims_elite_knight[] = {
   {
       .mode           = ANIM_PLAY_MODE_LOOP,
-      .frame_duration = 5,
+      .frame_duration = 10,
       .texture_id     = TEX_ELITE_KNIGHT,
       .offset_x       = 0,
       .offset_y       = 0,

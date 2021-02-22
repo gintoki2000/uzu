@@ -53,7 +53,7 @@ static const char*  _texture_files[NUM_TEXS] = {
   [TEX_EFFECT_FIRE_BUST]     = "asserts/effect/fire_bust.png",
   [TEX_COIN]                 = "asserts/coin.png",
   [TEX_ELF]                  = "asserts/elf_m.png",
-  [TEX_TILESCR_BG]           = "asserts/tilescreenbg.png"
+  [TEX_TILESCR_BG]           = "asserts/tilescreenbg.png",
 };
 
 static Mix_Music*  _bg_musics[NUM_BG_MUSICS];
@@ -62,6 +62,7 @@ static const char* _bg_mus_files[NUM_BG_MUSICS] = {
   [BG_MUS_LV2]         = "asserts/sound/bg/lv2.wav",
   [BG_MUS_BOSS]        = "asserts/sound/bg/boss.wav",
   [BG_MUS_TILE_SCREEN] = "asserts/sound/bg/tile_screen.wav",
+  [BG_MUS_SELECT_CHAR] = "asserts/sound/bg/itscomefromthedark.mp3",
 };
 
 static Mix_Chunk*  _sfx[NUM_SFXS];

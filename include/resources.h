@@ -52,6 +52,7 @@ typedef enum
   TEX_COIN,
   TEX_ELF,
   TEX_TILESCR_BG,
+  TEX_KEYS,
   NUM_TEXS
 } TextureId;
 
@@ -112,5 +113,5 @@ Mix_Music*    get_bg_mus(BgMusId id);
 Mix_Chunk*    get_sfx(SfxId id);
 FONT*         get_font(FontId id);
 Conversation* get_conversation(ConversationId id);
-
+Icon          get_key_icon(u16 key);
 #endif // RESOURCES_H

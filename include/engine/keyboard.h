@@ -17,11 +17,12 @@ typedef enum
 
 typedef void (*key_handle_fn_t)(void);
 
-void     keybroad_init();
-void     keybroad_update();
-SDL_bool key_pressed(Key k);
-SDL_bool key_just_pressed(Key k);
-void     keybroad_push_state(key_handle_fn_t key_handle_fn);
-void     keybroad_pop_state();
+void         keybroad_init();
+void         keybroad_update();
+SDL_bool     key_pressed(Key k);
+SDL_bool     key_just_pressed(Key k);
+void         keybroad_push_state(key_handle_fn_t key_handle_fn);
+void         keybroad_pop_state();
+SDL_Scancode key_to_scancode(Key key);
 
 #endif

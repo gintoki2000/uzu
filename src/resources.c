@@ -5,6 +5,7 @@
 #include "engine/engine.h"
 #include "json_helper.h"
 #include "struct_meta_data.h"
+#include "engine/keyboard.h"
 static SDL_Texture* _textures[NUM_TEXS];
 static const char*  _texture_files[NUM_TEXS] = {
   [TEX_BIG_DEMON]            = "asserts/big_demon.png",
@@ -54,6 +55,7 @@ static const char*  _texture_files[NUM_TEXS] = {
   [TEX_COIN]                 = "asserts/coin.png",
   [TEX_ELF]                  = "asserts/elf_m.png",
   [TEX_TILESCR_BG]           = "asserts/tilescreenbg.png",
+  [TEX_KEYS]                 = "asserts/ui/keys.png",
 };
 
 static Mix_Music*  _bg_musics[NUM_BG_MUSICS];
@@ -228,4 +230,21 @@ FONT* get_font(FontId id)
 Conversation* get_conversation(ConversationId id)
 {
   return _conversations + id;
+}
+
+static Icon _key_icon_tbl[] = {
+  [SDL_SCANCODE_A]     = { TEX_KEYS, { 65, 39, 12, 12 } },
+  [SDL_SCANCODE_S]     = { TEX_KEYS, { 78, 39, 12, 12 } },
+  [SDL_SCANCODE_Q]     = { TEX_KEYS, { 59, 26, 12, 12 } },
+  [SDL_SCANCODE_W]     = { TEX_KEYS, { 59, 26, 12, 12 } },
+  [SDL_SCANCODE_SPACE] = { TEX_KEYS, { 106, 52, 20, 11 } },
+  [SDL_SCANCODE_LEFT]  = { TEX_KEYS, { 182, 52, 12, 12 } },
+  [SDL_SCANCODE_RIGHT] = { TEX_KEYS, { 207, 52, 12, 12 } },
+  [SDL_SCANCODE_UP]    = { TEX_KEYS, { 195, 39, 12, 12 } },
+  [SDL_SCANCODE_DOWN]  = { TEX_KEYS, { 195, 52, 12, 12 } },
+};
+
+Icon get_key_icon(u16 key)
+{
+  return _key_icon_tbl[key_to_scancode(key)];
 }

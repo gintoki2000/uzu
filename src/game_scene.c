@@ -209,7 +209,11 @@ typedef struct MusTblItem
   u16         mus_id;
 } MusTblItem;
 
-static MusTblItem _mustbl[] = { { "0", BG_MUS_LV1 }, { "1", BG_MUS_LV2 }, { NULL, 0 } };
+static MusTblItem _mustbl[] = {
+  { "0", BG_MUS_LV1 },
+  { "1", BG_MUS_LV2 },
+  { NULL, 0 },
+};
 
 static Mix_Music* get_bgmusic_by_level_name(const char* level_name)
 {

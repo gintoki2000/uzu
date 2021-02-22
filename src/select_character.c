@@ -12,6 +12,9 @@
 #define CHARACTER_POS_Y 50
 #define JOB_DESC_POS_X (WIN_WIDTH / 2)
 #define JOB_DESC_POS_Y 150
+#define BUTTON_LR_POS_Y 70
+#define BUTTON_LEFT_POS_X (CHARACTER_POS_X - 20)
+#define BUTTON_RIGHT_POS_X (CHARACTER_POS_X + 24)
 
 struct PingPongValue
 {
@@ -50,6 +53,8 @@ static u32        _ticks;
 static Mix_Chunk* _interact_fx;
 static Mix_Chunk* _back_fx;
 static TEXTURE*   _bgimg;
+static Icon       _lbtn_icon;
+static Icon       _rbtn_icon;
 
 static struct PingPongValue _transparent = {
   .val = 0x7f,
@@ -66,6 +71,7 @@ static void process_input(void);
 static void draw_character(void);
 static void draw_jobdesc(void);
 static void draw_bg(void);
+static void draw_icon(Icon icon, int x, int y);
 
 static u8 ppv_step(struct PingPongValue* pp);
 
@@ -80,9 +86,10 @@ static void on_load()
   _back_fx     = get_sfx(SFX_INTERACTION);
   _interact_fx = get_sfx(SFX_BUTTON);
   _bgimg       = get_texture(TEX_TILESCR_BG);
+  _lbtn_icon   = get_key_icon(KEY_LEFT);
+  _rbtn_icon   = get_key_icon(KEY_RIGHT);
   _ticks       = 0;
   keybroad_push_state(process_input);
- // Mix_PlayMusic(get_bg_mus(BG_MUS_SELECT_CHAR), -1);
 }
 
 static void on_unload()
@@ -153,6 +160,9 @@ static void draw_character(void)
   dst.h = src.h;
 
   SDL_RenderCopy(g_renderer, texture, &src, &dst);
+
+  draw_icon(_lbtn_icon, BUTTON_LEFT_POS_X, BUTTON_LR_POS_Y);
+  draw_icon(_rbtn_icon, BUTTON_RIGHT_POS_X, BUTTON_LR_POS_Y);
 }
 
 static void draw_jobdesc()
@@ -166,6 +176,7 @@ static void draw_bg(void)
 {
   SDL_RenderCopy(g_renderer, _bgimg, NULL, NULL);
 }
+
 static u8 ppv_step(struct PingPongValue* ppv)
 {
   ppv->val += ppv->dir;
@@ -173,4 +184,15 @@ static u8 ppv_step(struct PingPongValue* ppv)
       (ppv->min - ppv->val) * (ppv->val < ppv->min) + (ppv->max - ppv->val) * (ppv->val > ppv->max);
   ppv->dir += 2 * ((ppv->val == ppv->min) - (ppv->val == ppv->max));
   return ppv->val;
+}
+
+static void draw_icon(Icon icon, int x, int y)
+{
+  RECT dst;
+  dst.x = x;
+  dst.y = y;
+  dst.w = icon.rect.w;
+  dst.h = icon.rect.h;
+
+  SDL_RenderCopy(g_renderer, get_texture(icon.texture_id), &icon.rect, &dst);
 }

@@ -58,3 +58,8 @@ void keybroad_pop_state()
   if (_key_handle_fn_stack_cnt > 0)
     _key_handle_fn_stack_cnt--;
 }
+
+SDL_Scancode key_to_scancode(Key key)
+{
+  return _key_to_scancode_tbl[key];
+}

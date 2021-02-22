@@ -58,6 +58,7 @@ typedef struct NewCharacterParams
   Vec2             position;
   const Animation* animations;
   u16              hit_points;
+  u16              mana_points;
 } NewCharacterParams;
 
 ecs_entity_t make_character_base(Ecs* ecs, const NewCharacterParams* params)
@@ -111,22 +112,47 @@ ecs_entity_t make_character_base(Ecs* ecs, const NewCharacterParams* params)
   ecs_add(ecs, entity, ENDABLE_TILE_COLLISION_TAG);
   ecs_add(ecs, entity, CHARACTER_ANIMATOR_TAG);
 
+  ecs_add_w_data(ecs,
+                 entity,
+                 MANA_POOL,
+                 &(ManaPool){
+                     params->mana_points,
+                     params->mana_points,
+                 });
+
   return entity;
 }
+extern const u16 g_initial_hp_tbl[];
+extern const u16 g_initial_mp_tbl[];
 
 ecs_entity_t make_knight(Ecs* ecs, Vec2 position)
 {
-  return make_character_base(ecs, &(NewCharacterParams){ position, g_anims_knight_m, 13 });
+  NewCharacterParams params;
+  params.position    = position;
+  params.animations  = g_anims_knight_m;
+  params.hit_points  = g_initial_hp_tbl[JOB_KNIGHT];
+  params.mana_points = g_initial_mp_tbl[JOB_KNIGHT];
+  return make_character_base(ecs, &params);
 }
 
 ecs_entity_t make_wizzard(Ecs* ecs, Vec2 position)
 {
-  return make_character_base(ecs, &(NewCharacterParams){ position, g_anims_wizzard_m, 9 });
+  NewCharacterParams params;
+  params.position    = position;
+  params.animations  = g_anims_wizzard_m;
+  params.hit_points  = g_initial_hp_tbl[JOB_WIZZARD];
+  params.mana_points = g_initial_mp_tbl[JOB_WIZZARD];
+  return make_character_base(ecs, &params);
 }
 
 ecs_entity_t make_dragon(Ecs* ecs, Vec2 position)
 {
-  return make_character_base(ecs, &(NewCharacterParams){ position, g_anims_lizzard_m, 11 });
+  NewCharacterParams params;
+  params.position    = position;
+  params.animations  = g_anims_lizzard_m;
+  params.hit_points  = g_initial_hp_tbl[JOB_DRAGON];
+  params.mana_points = g_initial_mp_tbl[JOB_DRAGON];
+  return make_character_base(ecs, &params);
 }
 
 typedef struct NewMonsterParams
@@ -478,7 +504,6 @@ ecs_entity_t make_player(Ecs* ecs, ecs_entity_t character, ecs_entity_t weapon)
   ecs_add(ecs, character, CAMERA_TARGET_TAG);
 
   AttunementSlot* attunement_slot;
-  ManaPool*       mana_pool;
 
   HitBox* hitbox = ecs_get(ecs, character, HITBOX);
 
@@ -492,10 +517,6 @@ ecs_entity_t make_player(Ecs* ecs, ecs_entity_t character, ecs_entity_t weapon)
 
   attunement_slot           = ecs_add(ecs, character, ATTUNEMENT_SLOT);
   attunement_slot->spell_id = SPELL_ICE_ARROW;
-
-  mana_pool                  = ecs_add(ecs, character, MANA_POOL);
-  mana_pool->mana_points     = 10;
-  mana_pool->max_mana_points = 10;
 
   ecs_add_w_data(ecs,
                  character,

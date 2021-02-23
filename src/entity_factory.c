@@ -264,7 +264,7 @@ ecs_entity_t make_imp(Ecs* ecs, Vec2 position)
   bt_decorator_set_child((BTDecorator*)is_player_in_spot, (BTNode*)follow_player);
 
   ecs_add_w_data(ecs, entity, BRAIN, &(Brain){ (BTNode*)root });
-  ecs_add_w_data(ecs, entity, SPOT, &(Spot){ .position = position, .radius = 100.f });
+  ecs_add_w_data(ecs, entity, SPOT, &(Spot){ .position = position, .radius = 150.f });
   return entity;
 }
 

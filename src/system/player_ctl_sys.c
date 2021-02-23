@@ -19,6 +19,12 @@ extern RECT g_viewport;
 #define POINTER_DOWN_HEIGHT 3
 #define MOVE_SPEED 100.f
 
+static u32 curr_mouse_state;
+static u32 prev_mouse_state;
+
+static void update_mouse_state();
+static BOOL is_mouse_button_just_pressed(u32 button);
+
 ecs_entity_t g_curr_iteractable_entity = ECS_NULL_ENT;
 
 //<--------------------------------event callbacks----------------------------------->//
@@ -139,6 +145,7 @@ void player_controller_system_update()
   Controller*  controller;
   u32          mouse_state;
 
+  update_mouse_state();
   if ((player = get_player(g_ecs)) == ECS_NULL_ENT)
     return;
   find_interacable_entity();
@@ -187,7 +194,7 @@ void player_controller_system_update()
 
     if (g_curr_iteractable_entity == ECS_NULL_ENT)
     {
-      if ((mouse_state & SDL_BUTTON(SDL_BUTTON_LEFT)) && !controller->in_action)
+      if (is_mouse_button_just_pressed(SDL_BUTTON_LEFT) && !controller->in_action)
       {
         controller->action = CHARACTER_ACTION_REGULAR_ATK;
       }
@@ -206,7 +213,7 @@ void player_controller_system_update()
     else
     {
 
-      if (key_just_pressed(KEY_A))
+      if (is_mouse_button_just_pressed(SDL_BUTTON_LEFT))
         begin_interact(g_curr_iteractable_entity);
     }
   }
@@ -215,4 +222,14 @@ void player_controller_system_update()
 void player_controller_system_init(void)
 {
   ems_connect(MSG_LEVEL_UNLOADED, NULL, on_level_unloaded);
+}
+
+static void update_mouse_state()
+{
+  prev_mouse_state = curr_mouse_state;
+  curr_mouse_state = SDL_GetMouseState(NULL, NULL);
+}
+static BOOL is_mouse_button_just_pressed(u32 button)
+{
+  return !(prev_mouse_state & SDL_BUTTON(button)) && (curr_mouse_state & SDL_BUTTON(button));
 }

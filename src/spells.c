@@ -22,10 +22,13 @@ static void cast_fire_ball(Ecs* ecs, SDL_UNUSED ecs_entity_t caster, ecs_entity_
 {
   WeaponAttributes* attributes;
   Transform*        transform;
+  Controller* controller;
 
   transform = ecs_get(ecs, weapon, TRANSFORM);
+  controller = ecs_get(ecs, caster, CONTROLLER);
 
-  Vec2 speed = { 100.f * transform->hdir, 0.f };
+
+  Vec2 speed = vec2_mul(controller->attack_direction, 120.f);
 
   attributes = ecs_get(ecs, weapon, WEAPON_ATTRIBUTES);
 

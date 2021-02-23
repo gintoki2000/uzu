@@ -47,7 +47,8 @@ static void __abort(BTTask_FollowPlayer* self, Ecs* ecs, ecs_entity_t entity)
 {
   ecs_rmv(ecs, entity, FOLLOWING_TARGET);
   self->is_running                             = FALSE;
-  ((Motion*)ecs_get(ecs, entity, MOTION))->vel = VEC2_ZERO;
+  Controller* controller = ecs_get(ecs, entity, CONTROLLER);
+  controller->desired_direction = VEC2_ZERO;
 }
 
 static BTStatus __exec(BTTask_FollowPlayer* self, Ecs* ecs, ecs_entity_t entity)

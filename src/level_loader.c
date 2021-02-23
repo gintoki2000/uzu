@@ -8,6 +8,8 @@
 #include "json_helper.h"
 #include "map.h"
 
+#define LEVEL_DATA_DIR "asserts/level/"
+
 extern Ecs* g_ecs;
 
 typedef struct ParseFnParams
@@ -25,13 +27,13 @@ typedef struct ParseFnTblItem
 } ParseFnTblItem;
 
 //<Helper functions>//
-static char* s_layer_name_tbl[NUM_MAP_LAYERS] = {
+static char* _layer_name_tbl[NUM_MAP_LAYERS] = {
   [MAP_LAYER_FLOOR]      = "floor",
   [MAP_LAYER_BACK_WALL]  = "back-wall",
   [MAP_LAYER_FRONT_WALL] = "front-wall",
 };
 
-static const char* s_item_name_tbl[NUM_ITEM_TYPES] = {
+static const char* _item_name_tbl[NUM_ITEM_TYPES] = {
   [ITEM_TYPE_RED_FLASK]        = "RedFlask",
   [ITEM_TYPE_BIG_RED_FLASK]    = "BigRedFlask",
   [ITEM_TYPE_BLUE_FLASK]       = "BlueFlask",
@@ -43,7 +45,7 @@ static const char* s_item_name_tbl[NUM_ITEM_TYPES] = {
 
 static void level_name_to_file_name(const char* level_name, char* dest)
 {
-  strcpy(dest, "asserts/level/");
+  strcpy(dest, LEVEL_DATA_DIR);
   strcat(dest, level_name);
   strcat(dest, ".json");
 }
@@ -51,7 +53,7 @@ static void level_name_to_file_name(const char* level_name, char* dest)
 static int item_name_to_id(const char* name)
 {
   for (int i = 0; i < NUM_ITEM_TYPES; ++i)
-    if (s_item_name_tbl[i] && strcmp(s_item_name_tbl[i], name) == 0)
+    if (_item_name_tbl[i] && strcmp(_item_name_tbl[i], name) == 0)
       return i;
   return -1;
 }
@@ -59,7 +61,7 @@ static int item_name_to_id(const char* name)
 static int layer_name_to_id(const char* name)
 {
   for (int i = 0; i < NUM_MAP_LAYERS; ++i)
-    if (strcmp(s_layer_name_tbl[i], name) == 0)
+    if (strcmp(_layer_name_tbl[i], name) == 0)
       return i;
   return -1;
 }
@@ -76,7 +78,7 @@ static void parse_ladder(const ParseFnParams* params);
 static void parse_chort(const ParseFnParams* params);
 static void parse_door(const ParseFnParams* params);
 
-static ParseFnTblItem s_parse_fn_tbl[] = {
+static ParseFnTblItem _entity_parse_fn_tbl[] = {
   { "Imp", parse_imp },     { "Wogol", parse_wogol },   { "BigDemon", parse_huge_demon },
   { "Chest", parse_chest }, { "Ladder", parse_ladder }, { "Chort", parse_chort },
   { "Door", parse_door }
@@ -146,6 +148,14 @@ static int parse_tilelayer(const json_object* tilelayer_json_obj)
   return 0;
 }
 
+static void (*get_entity_create_fn(const char* entity_type_name))(const ParseFnParams*)
+{
+  for (int i = 0; _entity_parse_fn_tbl[i].name != NULL; ++i)
+    if (!strcmp(_entity_parse_fn_tbl[i].name, entity_type_name))
+      return _entity_parse_fn_tbl[i].fn;
+  return NULL;
+}
+
 static int parse_objectgroup(const json_object* object_group_json_obj)
 {
   const json_object* objects_json_obj;
@@ -154,6 +164,7 @@ static int parse_objectgroup(const json_object* object_group_json_obj)
   const json_object* obj_json_obj;
 
   ParseFnParams params;
+  void (*parse_fn)(const ParseFnParams*);
 
   objects_json_obj = json_object_object_get(object_group_json_obj, "objects");
   objcnt           = json_object_array_length(objects_json_obj);
@@ -171,13 +182,8 @@ static int parse_objectgroup(const json_object* object_group_json_obj)
     params.name       = json_object_object_get_as_string(obj_json_obj, "name");
     params.properties = json_object_object_get(obj_json_obj, "properties");
 
-    for (int i = 0; s_parse_fn_tbl[i].name != NULL; ++i)
-    {
-      if (strcmp(objtype, s_parse_fn_tbl[i].name) == 0)
-      {
-        s_parse_fn_tbl[i].fn(&params);
-      }
-    }
+    if ((parse_fn = get_entity_create_fn(objtype)) != NULL)
+      parse_fn(&params);
   }
 
   return 0;

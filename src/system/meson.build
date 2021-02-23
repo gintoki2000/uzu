@@ -36,6 +36,7 @@ system_source_files = files(
   './weapon_skill/charge.c',
   './weapon_skill/thunder_storm.c',
   './weapon_skill/thust.c',
+  './weapon_skill/shoot.c',
 
   #debug systems
   './debug/draw_path.c',

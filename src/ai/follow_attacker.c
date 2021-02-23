@@ -1,8 +1,8 @@
 #include "ai/follow_attacker.h"
 
-#include "entity_utils.h"
 #include "behaviour_tree.h"
 #include "components.h"
+#include "entity_utils.h"
 
 struct BTTask_FollowAttacker
 {

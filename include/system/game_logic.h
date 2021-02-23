@@ -35,6 +35,8 @@ void player_controller_system_init(void);
 void self_destruction_system (void);
 void tile_collision_system_update(void);
 
+void weapon_shoot_system_update(void);
+
 void init_all_systems(void);
 void shutdown_all_systems(void);
 

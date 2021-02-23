@@ -296,6 +296,7 @@ static void update_game_logic(void)
   casting_system_update();
   weapon_skill_thust_update();
   thunder_storm_weapon_skl_system_update();
+  weapon_shoot_system_update();
   // charge_weapon_skl_system();
 }
 

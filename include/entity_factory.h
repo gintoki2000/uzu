@@ -5,9 +5,6 @@
 #include "resources.h"
 #include "toolbox/toolbox.h"
 
-ecs_entity_t make_axe(Ecs* ecs);
-ecs_entity_t make_bow(Ecs* ecs);
-ecs_entity_t make_arrow(Ecs* ecs, Vec2 pos, Vec2 vel);
 ecs_entity_t make_golden_cross_hit_effect(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_pickupable_entity(Ecs* ecs, u16 texture_id, u16 item_type_id, Vec2 pos);
 ecs_entity_t make_thunder_storm(Ecs* ecs, Vec2 center);
@@ -35,11 +32,12 @@ ecs_entity_t make_cleaver(Ecs* ecs, u16 mask);
 ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask);
 ecs_entity_t make_staff(Ecs* ecs, u16 mask);
 ecs_entity_t make_anime_sword(Ecs* ecs, u16 mask);
+ecs_entity_t make_bow(Ecs* ecs, u16 mask);
 
 // chars
 ecs_entity_t make_wizzard(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_knight(Ecs* ecs, Vec2 pos);
-ecs_entity_t make_hunter(Ecs* ecs, Vec2 pos);
+ecs_entity_t make_elf(Ecs* ecs, Vec2 pos);
 ecs_entity_t make_dragon(Ecs* ecs, Vec2 pos);
 
 // pickups
@@ -74,6 +72,7 @@ ecs_entity_t make_fire_bust_effect(Ecs* ecs, Vec2 pos);
 // projectiles
 ecs_entity_t make_fire_ball(Ecs* ecs, ecs_entity_t shooter, Vec2 pos, Vec2 direction, u16 mask);
 ecs_entity_t make_ice_arrow(Ecs* ecs, ecs_entity_t shooter, Vec2 pos, Vec2 direction, u16 mask);
+ecs_entity_t make_arrow(Ecs* ecs, ecs_entity_t shooter, Vec2 position, Vec2 speed, u16 mask);
 
 // npcs
 ecs_entity_t make_npc_nova(Ecs* ecs, Vec2 position, u16 conversation_id);

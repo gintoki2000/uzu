@@ -2,12 +2,13 @@
 #include <components.h>
 #include <constances.h>
 
-const BTNodeVtbl* move_to_vtbl_inst();
-static void       move_to_vtbl_init(BTNodeVtbl* vtbl);
-static BTTask_MoveTo*    move_to_init(BTTask_MoveTo* self, float arrive_radius);
-static BTStatus   move_to_exec(BTTask_MoveTo* self, Ecs* ecs, ecs_entity_t entity);
-static void       move_to_abort(BTTask_MoveTo* self, Ecs* ecs, ecs_entity_t entity);
-static void move_to_finish(BTTask_MoveTo* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status);
+const BTNodeVtbl*     move_to_vtbl_inst();
+static void           move_to_vtbl_init(BTNodeVtbl* vtbl);
+static BTTask_MoveTo* move_to_init(BTTask_MoveTo* self, float arrive_radius);
+static BTStatus       move_to_exec(BTTask_MoveTo* self, Ecs* ecs, ecs_entity_t entity);
+static void           move_to_abort(BTTask_MoveTo* self, Ecs* ecs, ecs_entity_t entity);
+static void
+move_to_finish(BTTask_MoveTo* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status);
 
 BT_ALLOC_FN(BTTask_MoveTo, move_to)
 BT_VTBL_INST_FN(BTNode, move_to)
@@ -37,24 +38,26 @@ static BTStatus move_to_exec(BTTask_MoveTo* self, Ecs* ecs, ecs_entity_t entity)
 {
   Destination* destination;
   Transform*   transform;
-  Motion*      motion;
   Vec2         desired;
+  Controller*  controller;
 
   if ((destination = ecs_get(ecs, entity, DESTINATION)) &&
-      (transform = ecs_get(ecs, entity, TRANSFORM)) && (motion = ecs_get(ecs, entity, MOTION)))
+      (transform = ecs_get(ecs, entity, TRANSFORM)) &&
+      (controller = ecs_get(ecs, entity, CONTROLLER)))
   {
     desired = vec2_sub(*destination, transform->position);
     float d = vec2_normalize(&desired);
     if (d < self->arrive_radius)
     {
+      controller->desired_direction = VEC2_ZERO;
       return BT_STATUS_SUCCESS;
     }
-    desired     = vec2_mul(desired, motion->max_speed);
-    motion->acc = vec2_trunc(vec2_sub(desired, motion->vel), motion->max_force);
+    controller->desired_direction = desired;
     return BT_STATUS_RUNNING;
   }
   else
   {
+
     return BT_STATUS_FAILURE;
   }
 }
@@ -71,7 +74,8 @@ static void move_to_abort(BTTask_MoveTo* self, Ecs* ecs, ecs_entity_t entity)
   }
 }
 
-static void move_to_finish(BTTask_MoveTo* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status)
+static void
+move_to_finish(BTTask_MoveTo* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status)
 {
 
   (void)self;

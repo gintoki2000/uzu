@@ -59,6 +59,7 @@ typedef enum
   TEX_ICON_STAFF,
   TEX_ICON_CLEAVER,
   TEX_ICON_SPEAR,
+  TEX_ICON_BOW,
   NUM_TEXS
 } TextureId;
 

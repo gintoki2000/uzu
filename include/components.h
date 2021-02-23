@@ -23,6 +23,7 @@ typedef enum
   WEAPON_SKILL_CHARGE,
   WEAPON_SKILL_THUST,
   WEAPON_SKILL_THUNDER_STORM,
+  WEAPON_SKILL_SHOOT,
   DAMAGE_OUTPUT,
   WEAPON_ATTRIBUTES,
   DROP,
@@ -82,7 +83,7 @@ typedef struct
   BOOL   lock_hdir;
 } Transform;
 
-typedef struct
+typedef struct Visual
 {
   SDL_Point        anchor;
   SDL_RendererFlip flip;
@@ -91,35 +92,37 @@ typedef struct
   u8               opacity;
 } Visual;
 
-typedef struct
+typedef struct Spot
 {
   Vec2  position;
   float radius;
 } Spot;
 
-typedef struct
+typedef struct Controller
 {
-  Vec2 force;
+  Vec2 desired_direction;
+  Vec2 attack_direction;
   u16  action;
   BOOL in_action;
 } Controller;
 
-typedef struct
+typedef struct Equipment
 {
   ecs_entity_t weapon;
   Vec2         weapon_anchor;
   Vec2         d;
 } Equipment;
 
-typedef struct
+typedef struct WeaponAttributes
 {
-  s32 atk;
-  u16 type_id;
-  u16 mask;
+  s32  atk;
+  u16  type_id;
+  u16  mask;
+  BOOL sync_with_attack_direction;
 } WeaponAttributes;
 
 /*Weapon skills*/
-typedef struct
+typedef struct wpskl_Swing
 {
   CharacterAction on_action;
   u16             timer;
@@ -149,6 +152,14 @@ typedef struct
   u16 total;
   u16 timer;
 } wpskl_ThunderStorm;
+
+typedef struct wpskl_Shoot
+{
+  u16   on_action;
+  u16   fire_rate;
+  u16   timer;
+  float projspd;
+} wpskl_Shoot;
 
 typedef struct
 {

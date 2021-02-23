@@ -13,10 +13,10 @@ static const char*  _texture_files[NUM_TEXS] = {
   [TEX_IMP]                  = "asserts/imp.png",
   [TEX_KNIGHT]               = "asserts/knight.png",
   [TEX_AXE]                  = "asserts/axe.png",
+  [TEX_BOW]                  = "asserts/bow.png",
   [TEX_ANIME_SWORD]          = "asserts/anime_sword.png",
   [TEX_BLOOD]                = "asserts/blood.png",
-  [TEX_BOW]                  = "asserts/bow.png",
-  [TEX_ARROW]                = "asserts/arrow.png",
+  [TEX_ARROW]                = "asserts/arrow_1.png",
   [TEX_YELLOW_THUNDER]       = "asserts/Thunder_Yellow.png",
   [TEX_GOLDEN_SWORD]         = "asserts/weapon_lavish_sword.png",
   [TEX_GOLDEN_CROSS_HIT]     = "asserts/golden_cross_hit.png",
@@ -62,6 +62,7 @@ static const char*  _texture_files[NUM_TEXS] = {
   [TEX_ICON_CLEAVER]         = "asserts/ui/icon_cleaver.png",
   [TEX_ICON_SPEAR]           = "asserts/ui/icon_spear.png",
   [TEX_ICON_STAFF]           = "asserts/ui/icon_staff.png",
+  [TEX_ICON_BOW]             = "asserts/ui/bow.png",
 };
 
 static Mix_Music*  _bg_musics[NUM_BG_MUSICS];

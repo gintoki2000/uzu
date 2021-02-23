@@ -1,10 +1,10 @@
 #include "system/game_logic.h"
 
-#include "include/entity_utils.h"
 #include "components.h"
 #include "entity_factory.h"
-#include "system/event_messaging_sys.h"
+#include "include/entity_utils.h"
 #include "resources.h"
+#include "system/event_messaging_sys.h"
 
 extern Ecs* g_ecs;
 
@@ -46,12 +46,12 @@ void self_destruction_system()
                     &(MSG_DealDamage){ .dealer      = entities[i],
                                        .damage      = 5,
                                        .type        = DAMAGE_TYPE_FIRE,
-                                       .receiver    = get_player(g_ecs),
+                                       .receiver    = player,
                                        .impact      = TRUE,
                                        .force       = force,
-                                       .impact_time = 60 });
+                                       .impact_time = 10 });
       ecs_add(g_ecs, entities[i], DESTROYED_TAG);
-  
+
       Mix_PlayChannel(-1, get_sfx(SFX_EXPOLOSION), 0);
     }
   }

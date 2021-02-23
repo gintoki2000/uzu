@@ -64,6 +64,7 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
   [ATTACK_MASK]                = ECS_TYPE(AttackMask),
   [SELF_DESTRUCTION]           = ECS_TYPE(SelfDestruction),
   [ATTACKER]                   = ECS_TYPE(Attacker),
+  [WEAPON_SKILL_SHOOT]         = ECS_TYPE(wpskl_Shoot),
 };
 
 void visual_set_anchor_to_center(Visual* v)

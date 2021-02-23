@@ -135,6 +135,16 @@ ecs_entity_t make_knight(Ecs* ecs, Vec2 position)
   return make_character_base(ecs, &params);
 }
 
+ecs_entity_t make_elf(Ecs* ecs, Vec2 position)
+{
+  NewCharacterParams params;
+  params.position    = position;
+  params.animations  = g_anims_elf_m;
+  params.hit_points  = g_initial_hp_tbl[JOB_KNIGHT];
+  params.mana_points = g_initial_mp_tbl[JOB_KNIGHT];
+  return make_character_base(ecs, &params);
+}
+
 ecs_entity_t make_wizzard(Ecs* ecs, Vec2 position)
 {
   NewCharacterParams params;
@@ -863,7 +873,7 @@ ecs_entity_t make_fire_ball(Ecs* ecs, ecs_entity_t shooter, Vec2 pos, Vec2 direc
   return entity;
 }
 
-ecs_entity_t make_ice_arrow(Ecs* ecs, ecs_entity_t shooter, Vec2 pos, Vec2 direction, u16 mask)
+ecs_entity_t make_ice_arrow(Ecs* ecs, ecs_entity_t shooter, Vec2 position, Vec2 speed, u16 mask)
 {
   ecs_entity_t entity = ecs_create(ecs);
 
@@ -878,11 +888,11 @@ ecs_entity_t make_ice_arrow(Ecs* ecs, ecs_entity_t shooter, Vec2 pos, Vec2 direc
   visual->anchor.y = 7;
 
   transform           = ecs_add(ecs, entity, TRANSFORM);
-  transform->position = pos;
-  transform->rotation = SDL_atan2(direction.y, direction.x) * 57.2957795;
+  transform->position = position;
+  transform->rotation = SDL_atan2(speed.y, speed.x) * 57.2957795;
 
   motion            = ecs_add(ecs, entity, MOTION);
-  motion->vel       = direction;
+  motion->vel       = speed;
   motion->friction  = 0.f;
   motion->max_speed = 150.f;
 
@@ -902,7 +912,7 @@ ecs_entity_t make_ice_arrow(Ecs* ecs, ecs_entity_t shooter, Vec2 pos, Vec2 direc
   attrs->effect           = 0;
   attrs->damage_type      = DAMAGE_TYPE_ICE;
   attrs->impact           = TRUE;
-  attrs->impact_force     = vec2_mul(vec2_unit_vec(direction), 100.f);
+  attrs->impact_force     = vec2_mul(vec2_unit_vec(speed), 100.f);
   attrs->impact_time      = 16;
   attrs->sfx              = SFX_ID_NULL;
   attrs->shooter          = shooter;
@@ -911,6 +921,55 @@ ecs_entity_t make_ice_arrow(Ecs* ecs, ecs_entity_t shooter, Vec2 pos, Vec2 direc
 
   return entity;
 }
+
+ecs_entity_t make_arrow(Ecs* ecs, ecs_entity_t shooter, Vec2 position, Vec2 speed, u16 mask)
+{
+  ecs_entity_t entity = ecs_create(ecs);
+
+  Visual*               visual;
+  Transform*            transform;
+  Motion*               motion;
+  HitBox*               hitbox;
+  ProjectileAttributes* attrs;
+
+  visual           = ecs_add(ecs, entity, VISUAL);
+  visual->anchor.x = 17;
+  visual->anchor.y = 2;
+  sprite_init(&visual->sprite, TEX_ARROW);
+
+  transform           = ecs_add(ecs, entity, TRANSFORM);
+  transform->position = position;
+  transform->rotation = SDL_atan2(speed.y, speed.x) * 57.2957795;
+
+  motion            = ecs_add(ecs, entity, MOTION);
+  motion->vel       = speed;
+  motion->friction  = 0.f;
+  motion->max_speed = 150.f;
+
+  hitbox            = ecs_add(ecs, entity, HITBOX);
+  hitbox->size.x    = 24;
+  hitbox->size.y    = 5;
+  hitbox->anchor.x  = 17;
+  hitbox->anchor.y  = 2;
+  hitbox->category  = CATEGORY_PROJECTILE;
+  hitbox->mask_bits = mask;
+
+  attrs                   = ecs_add(ecs, entity, PROJECTILE_ATTRIBUTES);
+  attrs->damage           = 2;
+  attrs->destroy_when_hit = TRUE;
+  attrs->effect           = 0;
+  attrs->damage_type      = DAMAGE_TYPE_THUST;
+  attrs->impact           = TRUE;
+  attrs->impact_force     = vec2_mul(vec2_unit_vec(speed), 100.f);
+  attrs->impact_time      = 16;
+  attrs->sfx              = SFX_ID_NULL;
+  attrs->shooter          = shooter;
+
+  ecs_add(ecs, entity, REMOVE_IF_OFFSCREEN);
+
+  return entity;
+}
+
 ecs_entity_t make_ice_cast_effect(Ecs* ecs, Vec2 pos)
 {
   ecs_entity_t entity;
@@ -1193,4 +1252,41 @@ ecs_entity_t make_coin(Ecs* ecs, Vec2 position)
 ecs_entity_t make_key_1_1(Ecs* ecs, Vec2 pos)
 {
   return make_pickupable_entity(ecs, TEX_KEY, PICKUPABLE_KEY_1_1, pos);
+}
+
+ecs_entity_t make_bow(Ecs* ecs, u16 mask)
+{
+  ecs_entity_t entity;
+
+  entity = ecs_create(ecs);
+
+  Transform*        transform;
+  Visual*           visual;
+  WeaponAttributes* attrs;
+
+  transform = ecs_add(ecs, entity, TRANSFORM);
+
+  visual = ecs_add(ecs, entity, VISUAL);
+  sprite_init(&visual->sprite, TEX_BOW);
+  visual->anchor.x = visual->sprite.rect.w / 2;
+  visual->anchor.y = visual->sprite.rect.h / 2;
+
+  attrs                             = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
+  attrs->atk                        = 2;
+  attrs->type_id                    = WEAPON_BOW;
+  attrs->mask                       = mask;
+  attrs->sync_with_attack_direction = TRUE;
+
+  ecs_add(ecs, entity, HOLDER);
+
+  ecs_add_w_data(ecs,
+                 entity,
+                 WEAPON_SKILL_SHOOT,
+                 &(wpskl_Shoot){
+                     .on_action = CHARACTER_ACTION_REGULAR_ATK,
+                     .projspd   = 170.f,
+                     .fire_rate = 20,
+                 });
+
+  return entity;
 }

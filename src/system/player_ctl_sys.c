@@ -12,6 +12,7 @@
 #include "ui_list.h"
 
 extern Ecs* g_ecs;
+extern RECT g_viewport;
 
 #define INTERACTABLE_DISTANCE (TILE_SIZE * 1)
 #define POINTER_DOWN_WIDTH 6
@@ -19,8 +20,6 @@ extern Ecs* g_ecs;
 #define MOVE_SPEED 100.f
 
 ecs_entity_t g_curr_iteractable_entity = ECS_NULL_ENT;
-
-extern Ecs* g_ecs;
 
 //<--------------------------------event callbacks----------------------------------->//
 
@@ -86,9 +85,7 @@ static void find_interacable_entity()
     cbargs.closest_entity   = ECS_NULL_ENT;
     cbargs.closest_distance = 9999.f;
 
-    collision_box_query(&rect,
-                        0xffff,
-                        CALLBACK_1(&cbargs, __cb_query_interacable_entities));
+    collision_box_query(&rect, 0xffff, CALLBACK_1(&cbargs, __cb_query_interacable_entities));
     g_curr_iteractable_entity = cbargs.closest_entity;
   }
   else
@@ -117,44 +114,70 @@ static void begin_interact(ecs_entity_t entity)
   ems_broadcast(MSG_BEGIN_INTERACTION, &(MSG_BeginInteraction){ entity });
 }
 
+static Vec2 get_mouse_positison(void)
+{
+  Vec2 mouse_position;
+
+  int x, y;
+  SDL_GetMouseState(&x, &y);
+  mouse_position.x = (float)x / SCL_X;
+  mouse_position.y = (float)y / SCL_Y;
+  return mouse_position;
+}
+
+static Vec2 to_world_coordinates(Vec2 v)
+{
+  v.x += g_viewport.x;
+  v.y += g_viewport.y;
+  return v;
+}
+
 void player_controller_system_update()
 {
 
   ecs_entity_t player;
   Controller*  controller;
-  Motion*      motion;
+  u32          mouse_state;
 
   if ((player = get_player(g_ecs)) == ECS_NULL_ENT)
     return;
   find_interacable_entity();
+  mouse_state = SDL_GetMouseState(NULL, NULL);
 
   controller = ecs_get(g_ecs, player, CONTROLLER);
-  motion     = ecs_get(g_ecs, player, MOTION);
 
   if (!ecs_has(g_ecs, player, INVULNERABLE))
   {
 
-    motion->vel = VEC2_ZERO;
+    controller->desired_direction = VEC2_ZERO;
     if (key_pressed(KEY_UP))
     {
-      motion->vel.y += -MOVE_SPEED;
+      controller->desired_direction.y -= 1.f;
     }
 
     if (key_pressed(KEY_DOWN))
     {
-      motion->vel.y += MOVE_SPEED;
+      controller->desired_direction.y += 1.f;
     }
 
     if (key_pressed(KEY_LEFT))
     {
-      motion->vel.x += -MOVE_SPEED;
+      controller->desired_direction.x -= 1.f;
     }
 
     if (key_pressed(KEY_RIGHT))
-
     {
-      motion->vel.x += MOVE_SPEED;
+      controller->desired_direction.x += 1.f;
     }
+
+    controller->desired_direction = vec2_unit_vec(controller->desired_direction);
+
+    Vec2 mouse_position  = get_mouse_positison();
+    Vec2 player_position = get_entity_position(g_ecs, player);
+    mouse_position       = to_world_coordinates(mouse_position);
+    Vec2 rposition       = vec2_sub(mouse_position, player_position);
+
+    controller->attack_direction = vec2_unit_vec(rposition);
 
     if (key_just_pressed(KEY_SELECT))
     {
@@ -164,7 +187,7 @@ void player_controller_system_update()
 
     if (g_curr_iteractable_entity == ECS_NULL_ENT)
     {
-      if (key_just_pressed(KEY_A) && !controller->in_action)
+      if ((mouse_state & SDL_BUTTON(SDL_BUTTON_LEFT)) && !controller->in_action)
       {
         controller->action = CHARACTER_ACTION_REGULAR_ATK;
       }

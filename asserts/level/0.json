@@ -160,7 +160,7 @@
                  "name":"",
                  "properties":
                     {
-                     "items":"[{\"type\":\"FireBallScroll\",\"count\":1}]"
+                     "items":"[{\"type\":\"FireBallScroll\",\"count\":1},{\"type\":\"RedStaff\",\"count\":1}]"
                     },
                  "propertytypes":
                     {

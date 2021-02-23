@@ -116,7 +116,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
           .category  = ITEM_CATEGORY_EQUIPMENT,
           .use = equipment_item_use_callback,
           .data = &k_equipemt_item_data_spear,
-          .icon = {.texture_id = TEX_KEY, .rect = {0, 0, 16, 16}},
+          .icon = {.texture_id = TEX_ICON_SPEAR, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_STAFF] =
       {
@@ -126,7 +126,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
           .category  = ITEM_CATEGORY_EQUIPMENT,
           .use = equipment_item_use_callback,
           .data = &k_equipemt_item_data_staff,
-          .icon = {.texture_id = TEX_KEY, .rect = {0, 0, 16, 16}},
+          .icon = {.texture_id = TEX_ICON_STAFF, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_CLEAVER] =
       {
@@ -136,7 +136,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
           .category  = ITEM_CATEGORY_EQUIPMENT,
           .use = equipment_item_use_callback,
           .data = &k_equipemt_item_data_cleaver,
-          .icon = {.texture_id = TEX_KEY, .rect = {0, 0, 16, 16}},
+          .icon = {.texture_id = TEX_ICON_CLEAVER, .rect = {-1, 0, 16, 16}},
       },
   
 };

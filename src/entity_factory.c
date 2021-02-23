@@ -801,7 +801,7 @@ ecs_entity_t make_staff(Ecs* ecs, u16 mask)
   visual = ecs_add(ecs, entity, VISUAL);
   sprite_init(&visual->sprite, (TEX_RED_STAFF));
   visual->anchor.x = visual->sprite.rect.w / 2;
-  visual->anchor.y = visual->sprite.rect.h / 2;
+  visual->anchor.y = visual->sprite.rect.h / 2 + 4;
 
   attrs          = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
   attrs->atk     = 1;

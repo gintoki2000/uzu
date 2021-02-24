@@ -63,6 +63,13 @@ static const char*  _texture_files[NUM_TEXS] = {
   [TEX_ICON_SPEAR]           = "asserts/ui/icon_spear.png",
   [TEX_ICON_STAFF]           = "asserts/ui/icon_staff.png",
   [TEX_ICON_BOW]             = "asserts/ui/bow.png",
+  [TEX_ICON_CONSUMABLE]      = "asserts/ui/icon_consumable.png",
+  [TEX_ICON_WEAPON]          = "asserts/ui/icon_weapon.png",
+  [TEX_ICON_SPELL]           = "asserts/ui/icon_spell.png",
+  [TEX_ICON_KEY_ITEM]        = "asserts/ui/key_item.png",
+  [TEX_INVENTORY]            = "asserts/ui/inventory.png",
+  [TEX_INVENTORY_TAB_ACTIVE] = "asserts/ui/inventory_tab_active.png",
+  [TEX_INVENTORY_CURSOR]     = "asserts/ui/inventory_cursor.png",
 };
 
 static Mix_Music*  _bg_musics[NUM_BG_MUSICS];

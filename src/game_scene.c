@@ -118,6 +118,8 @@ static void on_load()
   ui_subtile_init();
   ui_msgbox_w_icon_init();
 
+  inventory_init();
+
   ems_connect(MSG_HIT_LADDER, NULL, on_player_hit_ladder);
   ems_connect(MSG_ENTITY_DIED, NULL, on_entity_died);
   ems_connect(MSG_LEVEL_LOADED, NULL, music_player_on_level_loaded);

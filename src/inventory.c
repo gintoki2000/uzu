@@ -9,25 +9,71 @@
 #include "ui_helper.h"
 #include "ui_list.h"
 
-#define INV_CELL_SIZE 20
-#define INV_CELL_GAP 1
-#define INV_X 16
-#define INV_Y 32
-#define INV_COL 5
-#define INV_ROW 5
-#define INV_MAX_SLOTS 25
-extern SDL_Renderer* g_renderer;
+#define CELL_SIZE 16
+#define CELL_GAP 9
+#define INV_X 60
+#define INV_Y 25
+#define INV_COL 7
+#define INV_ROW 3
+#define INV_MAX_SLOTS 21
+#define FIRST_CELL_X (INV_X + 17)
+#define FIRST_CELL_Y (INV_Y + 37)
+#define ITEM_NAME_X (INV_X + 97)
+#define ITEM_NAME_Y (INV_Y + 14)
+#define CURSOR_WIDTH 26
+#define CURSOR_HEIGHT 26
+#define CURSOR_FRAME_DURATION 10
+#define CURSOR_NUM_FRAMES 6
+
+extern RENDERER* g_renderer;
 
 static Item         _items[NUM_ITEM_CATEGORIES][INV_MAX_SLOTS];
 static s32          _curr_col, _curr_row;
 static BOOL         _visible;
 static ItemCategory _category = ITEM_CATEGORY_CONSUMABLE;
+static TEXTURE*     _inventory_texture;
+static TEXTURE*     _icon[NUM_ITEM_CATEGORIES];
+static TEXTURE*     _active_tab_texture;
+static FONT*        _font;
+static TEXTURE*     _cursor_texture;
+static u32          _cursor_ticks;
 
-static const RECT _description_rect = { 130, INV_Y, 100, 25 };
+static const RECT _description_rect = { INV_X + 27, INV_Y + 120, 147, 47 };
 
-static const char        INV_TEXT_USE[]  = "USE";
-static const char        INV_TEXT_DROP[] = "DROP";
-static const char* const INV_OPTIONS[]   = { INV_TEXT_USE, INV_TEXT_DROP };
+static const RECT _icon_dst_tbl[NUM_ITEM_CATEGORIES] = {
+  { INV_X + 12, INV_Y + 5, 16, 16 },
+  { INV_X + 37, INV_Y + 5, 16, 16 },
+  { INV_X + 147, INV_Y + 5, 16, 16 },
+  { INV_X + 172, INV_Y + 5, 16, 16 },
+};
+
+static const FC_Effect _item_name_effect = {
+  .alignment = FC_ALIGN_CENTER,
+  .color     = { 0x4a, 0x3d, 0x3c, 0xff },
+  .scale     = { 1.f, 1.f },
+};
+
+static const RECT _active_tab_dst_tbl[] = {
+  { INV_X + 10, INV_Y - 1, 20, 23 },
+  { INV_X + 35, INV_Y - 1, 20, 23 },
+  { INV_X + 145, INV_Y - 1, 20, 23 },
+  { INV_X + 170, INV_Y - 1, 20, 23 },
+};
+
+static const RECT _cursor_frame_rects[] = {
+  { 0 * CURSOR_WIDTH, 0, CURSOR_WIDTH, CURSOR_HEIGHT },
+  { 1 * CURSOR_WIDTH, 0, CURSOR_WIDTH, CURSOR_HEIGHT },
+  { 2 * CURSOR_WIDTH, 0, CURSOR_WIDTH, CURSOR_HEIGHT },
+  { 3 * CURSOR_WIDTH, 0, CURSOR_WIDTH, CURSOR_HEIGHT },
+  { 4 * CURSOR_WIDTH, 0, CURSOR_WIDTH, CURSOR_HEIGHT },
+  { 5 * CURSOR_WIDTH, 0, CURSOR_WIDTH, CURSOR_HEIGHT },
+};
+
+static const RECT _inventory_dst = { INV_X, INV_Y, 200, 190 };
+
+static const char        _text_use[]  = "USE";
+static const char        _text_drop[] = "DROP";
+static const char* const _opts[]      = { _text_use, _text_drop };
 
 //<----------------------------------event callbacks--------------------------->//
 static void process_key_input(void);
@@ -87,7 +133,7 @@ static void process_key_input(void)
   if (key_just_pressed(KEY_A) && current_item()->num_items > 0)
   {
     play_sound(SFX_INTERACTION);
-    ui_list_display((const char**)INV_OPTIONS, 2);
+    ui_list_display((const char**)_opts, 2);
     ui_list_hook(UI_LIST_ON_SELECT, CALLBACK_2(on_list_selected));
   }
 
@@ -116,17 +162,38 @@ static void on_list_selected(pointer_t arg, const char* item)
   Item*           it   = current_item();
   const ItemType* type = &g_item_types[it->type_id];
 
-  if (strcmp(item, INV_TEXT_USE) == 0)
+  if (strcmp(item, _text_use) == 0)
   {
     if (type->category == ITEM_CATEGORY_CONSUMABLE)
       it->num_items--;
     type->use(type->data, g_ecs, get_player(g_ecs));
   }
-  else if (strcmp(item, INV_TEXT_DROP) == 0)
+  else if (strcmp(item, _text_drop) == 0)
   {
     it->num_items = 0;
   }
 }
+
+void inventory_init()
+{
+  _inventory_texture              = get_texture(TEX_INVENTORY);
+  _icon[ITEM_CATEGORY_CONSUMABLE] = get_texture(TEX_ICON_CONSUMABLE);
+  _icon[ITEM_CATEGORY_EQUIPMENT]  = get_texture(TEX_ICON_WEAPON);
+  _icon[ITEM_CATEGORY_SCROLL]     = get_texture(TEX_ICON_SPELL);
+  _icon[ITEM_CATEGORY_KEY]        = get_texture(TEX_ICON_KEY_ITEM);
+  _font                           = get_font(FONT_ITEM_PICKED_UP);
+  _active_tab_texture             = get_texture(TEX_INVENTORY_TAB_ACTIVE);
+  _cursor_texture                 = get_texture(TEX_INVENTORY_CURSOR);
+}
+
+#define is_stackable(__cat, __idx) (g_item_types[_items[__cat][idx].type_id].stackable)
+
+#define item_name(__itemptr) (g_item_types[(__itemptr)->type_id].name)
+
+#define item_desc(__itemptr) (g_item_types[(__itemptr)->type_id].description)
+
+#define item_icon(__itemptr) (g_item_types[(__itemptr)->type_id].icon)
+
 
 BOOL add_to_inv(ItemTypeId type_id, u8 quality)
 {
@@ -201,73 +268,77 @@ void inventory_close()
   keybroad_pop_state();
 }
 
+static void draw_cursor(void)
+{
+  int  current_frame;
+  RECT dst;
+
+  ++_cursor_ticks;
+
+  current_frame = (_cursor_ticks / CURSOR_FRAME_DURATION) % CURSOR_NUM_FRAMES;
+
+  dst.x = FIRST_CELL_X + _curr_col * (CELL_GAP + CELL_SIZE) + (CELL_SIZE / 2 - CURSOR_WIDTH / 2);
+  dst.y = FIRST_CELL_Y + _curr_row * (CELL_GAP + CELL_SIZE) + (CELL_SIZE / 2 - CURSOR_HEIGHT / 2);
+  dst.w = CURSOR_WIDTH;
+  dst.h = CURSOR_HEIGHT;
+
+  SDL_RenderCopy(g_renderer, _cursor_texture, &_cursor_frame_rects[current_frame], &dst);
+}
+
 void inventory_draw()
 {
+  RECT            item_rect;
+  int             idx;
+  Item*           items = _items[_category];
+  const ItemType* item_type;
+  Icon            item_icon;
+
   if (!_visible)
     return;
 
-  RECT cell_rect, item_rect;
-  int  idx;
+  SDL_RenderCopy(g_renderer, _inventory_texture, NULL, &_inventory_dst);
 
-  Item*           items = _items[_category];
-  const ItemType* tp;
-
+  item_rect.w = 16;
+  item_rect.h = 16;
   for (int i = 0; i < INV_ROW; ++i)
   {
     for (int j = 0; j < INV_COL; ++j)
     {
-      cell_rect = (RECT){
-        j * INV_CELL_SIZE + INV_CELL_GAP + INV_X,
-        i * INV_CELL_SIZE + INV_CELL_GAP + INV_Y,
-        INV_CELL_SIZE,
-        INV_CELL_SIZE,
-      };
-
-      draw_bordered_box(&cell_rect,
-                        UI_COLOR_BG,
-                        i == _curr_row && j == _curr_col ? UI_COLOR_BORDER_SELECT
-                                                         : UI_COLOR_BORDER);
-
       idx = i * INV_COL + j;
 
-      tp = &g_item_types[items[idx].type_id];
+      if (items[idx].num_items == 0)
+        continue;
 
-      item_rect.w = tp->icon.rect.w;
-      item_rect.h = tp->icon.rect.h;
-      item_rect.x = cell_rect.x + (INV_CELL_SIZE - item_rect.w) / 2;
-      item_rect.y = cell_rect.y + (INV_CELL_SIZE - item_rect.h) / 2;
-      if (items[idx].num_items > 0)
-      {
-        SDL_RenderCopy(g_renderer, get_texture(tp->icon.texture_id), &tp->icon.rect, &item_rect);
-        if (items[idx].num_items > 1)
-          FC_DrawColor(get_font(FONT_DAMAGE_INDICATOR),
-                       g_renderer,
-                       cell_rect.x + 3,
-                       cell_rect.y + 3,
-                       (COLOR){ 232, 39, 194, 255 },
-                       "%d",
-                       items[idx].num_items);
-      }
+      item_rect.x = FIRST_CELL_X + j * (16 + CELL_GAP);
+      item_rect.y = FIRST_CELL_Y + i * (16 + CELL_GAP);
+
+      item_type = &g_item_types[items[idx].type_id];
+      item_icon = item_type->icon;
+
+      SDL_RenderCopy(g_renderer, get_texture(item_icon.texture_id), &item_icon.rect, &item_rect);
     }
   }
-
-  idx = _curr_col + _curr_row * INV_COL;
-
-  draw_bordered_box(&_description_rect, UI_COLOR_BG, UI_COLOR_BORDER);
-  if (items[idx].num_items > 0)
+  int current_item_index = _curr_row * INV_COL + _curr_col;
+  if (items[current_item_index].num_items > 0)
   {
-    FC_DrawBoxColor(get_font(FONT_DAMAGE_INDICATOR),
-                    g_renderer,
-                    (RECT){
-                        _description_rect.x + 3,
-                        _description_rect.y + 2,
-                        _description_rect.w - 4,
-                        _description_rect.h - 5,
-                    },
-                    UI_COLOR_TEXT,
-                    g_item_types[items[idx].type_id].description);
+    item_type = &g_item_types[items[current_item_index].type_id];
+    FC_DrawEffect(_font, g_renderer, ITEM_NAME_X, ITEM_NAME_Y, _item_name_effect, item_type->name);
+    FC_DrawBoxEffect(_font,
+                     g_renderer,
+                     _description_rect,
+                     _item_name_effect,
+                     item_type->description);
   }
+
+  SDL_RenderCopy(g_renderer, _active_tab_texture, NULL, &_active_tab_dst_tbl[_category]);
+  for (int i = 0; i < NUM_ITEM_CATEGORIES; ++i)
+  {
+    SDL_RenderCopy(g_renderer, _icon[i], NULL, &_icon_dst_tbl[i]);
+  }
+
+  draw_cursor();
 }
+
 void inventory_save(void)
 {
   FILE* file = fopen("inventory", "w");
@@ -277,6 +348,7 @@ void inventory_save(void)
     fclose(file);
   }
 }
+
 void inventory_load(void)
 {
   FILE* file = fopen("inventory", "r");

@@ -57,6 +57,13 @@ typedef struct
 #define INVOKE_CALLBACK_NOARGS(__callback, __return_type)                                          \
   (((__return_type(*)())(__callback).func)((__callback).user_data))
 
+#define INVOKE_EVENT(__callback, ...)                                                              \
+  do                                                                                               \
+  {                                                                                                \
+    if ((__callback).func != NULL)                                                                 \
+      (((void (*)())(__callback).func)((__callback).user_data, __VA_ARGS__));                      \
+  } while (0)
+
 #define INLINE static inline
 
 #define DEG_TO_RAD 0.0174532925

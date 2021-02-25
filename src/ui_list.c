@@ -6,81 +6,65 @@
 #include "ui_helper.h"
 
 #define UI_LIST_WIDTH 100
-#define UI_LIST_MAX_ITEMS 10
+#define MAX_ENTRIES 10
+#define ENTRY_WIDTH 100
+#define ENTRY_HEIGHT 20
+#define ENTRY_VGAP 2
+#define FIRST_ENTRY_Y 7
 
-static char*    _items[UI_LIST_MAX_ITEMS];
-static s32      _cnt;
-static Callback _events[UI_LIST_NUM_EVENTS];
-static BOOL     _visible;
-static int      _pos_x;
-static int      _pos_y;
-static int      _selected;
-
-
-const static COLOR BG_COLOR     = { 0x00, 0x00, 0x00, 0x90 };
-const static COLOR BORDER_COLOR = { 0xff, 0xff, 0xff, 0x80 };
+static UI_List_Entry _entries[MAX_ENTRIES];
+static s32           _num_entries;
+static Callback      _events[UI_LIST_NUM_EVENTS];
+static BOOL          _visible;
+static int           _pos_x;
+static int           _pos_y;
+static int           _selected;
 
 extern SDL_Renderer* g_renderer;
 
-static void process_key_input()
+static int get_height()
 {
-  if (key_just_pressed(KEY_UP))
+  return _num_entries * ENTRY_HEIGHT + (_num_entries - 1) * ENTRY_VGAP;
+}
+
+static void process_key_input(SDL_UNUSED void* arg)
+{
+  if (button_just_pressed(BUTTON_UP))
   {
-    _selected--;
-    if (_selected < 0)
-      _selected = _cnt - 1;
+    _selected = max(0, _selected -1);
     Mix_PlayChannel(-1, get_sfx(SFX_BUTTON), 0);
   }
 
-  if (key_just_pressed(KEY_DOWN))
+  if (button_just_pressed(BUTTON_DOWN))
   {
-    _selected++;
-    if (_selected > _cnt - 1)
-      _selected = 0;
+    _selected = min(MAX_ENTRIES - 1, _selected + 1);
     Mix_PlayChannel(-1, get_sfx(SFX_BUTTON), 0);
   }
 
-  if (key_just_pressed(KEY_B))
+  if (button_just_pressed(BUTTON_CANCEL))
   {
     ui_list_close();
-    for (int i = 0; i < _cnt; ++i)
-    {
-      free(_items[i]);
-      _items[i] = NULL;
-    }
-    _cnt = 0;
   }
 
-  if (key_just_pressed(KEY_A))
+  if (button_just_pressed(BUTTON_INTERACT))
   {
     ui_list_close();
-
-    if (_events[UI_LIST_ON_SELECT].func != NULL)
-      INVOKE_CALLBACK(_events[UI_LIST_ON_SELECT], void, _items[_selected]);
-
-    for (int i = 0; i < _cnt; ++i)
-    {
-      free(_items[i]);
-      _items[i] = NULL;
-    }
-    _cnt = 0;
+    INVOKE_EVENT(_events[UI_LIST_ON_SELECT], (const char*)_entries[_selected].text);
   }
 }
 
 void ui_list_display(const char** items, u32 cnt)
 {
-  _visible = TRUE;
+  _visible     = TRUE;
+  _num_entries = min(cnt, MAX_ENTRIES);
 
-  _cnt = min(cnt, UI_LIST_MAX_ITEMS);
-
-  for (s32 i = 0; i < _cnt; ++i)
+  for (s32 i = 0; i < _num_entries; ++i)
   {
-    _items[i] = SDL_strdup(items[i]);
+    SDL_strlcpy(_entries[i].text, items[i], UI_LIST_ENTRY_MAX_LEN);
   }
-
   _selected = 0;
 
-  keybroad_push_state(process_key_input);
+  input_push_state(INPUT_STATE_INST_1(process_key_input));
   Mix_PlayChannel(-1, get_sfx(SFX_INTERACTION), 0);
 }
 
@@ -89,25 +73,24 @@ void ui_list_draw()
   if (!_visible)
     return;
 
-  draw_bordered_box(&(RECT){ _pos_x, _pos_y, UI_LIST_WIDTH, _cnt * 20 },
+  draw_bordered_box(&(RECT){ _pos_x, _pos_y, UI_LIST_WIDTH, _num_entries * 20 },
                     UI_COLOR_BG,
                     UI_COLOR_BORDER);
 
   COLOR color;
-  for (int i = 0; i < _cnt; ++i)
+  for (int i = 0; i < _num_entries; ++i)
   {
-    color = i != _selected ? UI_COLOR_TEXT : UI_COLOR_TEXT_SELECT;
-
+    color = UI_COLOR_TEXT;
     FC_DrawEffect(get_font(FONT_ITEM_PICKED_UP),
                   g_renderer,
                   _pos_x + UI_LIST_WIDTH / 2,
-                  _pos_y + i * 20 + 7,
+                  _pos_y + i * (ENTRY_HEIGHT + ENTRY_VGAP) + FIRST_ENTRY_Y,
                   (FC_Effect){
                       .color     = color,
                       .scale     = (FC_Scale){ 1.f, 1.f },
                       .alignment = FC_ALIGN_CENTER,
                   },
-                  _items[i]);
+                  _entries[i].text);
   }
 }
 
@@ -115,9 +98,8 @@ void ui_list_close()
 {
   if (_visible)
   {
-    keybroad_pop_state();
+    input_pop_state();
     _visible = FALSE;
-
     Mix_PlayChannel(-1, get_sfx(SFX_INTERACTION), 0);
   }
 }
@@ -130,6 +112,6 @@ void ui_list_hook(u32 event_id, Callback callback)
 
 void ui_list_set_pos(s32 x, s32 y)
 {
-  _pos_x = x;
-  _pos_y = y;
+  _pos_x = (x == UI_LIST_POS_CENTER_X) ? WIN_WIDTH / 2 - UI_LIST_WIDTH / 2 : x;
+  _pos_y = (y == UI_LIST_POS_CENTER_Y) ? WIN_HEIGHT / 2 - get_height() / 2 : y;
 }

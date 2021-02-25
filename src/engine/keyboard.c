@@ -1,65 +1,102 @@
 #include "engine/keyboard.h"
-#include <string.h>
+#include "SDL_log.h"
 #include "toolbox/toolbox.h"
+#include <string.h>
 
-static const int _key_to_scancode_tbl[NUM_KEYS] = {
-  [KEY_A] = SDL_SCANCODE_A,          [KEY_B] = SDL_SCANCODE_S,
-  [KEY_UP] = SDL_SCANCODE_UP,        [KEY_DOWN] = SDL_SCANCODE_DOWN,
-  [KEY_LEFT] = SDL_SCANCODE_LEFT,    [KEY_RIGHT] = SDL_SCANCODE_RIGHT,
-  [KEY_SELECT] = SDL_SCANCODE_SPACE, [KEY_R] = SDL_SCANCODE_W,
-  [KEY_L] = SDL_SCANCODE_Q,
+static const int _key_to_scancode_tbl[NUM_BUTTONS] = {
+  [BUTTON_UP]             = SDL_SCANCODE_W,
+  [BUTTON_DOWN]           = SDL_SCANCODE_S,
+  [BUTTON_LEFT]           = SDL_SCANCODE_A,
+  [BUTTON_RIGHT]          = SDL_SCANCODE_D,
+  [BUTTON_INTERACT]       = SDL_SCANCODE_E,
+  [BUTTON_CANCEL]         = SDL_SCANCODE_Q,
+  [BUTTON_OPEN_MENU]      = SDL_SCANCODE_ESCAPE,
+  [BUTTON_JUMP]           = SDL_SCANCODE_SPACE,
+  [BUTTON_OPEN_INVENTORY] = SDL_SCANCODE_I,
 };
 
-static int _curr_state[NUM_KEYS];
-static int _prev_state[NUM_KEYS];
+static u32 _curr_mouse_state;
+static u32 _prev_mouse_state;
+static u32 _curr_button_state;
+static u32 _prev_button_state;
 
 #define KEY_HANDLE_FN_STACK_MAX 10
 
-static key_handle_fn_t _key_handle_fn_stack[KEY_HANDLE_FN_STACK_MAX];
-static u32             _key_handle_fn_stack_cnt;
+static InputState _state_stack[KEY_HANDLE_FN_STACK_MAX];
+static u32        _stack_cnt;
 
-void keybroad_init()
+void input_init()
 {
-  memset(_curr_state, 0, NUM_KEYS * sizeof(int));
-  memset(_prev_state, 0, NUM_KEYS * sizeof(int));
 }
 
-void keybroad_update()
+static void update_button_state(void)
 {
   const Uint8* keyboard_state = SDL_GetKeyboardState(NULL);
-  memcpy(_prev_state, _curr_state, NUM_KEYS * sizeof(int));
-  for (int i = 0; i < NUM_KEYS; ++i)
+
+  _prev_button_state = _curr_button_state;
+  _curr_button_state = 0;
+
+  for (int i = 0; i < NUM_BUTTONS; ++i)
   {
-    _curr_state[i] = keyboard_state[_key_to_scancode_tbl[i]];
+    _curr_button_state |= (keyboard_state[_key_to_scancode_tbl[i]] & 1) << i;
   }
-
-  if (_key_handle_fn_stack_cnt > 0)
-    _key_handle_fn_stack[_key_handle_fn_stack_cnt - 1]();
 }
 
-SDL_bool key_pressed(Key k)
+void input_update()
 {
-  return _curr_state[k];
+  update_button_state();
+  update_mouse_state();
+
+  InputState current_state;
+  if (_stack_cnt > 0)
+  {
+    current_state = _state_stack[_stack_cnt - 1];
+    current_state.fn(current_state.data);
+  }
 }
 
-SDL_bool key_just_pressed(Key k)
+SDL_bool button_pressed(u16 button)
 {
-  return _curr_state[k] && !_prev_state[k];
+  return _curr_button_state & BUTTON_MASK(button);
 }
 
-void keybroad_push_state(key_handle_fn_t key_handle_fn)
+SDL_bool button_just_pressed(u16 button)
 {
-  if (_key_handle_fn_stack_cnt < KEY_HANDLE_FN_STACK_MAX)
-    _key_handle_fn_stack[_key_handle_fn_stack_cnt++] = key_handle_fn;
+  return (_curr_button_state & BUTTON_MASK(button)) &&
+         !(_prev_button_state & (BUTTON_MASK(button)));
 }
 
-void keybroad_pop_state()
+void input_push_state(InputState input_state)
 {
-  if (_key_handle_fn_stack_cnt > 0)
-    _key_handle_fn_stack_cnt--;
+  if (_stack_cnt < KEY_HANDLE_FN_STACK_MAX)
+    _state_stack[_stack_cnt++] = input_state;
 }
 
-SDL_Scancode key_to_scancode(Key key)
+void input_pop_state()
 {
-  return _key_to_scancode_tbl[key];
+  if (_stack_cnt > 0)
+    _stack_cnt--;
+}
+
+SDL_Scancode button_to_scancode(u16 button)
+{
+  ASSERT(button < NUM_BUTTONS);
+  return _key_to_scancode_tbl[button];
+}
+
+void update_mouse_state()
+{
+  _prev_mouse_state = _curr_mouse_state;
+  _curr_mouse_state = SDL_GetMouseState(NULL, NULL);
+}
+
+BOOL mouse_button_just_pressed(u16 mouse_button)
+{
+  return !(_prev_mouse_state & SDL_BUTTON(mouse_button)) &&
+         (_curr_mouse_state & SDL_BUTTON(mouse_button));
+}
+
+BOOL mouse_button_pressed(u16 mouse_button)
+{
+  return _curr_mouse_state & SDL_BUTTON(mouse_button);
 }

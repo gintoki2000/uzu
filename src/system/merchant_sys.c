@@ -1,15 +1,15 @@
 #include "system/game_logic.h"
 
-#include "global.h"
-#include "constances.h"
-#include "engine/keyboard.h"
-#include "system/event_messaging_sys.h"
-#include "resources.h"
-#include "ui_quality.h"
 #include "components.h"
+#include "constances.h"
 #include "ecs/ecs.h"
+#include "engine/keyboard.h"
+#include "global.h"
 #include "inventory.h"
+#include "resources.h"
+#include "system/event_messaging_sys.h"
 #include "ui_helper.h"
+#include "ui_quality.h"
 
 extern Ecs*          g_ecs;
 extern SDL_Renderer* g_renderer;
@@ -31,7 +31,7 @@ static void on_quality_selected(pointer_t arg, u32 value);
 
 static void display_shop(ecs_entity_t entity);
 static void draw_item(const ItemPayload* payload, s32 x, s32 y, BOOL selected);
-static void process_key_input();
+static void process_input(void*);
 
 void merchant_system_init()
 {
@@ -58,7 +58,7 @@ static void display_shop(ecs_entity_t entity)
 {
   _merchant = entity;
   _current  = 0;
-  keybroad_push_state(process_key_input);
+  input_push_state(INPUT_STATE_INST_1(process_input));
 }
 
 #define MAX_LENGTH_OF_ITEM_NAME 11
@@ -91,10 +91,7 @@ static void draw_item(const ItemPayload* payload, s32 x, s32 y, BOOL selected)
 
   char name[MAX_LENGTH_OF_ITEM_NAME];
 
-  SDL_RenderCopy(g_renderer,
-                 get_texture(item_type->icon.texture_id),
-                 &item_type->icon.rect,
-                 &dst);
+  SDL_RenderCopy(g_renderer, get_texture(item_type->icon.texture_id), &item_type->icon.rect, &dst);
 
   if (payload->available == MERCHANT_INIFINTE)
   {
@@ -130,19 +127,19 @@ static void on_command_selected(pointer_t arg, const MSG_CommandSelected* event)
   }
 }
 
-static void process_key_input()
+static void process_input(SDL_UNUSED void* arg)
 {
   Merchant* merchant;
   if (_merchant == ECS_NULL_ENT)
     return;
   merchant = ecs_get(g_ecs, _merchant, MERCHANT);
-  if (key_just_pressed(KEY_UP))
+  if (button_just_pressed(BUTTON_UP))
   {
     if (_current > 0)
       --_current;
   }
 
-  if (key_just_pressed(KEY_DOWN))
+  if (button_just_pressed(BUTTON_DOWN))
   {
     if (_current < merchant->num_payloads - 1)
     {
@@ -150,7 +147,7 @@ static void process_key_input()
     }
   }
 
-  if (key_just_pressed(KEY_A))
+  if (mouse_button_just_pressed(SDL_BUTTON_LEFT))
   {
     if (merchant->payloads[_current].available == MERCHANT_INIFINTE)
     {
@@ -166,10 +163,10 @@ static void process_key_input()
       ;
   }
 
-  if (key_just_pressed(KEY_B))
+  if (mouse_button_just_pressed(SDL_BUTTON_RIGHT))
   {
     _merchant = ECS_NULL_ENT;
-    keybroad_pop_state();
+    input_pop_state();
   }
 }
 

@@ -9,6 +9,15 @@ enum
   UI_LIST_NUM_EVENTS,
 };
 
+#define UI_LIST_POS_CENTER_X (-1)
+#define UI_LIST_POS_CENTER_Y (-1)
+
+#define UI_LIST_ENTRY_MAX_LEN (50)
+typedef struct UI_List_Entry
+{
+  char text[UI_LIST_ENTRY_MAX_LEN + 1];
+} UI_List_Entry;
+
 void ui_list_display(const char* items[], u32 cnt);
 void ui_list_close(void);
 void ui_list_hook(u32 event_id, Callback callback);

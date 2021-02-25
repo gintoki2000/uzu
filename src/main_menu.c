@@ -10,10 +10,10 @@ static void on_load();
 static void on_unload();
 static void on_update();
 static void on_event(const SDL_Event*);
-static void main_state_process_input(void);
+static void main_state_process_input(void*);
 static void draw_main_menu(void);
 static void draw_about_panel(void);
-static void about_state_process_input(void);
+static void about_state_process_input(void*);
 
 const Scene g_main_menu = {
   .on_load   = on_load,
@@ -72,13 +72,13 @@ static void on_load()
   _pointer = get_texture(TEX_UI_MAIN_MENU_POINTER);
   _font    = get_font(FONT_DAMAGE_INDICATOR);
   _bg      = get_texture(TEX_TILESCR_BG);
-  keybroad_push_state(main_state_process_input);
+  input_push_state(INPUT_STATE_INST_1(main_state_process_input));
   Mix_PlayMusic(get_bg_mus(BG_MUS_TILE_SCREEN), -1);
 }
 
 static void on_unload()
 {
-  keybroad_pop_state();
+  input_pop_state();
 }
 
 static void on_update()
@@ -98,21 +98,21 @@ static void on_event(const SDL_UNUSED SDL_Event* e)
 {
 }
 
-static void main_state_process_input()
+static void main_state_process_input(SDL_UNUSED void* arg)
 {
-  if (key_just_pressed(KEY_DOWN) && _select < MAIN_MENU_NUM_OPS - 1)
+  if (button_just_pressed(BUTTON_DOWN) && _select < MAIN_MENU_NUM_OPS - 1)
   {
     ++_select;
     Mix_PlayChannel(-1, get_sfx(SFX_BUTTON), 0);
   }
 
-  if (key_just_pressed(KEY_UP) && _select > 0)
+  if (button_just_pressed(BUTTON_UP) && _select > 0)
   {
     --_select;
     Mix_PlayChannel(-1, get_sfx(SFX_BUTTON), 0);
   }
 
-  if (key_just_pressed(KEY_A))
+  if (button_just_pressed(BUTTON_INTERACT))
   {
     if (_options[_select] == _text_new_game)
     {
@@ -125,7 +125,7 @@ static void main_state_process_input()
     else if (_options[_select] == _text_about)
     {
       _state = TITLE_SCENE_STATE_ABOUT;
-      keybroad_push_state(about_state_process_input);
+      input_push_state(INPUT_STATE_INST_1(about_state_process_input));
       Mix_PlayChannel(-1, get_sfx(SFX_BUTTON), 0);
     }
   }
@@ -170,12 +170,12 @@ static void draw_about_panel(void)
                    _about_content);
 }
 
-static void about_state_process_input()
+static void about_state_process_input(SDL_UNUSED void* arg)
 {
-  if (key_just_pressed(KEY_B))
+  if (button_just_pressed(BUTTON_INTERACT) | button_just_pressed(BUTTON_CANCEL))
   {
     _state = TITLE_SCENE_STATE_MAIN;
-    keybroad_pop_state();
+    input_pop_state();
     Mix_PlayChannel(-1, get_sfx(SFX_INTERACTION), 0);
   }
 }

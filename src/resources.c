@@ -256,9 +256,10 @@ static Icon _key_icon_tbl[] = {
   [SDL_SCANCODE_RIGHT] = { TEX_KEYS, { 207, 52, 12, 12 } },
   [SDL_SCANCODE_UP]    = { TEX_KEYS, { 195, 39, 12, 12 } },
   [SDL_SCANCODE_DOWN]  = { TEX_KEYS, { 195, 52, 12, 12 } },
+  [SDL_SCANCODE_D]     = { TEX_KEYS, { 91, 39, 12, 12 } },
 };
 
 Icon get_key_icon(u16 key)
 {
-  return _key_icon_tbl[key_to_scancode(key)];
+  return _key_icon_tbl[button_to_scancode(key)];
 }

@@ -26,7 +26,7 @@ static const RECT _rect_dialogue = { 10, 167, 299, 60 };
 static const RECT _rect_textbox  = { 10 + 17, 167 + 5, 282, 54 };
 
 static void next_sentence(void);
-static void process_key_input(void);
+static void process_input(void*);
 static void display_responses(void);
 static void end_conversation(const char* response);
 static void fire_event(u16 event_id, const void* data);
@@ -42,7 +42,7 @@ void ui_dialogue_init(void)
   _texture_dialogue = get_texture(TEX_UI_DIALOGUE);
   _is_visible       = FALSE;
   _delay            = 3;
-  strcpy(_displayed_text, "");
+  SDL_strlcpy(_displayed_text, "", MAX_TEXT_LENGTH);
 }
 
 void ui_dialogue_fini(void)
@@ -58,7 +58,7 @@ void ui_dialogue_show(u16 conversation_id)
   for (int i = 0; i < _conversation->sentences->cnt; ++i)
     queue_offer(&_queue, _conversation->sentences->storage[i]);
   next_sentence();
-  keybroad_push_state(process_key_input);
+  input_push_state(INPUT_STATE_INST_1(process_input));
 }
 
 void ui_dialogue_hook(u16 event_id, Callback callback)
@@ -91,9 +91,9 @@ void ui_dialogue_draw(void)
   FC_DrawBoxColor(_font, g_renderer, _rect_textbox, COLOR_BLACK, "%s", _displayed_text);
 }
 
-static void process_key_input(void)
+static void process_input(SDL_UNUSED void* arg)
 {
-  if (key_just_pressed(KEY_A) || key_just_pressed(KEY_B))
+  if (button_just_pressed(BUTTON_INTERACT))
   {
     next_sentence();
     Mix_PlayChannel(-1, get_sfx(SFX_BUTTON), 0);
@@ -115,7 +115,7 @@ static void display_responses(void)
 
 static void end_conversation(const char* response)
 {
-  keybroad_pop_state();
+  input_pop_state();
   fire_event(UI_DIALOGUE_EVENT_DIALOGUE_FINISHED,
              &(UI_DialogueEvent_DialogueFinished){ _conversation->name, response });
   _current_sentence = NULL;

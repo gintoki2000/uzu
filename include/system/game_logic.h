@@ -30,7 +30,7 @@ void merchant_system_init(void);
 void merchant_system_update(void);
 void motion_system_update(void);
 void pickup_system_init(void);
-void player_controller_system_update(void);
+void player_process_input(void*);
 void player_controller_system_init(void);
 void self_destruction_system (void);
 void tile_collision_system_update(void);

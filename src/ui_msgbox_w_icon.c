@@ -23,12 +23,12 @@ static u16   _nentry;
 static FONT* _font;
 static BOOL  _visible;
 
-static void process_input(void)
+static void process_input(SDL_UNUSED void* arg)
 {
-  if (key_just_pressed(KEY_A))
+  if (button_just_pressed(BUTTON_INTERACT))
   {
     _visible = FALSE;
-    keybroad_pop_state();
+    input_pop_state();
   }
 }
 
@@ -92,16 +92,16 @@ void ui_msgbox_w_icon_update(void)
   }
 }
 
-void ui_msgbox_w_icon_show(const ENTRY* entries, u16 nentry)
+void ui_msgbox_w_icon_show(const ENTRY* entries, u16 _num_entries)
 {
-  nentry = min(nentry, 5);
-  memcpy(_entries, entries, sizeof(ENTRY) * nentry);
+  _num_entries = min(_num_entries, 5);
+  memcpy(_entries, entries, sizeof(ENTRY) * _num_entries);
   _visible = TRUE;
-  _nentry  = nentry;
-  for (int i = 0; i < nentry; ++i)
+  _nentry  = _num_entries;
+  for (int i = 0; i < _num_entries; ++i)
   {
     _entry_x[i] = INITIAL_ENTRY_X + i * 10;
   }
-  keybroad_push_state(process_input);
+  input_push_state(INPUT_STATE_INST_1(process_input));
 }
 #undef ENTRY

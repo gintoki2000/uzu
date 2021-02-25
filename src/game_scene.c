@@ -124,7 +124,7 @@ static void on_load()
   ems_connect(MSG_ENTITY_DIED, NULL, on_entity_died);
   ems_connect(MSG_LEVEL_LOADED, NULL, music_player_on_level_loaded);
 
-  keybroad_push_state(player_controller_system_update);
+  input_push_state(INPUT_STATE_INST_1(player_process_input));
 
   if (g_session.new_game)
   {

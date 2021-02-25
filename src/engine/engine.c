@@ -38,7 +38,7 @@ static SDL_bool init(const GameSetting* setting)
     return FALSE;
   }
   SDL_SetRenderDrawBlendMode(g_renderer, SDL_BLENDMODE_BLEND);
-  keybroad_init();
+  input_init();
   engine_set_frame_rate(setting->frame_rate);
   return SDL_TRUE;
 }
@@ -64,7 +64,7 @@ void engine_run(GameDelegate* game_delegate, const GameSetting* setting)
       {
         event_fn(&event);
       }
-      keybroad_update();
+      input_update();
       SDL_SetRenderDrawColor(g_renderer, 0, 0, 0, 0);
       SDL_RenderClear(g_renderer);
       loop_fn();

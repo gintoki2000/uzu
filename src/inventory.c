@@ -13,9 +13,9 @@
 #define CELL_GAP 9
 #define INV_X 60
 #define INV_Y 25
-#define INV_COL 7
-#define INV_ROW 3
-#define INV_MAX_SLOTS 21
+#define NUM_COLS 7
+#define NUM_ROWS 3
+#define MAX_CELLS 21
 #define FIRST_CELL_X (INV_X + 17)
 #define FIRST_CELL_Y (INV_Y + 37)
 #define ITEM_NAME_X (INV_X + 97)
@@ -27,7 +27,7 @@
 
 extern RENDERER* g_renderer;
 
-static Item         _items[NUM_ITEM_CATEGORIES][INV_MAX_SLOTS];
+static Item         _items[NUM_ITEM_CATEGORIES][MAX_CELLS];
 static s32          _curr_col, _curr_row;
 static BOOL         _visible;
 static ItemCategory _category = ITEM_CATEGORY_CONSUMABLE;
@@ -76,19 +76,19 @@ static const char        _text_drop[] = "DROP";
 static const char* const _opts[]      = { _text_use, _text_drop };
 
 //<----------------------------------event callbacks--------------------------->//
-static void process_key_input(void);
+static void process_key_input(void*);
 static void on_list_selected(pointer_t arg, const char* item);
 //<============================================================================>//
 
 static Item* current_item(void)
 {
-  return &_items[_category][_curr_row * INV_COL + _curr_col];
+  return &_items[_category][_curr_row * NUM_COLS + _curr_col];
 }
 
 static int find_item(ItemTypeId type_id)
 {
   const ItemCategory item_category = g_item_types[type_id].category;
-  for (u32 i = 0; i < INV_MAX_SLOTS; ++i)
+  for (u32 i = 0; i < MAX_CELLS; ++i)
     if (_items[item_category][i].type_id == type_id)
       return i;
   return -1;
@@ -96,7 +96,7 @@ static int find_item(ItemTypeId type_id)
 
 static int find_empty_slot(u16 category)
 {
-  for (u32 i = 0; i < INV_MAX_SLOTS; ++i)
+  for (u32 i = 0; i < MAX_CELLS; ++i)
     if (_items[category][i].num_items == 0)
       return i;
   return -1;
@@ -107,68 +107,68 @@ static void play_sound(SfxId id)
   Mix_PlayChannel(-1, get_sfx(id), 0);
 }
 
-static void process_key_input(void)
+static void process_key_input(SDL_UNUSED void* arg)
 {
-  if (key_just_pressed(KEY_LEFT))
+  if (button_just_pressed(BUTTON_LEFT))
   {
     _curr_col = max(0, _curr_col - 1);
     play_sound(SFX_BUTTON);
   }
-  if (key_just_pressed(KEY_RIGHT))
+  if (button_just_pressed(BUTTON_RIGHT))
   {
-    _curr_col = min(INV_COL - 1, _curr_col + 1);
+    _curr_col = min(NUM_COLS - 1, _curr_col + 1);
     play_sound(SFX_BUTTON);
   }
-  if (key_just_pressed(KEY_DOWN))
+  if (button_just_pressed(BUTTON_DOWN))
   {
-    _curr_row = min(INV_ROW - 1, _curr_row + 1);
+    _curr_row = min(NUM_ROWS - 1, _curr_row + 1);
     play_sound(SFX_BUTTON);
   }
-  if (key_just_pressed(KEY_UP))
+  if (button_just_pressed(BUTTON_UP))
   {
     _curr_row = max(0, _curr_row - 1);
     play_sound(SFX_BUTTON);
   }
 
-  if (key_just_pressed(KEY_A) && current_item()->num_items > 0)
+  if (button_just_pressed(BUTTON_INTERACT) && current_item()->num_items > 0)
   {
     play_sound(SFX_INTERACTION);
     ui_list_display((const char**)_opts, 2);
+    ui_list_set_pos(UI_LIST_POS_CENTER_X, UI_LIST_POS_CENTER_Y);
     ui_list_hook(UI_LIST_ON_SELECT, CALLBACK_2(on_list_selected));
   }
 
-  if (key_just_pressed(KEY_L) && _category > 0)
+  if (mouse_button_just_pressed(SDL_BUTTON_LEFT) && _category > 0)
   {
     --_category;
     play_sound(SFX_INTERACTION);
   }
 
-  if (key_just_pressed(KEY_R) && _category < NUM_ITEM_CATEGORIES - 1)
+  if (mouse_button_just_pressed(SDL_BUTTON_RIGHT) && _category < NUM_ITEM_CATEGORIES - 1)
   {
     ++_category;
     play_sound(SFX_INTERACTION);
   }
 
-  if (key_just_pressed(KEY_B))
+  if (button_just_pressed(BUTTON_CANCEL))
   {
     inventory_close();
     play_sound(SFX_INTERACTION);
   }
 }
 
-static void on_list_selected(pointer_t arg, const char* item)
+static void on_list_selected(SDL_UNUSED pointer_t arg, const char* value)
 {
-  (void)arg;
   Item*           it   = current_item();
   const ItemType* type = &g_item_types[it->type_id];
 
-  if (strcmp(item, _text_use) == 0)
+  if (STREQ(value, _text_use))
   {
     if (type->category == ITEM_CATEGORY_CONSUMABLE)
       it->num_items--;
     type->use(type->data, g_ecs, get_player(g_ecs));
   }
-  else if (strcmp(item, _text_drop) == 0)
+  else if (STREQ(value, _text_drop))
   {
     it->num_items = 0;
   }
@@ -186,14 +186,13 @@ void inventory_init()
   _cursor_texture                 = get_texture(TEX_INVENTORY_CURSOR);
 }
 
-#define is_stackable(__cat, __idx) (g_item_types[_items[__cat][idx].type_id].stackable)
+#define is_stackable(__itemptr) (g_item_types[(__itemptr)->type_id].stackable)
 
 #define item_name(__itemptr) (g_item_types[(__itemptr)->type_id].name)
 
 #define item_desc(__itemptr) (g_item_types[(__itemptr)->type_id].description)
 
 #define item_icon(__itemptr) (g_item_types[(__itemptr)->type_id].icon)
-
 
 BOOL add_to_inv(ItemTypeId type_id, u8 quality)
 {
@@ -207,7 +206,12 @@ BOOL add_to_inv(ItemTypeId type_id, u8 quality)
 
   idx = find_item(type_id);
 
-  if (idx == -1)
+  if (idx != -1 && is_stackable(&items[idx]) && items[idx].num_items < ITEM_MAX_STACK)
+  {
+    items[idx].num_items = min(items[idx].num_items + quality, ITEM_MAX_STACK);
+    return TRUE;
+  }
+  else
   {
     empty_slot = find_empty_slot(cat);
     if (empty_slot != -1)
@@ -215,15 +219,7 @@ BOOL add_to_inv(ItemTypeId type_id, u8 quality)
       items[empty_slot] = (Item){ .type_id = type_id, .num_items = quality };
       return TRUE;
     }
-    return FALSE;
-  }
-  else
-  {
-    if (items[idx].num_items < ITEM_MAX_STACK)
-    {
-      items[idx].num_items = min(items[idx].num_items + quality, ITEM_MAX_STACK);
-      return TRUE;
-    }
+    // inventory is full
     return FALSE;
   }
   return FALSE;
@@ -258,14 +254,14 @@ void inventory_display()
 {
   game_scene_pause();
   _visible = TRUE;
-  keybroad_push_state(process_key_input);
+  input_push_state(INPUT_STATE_INST_1(process_key_input));
 }
 
 void inventory_close()
 {
   game_scene_resume();
   _visible = FALSE;
-  keybroad_pop_state();
+  input_pop_state();
 }
 
 static void draw_cursor(void)
@@ -300,11 +296,11 @@ void inventory_draw()
 
   item_rect.w = 16;
   item_rect.h = 16;
-  for (int i = 0; i < INV_ROW; ++i)
+  for (int i = 0; i < NUM_ROWS; ++i)
   {
-    for (int j = 0; j < INV_COL; ++j)
+    for (int j = 0; j < NUM_COLS; ++j)
     {
-      idx = i * INV_COL + j;
+      idx = i * NUM_COLS + j;
 
       if (items[idx].num_items == 0)
         continue;
@@ -318,7 +314,7 @@ void inventory_draw()
       SDL_RenderCopy(g_renderer, get_texture(item_icon.texture_id), &item_icon.rect, &item_rect);
     }
   }
-  int current_item_index = _curr_row * INV_COL + _curr_col;
+  int current_item_index = _curr_row * NUM_COLS + _curr_col;
   if (items[current_item_index].num_items > 0)
   {
     item_type = &g_item_types[items[current_item_index].type_id];

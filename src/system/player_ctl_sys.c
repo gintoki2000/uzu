@@ -19,12 +19,6 @@ extern RECT g_viewport;
 #define POINTER_DOWN_HEIGHT 3
 #define MOVE_SPEED 100.f
 
-static u32 curr_mouse_state;
-static u32 prev_mouse_state;
-
-static void update_mouse_state();
-static BOOL is_mouse_button_just_pressed(u32 button);
-
 ecs_entity_t g_curr_iteractable_entity = ECS_NULL_ENT;
 
 //<--------------------------------event callbacks----------------------------------->//
@@ -50,7 +44,7 @@ static void on_level_unloaded(pointer_t arg, pointer_t event)
   g_curr_iteractable_entity = ECS_NULL_ENT;
 }
 
-struct CBPlayerController_QueryInteracableEntitiesArgs
+struct CBPlayerInputProcess_QueryClosestInteracableArgs
 {
   Vec2         player_position;
   float        closest_distance;
@@ -58,8 +52,8 @@ struct CBPlayerController_QueryInteracableEntitiesArgs
 };
 
 static BOOL
-__cb_query_interacable_entities(struct CBPlayerController_QueryInteracableEntitiesArgs* args,
-                                ecs_entity_t                                            e)
+__callback_query_closest_interactable(struct CBPlayerInputProcess_QueryClosestInteracableArgs* args,
+                                      ecs_entity_t                                             e)
 {
   Vec2  entity_position = get_entity_position(g_ecs, e);
   float dist            = vec2_dist(args->player_position, entity_position);
@@ -73,13 +67,12 @@ __cb_query_interacable_entities(struct CBPlayerController_QueryInteracableEntiti
 
 static void find_interacable_entity()
 {
-
   if (g_curr_iteractable_entity == ECS_NULL_ENT)
   {
     Vec2 player_pos;
     RECT rect;
 
-    struct CBPlayerController_QueryInteracableEntitiesArgs cbargs;
+    struct CBPlayerInputProcess_QueryClosestInteracableArgs cbargs;
 
     player_pos = get_player_position(g_ecs);
     rect.x     = player_pos.x - INTERACTABLE_DISTANCE / 2;
@@ -91,7 +84,7 @@ static void find_interacable_entity()
     cbargs.closest_entity   = ECS_NULL_ENT;
     cbargs.closest_distance = 9999.f;
 
-    collision_box_query(&rect, 0xffff, CALLBACK_1(&cbargs, __cb_query_interacable_entities));
+    collision_box_query(&rect, 0xffff, CALLBACK_1(&cbargs, __callback_query_closest_interactable));
     g_curr_iteractable_entity = cbargs.closest_entity;
   }
   else
@@ -138,18 +131,15 @@ static Vec2 to_world_coordinates(Vec2 v)
   return v;
 }
 
-void player_controller_system_update()
+void player_process_input(SDL_UNUSED void* arg)
 {
 
   ecs_entity_t player;
   Controller*  controller;
-  u32          mouse_state;
 
-  update_mouse_state();
   if ((player = get_player(g_ecs)) == ECS_NULL_ENT)
     return;
   find_interacable_entity();
-  mouse_state = SDL_GetMouseState(NULL, NULL);
 
   controller = ecs_get(g_ecs, player, CONTROLLER);
 
@@ -157,22 +147,22 @@ void player_controller_system_update()
   {
 
     controller->desired_direction = VEC2_ZERO;
-    if (key_pressed(KEY_UP))
+    if (button_pressed(BUTTON_UP))
     {
       controller->desired_direction.y -= 1.f;
     }
 
-    if (key_pressed(KEY_DOWN))
+    if (button_pressed(BUTTON_DOWN))
     {
       controller->desired_direction.y += 1.f;
     }
 
-    if (key_pressed(KEY_LEFT))
+    if (button_pressed(BUTTON_LEFT))
     {
       controller->desired_direction.x -= 1.f;
     }
 
-    if (key_pressed(KEY_RIGHT))
+    if (button_pressed(BUTTON_RIGHT))
     {
       controller->desired_direction.x += 1.f;
     }
@@ -186,7 +176,7 @@ void player_controller_system_update()
 
     controller->attack_direction = vec2_unit_vec(rposition);
 
-    if (key_just_pressed(KEY_SELECT))
+    if (button_just_pressed(BUTTON_OPEN_INVENTORY))
     {
       inventory_display();
       return;
@@ -194,12 +184,12 @@ void player_controller_system_update()
 
     if (g_curr_iteractable_entity == ECS_NULL_ENT)
     {
-      if (is_mouse_button_just_pressed(SDL_BUTTON_LEFT) && !controller->in_action)
+      if (mouse_button_just_pressed(SDL_BUTTON_LEFT) && !controller->in_action)
       {
         controller->action = CHARACTER_ACTION_REGULAR_ATK;
       }
 
-      else if (key_just_pressed(KEY_B))
+      else if (button_just_pressed(BUTTON_JUMP))
       {
         Transform* transform = ecs_get(g_ecs, player, TRANSFORM);
         if (transform->z <= 0.f)
@@ -213,7 +203,7 @@ void player_controller_system_update()
     else
     {
 
-      if (is_mouse_button_just_pressed(SDL_BUTTON_LEFT))
+      if (button_just_pressed(BUTTON_INTERACT))
         begin_interact(g_curr_iteractable_entity);
     }
   }
@@ -222,14 +212,4 @@ void player_controller_system_update()
 void player_controller_system_init(void)
 {
   ems_connect(MSG_LEVEL_UNLOADED, NULL, on_level_unloaded);
-}
-
-static void update_mouse_state()
-{
-  prev_mouse_state = curr_mouse_state;
-  curr_mouse_state = SDL_GetMouseState(NULL, NULL);
-}
-static BOOL is_mouse_button_just_pressed(u32 button)
-{
-  return !(prev_mouse_state & SDL_BUTTON(button)) && (curr_mouse_state & SDL_BUTTON(button));
 }

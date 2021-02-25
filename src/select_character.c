@@ -67,7 +67,7 @@ static void on_load(void);
 static void on_unload(void);
 static void on_event(SDL_UNUSED const SDL_Event* event);
 static void on_update(void);
-static void process_input(void);
+static void process_input(void*);
 static void draw_character(void);
 static void draw_jobdesc(void);
 static void draw_bg(void);
@@ -86,15 +86,15 @@ static void on_load()
   _back_fx     = get_sfx(SFX_INTERACTION);
   _interact_fx = get_sfx(SFX_BUTTON);
   _bgimg       = get_texture(TEX_TILESCR_BG);
-  _lbtn_icon   = get_key_icon(KEY_LEFT);
-  _rbtn_icon   = get_key_icon(KEY_RIGHT);
+  _lbtn_icon   = get_key_icon(BUTTON_LEFT);
+  _rbtn_icon   = get_key_icon(BUTTON_RIGHT);
   _ticks       = 0;
-  keybroad_push_state(process_input);
+  input_push_state(INPUT_STATE_INST_1(process_input));
 }
 
 static void on_unload()
 {
-  keybroad_pop_state();
+  input_pop_state();
 }
 
 static void on_event(SDL_UNUSED const SDL_Event* event)
@@ -109,24 +109,24 @@ static void on_update()
   draw_jobdesc();
 }
 
-static void process_input(void)
+static void process_input(SDL_UNUSED void* arg)
 {
-  if (key_just_pressed(KEY_LEFT))
+  if (button_just_pressed(BUTTON_LEFT))
   {
     _job = _job > 0 ? _job - 1 : NUM_JOBS - 1;
     Mix_PlayChannel(-1, _interact_fx, 0);
   }
-  if (key_just_pressed(KEY_RIGHT))
+  if (button_just_pressed(BUTTON_RIGHT))
   {
     Mix_PlayChannel(-1, _interact_fx, 0);
     _job = _job < NUM_JOBS - 1 ? _job + 1 : 0;
   }
-  if (key_just_pressed(KEY_B))
+  if (button_just_pressed(BUTTON_CANCEL))
   {
     set_scene(&g_main_menu);
     Mix_PlayChannel(-1, _back_fx, 0);
   }
-  if (key_just_pressed(KEY_A))
+  if (button_just_pressed(BUTTON_INTERACT))
   {
     new_game(_job);
     set_scene(&g_game_scene);

@@ -21,15 +21,15 @@ const static COLOR     BORDER_COLOR = { 0xff, 0xff, 0xff, 0x80 };
 
 static void close()
 {
-  keybroad_pop_state();
+  input_pop_state();
   _ticks   = -1;
   _visible = FALSE;
 }
-static void process_key_input(void)
+static void process_input(SDL_UNUSED void* arg)
 {
   if (_ticks < 0)
   {
-    if (key_just_pressed(KEY_A))
+    if (button_just_pressed(BUTTON_INTERACT) | button_just_pressed(BUTTON_CANCEL))
     {
       close();
     }
@@ -46,7 +46,7 @@ void ui_msgbox_display_timed(const char* msg, s32 ticks)
   strcpy(_msg, msg);
   _ticks   = ticks;
   _visible = TRUE;
-  keybroad_push_state(process_key_input);
+  input_push_state(INPUT_STATE_INST_1(process_input));
 }
 
 void ui_msgbox_draw()
@@ -57,6 +57,7 @@ void ui_msgbox_draw()
   if (_ticks > 0 && !(--_ticks))
   {
     close();
+    return;
   }
 
   draw_bordered_box(&BOX_RECT, BG_COLOR, BORDER_COLOR);

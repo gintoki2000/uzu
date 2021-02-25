@@ -23,26 +23,25 @@ static const RECT  QUALITY_RECT = { UI_QUALITY_X, UI_QUALITY_Y + 12, 44, 24 };
 const static COLOR BG_COLOR     = { 0x00, 0x00, 0x00, 0x90 };
 const static COLOR BORDER_COLOR = { 0xff, 0xff, 0xff, 0x80 };
 
-static void        process_key_input()
+static void process_key_input()
 {
-  if (key_just_pressed(KEY_A))
+  if (button_just_pressed(BUTTON_INTERACT))
   {
-    keybroad_pop_state();
+    input_pop_state();
     _visible = FALSE;
-    if (_callbacks[UI_QUALITY_ON_SELECTED].func != NULL)
-      INVOKE_CALLBACK(_callbacks[UI_QUALITY_ON_SELECTED], void, _val);
+    INVOKE_EVENT(_callbacks[UI_QUALITY_ON_SELECTED], (u32)_val);
     return;
   }
 
-  if (key_just_pressed(KEY_B))
+  if (button_just_pressed(BUTTON_CANCEL))
   {
 
-    keybroad_pop_state();
+    input_pop_state();
     _visible = FALSE;
     return;
   }
 
-  if (key_just_pressed(KEY_RIGHT))
+  if (button_just_pressed(BUTTON_RIGHT))
   {
     if (_val < _max_val)
     {
@@ -54,7 +53,7 @@ static void        process_key_input()
     }
   }
 
-  if (key_just_pressed(KEY_LEFT))
+  if (button_just_pressed(BUTTON_LEFT))
   {
     if (_val > _min_val)
     {
@@ -74,7 +73,7 @@ void ui_quality_display(const char* title, u32 initial_val, u32 min_val, u32 max
   _val     = initial_val;
   _max_val = max_val;
   _min_val = min_val;
-  keybroad_push_state(process_key_input);
+  input_push_state(INPUT_STATE_INST_1(process_key_input));
 }
 
 void ui_quality_draw()

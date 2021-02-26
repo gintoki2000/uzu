@@ -48,7 +48,7 @@ static void draw_spell_name(ecs_entity_t player);
 static void draw_coins(void);
 static void draw_spell_icon(ecs_entity_t player);
 
-void hub_system_update()
+void hub_rendering_system()
 {
   ecs_entity_t player;
   if ((player = get_player(g_ecs)) != ECS_NULL_ENT)

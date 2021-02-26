@@ -53,7 +53,7 @@ static void draw_all(void)
   }
 }
 
-void rendering_system_update(void)
+void rendering_system(void)
 {
   ecs_entity_t* entities;
   Visual*       visuals;

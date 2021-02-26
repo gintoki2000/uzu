@@ -7,7 +7,7 @@ extern Ecs*          g_ecs;
 extern SDL_Renderer* g_renderer;
 extern SDL_Rect      g_viewport;
 
-void text_rendering_system_update()
+void text_rendering_system()
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;

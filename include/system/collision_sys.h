@@ -11,7 +11,7 @@ typedef struct
 
 void collision_system_init(void);
 void collision_system_fini(void);
-void collision_system_update(void);
+void collision_system(void);
 void collision_system_render_debug(void);
 void collision_box_query(const RECT* rect, u16 mask_bits, Callback callback);
 #endif // COLLISION_SYSTEM_H

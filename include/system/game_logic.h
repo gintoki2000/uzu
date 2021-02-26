@@ -2,8 +2,7 @@
 #define GAME_LOGIC_H
 #include "ecs/ecs.h"
 
-#define RUN_SYSTEM(__system)\
-  __system()
+#define RUN_SYSTEM(sys) sys()
 
 void effect_system_init(void);
 void ai_system(void);
@@ -34,11 +33,10 @@ void motion_system(void);
 void pickup_system_init(void);
 void player_process_input(void*);
 void player_controller_system_init(void);
-void self_destruction_system (void);
+void self_destruction_system(void);
 void tile_collision_system(void);
-
 
 void init_all_systems(void);
 void shutdown_all_systems(void);
 
-#endif //GAME_LOGIC_H
+#endif // GAME_LOGIC_H

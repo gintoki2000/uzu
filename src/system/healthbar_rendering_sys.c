@@ -6,7 +6,7 @@ extern SDL_Rect      g_viewport;
 extern SDL_Renderer* g_renderer;
 extern Ecs*          g_ecs;
 
-void healthbar_rendering_system_update()
+void healthbar_rendering_system()
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;

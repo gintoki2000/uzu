@@ -213,7 +213,7 @@ void query_box_collision(const AABB* aabb, Callback callback)
   rtree_query(_rtree, aabb, callback);
 }
 
-void collision_system_update()
+void collision_system()
 {
   update_proxies(g_ecs);
   broad_phase(g_ecs);

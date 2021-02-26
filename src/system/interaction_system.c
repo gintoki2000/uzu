@@ -18,7 +18,7 @@ extern Ecs*          g_ecs;
 extern RECT          g_viewport;
 extern SDL_Renderer* g_renderer;
 
-void interactable_pointer_rendering_system_update()
+void interactable_rendering_system()
 {
   if (g_curr_iteractable_entity != ECS_NULL_ENT)
   {

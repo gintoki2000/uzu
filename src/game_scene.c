@@ -277,7 +277,7 @@ static void update_game_logic(void)
 {
   RUN_SYSTEM(motion_system);
   RUN_SYSTEM(tile_collision_system);
-  RUN_SYSTEM(collision_system_update);
+  RUN_SYSTEM(collision_system);
   RUN_SYSTEM(equipment_system);
   RUN_SYSTEM(character_controller_system);
   RUN_SYSTEM(animator_system);
@@ -300,14 +300,14 @@ static void render_game_world(void)
 {
   map_draw(MAP_LAYER_FLOOR);
   map_draw(MAP_LAYER_BACK_WALL);
-  rendering_system_update();
-  healthbar_rendering_system_update();
+  RUN_SYSTEM(rendering_system);
+  RUN_SYSTEM(healthbar_rendering_system);
   map_draw(MAP_LAYER_FRONT_WALL);
-  text_rendering_system_update();
-  interactable_pointer_rendering_system_update();
-  hub_system_update();
-  dialogue_system();
-  merchant_system();
+  RUN_SYSTEM(text_rendering_system);
+  RUN_SYSTEM(interactable_rendering_system);
+  RUN_SYSTEM(hub_rendering_system);
+  RUN_SYSTEM(dialogue_system);
+  RUN_SYSTEM(merchant_system);
 }
 
 static Vec2 get_spawn_localtion(ecs_entity_t ladder)

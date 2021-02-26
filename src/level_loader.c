@@ -270,11 +270,11 @@ static void parse_chest(const ParseFnParams* params)
 static void parse_ladder(const ParseFnParams* _params)
 {
   NewLadderParams params;
-  params.level = json_object_object_get_as_string(_params->properties, "level");
-  params.dest  = json_object_object_get_as_string(_params->properties, "dest");
-  params.name  = _params->name;
-  params.pos   = _params->position;
-  params.size  = _params->size;
+  params.level    = json_object_object_get_as_string(_params->properties, "level");
+  params.dest     = json_object_object_get_as_string(_params->properties, "dest");
+  params.name     = _params->name;
+  params.position = _params->position;
+  params.size     = _params->size;
 
   make_ladder(g_ecs, &params);
 }

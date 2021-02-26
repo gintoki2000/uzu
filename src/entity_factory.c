@@ -24,10 +24,10 @@ ecs_entity_t make_anime_sword(Ecs* ecs, u16 mask)
 
   entity = ecs_create(ecs);
 
-  Transform*        transform;
-  Visual*           visual;
-  WeaponAttributes* attrs;
-  WeaponSwingAttack*      sklswing;
+  Transform*         transform;
+  Visual*            visual;
+  WeaponAttributes*  attrs;
+  WeaponSwingAttack* sklswing;
 
   transform = ecs_add(ecs, entity, TRANSFORM);
 
@@ -154,7 +154,7 @@ ecs_entity_t make_wizzard(Ecs* ecs, Vec2 position)
   return make_character_base(ecs, &params);
 }
 
-ecs_entity_t make_dragon(Ecs* ecs, Vec2 position)
+ecs_entity_t make_lizzard(Ecs* ecs, Vec2 position)
 {
   NewCharacterParams params;
   params.position    = position;
@@ -289,10 +289,19 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 position)
   ecs_add(ecs, entity, ENEMY_TAG);
 
   drop          = ecs_add(ecs, entity, DROP);
-  drop->item1   = PICKUPABLE_RED_FLASK;
-  drop->item2   = PICKUPABLE_BLUE_FLASK;
-  drop->change1 = 70;
-  drop->change2 = 60;
+  drop->type[0] = PICKUPABLE_RED_FLASK;
+  drop->type[1] = PICKUPABLE_BLUE_FLASK;
+  drop->type[2] = PICKUPABLE_COIN;
+
+  drop->rate[0] = 70;
+  drop->rate[1] = 60;
+  drop->rate[2] = 100;
+
+  drop->quality[0] = 1;
+  drop->quality[1] = 1;
+  drop->quality[2] = 1;
+
+  drop->cnt = 3;
 
   controller = ecs_add(ecs, entity, CONTROLLER);
 
@@ -386,10 +395,10 @@ ecs_entity_t make_cleaver(Ecs* ecs, u16 mask_bits)
   entity  = ecs_create(ecs);
   texture = get_texture(TEX_CLEAVER);
 
-  Transform*        transform;
-  Visual*           visual;
-  WeaponAttributes* attrs;
-  WeaponSwingAttack*      sklswing;
+  Transform*         transform;
+  Visual*            visual;
+  WeaponAttributes*  attrs;
+  WeaponSwingAttack* sklswing;
 
   transform = ecs_add(ecs, entity, TRANSFORM);
 
@@ -418,10 +427,10 @@ ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
 
   entity = ecs_create(ecs);
 
-  Transform*          transform;
-  Visual*             visual;
-  WeaponAttributes*   attrs;
-  WeaponSwingAttack*        sklswing;
+  Transform*                 transform;
+  Visual*                    visual;
+  WeaponAttributes*          attrs;
+  WeaponSwingAttack*         sklswing;
   WeaponThunderStormRelease* wpskl_thunder_storm;
 
   transform = ecs_add(ecs, entity, TRANSFORM);
@@ -450,22 +459,26 @@ ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
   return entity;
 }
 
-ecs_entity_t make_big_red_flask(Ecs* ecs, Vec2 position)
+ecs_entity_t make_big_red_flask(Ecs* ecs, Vec2 position, u8 quality)
 {
-  return make_pickupable_entity(ecs, TEX_FLASK_RED_BIG, PICKUPABLE_BIG_RED_FLASK, position);
+  return make_pickupable_entity(ecs,
+                                TEX_FLASK_RED_BIG,
+                                PICKUPABLE_BIG_RED_FLASK,
+                                position,
+                                quality);
 }
 
-ecs_entity_t make_red_flask(Ecs* ecs, Vec2 position)
+ecs_entity_t make_red_flask(Ecs* ecs, Vec2 position, u8 quality)
 {
-  return make_pickupable_entity(ecs, TEX_FLASK_RED, PICKUPABLE_RED_FLASK, position);
+  return make_pickupable_entity(ecs, TEX_FLASK_RED, PICKUPABLE_RED_FLASK, position, quality);
 }
 
-ecs_entity_t make_blue_flask(Ecs* ecs, Vec2 position)
+ecs_entity_t make_blue_flask(Ecs* ecs, Vec2 position, u8 quality)
 {
-  return make_pickupable_entity(ecs, TEX_BLUE_FLASK, PICKUPABLE_BLUE_FLASK, position);
+  return make_pickupable_entity(ecs, TEX_BLUE_FLASK, PICKUPABLE_BLUE_FLASK, position, quality);
 }
 
-ecs_entity_t make_pickupable_entity(Ecs* ecs, u16 texture_id, u16 id, Vec2 position)
+ecs_entity_t make_pickupable_entity(Ecs* ecs, u16 texture_id, u16 id, Vec2 position, u8 quality)
 {
   ecs_entity_t entity;
 
@@ -496,9 +509,10 @@ ecs_entity_t make_pickupable_entity(Ecs* ecs, u16 texture_id, u16 id, Vec2 posit
   hitbox->category  = CATEGORY_ITEM;
   hitbox->mask_bits = BIT(CATEGORY_PLAYER);
 
-  attrs      = ecs_add(ecs, entity, PICKUPABLE_ATTRIBUTES);
-  attrs->id  = id;
-  attrs->sfx = SFX_INTERACTION;
+  attrs          = ecs_add(ecs, entity, PICKUPABLE_ATTRIBUTES);
+  attrs->id      = id;
+  attrs->sfx     = SFX_INTERACTION;
+  attrs->quality = quality;
 
   ecs_add_w_data(ecs, entity, MOTION, &(Motion){ .friction = .2f, .bounching = .8f });
   return entity;
@@ -547,7 +561,7 @@ ecs_entity_t make_ladder(Ecs* ecs, const NewLadderParams* params)
   entity = ecs_create(ecs);
 
   transform           = ecs_add(ecs, entity, TRANSFORM);
-  transform->position = params->pos;
+  transform->position = params->position;
 
   hitbox            = ecs_add(ecs, entity, HITBOX);
   hitbox->size      = params->size;
@@ -588,7 +602,7 @@ make_text_particle(Ecs* ecs, const char* text, Vec2 position, Vec2 vel, FONT* fo
   return entity;
 }
 
-ecs_entity_t make_damage_indicator_particle(Ecs* ecs, Vec2 position, COLOR color, int amount)
+ecs_entity_t make_fx_damage_indicator(Ecs* ecs, Vec2 position, COLOR color, int amount)
 {
   char strnum[5];
   sprintf(strnum, "%d", amount);
@@ -600,7 +614,7 @@ ecs_entity_t make_damage_indicator_particle(Ecs* ecs, Vec2 position, COLOR color
                             color);
 }
 
-ecs_entity_t make_item_picked_up_msg(Ecs* ecs, Vec2 position, const char* item_name)
+ecs_entity_t make_fx_item_picked_up(Ecs* ecs, Vec2 position, const char* item_name)
 {
   return make_text_particle(ecs,
                             item_name,
@@ -608,44 +622,6 @@ ecs_entity_t make_item_picked_up_msg(Ecs* ecs, Vec2 position, const char* item_n
                             VEC2(0.f, -40.f),
                             get_font(FONT_ITEM_PICKED_UP),
                             (COLOR){ 122, 196, 10, 255 });
-}
-
-ecs_entity_t make_npc(Ecs* ecs, ecs_entity_t character_base)
-{
-  Interactable* interactable;
-  HitBox*       hitbox;
-  Dialogue*     dialogue;
-  Merchant*     merchant;
-
-  interactable = ecs_add(ecs, character_base, INTERACTABLE);
-
-  const char* commands[] = { TEXT_COMMAND_TALK, TEXT_COMMAND_BUY };
-
-  memcpy(interactable->commands, commands, sizeof(commands));
-  interactable->num_commands = sizeof(commands) / sizeof(const char*);
-
-  dialogue                  = ecs_add(ecs, character_base, DIALOGUE);
-  dialogue->conversation_id = CONVERSATION_DEMO1;
-
-  merchant = ecs_add(ecs, character_base, MERCHANT);
-
-  ItemPayload payloads[] = { { ITEM_TYPE_RED_FLASK, 10, 1 },
-                             { ITEM_TYPE_BIG_RED_FLASK, 5, 3 },
-                             { ITEM_TYPE_BLUE_FLASK, 10, 2 } };
-
-  merchant->num_payloads = sizeof(payloads) / sizeof(ItemPayload);
-  memcpy(merchant->payloads, payloads, sizeof(payloads));
-
-  name_init(ecs_add(ecs, character_base, NAME), "luca");
-
-  hitbox           = ecs_get(ecs, character_base, HITBOX);
-  hitbox->category = CATEGORY_INTERACABLE;
-  return character_base;
-}
-
-ecs_entity_t make_wizzard_npc(Ecs* ecs, Vec2 position)
-{
-  return make_npc(ecs, make_wizzard(ecs, position));
 }
 
 ecs_entity_t make_chest(Ecs* ecs, Vec2 position, Item items[CHEST_MAX_ITEMS], u16 cnt)
@@ -689,10 +665,10 @@ ecs_entity_t make_spear(Ecs* ecs, u16 mask)
 {
   ecs_entity_t entity;
 
-  Visual*           visual;
-  Transform*        transform;
-  WeaponThustAttack*      thust;
-  WeaponAttributes* attrs;
+  Visual*            visual;
+  Transform*         transform;
+  WeaponThustAttack* thust;
+  WeaponAttributes*  attrs;
 
   entity = ecs_create(ecs);
 
@@ -760,7 +736,7 @@ static const Animation* _blood_effect_tbl[] = {
 
 #define NUM_BLOOD_LOSS_EFFECTS 2
 
-ecs_entity_t make_blood_loss_particle(Ecs* ecs, Vec2 position)
+ecs_entity_t make_fx_blood_loss(Ecs* ecs, Vec2 position)
 {
   ecs_entity_t entity;
 
@@ -961,7 +937,7 @@ ecs_entity_t make_arrow(Ecs* ecs, ecs_entity_t shooter, Vec2 position, Vec2 spee
   return entity;
 }
 
-ecs_entity_t make_ice_cast_effect(Ecs* ecs, Vec2 pos)
+ecs_entity_t make_fx_cast_ice(Ecs* ecs, Vec2 pos)
 {
   ecs_entity_t entity;
 
@@ -982,7 +958,7 @@ ecs_entity_t make_ice_cast_effect(Ecs* ecs, Vec2 pos)
   return entity;
 }
 
-ecs_entity_t make_fire_cast_effect(Ecs* ecs, Vec2 position)
+ecs_entity_t make_fx_cast_fire(Ecs* ecs, Vec2 position)
 {
   ecs_entity_t entity;
 
@@ -1003,7 +979,7 @@ ecs_entity_t make_fire_cast_effect(Ecs* ecs, Vec2 position)
   return entity;
 }
 
-ecs_entity_t make_slash_effect(Ecs* ecs, Vec2 position, SDL_RendererFlip flip)
+ecs_entity_t make_fx_slash(Ecs* ecs, Vec2 position, SDL_RendererFlip flip)
 {
   ecs_entity_t entity;
 
@@ -1031,7 +1007,7 @@ ecs_entity_t make_slash_effect(Ecs* ecs, Vec2 position, SDL_RendererFlip flip)
   return entity;
 }
 
-ecs_entity_t make_fire_hit_effect(Ecs* ecs, Vec2 position)
+ecs_entity_t make_fx_fire_hit(Ecs* ecs, Vec2 position)
 {
 
   ecs_entity_t entity;
@@ -1059,7 +1035,7 @@ ecs_entity_t make_fire_hit_effect(Ecs* ecs, Vec2 position)
 
   return entity;
 }
-ecs_entity_t make_ice_hit_effect(Ecs* ecs, Vec2 position)
+ecs_entity_t make_fx_ice_hit(Ecs* ecs, Vec2 position)
 {
   ecs_entity_t entity;
 
@@ -1108,10 +1084,6 @@ ecs_entity_t make_npc_nova(Ecs* ecs, Vec2 position, u16 conversation_id)
       entity,
       HEAL_BAR,
       &(HealthBar){ .color = { 0x03, 0xb6, 0xfc, 0xff }, .len = 20, .anchor = { 6, 23 } });
-  ecs_add_w_data(ecs,
-                 entity,
-                 DROP,
-                 &(Drop){ .item1 = PICKUPABLE_KEY_1_1, .change1 = 100, .change2 = 0 });
   ecs_add_w_data(ecs, entity, MOTION, &(Motion){ 0 });
   ecs_add(ecs, entity, CHARACTER_ANIMATOR_TAG);
 
@@ -1198,7 +1170,7 @@ ecs_entity_t make_trigger(Ecs* ecs, Vec2 pos, Vec2 size, u16 mask)
   return entity;
 }
 
-ecs_entity_t make_coin(Ecs* ecs, Vec2 position)
+ecs_entity_t make_coin(Ecs* ecs, Vec2 position, u8 quality)
 {
   ecs_entity_t entity;
   Animation    anim;
@@ -1229,18 +1201,18 @@ ecs_entity_t make_coin(Ecs* ecs, Vec2 position)
   hitbox->category  = CATEGORY_ITEM;
   hitbox->mask_bits = BIT(CATEGORY_PLAYER);
 
-  attrs        = ecs_add(ecs, entity, PICKUPABLE_ATTRIBUTES);
-  attrs->id    = PICKUPABLE_COIN;
-  attrs->sfx   = SFX_COIN;
-  attrs->coins = 5;
+  attrs          = ecs_add(ecs, entity, PICKUPABLE_ATTRIBUTES);
+  attrs->id      = PICKUPABLE_COIN;
+  attrs->sfx     = SFX_COIN;
+  attrs->quality = quality;
 
   ecs_add_w_data(ecs, entity, MOTION, &(Motion){ .friction = .2f, .bounching = .8f });
   return entity;
 }
 
-ecs_entity_t make_key_1_1(Ecs* ecs, Vec2 pos)
+ecs_entity_t make_key_1_1(Ecs* ecs, Vec2 pos, u8 quality)
 {
-  return make_pickupable_entity(ecs, TEX_KEY, PICKUPABLE_KEY_1_1, pos);
+  return make_pickupable_entity(ecs, TEX_KEY, PICKUPABLE_KEY_1_1, pos, quality);
 }
 
 ecs_entity_t make_bow(Ecs* ecs, u16 mask)

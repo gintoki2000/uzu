@@ -111,7 +111,6 @@ void text_init(Text* text, const char* value, FONT* font, COLOR color)
 
 void visual_init(Visual* v)
 {
-  v->opacity = 255;
   v->color   = (COLOR){ 255, 255, 255, 255 };
   v->anchor  = (POINT){ 0, 0 };
   v->sprite  = (Sprite){ 0 };

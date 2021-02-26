@@ -1,10 +1,10 @@
-#include "system/game_logic.h"
 #include "components.h"
 #include "entity_factory.h"
 #include "global.h"
 #include "system/event_messaging_sys.h"
+#include "system/game_logic.h"
 
-static ecs_entity_t (*create_fn_tbl[NUM_PICKUPABLE_TYPES])(Ecs*, Vec2) = {
+static ecs_entity_t (*const _pickupable_make_fn_tbl[NUM_PICKUPABLE_TYPES])(Ecs*, Vec2, u8) = {
   [PICKUPABLE_RED_FLASK]     = make_red_flask,
   [PICKUPABLE_BIG_RED_FLASK] = make_big_red_flask,
   [PICKUPABLE_BLUE_FLASK]    = make_blue_flask,
@@ -19,50 +19,39 @@ static Vec2 get_random_speed()
   int   deg = rand() % 360;
   float rad = deg * 0.0174532925f;
   int   len = rand() % 50 + 100;
-  Vec2  v;
-  v.x = SDL_cosf(rad);
-  v.y = SDL_sinf(rad);
-  v.x *= len;
-  v.y *= len;
-  return v;
+  Vec2  random_speed;
+  random_speed.x = SDL_cosf(rad);
+  random_speed.y = SDL_sinf(rad);
+  random_speed.x *= len;
+  random_speed.y *= len;
+  return random_speed;
 }
 
 static void on_entity_died(SDL_UNUSED void* arg, const MSG_EntityDied* event)
 {
   Drop*        drop;
   Transform*   transform;
-  int          v;
-  ecs_entity_t pickupable = ECS_NULL_ENT;
-  if ((drop = ecs_get(g_ecs, event->entity, DROP)) &&
+  int          random_value;
+  ecs_entity_t pickupable;
+  BOOL         should_drop;
+  Motion*      pickupable_motion;
+
+  if ((drop      = ecs_get(g_ecs, event->entity, DROP      )) &&
       (transform = ecs_get(g_ecs, event->entity, TRANSFORM)))
   {
-    v = rand() % 100;
-    if (v <= drop->change1)
+    for (int i = 0; i < drop->cnt; ++i)
     {
-      pickupable = create_fn_tbl[drop->item1](g_ecs, transform->position);
-      if (pickupable != ECS_NULL_ENT)
+      random_value = rand() % 100;
+      should_drop  = random_value <= drop->rate[i];
+      if (should_drop)
       {
-        Motion* motion = ecs_get(g_ecs, pickupable, MOTION);
-        motion->vel    = get_random_speed();
-        motion->vz     = 60.f;
+        pickupable =
+            _pickupable_make_fn_tbl[drop->type[i]](g_ecs, transform->position, drop->quality[i]);
+        pickupable_motion      = ecs_get(g_ecs, pickupable, MOTION);
+        pickupable_motion->vel = get_random_speed();
+        pickupable_motion->vz  = 80.f;
       }
     }
-
-    v = rand() % 100;
-    if (v <= drop->change2)
-    {
-      pickupable = create_fn_tbl[drop->item2](g_ecs, transform->position);
-      if (pickupable != ECS_NULL_ENT)
-      {
-        Motion* motion = ecs_get(g_ecs, pickupable, MOTION);
-        motion->vel    = get_random_speed();
-        motion->vz     = 60.f;
-      }
-    }
-    pickupable     = make_coin(g_ecs, transform->position);
-    Motion* motion = ecs_get(g_ecs, pickupable, MOTION);
-    motion->vel    = get_random_speed();
-    motion->vz     = 60.f;
   }
 }
 

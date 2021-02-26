@@ -1,4 +1,3 @@
-#include "system/game_logic.h"
 #include "components.h"
 #include "entity_factory.h"
 #include "entity_utils.h"
@@ -8,6 +7,7 @@
 #include "resources.h"
 #include "session.h"
 #include "system/event_messaging_sys.h"
+#include "system/game_logic.h"
 
 extern Ecs* g_ecs;
 
@@ -40,7 +40,7 @@ static void callback1(ecs_entity_t entity, const PickupableAttributes* attrs, co
   u16 item_type_id = g_pickupable_to_item_type_id_tbl[attrs->id];
   if (item_type_id != ITEM_TYPE_ID_NULL)
   {
-    if (add_to_inv(item_type_id, 1))
+    if (add_to_inv(item_type_id, attrs->quality))
     {
       ems_broadcast(MSG_ITEM_PICKED_UP,
                     &(MSG_ItemPickedUp){ .pickupable_entity = entity,
@@ -53,8 +53,8 @@ static void callback1(ecs_entity_t entity, const PickupableAttributes* attrs, co
 
 static void callback2(ecs_entity_t entity, const PickupableAttributes* attrs, const Vec2 position)
 {
-  g_session.coins += attrs->coins;
-  ems_broadcast(MSG_COIN_PICKED_UP, &(MSG_CoinPickedUp){ attrs->coins, position });
+  g_session.coins += attrs->quality;
+  ems_broadcast(MSG_COIN_PICKED_UP, &(MSG_CoinPickedUp){ attrs->quality, position });
   ecs_add(g_ecs, entity, DESTROYED_TAG);
 }
 void pickup_system_init()

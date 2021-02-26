@@ -12,8 +12,8 @@ const Spell g_spell_tbl[NUM_SPELLS] = {
 };
 
 ecs_entity_t (*const g_cast_effect_fn_tbl[NUM_CAST_EFFECTS])(Ecs* ecs, Vec2 pos) = {
-  [CAST_EFFECT_ICE]  = make_ice_cast_effect,
-  [CAST_EFFECT_FIRE] = make_fire_cast_effect,
+  [CAST_EFFECT_ICE]  = make_fx_cast_ice,
+  [CAST_EFFECT_FIRE] = make_fx_cast_fire,
 };
 
 #define play_sound(__sound_id) Mix_PlayChannel(-1, get_sfx(__sound_id), 0)

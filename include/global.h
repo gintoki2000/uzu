@@ -122,6 +122,7 @@ typedef enum
   PICKUPABLE_KEY_1_1,
   NUM_PICKUPABLE_TYPES,
 } PickupableId;
+#define PICKUPABLE_ID_NULL NUM_PICKUPABLE_TYPES
 
 typedef enum
 {

@@ -30,12 +30,12 @@ static void on_item_picked_up(SDL_UNUSED void* arg, const MSG_ItemPickedUp* even
   if (attrs->sfx != SFX_ID_NULL)
     Mix_PlayChannel(-1, get_sfx(attrs->sfx), 0);
   if (item_type_id != ITEM_TYPE_ID_NULL)
-    make_item_picked_up_msg(g_ecs, event->position, g_item_types[item_type_id].name);
+    make_fx_item_picked_up(g_ecs, event->position, g_item_types[item_type_id].name);
 }
 
 static ecs_entity_t (*const s_hit_effect_fn_tbl[])(Ecs*, Vec2) = {
-  make_blood_loss_particle, make_blood_loss_particle, make_fire_hit_effect,
-  make_blood_loss_particle, make_ice_hit_effect,
+  make_fx_blood_loss, make_fx_blood_loss, make_fx_fire_hit,
+  make_fx_blood_loss, make_fx_ice_hit,
 };
 
 static COLOR s_damage_type_color_tbl[] = {
@@ -64,7 +64,7 @@ static void on_get_damaged(void* arg, const MSG_GetDamaged* event)
   {
     particle_position.x = transform->position.x;
     particle_position.y = transform->position.y - 30.f;
-    make_damage_indicator_particle(g_ecs,
+    make_fx_damage_indicator(g_ecs,
                                    particle_position,
                                    s_damage_type_color_tbl[event->type],
                                    event->damage);

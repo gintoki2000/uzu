@@ -6,7 +6,7 @@
 #include "path_finder.h"
 #include "toolbox/toolbox.h"
 
-typedef enum
+typedef enum ComponentId
 {
   TRANSFORM,
   VISUAL,
@@ -88,7 +88,6 @@ typedef struct Visual
   SDL_RendererFlip flip;
   Sprite           sprite;
   COLOR            color;
-  u8               opacity;
 } Visual;
 
 typedef struct Spot
@@ -214,7 +213,7 @@ typedef struct PickupableAttributes
 {
   u16 id;
   u16 sfx;
-  u16 coins;
+  u8  quality;
 } PickupableAttributes;
 
 typedef struct
@@ -246,12 +245,13 @@ typedef struct LifeSpan
   s32 remaining;
 } LifeSpan;
 
-typedef struct
+#define DROP_MAX_NUM_ITEMS 4
+typedef struct Drop
 {
-  u16 item1;
-  u16 item2;
-  u8  change1;
-  u8  change2;
+  u16 type[DROP_MAX_NUM_ITEMS];
+  u8  rate[DROP_MAX_NUM_ITEMS];
+  u8  quality[DROP_MAX_NUM_ITEMS];
+  u8  cnt;
 } Drop;
 
 typedef struct

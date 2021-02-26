@@ -1,11 +1,13 @@
-#include "system/game_logic.h"
-#include "system/event_messaging_sys.h"
 #include "components.h"
+#include "system/event_messaging_sys.h"
+#include "system/game_logic.h"
 #include <constances.h>
 #include <map.h>
 #include <toolbox/toolbox.h>
 
 extern Ecs* g_ecs;
+
+typedef int   vec2i_t[2];
 
 INLINE RECT get_bounding_box(const HitBox* hitbox, const Transform* transform)
 {

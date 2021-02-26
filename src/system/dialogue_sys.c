@@ -64,6 +64,6 @@ void dialogue_system_fini()
 {
 }
 
-void dialogue_system_update()
+void dialogue_system()
 {
 }

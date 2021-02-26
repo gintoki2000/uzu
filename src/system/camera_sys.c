@@ -3,7 +3,7 @@
 
 extern SDL_Rect g_viewport;
 extern Ecs*     g_ecs;
-void            camera_system_update()
+void            camera_system()
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;

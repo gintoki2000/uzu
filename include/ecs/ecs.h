@@ -11,7 +11,8 @@ typedef struct Ecs
   EcsType*      types;
   EcsPool**     pools;
   EcsEntityPool entity_pool;
-  Dispatcher*   dispatcher;
+  Dispatcher*   on_rmv;
+  Dispatcher*   on_add;
 } Ecs;
 
 typedef struct EcsFilter
@@ -22,18 +23,11 @@ typedef struct EcsFilter
   ecs_size_t        ecnt;
 } EcsFilter;
 
-enum
-{
-  ECS_SIG_COMP_RMV,
-  ECS_SIG_COMP_ADD,
-  NUM_ECS_SIGS,
-};
 
 typedef struct EcsComponentEvent
 {
   ecs_entity_t entity;
   void*        component;
-  ecs_size_t   type;
 } EcsComponentEvent;
 
 typedef void (*ecs_each_fn_t)(void* user_data, Ecs* ecs, ecs_entity_t entity);
@@ -72,10 +66,12 @@ void ecs_raw(Ecs*           self,
              ecs_entity_t** entities_ptr,
              void**         components_ptr,
              ecs_size_t*    cnt_ptr);
-void ecs_connect(Ecs* ecs, int sig, void* udata, void(*func)());
 
 static BOOL ecs_is_valid(Ecs* self, ecs_entity_t entity)
 {
   return ecs_entity_pool_is_valid(&self->entity_pool, entity);
 }
+
+void ecs_on_add(Ecs* ecs, ecs_size_t type_id, funcptr_t fn, pointer_t arg);
+void ecs_on_rmv(Ecs* ecs, ecs_size_t type_id, funcptr_t fn, pointer_t arg);
 #endif // WORLD_H

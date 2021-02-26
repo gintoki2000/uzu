@@ -27,7 +27,7 @@ ecs_entity_t make_anime_sword(Ecs* ecs, u16 mask)
   Transform*        transform;
   Visual*           visual;
   WeaponAttributes* attrs;
-  wpskl_Swing*      sklswing;
+  WeaponSwingAttack*      sklswing;
 
   transform = ecs_add(ecs, entity, TRANSFORM);
 
@@ -41,7 +41,7 @@ ecs_entity_t make_anime_sword(Ecs* ecs, u16 mask)
   attrs->type_id = WEAPON_ANIME_SWORD;
   attrs->mask    = mask;
 
-  sklswing            = ecs_add(ecs, entity, WEAPON_SKILL_SWING);
+  sklswing            = ecs_add(ecs, entity, WEAPON_SWING_ATTACK);
   sklswing->on_action = CHARACTER_ACTION_REGULAR_ATK;
   sklswing->range     = 40;
 
@@ -101,15 +101,13 @@ ecs_entity_t make_character_base(Ecs* ecs, const NewCharacterParams* params)
   hitbox->anchor   = VEC2(3.f, 10.f);
   hitbox->proxy_id = RTREE_NULL_NODE;
 
-  motion            = ecs_add(ecs, entity, MOTION);
-  motion->max_speed = 150;
-  motion->max_force = 10;
+  motion = ecs_add(ecs, entity, MOTION);
 
   heath                 = ecs_add(ecs, entity, HEALTH);
   heath->hit_points     = params->hit_points;
   heath->max_hit_points = params->hit_points;
 
-  ecs_add(ecs, entity, ENDABLE_TILE_COLLISION_TAG);
+  ecs_add(ecs, entity, ENABLE_TILE_COLLISION_TAG);
   ecs_add(ecs, entity, CHARACTER_ANIMATOR_TAG);
 
   ecs_add_w_data(ecs,
@@ -120,6 +118,7 @@ ecs_entity_t make_character_base(Ecs* ecs, const NewCharacterParams* params)
                      params->mana_points,
                  });
 
+  ecs_add_w_data(ecs, entity, MOVE_SPEED, &(MoveSpeed){ 120 });
   return entity;
 }
 extern const u16 g_initial_hp_tbl[];
@@ -225,13 +224,11 @@ ecs_entity_t make_monster_base(Ecs* ecs, const NewMonsterParams* params)
   health_bar->anchor = (SDL_Point){ sprite_width / 2, sprite_height };
   health_bar->color  = (SDL_Color){ 0x42, 0xde, 0x23, 0xd0 };
 
-  motion            = ecs_add(ecs, entity, MOTION);
-  motion->max_speed = 60.f;
-  motion->max_force = 5.f;
-  motion->friction  = 0.0f;
+  motion = ecs_add(ecs, entity, MOTION);
 
-  ecs_add(ecs, entity, ENDABLE_TILE_COLLISION_TAG);
+  ecs_add(ecs, entity, ENABLE_TILE_COLLISION_TAG);
   ecs_add(ecs, entity, CHARACTER_ANIMATOR_TAG);
+  ecs_add_w_data(ecs, entity, MOVE_SPEED, &(MoveSpeed){ 50 });
   return entity;
 }
 
@@ -312,8 +309,9 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 position)
   BTCondition_IsPlayerOutOfSpot* is_player_out_of_spot;
   BTTask_FollowPlayer*           chase;
 
-  root                  = bt_root_new();
-  wait                  = bt_task_wait_new(30);
+  root = bt_root_new();
+  wait = bt_task_wait_new(30);
+  // TODO: BTTask_SetAttackTargetToPlayer
   attack                = bt_task_attack_new(BTTASK_ATTACK_MODE_PLAYER);
   hostile               = bt_selector_new();
   attack_seq            = bt_sequence_new();
@@ -391,7 +389,7 @@ ecs_entity_t make_cleaver(Ecs* ecs, u16 mask_bits)
   Transform*        transform;
   Visual*           visual;
   WeaponAttributes* attrs;
-  wpskl_Swing*      sklswing;
+  WeaponSwingAttack*      sklswing;
 
   transform = ecs_add(ecs, entity, TRANSFORM);
 
@@ -405,7 +403,7 @@ ecs_entity_t make_cleaver(Ecs* ecs, u16 mask_bits)
   attrs->type_id = WEAPON_CLEAVER;
   attrs->mask    = mask_bits;
 
-  sklswing            = ecs_add(ecs, entity, WEAPON_SKILL_SWING);
+  sklswing            = ecs_add(ecs, entity, WEAPON_SWING_ATTACK);
   sklswing->on_action = CHARACTER_ACTION_REGULAR_ATK;
   sklswing->range     = 20;
 
@@ -423,8 +421,8 @@ ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
   Transform*          transform;
   Visual*             visual;
   WeaponAttributes*   attrs;
-  wpskl_Swing*        sklswing;
-  wpskl_ThunderStorm* wpskl_thunder_storm;
+  WeaponSwingAttack*        sklswing;
+  WeaponThunderStormRelease* wpskl_thunder_storm;
 
   transform = ecs_add(ecs, entity, TRANSFORM);
 
@@ -438,11 +436,11 @@ ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
   attrs->type_id = WEAPON_LAVIS_SWORD;
   attrs->mask    = mask_bits;
 
-  sklswing            = ecs_add(ecs, entity, WEAPON_SKILL_SWING);
+  sklswing            = ecs_add(ecs, entity, WEAPON_SWING_ATTACK);
   sklswing->on_action = CHARACTER_ACTION_REGULAR_ATK;
   sklswing->range     = 100;
 
-  wpskl_thunder_storm            = ecs_add(ecs, entity, WEAPON_SKILL_THUNDER_STORM);
+  wpskl_thunder_storm            = ecs_add(ecs, entity, WEAPON_THUNDER_STORM_RELEASE);
   wpskl_thunder_storm->on_action = CHARACTER_ACTION_SPECIAL_ATK;
   wpskl_thunder_storm->interval  = 10;
   wpskl_thunder_storm->total     = 5;
@@ -502,10 +500,7 @@ ecs_entity_t make_pickupable_entity(Ecs* ecs, u16 texture_id, u16 id, Vec2 posit
   attrs->id  = id;
   attrs->sfx = SFX_INTERACTION;
 
-  ecs_add_w_data(ecs,
-                 entity,
-                 MOTION,
-                 &(Motion){ .friction = .2f, .max_speed = 150.f, .bounching = .8f });
+  ecs_add_w_data(ecs, entity, MOTION, &(Motion){ .friction = .2f, .bounching = .8f });
   return entity;
 }
 
@@ -582,9 +577,8 @@ make_text_particle(Ecs* ecs, const char* text, Vec2 position, Vec2 vel, FONT* fo
   transform           = ecs_add(ecs, entity, TRANSFORM);
   transform->position = position;
 
-  motion            = ecs_add(ecs, entity, MOTION);
-  motion->vel       = vel;
-  motion->max_speed = 200.f;
+  motion      = ecs_add(ecs, entity, MOTION);
+  motion->vel = vel;
 
   text_init(ecs_add(ecs, entity, TEXT), text, font, color);
 
@@ -697,7 +691,7 @@ ecs_entity_t make_spear(Ecs* ecs, u16 mask)
 
   Visual*           visual;
   Transform*        transform;
-  wpskl_Thust*      thust;
+  WeaponThustAttack*      thust;
   WeaponAttributes* attrs;
 
   entity = ecs_create(ecs);
@@ -709,7 +703,7 @@ ecs_entity_t make_spear(Ecs* ecs, u16 mask)
 
   transform = ecs_add(ecs, entity, TRANSFORM);
 
-  thust            = ecs_add(ecs, entity, WEAPON_SKILL_THUST);
+  thust            = ecs_add(ecs, entity, WEAPON_THUST_ATTACK);
   thust->on_action = CHARACTER_ACTION_REGULAR_ATK;
 
   attrs       = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
@@ -818,7 +812,7 @@ ecs_entity_t make_staff(Ecs* ecs, u16 mask)
   attrs->mask    = mask;
   attrs->type_id = WEAPON_STAFF;
 
-  castable = ecs_add(ecs, entity, CASTABLE);
+  castable = ecs_add(ecs, entity, WEAPON_CAST);
 
   ecs_add(ecs, entity, HOLDER);
 
@@ -842,10 +836,9 @@ ecs_entity_t make_fire_ball(Ecs* ecs, ecs_entity_t shooter, Vec2 pos, Vec2 direc
   transform->position = pos;
   transform->rotation = SDL_atan2(direction.y, direction.x) * 57.2957795;
 
-  motion            = ecs_add(ecs, entity, MOTION);
-  motion->vel       = direction;
-  motion->friction  = 0.f;
-  motion->max_speed = 150.f;
+  motion           = ecs_add(ecs, entity, MOTION);
+  motion->vel      = direction;
+  motion->friction = 0.f;
 
   hitbox            = ecs_add(ecs, entity, HITBOX);
   hitbox->size.x    = 26;
@@ -891,10 +884,9 @@ ecs_entity_t make_ice_arrow(Ecs* ecs, ecs_entity_t shooter, Vec2 position, Vec2 
   transform->position = position;
   transform->rotation = SDL_atan2(speed.y, speed.x) * 57.2957795;
 
-  motion            = ecs_add(ecs, entity, MOTION);
-  motion->vel       = speed;
-  motion->friction  = 0.f;
-  motion->max_speed = 150.f;
+  motion           = ecs_add(ecs, entity, MOTION);
+  motion->vel      = speed;
+  motion->friction = 0.f;
 
   ecs_add_w_data(ecs, entity, ANIMATOR, &(Animator){ .anims = &g_anim_ice_arrow });
 
@@ -941,10 +933,9 @@ ecs_entity_t make_arrow(Ecs* ecs, ecs_entity_t shooter, Vec2 position, Vec2 spee
   transform->position = position;
   transform->rotation = SDL_atan2(speed.y, speed.x) * 57.2957795;
 
-  motion            = ecs_add(ecs, entity, MOTION);
-  motion->vel       = speed;
-  motion->friction  = 0.f;
-  motion->max_speed = 150.f;
+  motion           = ecs_add(ecs, entity, MOTION);
+  motion->vel      = speed;
+  motion->friction = 0.f;
 
   hitbox            = ecs_add(ecs, entity, HITBOX);
   hitbox->size.x    = 24;
@@ -1121,7 +1112,7 @@ ecs_entity_t make_npc_nova(Ecs* ecs, Vec2 position, u16 conversation_id)
                  entity,
                  DROP,
                  &(Drop){ .item1 = PICKUPABLE_KEY_1_1, .change1 = 100, .change2 = 0 });
-  ecs_add_w_data(ecs, entity, MOTION, &(Motion){ .max_speed = 60.f });
+  ecs_add_w_data(ecs, entity, MOTION, &(Motion){ 0 });
   ecs_add(ecs, entity, CHARACTER_ANIMATOR_TAG);
 
   hitbox            = ecs_add(ecs, entity, HITBOX);
@@ -1184,7 +1175,8 @@ ecs_entity_t make_npc_nova(Ecs* ecs, Vec2 position, u16 conversation_id)
                  EQUIPMENT,
                  &(Equipment){ .weapon = ECS_NULL_ENT, .weapon_anchor = { 8, -9 } });
 
-  ecs_add(ecs, entity, ENDABLE_TILE_COLLISION_TAG);
+  ecs_add(ecs, entity, ENABLE_TILE_COLLISION_TAG);
+  ecs_add_w_data(ecs, entity, MOVE_SPEED, &(MoveSpeed){ 120 });
   return entity;
 }
 
@@ -1242,10 +1234,7 @@ ecs_entity_t make_coin(Ecs* ecs, Vec2 position)
   attrs->sfx   = SFX_COIN;
   attrs->coins = 5;
 
-  ecs_add_w_data(ecs,
-                 entity,
-                 MOTION,
-                 &(Motion){ .friction = .2f, .max_speed = 150.f, .bounching = .8f });
+  ecs_add_w_data(ecs, entity, MOTION, &(Motion){ .friction = .2f, .bounching = .8f });
   return entity;
 }
 
@@ -1281,8 +1270,8 @@ ecs_entity_t make_bow(Ecs* ecs, u16 mask)
 
   ecs_add_w_data(ecs,
                  entity,
-                 WEAPON_SKILL_SHOOT,
-                 &(wpskl_Shoot){
+                 WEAPON_SHOOT,
+                 &(WeaponShoot){
                      .on_action = CHARACTER_ACTION_REGULAR_ATK,
                      .projspd   = 170.f,
                      .fire_rate = 20,

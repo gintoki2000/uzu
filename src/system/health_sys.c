@@ -57,7 +57,7 @@ void health_system_init()
   ems_connect(MSG_DEAL_DAMAGE, NULL, on_deal_damage);
 }
 
-void health_system_update()
+void health_system()
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;

@@ -1,4 +1,3 @@
-#include "system/weapon_skill/thust.h"
 #include "resources.h"
 #include "system/collision_sys.h"
 #include "system/event_messaging_sys.h"
@@ -32,21 +31,21 @@ static BOOL __cb_query_hit_entities(CBThust_QueryHitEntitiesArgs* args, ecs_enti
   return TRUE;
 }
 
-void weapon_skill_thust_update()
+void weapon_thust_attack_system()
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;
 
-  WeaponAttributes* attributes;
-  Holder*           holder;
-  wpskl_Thust*      skl;
-  Controller*       holder_controller;
-  Equipment*        holder_equipment;
-  Motion*           holder_motion;
-  Transform*        transform;
-  RECT              damage_area;
+  WeaponAttributes*  attributes;
+  Holder*            holder;
+  WeaponThustAttack* skl;
+  Controller*        holder_controller;
+  Equipment*         holder_equipment;
+  Motion*            holder_motion;
+  Transform*         transform;
+  RECT               damage_area;
 
-  ecs_raw(g_ecs, WEAPON_SKILL_THUST, &entities, (pointer_t*)&skl, &cnt);
+  ecs_raw(g_ecs, WEAPON_THUST_ATTACK, &entities, (pointer_t*)&skl, &cnt);
   for (ecs_size_t i = 0; i < cnt; ++i)
   {
     if ((holder = ecs_get(g_ecs, entities[i], HOLDER)))
@@ -66,7 +65,7 @@ void weapon_skill_thust_update()
             holder_controller->in_action = TRUE;
             holder_controller->action    = CHARACTER_ACTION_NONE;
 
-            transform->rotation  = -15.0 * transform->hdir;
+            transform->rotation = -15.0 * transform->hdir;
 
             skl[i].state = 1;
             skl[i].timer = 7;
@@ -133,4 +132,3 @@ void weapon_skill_thust_update()
       }
   }
 }
-

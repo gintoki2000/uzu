@@ -4,12 +4,12 @@
 
 extern Ecs* g_ecs;
 
-void weapon_shoot_system_update()
+void weapon_shoot_system()
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;
 
-  wpskl_Shoot* shoots;
+  WeaponShoot* shoots;
 
   Controller* controller;
   Holder*     holder;
@@ -17,7 +17,7 @@ void weapon_shoot_system_update()
   Transform*  transform;
   Vec2        projspd;
 
-  ecs_raw(g_ecs, WEAPON_SKILL_SHOOT, &entities, (void**)&shoots, &cnt);
+  ecs_raw(g_ecs, WEAPON_SHOOT, &entities, (void**)&shoots, &cnt);
 
   for (int i = 0; i < cnt; ++i)
   {

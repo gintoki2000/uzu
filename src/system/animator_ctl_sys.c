@@ -18,7 +18,7 @@ static void force_play_animation(Animator* animator, u16 new_anim_state)
   animator->elapsed      = 0;
 }
 
-void animator_controller_system_update()
+void character_controller_system()
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;

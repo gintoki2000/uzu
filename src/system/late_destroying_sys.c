@@ -46,7 +46,7 @@ static void destroy_tagged_entities()
   }
 }
 
-void late_destroying_system_update()
+void late_destroying_system()
 {
   destroy_offscreen_entities();
   destroy_tagged_entities();

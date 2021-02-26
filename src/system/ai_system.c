@@ -5,7 +5,7 @@
 
 extern Ecs* g_ecs;
 
-void ai_system_update(void)
+void ai_system(void)
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;

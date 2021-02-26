@@ -5,7 +5,7 @@
 
 extern Ecs* g_ecs;
 
-void animator_system_update(void)
+void animator_system(void)
 {
   ecs_entity_t* ett;
   Animator*     animator;

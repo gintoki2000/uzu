@@ -19,12 +19,11 @@ typedef enum
   HEAL_BAR,
   LIFE_SPAN,
   DESTROYED_TAG,
-  WEAPON_SKILL_SWING,
-  WEAPON_SKILL_CHARGE,
-  WEAPON_SKILL_THUST,
-  WEAPON_SKILL_THUNDER_STORM,
-  WEAPON_SKILL_SHOOT,
-  DAMAGE_OUTPUT,
+  WEAPON_SWING_ATTACK,
+  WEAPON_CHARGE_ATTACK,
+  WEAPON_THUST_ATTACK,
+  WEAPON_THUNDER_STORM_RELEASE,
+  WEAPON_SHOOT,
   WEAPON_ATTRIBUTES,
   DROP,
   PICKUPABLE_ATTRIBUTES,
@@ -33,7 +32,7 @@ typedef enum
   ENEMY_TAG,
   PLAYER_TAG,
   CAMERA_TARGET_TAG,
-  ENDABLE_TILE_COLLISION_TAG,
+  ENABLE_TILE_COLLISION_TAG,
   CHARACTER_ANIMATOR_TAG,
   PROJECTILE_ATTRIBUTES,
   DOOR_TAG,
@@ -50,7 +49,7 @@ typedef enum
   MERCHANT,
   CHEST,
   ATTUNEMENT_SLOT,
-  CASTABLE,
+  WEAPON_CAST,
   MANA_POOL,
   DOOR_ATTRIBUTES,
   HOLDER,
@@ -58,14 +57,14 @@ typedef enum
   REMOVE_IF_OFFSCREEN,
   ATTACKER,
   SELF_DESTRUCTION,
+  MOVE_SPEED,
   NUM_COMPONENTS
 } ComponentId;
 
-typedef struct
+typedef struct Motion
 {
   Vec2  vel;
   Vec2  acc;
-  float max_speed;
   float max_force;
   float friction;
   float vz;
@@ -73,7 +72,7 @@ typedef struct
   float bounching;
 } Motion;
 
-typedef struct
+typedef struct Transform
 {
   Vec2   prev_position;
   Vec2   position;
@@ -122,52 +121,49 @@ typedef struct WeaponAttributes
 } WeaponAttributes;
 
 /*Weapon skills*/
-typedef struct wpskl_Swing
+typedef struct WeaponSwingAttack
 {
   CharacterAction on_action;
   u16             timer;
   u16             state;
   u32             range;
-} wpskl_Swing;
+} WeaponSwingAttack;
 
-typedef struct
+typedef struct WeaponChargeAttack
 {
   u16  on_action;
   u16  timer;
   BOOL is_active;
-} wpskl_Charge;
+} WeaponChargeAttack;
 
-typedef struct
+typedef struct WeaponThustAttack
 {
   u16 on_action;
   u16 timer;
   u8  state;
-} wpskl_Thust;
+} WeaponThustAttack;
 
-typedef struct
+typedef struct WeaponThunderStormRelease
 {
   u16 on_action;
   u16 remaining;
   u16 interval;
   u16 total;
   u16 timer;
-} wpskl_ThunderStorm;
+} WeaponThunderStormRelease;
 
-typedef struct wpskl_Shoot
+typedef struct WeaponShoot
 {
   u16   on_action;
   u16   fire_rate;
   u16   timer;
   float projspd;
-} wpskl_Shoot;
+} WeaponShoot;
 
-typedef struct
+typedef struct WeaponCast
 {
-  int  atk;
-  int  type;
-  BOOL impact;
-  Vec2 force;
-} DamageOutput;
+  int timer;
+} Castable;
 
 /*entity tags*/
 typedef int PlayerTag;
@@ -220,12 +216,6 @@ typedef struct PickupableAttributes
   u16 sfx;
   u16 coins;
 } PickupableAttributes;
-
-typedef struct Health
-{
-  s32 hit_points;
-  s32 max_hit_points;
-} Health;
 
 typedef struct
 {
@@ -295,12 +285,12 @@ typedef struct
   float        radius;
 } FollowingTarget;
 
-#define LEVEL_SWITCHER_MAX_LEVEL_NAME_LEN 255
-#define LEVEL_SWITCHER_MAX_DEST_LEN 255
+#define LADDER_ATTRS_MAX_LEVEL_NAME_LEN 255
+#define LADDER_ATTRS_MAX_DEST_LEN 255
 typedef struct
 {
-  char      level[LEVEL_SWITCHER_MAX_LEVEL_NAME_LEN + 1];
-  char      dest[LEVEL_SWITCHER_MAX_DEST_LEN + 1];
+  char level[LADDER_ATTRS_MAX_LEVEL_NAME_LEN + 1]; // level nào cần load
+  char dest[LADDER_ATTRS_MAX_DEST_LEN + 1]; // vị trí cầu thang mà player sẽ xuất hiện
   Direction exit_direction;
 } LadderAttributes;
 
@@ -347,19 +337,8 @@ typedef struct
 
 typedef struct
 {
-  u16 mana_points;
-  u16 max_mana_points;
-} ManaPool;
-
-typedef struct
-{
   u16 spell_id;
 } AttunementSlot;
-
-typedef struct
-{
-  int timer;
-} Castable;
 
 typedef int RemoveIfOffScreen;
 
@@ -373,6 +352,7 @@ typedef struct AttackMask
   u16 value;
 } AttackMask;
 
+// dùng để track ai tấn công entity
 typedef struct Attacker
 {
   ecs_entity_t value;
@@ -384,22 +364,48 @@ typedef struct SelfDestruction
   ecs_entity_t target;
 } SelfDestruction;
 
-enum FlagValues
+typedef struct Stat
 {
-  FLAG_INVULNERABLE,
-};
+  int base;
+  int modifier[3]; // self-buff/weapon/hmm
+} Stat;
 
-typedef struct Flags
+typedef struct Stats
 {
-  u32 value;
-} Flags;
+  Stat vitality;    // health
+  Stat strenght;    // physical damage
+  Stat intelligent; // mp & magic damage
+} Stats;
 
-void visual_set_anchor_to_center(Visual* v);
-void brain_fini(Brain* ai_agent);
-void hitbox_init(HitBox* h);
+// Combat attributes
+typedef struct MoveSpeed
+{
+  int value;
+} MoveSpeed;
+
+typedef struct ManaPool
+{
+  u16 mana_points;
+  u16 max_mana_points;
+} ManaPool;
+
+typedef struct Health
+{
+  s32 hit_points;
+  s32 max_hit_points;
+} Health;
+
+typedef struct Defense
+{
+  u16 physical;
+  u16 magical;
+  u16 fire;
+  u16 ice;
+  u16 lightning;
+} Defense;
+
 void ladder_attrs_init(LadderAttributes* sw, const char* level, const char* dest);
 void name_init(Name* name, const char* value);
 void text_init(Text* text, const char* value, FONT* font, COLOR color);
-void visual_init(Visual* v);
 
 #endif // COMPONENTS_H

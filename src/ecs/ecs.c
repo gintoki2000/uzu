@@ -1,5 +1,5 @@
-#include "ecs/common.h"
 #include "ecs/ecs.h"
+#include "ecs/common.h"
 #include "ecs/entity_pool.h"
 #include "ecs/pool.h"
 #include "toolbox/toolbox.h"
@@ -7,15 +7,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-
-INLINE EcsPool* get_pool(Ecs* self, ecs_size_t type)
-{
-  return self->pools[type];
-}
-
 Ecs* ecs_new(const EcsType* types, ecs_size_t cnt)
 {
-  return ecs_init(malloc(sizeof(Ecs)), types, cnt);
+  return ecs_init(SDL_malloc(sizeof(Ecs)), types, cnt);
 }
 
 void ecs_del(Ecs* ecs)
@@ -30,15 +24,16 @@ void ecs_del(Ecs* ecs)
 Ecs* ecs_init(Ecs* self, const EcsType* types, ecs_size_t cnt)
 {
   self->type_cnt = cnt;
-  self->types    = malloc(cnt * sizeof(EcsType));
-  self->pools    = calloc(cnt, sizeof(void*));
-  memcpy(self->types, types, cnt * sizeof(EcsType));
+  self->types    = SDL_malloc(cnt * sizeof(EcsType));
+  self->pools    = SDL_calloc(cnt, sizeof(void*));
+  SDL_memcpy(self->types, types, cnt * sizeof(EcsType));
   for (int i = 0; i < cnt; ++i)
   {
     self->pools[i] = ecs_pool_new(types[i].size);
   }
   ecs_entity_pool_init(&self->entity_pool);
-  self->dispatcher = dispatcher_new(NUM_ECS_SIGS);
+  self->on_add = dispatcher_new(cnt);
+  self->on_rmv = dispatcher_new(cnt);
   return self;
 }
 
@@ -56,7 +51,8 @@ void ecs_fini(Ecs* self)
   free(self->pools);
   free(self->types);
   ecs_entity_pool_fini(&self->entity_pool);
-  dispatcher_destroy(self->dispatcher);
+  dispatcher_destroy(self->on_add);
+  dispatcher_destroy(self->on_rmv);
 }
 
 ecs_entity_t ecs_create(Ecs* self)
@@ -72,11 +68,12 @@ void ecs_destroy(Ecs* self, ecs_entity_t entity)
 
 void* ecs_add(Ecs* self, ecs_entity_t entity, ecs_size_t type_id)
 {
-  ASSERT(type_id < self->type_cnt && "invalid type");
-  ASSERT(ecs_is_valid(self, entity) && "invalid entity");
   void*          component;
   const EcsType* type;
   EcsPool*       pool;
+
+  ASSERT(type_id < self->type_cnt && "invalid type");
+  ASSERT(ecs_is_valid(self, entity) && "invalid entity");
 
   pool = self->pools[type_id];
   if (ecs_pool_add(pool, entity))
@@ -86,7 +83,11 @@ void* ecs_add(Ecs* self, ecs_entity_t entity, ecs_size_t type_id)
     if (type->init_fn != NULL)
       type->init_fn(component);
     else
-      memset(component, 0, type->size);
+      SDL_memset(component, 0, type->size);
+    EcsComponentEvent event;
+    event.entity    = entity;
+    event.component = component;
+    dispatcher_emit(self->on_add, type_id, &event);
     return component;
   }
   return ecs_pool_get(pool, entity);
@@ -100,16 +101,14 @@ void ecs_rmv(Ecs* self, ecs_entity_t entity, ecs_size_t type_id)
   void*    component;
   EcsPool* pool;
 
-  pool = get_pool(self, type_id);
+  pool = self->pools[type_id];
 
   if ((component = ecs_pool_get(pool, entity)) != NULL)
   {
-    EcsComponentEvent event = (EcsComponentEvent){
-      .entity    = entity,
-      .type      = type_id,
-      .component = component,
-    };
-    dispatcher_emit(self->dispatcher, ECS_SIG_COMP_RMV, &event);
+    EcsComponentEvent event;
+    event.component = component;
+    event.entity    = entity;
+    dispatcher_emit(self->on_rmv, type_id, &event);
     ecs_pool_rmv(pool, entity);
   }
 }
@@ -124,19 +123,15 @@ void ecs_rmv_all(Ecs* self, ecs_entity_t entity)
 
   types = self->types;
   pools = self->pools;
+  EcsComponentEvent event;
   for (int i = 0; i < self->type_cnt; ++i)
   {
     ppool = pools[i];
     if ((component = ecs_pool_get(ppool, entity)) != NULL)
     {
-      component = ecs_pool_get(ppool, entity);
-      dispatcher_emit(self->dispatcher,
-                      ECS_SIG_COMP_RMV,
-                      &(EcsComponentEvent){
-                          .entity    = entity,
-                          .type      = i,
-                          .component = component,
-                      });
+      event.component = component;
+      event.entity    = entity;
+      dispatcher_emit(self->on_rmv, i, &event);
       if (types[i].fini_fn != NULL)
         types[i].fini_fn(component);
       ecs_pool_rmv(ppool, entity);
@@ -272,11 +267,6 @@ SDL_bool ecs_has(Ecs* self, ecs_entity_t entity, ecs_size_t type_id)
   return ecs_pool_contains(self->pools[type_id], entity);
 }
 
-void ecs_connect(Ecs* self, int sig, void* udata, void (*func)())
-{
-  dispatcher_connect(self->dispatcher, sig, udata, func);
-}
-
 void ecs_clear(Ecs* self)
 {
   ecs_each(self, NULL, cb_clear);
@@ -294,7 +284,7 @@ void ecs_set(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const void* dat
   }
   else
   {
-    memcpy(raw, data, self->types[type_id].size);
+    SDL_memcpy(raw, data, self->types[type_id].size);
   }
 }
 
@@ -313,7 +303,7 @@ void ecs_add_or_set(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const vo
   if (self->types[type_id].cpy_fn != NULL)
     self->types[type_id].cpy_fn(raw, data);
   else
-    memcpy(raw, data, self->types[type_id].size);
+    SDL_memcpy(raw, data, self->types[type_id].size);
 }
 
 void* ecs_add_w_data(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const void* data)
@@ -328,7 +318,17 @@ void* ecs_add_w_data(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const v
   }
   else
   {
-    memcpy(raw, data, self->types[type_id].size);
+    SDL_memcpy(raw, data, self->types[type_id].size);
   }
   return raw;
+}
+
+void ecs_on_add(Ecs *ecs, ecs_size_t type_id, funcptr_t fn, pointer_t arg)
+{
+  dispatcher_connect(ecs->on_add, type_id, arg, fn);
+}
+
+void ecs_on_rmv(Ecs *ecs, ecs_size_t type_id, funcptr_t fn, pointer_t arg)
+{
+  dispatcher_connect(ecs->on_rmv, type_id, arg, fn);
 }

@@ -22,11 +22,7 @@
 #include "system/collision_sys.h"
 #include "system/game_logic.h"
 #include "system/rendering.h"
-
-#include "system/weapon_skill/charge.h"
-#include "system/weapon_skill/swing.h"
-#include "system/weapon_skill/thunder_storm.h"
-#include "system/weapon_skill/thust.h"
+#include "system/weapon_skills.h"
 
 #include "game_event/game_event.h"
 
@@ -69,8 +65,8 @@ const Scene g_game_scene = {
 Ecs* g_ecs;
 
 static BOOL _has_next_level;
-static char _next_level[LEVEL_SWITCHER_MAX_LEVEL_NAME_LEN + 1];
-static char _spwan_location[LEVEL_SWITCHER_MAX_DEST_LEN + 1];
+static char _next_level[LADDER_ATTRS_MAX_LEVEL_NAME_LEN + 1];
+static char _spwan_location[LADDER_ATTRS_MAX_DEST_LEN + 1];
 static BOOL _paused;
 static BOOL _player_died;
 
@@ -186,8 +182,8 @@ static void on_update()
 #endif
 
     // late update
-    late_destroying_system_update();
-    life_span_system_update();
+    late_destroying_system();
+    life_span_system();
   }
 }
 
@@ -279,27 +275,25 @@ static void render_ui()
 }
 static void update_game_logic(void)
 {
-  motion_system_update();
-  tile_collision_system_update();
-  collision_system_update();
-  equipment_system_update();
-  animator_controller_system_update();
-  animator_system_update();
-  ai_system_update();
-  health_system_update();
-  camera_system_update();
-  map_update_animated_cells();
-  following_system_update();
-  input_blocking_system();
-  self_destruction_system();
+  RUN_SYSTEM(motion_system);
+  RUN_SYSTEM(tile_collision_system);
+  RUN_SYSTEM(collision_system_update);
+  RUN_SYSTEM(equipment_system);
+  RUN_SYSTEM(character_controller_system);
+  RUN_SYSTEM(animator_system);
+  RUN_SYSTEM(ai_system);
+  RUN_SYSTEM(health_system);
+  RUN_SYSTEM(camera_system);
+  RUN_SYSTEM(map_update_animated_cells);
+  RUN_SYSTEM(following_system);
+  RUN_SYSTEM(input_blocking_system);
+  RUN_SYSTEM(self_destruction_system);
 
-  //  skl
-  swing_weapon_skl_system_update();
-  casting_system_update();
-  weapon_skill_thust_update();
-  thunder_storm_weapon_skl_system_update();
-  weapon_shoot_system_update();
-  // charge_weapon_skl_system();
+  RUN_SYSTEM(weapon_swing_attack_system);
+  RUN_SYSTEM(weapon_casting_system);
+  RUN_SYSTEM(weapon_thust_attack_system);
+  RUN_SYSTEM(weapon_thunder_storm_release_system);
+  RUN_SYSTEM(weapon_shoot_system);
 }
 
 static void render_game_world(void)
@@ -312,8 +306,8 @@ static void render_game_world(void)
   text_rendering_system_update();
   interactable_pointer_rendering_system_update();
   hub_system_update();
-  dialogue_system_update();
-  merchant_system_update();
+  dialogue_system();
+  merchant_system();
 }
 
 static Vec2 get_spawn_localtion(ecs_entity_t ladder)

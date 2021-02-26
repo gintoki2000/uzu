@@ -1,7 +1,7 @@
 #include "system/collision_sys.h"
-#include "system/event_messaging_sys.h"
 #include "components.h"
 #include "game_scene.h"
+#include "system/event_messaging_sys.h"
 #include "toolbox/toolbox.h"
 
 #define BUFF_SIZE 300
@@ -14,16 +14,12 @@ extern SDL_Rect      g_viewport;
 extern SDL_Renderer* g_renderer;
 extern Ecs*          g_ecs;
 
-static void on_component_remove(void* arg, const EcsComponentEvent* event)
+static void on_hitbox_remove(SDL_UNUSED void* arg, const EcsComponentEvent* event)
 {
-  (void)arg;
-  if (event->type == HITBOX)
+  HitBox* hitbox = event->component;
+  if (hitbox->proxy_id != RTREE_NULL_NODE)
   {
-    HitBox* hitbox = event->component;
-    if (hitbox->proxy_id != RTREE_NULL_NODE)
-    {
-      rtree_destroy_proxy(_rtree, hitbox->proxy_id);
-    }
+    rtree_destroy_proxy(_rtree, hitbox->proxy_id);
   }
 }
 
@@ -84,6 +80,16 @@ typedef struct
   int          proxy_id;
 } CBBroadPhaseQueryVars;
 
+INLINE ecs_entity_t maxe(ecs_entity_t e1, ecs_entity_t e2)
+{
+  return e1 > e2 ? e1 : e2;
+}
+
+INLINE ecs_entity_t mine(ecs_entity_t e1, ecs_entity_t e2)
+{
+  return e1 < e2 ? e1 : e2;
+}
+
 static BOOL cb_broard_phase_query(CBBroadPhaseQueryVars* vars, int proxy_id)
 {
   if (vars->proxy_id != proxy_id)
@@ -91,14 +97,14 @@ static BOOL cb_broard_phase_query(CBBroadPhaseQueryVars* vars, int proxy_id)
     ASSERT(_pair_cnt < BUFF_SIZE);
     ecs_entity_t entity     = (ecs_entity_t)rtree_get_user_data(_rtree, proxy_id);
     _pair_buff[_pair_cnt++] = (CollisionPair){
-      MAX(vars->entity, entity),
-      MIN(vars->entity, entity),
+      maxe(vars->entity, entity),
+      mine(vars->entity, entity),
     };
   }
   return TRUE;
 }
 
-static int compr_pair(const CollisionPair* p1, const CollisionPair* p2)
+static int compr_collision_pair(const CollisionPair* p1, const CollisionPair* p2)
 {
   if (p1->e1 != p2->e1)
     return p1->e1 - p2->e1;
@@ -158,7 +164,7 @@ static void narrow_phase(Ecs* ecs)
   HitBox *   hitbox1, *hitbox2;
   Transform *transform1, *transform2;
 
-  qsort(_pair_buff, _pair_cnt, sizeof(CollisionPair), (__compar_fn_t)compr_pair);
+  SDL_qsort(_pair_buff, _pair_cnt, sizeof(CollisionPair), (__compar_fn_t)compr_collision_pair);
 
   _pair_cnt = remove_duplicate_pairs(_pair_buff, _pair_cnt);
 
@@ -188,7 +194,7 @@ static void narrow_phase(Ecs* ecs)
 void collision_system_init()
 {
   _rtree = rtree_new();
-  ecs_connect(g_ecs, ECS_SIG_COMP_RMV, NULL, on_component_remove);
+  ecs_on_rmv(g_ecs, HITBOX, on_hitbox_remove, NULL);
 }
 
 void collision_system_fini()

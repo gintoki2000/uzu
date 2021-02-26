@@ -22,9 +22,9 @@ static void swap_component_data(EcsPool* self, ecs_size_t cidx1, ecs_size_t cidx
   mem1 = ECS_POOL_DATA_OFFSET(self, cidx1);
   mem2 = ECS_POOL_DATA_OFFSET(self, cidx2);
 
-  memcpy(tmp, mem1, self->type_size);
-  memcpy(mem1, mem2, self->type_size);
-  memcpy(mem2, tmp, self->type_size);
+  SDL_memcpy(tmp, mem1, self->type_size);
+  SDL_memcpy(mem1, mem2, self->type_size);
+  SDL_memcpy(mem2, tmp, self->type_size);
 
   etmp                        = self->dense.entities[cidx1];
   self->dense.entities[cidx1] = self->dense.entities[cidx2];
@@ -45,7 +45,7 @@ static void realloc_sparse_array(EcsPool* self, ecs_size_t new_size)
     self->sparse.size *= 2;
   }
 
-  self->sparse.data = realloc(self->sparse.data, self->sparse.size * sizeof(ecs_size_t));
+  self->sparse.data = SDL_realloc(self->sparse.data, self->sparse.size * sizeof(ecs_size_t));
   for (int i = old_size; i < self->sparse.size; ++i)
   {
     self->sparse.data[i] = ECS_NULL_IDX;
@@ -56,8 +56,8 @@ static void realloc_dense_array(EcsPool* self, ecs_size_t new_size)
 {
   ecs_size_t old_size    = self->dense.size;
   self->dense.size       = new_size;
-  self->dense.entities   = realloc(self->dense.entities, new_size * sizeof(ecs_entity_t));
-  self->dense.components = realloc(self->dense.components, new_size * self->type_size);
+  self->dense.entities   = SDL_realloc(self->dense.entities, new_size * sizeof(ecs_entity_t));
+  self->dense.components = SDL_realloc(self->dense.components, new_size * self->type_size);
   for (int i = old_size; i < self->dense.size; ++i)
   {
     self->dense.entities[i] = ECS_NULL_ENT;
@@ -66,7 +66,7 @@ static void realloc_dense_array(EcsPool* self, ecs_size_t new_size)
 
 EcsPool* ecs_pool_new(ecs_size_t type_size)
 {
-  return ecs_pool_init(malloc(sizeof(EcsPool)), type_size);
+  return ecs_pool_init(SDL_malloc(sizeof(EcsPool)), type_size);
 }
 
 void ecs_pool_del(EcsPool* pool)
@@ -82,10 +82,10 @@ EcsPool* ecs_pool_init(EcsPool* self, ecs_size_t type_size)
     self->type_size        = type_size;
     self->dense.cnt        = 0;
     self->dense.size       = ECS_POOL_DFAULT_SIZE;
-    self->dense.components = malloc(ECS_POOL_DFAULT_SIZE * type_size);
-    self->dense.entities   = malloc(ECS_POOL_DFAULT_SIZE * sizeof(ecs_entity_t));
+    self->dense.components = SDL_malloc(ECS_POOL_DFAULT_SIZE * type_size);
+    self->dense.entities   = SDL_malloc(ECS_POOL_DFAULT_SIZE * sizeof(ecs_entity_t));
     self->sparse.size      = ECS_POOL_DFAULT_SIZE;
-    self->sparse.data      = malloc(ECS_POOL_DFAULT_SIZE * sizeof(ecs_size_t));
+    self->sparse.data      = SDL_malloc(ECS_POOL_DFAULT_SIZE * sizeof(ecs_size_t));
 
     for (int i = 0; i < ECS_POOL_DFAULT_SIZE; ++i)
     {

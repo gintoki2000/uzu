@@ -1,12 +1,11 @@
-#include "system/game_logic.h"
-#include "global.h"
 #include "components.h"
 #include "ecs/ecs.h"
+#include "global.h"
 
 extern const Spell g_spell_tbl[];
 extern Ecs*        g_ecs;
 
-void casting_system_update()
+void weapon_casting_system()
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;
@@ -22,7 +21,7 @@ void casting_system_update()
   BOOL              enough_mp;
   Transform*        transform;
 
-  ecs_raw(g_ecs, CASTABLE, &entities, (pointer_t*)&castables, &cnt);
+  ecs_raw(g_ecs, WEAPON_CAST, &entities, (pointer_t*)&castables, &cnt);
 
   for (int i = 0; i < cnt; ++i)
   {

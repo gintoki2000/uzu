@@ -17,21 +17,25 @@ static void apply_controller_input(void)
 
   Controller* controllers;
   Motion*     motion;
+  MoveSpeed*  move_speed;
+
+  // TODO: !(Flags->value & BLOCK_MOVEMENT)
 
   ecs_raw(g_ecs, CONTROLLER, &entities, (void**)&controllers, &cnt);
   for (int i = 0; i < cnt; ++i)
   {
     if (!ecs_has(g_ecs, entities[i], INPUT_BLOCKER))
     {
-      if ((motion = ecs_get(g_ecs, entities[i], MOTION)))
+      if ((motion = ecs_get(g_ecs, entities[i], MOTION)) &&
+          (move_speed = ecs_get(g_ecs, entities[i], MOVE_SPEED)))
       {
-        motion->vel = vec2_mul(controllers[i].desired_direction, 100.f);
+        motion->vel = vec2_mul(controllers[i].desired_direction, (float)move_speed->value);
       }
     }
   }
 }
 
-void motion_system_update()
+void motion_system()
 {
 
   ecs_entity_t* entities;
@@ -48,7 +52,7 @@ void motion_system_update()
   {
     motion_raw_array[i].vel.x += motion_raw_array[i].acc.x;
     motion_raw_array[i].vel.y += motion_raw_array[i].acc.y;
-    motion_raw_array[i].vel = vec2_trunc(motion_raw_array[i].vel, motion_raw_array[i].max_speed);
+    motion_raw_array[i].vel = vec2_trunc(motion_raw_array[i].vel, SPEED_LIMIT);
     motion_raw_array[i].acc = VEC2_ZERO;
   }
 

@@ -62,7 +62,7 @@ on_standing_floor(ecs_entity_t e, float entity_position_z, int tile_x, int tile_
     ems_broadcast(MSG_HIT_TRAP, &(MSG_EntityHitTrap){ .row = tile_y, .col = tile_x, .entity = e });
 }
 
-void tile_collision_system_update()
+void tile_collision_system()
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;
@@ -80,7 +80,7 @@ void tile_collision_system_update()
   BOOL  has_any_collision;
   BOOL  is_floor_tile;
 
-  ecs_raw(g_ecs, ENDABLE_TILE_COLLISION_TAG, &entities, NULL, &cnt);
+  ecs_raw(g_ecs, ENABLE_TILE_COLLISION_TAG, &entities, NULL, &cnt);
   for (int ie = 0; ie < cnt; ++ie)
   {
     if ((transform = ecs_get(g_ecs, entities[ie], TRANSFORM)) &&

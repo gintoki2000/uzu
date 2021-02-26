@@ -38,7 +38,7 @@ void merchant_system_init()
   ems_connect(MSG_COMANND_SELECTED, NULL, on_command_selected);
 }
 
-void merchant_system_update()
+void merchant_system()
 {
   if (_merchant == ECS_NULL_ENT)
     return;

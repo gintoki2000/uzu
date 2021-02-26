@@ -4,7 +4,7 @@
 
 extern Ecs* g_ecs;
 
-void life_span_system_update()
+void life_span_system()
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;

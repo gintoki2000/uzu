@@ -3,7 +3,7 @@
 
 extern Ecs* g_ecs;
 
-void equipment_system_update()
+void equipment_system()
 {
   ecs_entity_t*     ett;
   Equipment*        equiments;

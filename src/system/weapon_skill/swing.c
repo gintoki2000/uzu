@@ -1,9 +1,8 @@
-#include "system/weapon_skill/swing.h"
+#include "components.h"
 #include "entity_factory.h"
 #include "system/collision_sys.h"
 #include "system/event_messaging_sys.h"
 #include "toolbox/toolbox.h"
-#include <components.h>
 
 #define SWINGING_SYSTEM_STEP 8
 #define SWINGING_SYSTEM_INTERVAL 1
@@ -32,33 +31,33 @@ static BOOL __cb_query_hit_entities(CBSwing_QueryHitEntitiesArgs* args, ecs_enti
   return TRUE;
 }
 
-void swing_weapon_skl_system_update(void)
+void weapon_swing_attack_system(void)
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;
 
-  wpskl_Swing*      skl;
-  WeaponAttributes* attributes;
-  Transform*        transform;
-  Controller*       holder_controller;
-  Holder*           holder;
-  RECT              damage_area;
+  WeaponSwingAttack* swing_attack;
+  WeaponAttributes*  attributes;
+  Transform*         transform;
+  Controller*        holder_controller;
+  Holder*            holder;
+  RECT               damage_area;
 
-  ecs_raw(g_ecs, WEAPON_SKILL_SWING, &entities, (void**)&skl, &cnt);
+  ecs_raw(g_ecs, WEAPON_SWING_ATTACK, &entities, (void**)&swing_attack, &cnt);
 
   for (int i = 0; i < cnt; ++i)
   {
-    switch (skl[i].state)
+    switch (swing_attack[i].state)
     {
     case 0:
       if ((holder = ecs_get(g_ecs, entities[i], HOLDER)) &&
           (holder_controller = ecs_get(g_ecs, holder->value, CONTROLLER)) &&
           (transform = ecs_get(g_ecs, entities[i], TRANSFORM)))
       {
-        if (!holder_controller->in_action && holder_controller->action == skl[i].on_action)
+        if (!holder_controller->in_action && holder_controller->action == swing_attack[i].on_action)
         {
-          skl[i].timer                 = 5;
-          skl[i].state                 = 1;
+          swing_attack[i].timer        = 5;
+          swing_attack[i].state        = 1;
           holder_controller->in_action = TRUE;
           holder_controller->action    = CHARACTER_ACTION_NONE;
           transform->rotation          = -15 * transform->hdir;
@@ -66,23 +65,24 @@ void swing_weapon_skl_system_update(void)
       }
       break;
     case 1:
-      if (skl[i].timer > 0 && --skl[i].timer == 0)
+      if (swing_attack[i].timer > 0 && --swing_attack[i].timer == 0)
       {
-        transform           = ecs_get(g_ecs, entities[i], TRANSFORM);
-        skl[i].state        = 2;
-        skl[i].timer        = 7;
-        transform->rotation = 115 * transform->hdir;
+        transform             = ecs_get(g_ecs, entities[i], TRANSFORM);
+        swing_attack[i].state = 2;
+        swing_attack[i].timer = 7;
+        transform->rotation   = 115 * transform->hdir;
 
         SDL_RendererFlip flip = transform->hdir < 0 ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
 
-        Vec2 particle_position = { transform->position.x + skl[i].range / 2.f * transform->hdir,
-                                   transform->position.y - 13};
+        Vec2 particle_position = { transform->position.x +
+                                       swing_attack[i].range / 2.f * transform->hdir,
+                                   transform->position.y - 13 };
         make_slash_effect(g_ecs, particle_position, flip);
         Mix_PlayChannel(-1, get_sfx(SFX_WEAPON_SWORD), 0);
       }
       break;
     case 2:
-      if (skl[i].timer > 0 && --skl[i].timer == 0)
+      if (swing_attack[i].timer > 0 && --swing_attack[i].timer == 0)
       {
         transform         = ecs_get(g_ecs, entities[i], TRANSFORM);
         attributes        = ecs_get(g_ecs, entities[i], WEAPON_ATTRIBUTES);
@@ -90,10 +90,10 @@ void swing_weapon_skl_system_update(void)
         holder_controller = ecs_get(g_ecs, holder->value, CONTROLLER);
 
         transform->rotation          = 0.0;
-        skl[i].state                 = 0;
+        swing_attack[i].state        = 0;
         holder_controller->in_action = FALSE;
 
-        damage_area.w = skl[i].range;
+        damage_area.w = swing_attack[i].range;
         damage_area.h = 32;
         damage_area.y = transform->position.y - 16;
         damage_area.x =

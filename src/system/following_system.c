@@ -34,7 +34,7 @@ void following_system(void)
       desired    = vec2_sub(target_pos, transform->position);
 
       d       = vec2_mag2(desired);
-      desired = vec2_unit_vec(desired);
+      desired = vec2_unit(desired);
       r       = target[i].radius;
       if (d < r * r)
       {

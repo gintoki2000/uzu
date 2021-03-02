@@ -2,11 +2,11 @@
 #include "entity_factory.h"
 #include "json_helper.h"
 
-ecs_entity_t (*const g_weapon_create_fn_tbl[NUM_WEAPONS])(Ecs*, u16) = {
+ecs_entity_t (*const g_make_weapon_fn_tbl[NUM_WEAPONS])(Ecs*, u16) = {
   make_spear, make_cleaver, make_golden_sword, make_anime_sword, make_staff, make_bow,
 };
 
-ecs_entity_t (*const g_char_create_fn_tbl[NUM_JOBS])(Ecs*, Vec2) = {
+ecs_entity_t (*const g_make_character_fn_tbl[NUM_JOBS])(Ecs*, Vec2) = {
   make_knight,
   make_lizzard,
   make_wizzard,

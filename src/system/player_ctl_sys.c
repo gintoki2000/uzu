@@ -108,27 +108,9 @@ static void begin_interact(ecs_entity_t entity)
   if (!interactable)
     return;
   ui_list_display((const char**)interactable->commands, interactable->num_commands);
-  ui_list_set_pos(120, 120);
+  ui_list_set_pos(UI_LIST_POS_CENTER_X, UI_LIST_POS_CENTER_Y);
   ui_list_hook(UI_LIST_ON_SELECT, CALLBACK_2(on_list_select));
   ems_broadcast(MSG_BEGIN_INTERACTION, &(MSG_BeginInteraction){ entity });
-}
-
-static Vec2 get_mouse_positison(void)
-{
-  Vec2 mouse_position;
-
-  int x, y;
-  SDL_GetMouseState(&x, &y);
-  mouse_position.x = (float)x / SCL_X;
-  mouse_position.y = (float)y / SCL_Y;
-  return mouse_position;
-}
-
-static Vec2 to_world_coordinates(Vec2 v)
-{
-  v.x += g_viewport.x;
-  v.y += g_viewport.y;
-  return v;
 }
 
 void player_process_input(SDL_UNUSED void* arg)
@@ -167,45 +149,30 @@ void player_process_input(SDL_UNUSED void* arg)
       controller->desired_direction.x += 1.f;
     }
 
-    controller->desired_direction = vec2_unit_vec(controller->desired_direction);
-
-    Vec2 mouse_position  = get_mouse_positison();
-    Vec2 player_position = get_entity_position(g_ecs, player);
-    mouse_position       = to_world_coordinates(mouse_position);
-    Vec2 rposition       = vec2_sub(mouse_position, player_position);
-
-    controller->attack_direction = vec2_unit_vec(rposition);
-
     if (button_just_pressed(BUTTON_OPEN_INVENTORY))
     {
       inventory_display();
       return;
     }
 
-    if (g_curr_iteractable_entity == ECS_NULL_ENT)
+    if (mouse_button_just_pressed(SDL_BUTTON_LEFT) && !controller->in_action)
     {
-      if (mouse_button_just_pressed(SDL_BUTTON_LEFT) && !controller->in_action)
-      {
-        controller->action = CHARACTER_ACTION_REGULAR_ATK;
-      }
+      controller->action = CHARACTER_ACTION_REGULAR_ATK;
+    }
 
-      else if (button_just_pressed(BUTTON_JUMP))
+    if (button_just_pressed(BUTTON_JUMP))
+    {
+      Transform* transform = ecs_get(g_ecs, player, TRANSFORM);
+      if (transform->z <= 0.f)
       {
-        Transform* transform = ecs_get(g_ecs, player, TRANSFORM);
-        if (transform->z <= 0.f)
-        {
-          Motion* motion = ecs_get(g_ecs, player, MOTION);
-          motion->vz     = 100.f;
-          Mix_PlayChannel(-1, get_sfx(SFX_MOV_JUMP), 0);
-        }
+        Motion* motion = ecs_get(g_ecs, player, MOTION);
+        motion->vz     = 100.f;
+        Mix_PlayChannel(-1, get_sfx(SFX_MOV_JUMP), 0);
       }
     }
-    else
-    {
 
-      if (button_just_pressed(BUTTON_INTERACT))
-        begin_interact(g_curr_iteractable_entity);
-    }
+    if (button_just_pressed(BUTTON_INTERACT) && g_curr_iteractable_entity != ECS_NULL_ENT)
+      begin_interact(g_curr_iteractable_entity);
   }
 }
 

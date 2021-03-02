@@ -181,7 +181,7 @@ static void equipment_item_use_callback(const void* data, Ecs* ecs, ecs_entity_t
   if (attack_mask != NULL)
   {
     ecs_entity_t weapon =
-        g_weapon_create_fn_tbl[equipment_item_data->weapon_id](ecs, attack_mask->value);
+        g_make_weapon_fn_tbl[equipment_item_data->weapon_id](ecs, attack_mask->value);
 
     equip(ecs, entity, weapon);
   }

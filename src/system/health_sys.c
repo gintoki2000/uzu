@@ -9,9 +9,9 @@ extern Ecs* g_ecs;
 static void on_deal_damage(void* arg, const MSG_DealDamage* event)
 {
   (void)arg;
-  Health*       health;
-  Motion*       motion;
-  InputBlocker* input_blocker;
+  Health*    health;
+  Motion*    motion;
+  Paralyzed* paralyzed;
   if ((health = ecs_get(g_ecs, event->receiver, HEALTH)) != NULL &&
       !ecs_has(g_ecs, event->receiver, INVULNERABLE))
   {
@@ -25,7 +25,7 @@ static void on_deal_damage(void* arg, const MSG_DealDamage* event)
                       .type    = event->type,
                   });
     invulnerable            = ecs_add(g_ecs, event->receiver, INVULNERABLE);
-    invulnerable->remaining = 10;
+    invulnerable->remaining = event->impact_time;
 
     if (event->dealer != ECS_NULL_ENT)
     {
@@ -37,10 +37,10 @@ static void on_deal_damage(void* arg, const MSG_DealDamage* event)
       motion->acc.x += event->force.x;
       motion->acc.y += event->force.y;
       motion->vz = event->zforce;
-      if (!ecs_has(g_ecs, event->receiver, INPUT_BLOCKER))
+      if (!ecs_has(g_ecs, event->receiver, PARALYZED))
       {
-        input_blocker            = ecs_add(g_ecs, event->receiver, INPUT_BLOCKER);
-        input_blocker->remaining = event->impact_time;
+        paralyzed            = ecs_add(g_ecs, event->receiver, PARALYZED);
+        paralyzed->remaining = event->impact_time;
       }
     }
     if (health->hit_points <= 0)

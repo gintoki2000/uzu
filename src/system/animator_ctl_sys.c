@@ -56,7 +56,7 @@ void character_controller_system()
       next_state = (absf(vx) > 0.1f || absf(vy) > 0.1f) ? ANIM_STATE_RUN : ANIM_STATE_IDLE;
 
       play_animation(animator, next_state);
-      visual->flip = transform->hdir < 0 ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+      visual->flip = transform->horizontal_axis < 0 ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
     }
   }
 }

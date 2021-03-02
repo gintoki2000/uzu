@@ -8,7 +8,7 @@ void effect_system_init(void);
 void ai_system(void);
 void character_controller_system(void);
 void animator_system(void);
-void input_blocking_system(void);
+void paralyzing_system(void);
 void camera_system(void);
 void chest_system_init(void);
 void collision_manager_system_init(void);
@@ -35,6 +35,8 @@ void player_process_input(void*);
 void player_controller_system_init(void);
 void self_destruction_system(void);
 void tile_collision_system(void);
+void update_facing_direction_system(void);
+void update_attack_target_system(void);
 
 void init_all_systems(void);
 void shutdown_all_systems(void);

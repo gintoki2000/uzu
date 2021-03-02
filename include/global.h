@@ -199,7 +199,7 @@ typedef enum
   JOB_KNIGHT,
   JOB_DRAGON,
   JOB_WIZZARD,
-  JOB_HUNTER,
+  JOB_ELF,
   NUM_JOBS,
 } JobType;
 
@@ -218,11 +218,11 @@ typedef enum
   NUM_CAST_EFFECTS
 } CastEffectType;
 
-extern ecs_entity_t (*const g_weapon_create_fn_tbl[NUM_WEAPONS])(Ecs*, u16);
-extern ecs_entity_t (*const g_char_create_fn_tbl[NUM_JOBS])(Ecs*, Vec2);
-extern ecs_entity_t (*const g_item_create_fn_tbl[NUM_ITEM_TYPES])(Ecs*, Vec2 pos);
-extern ecs_entity_t (*const g_projectile_create_fn[])(Ecs*, Vec2 pos, Vec2 dir, u16 mask);
-extern ecs_entity_t (*const g_cast_effect_fn_tbl[NUM_CAST_EFFECTS])(Ecs* ecs, Vec2 pos);
+extern ecs_entity_t (*const g_make_weapon_fn_tbl[NUM_WEAPONS])(Ecs*, u16);
+extern ecs_entity_t (*const g_make_character_fn_tbl[NUM_JOBS])(Ecs*, Vec2);
+extern ecs_entity_t (*const g_make_pickupable_fn_tbl[NUM_ITEM_TYPES])(Ecs*, Vec2 pos);
+extern ecs_entity_t (*const g_make_projectile_fn[])(Ecs*, Vec2 pos, Vec2 dir, u16 mask);
+extern ecs_entity_t (*const g_make_cast_effect_fn_tbl[NUM_CAST_EFFECTS])(Ecs* ecs, Vec2 pos);
 extern const ItemType g_item_types[NUM_ITEM_TYPES];
 extern const Spell    g_spell_tbl[NUM_SPELLS];
 extern const u16      g_pickupable_to_item_type_id_tbl[];

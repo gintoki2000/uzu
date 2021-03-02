@@ -39,7 +39,6 @@ ecs_entity_t make_anime_sword(Ecs* ecs, u16 mask)
   attrs          = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
   attrs->atk     = 2;
   attrs->type_id = WEAPON_ANIME_SWORD;
-  attrs->mask    = mask;
 
   sklswing            = ecs_add(ecs, entity, WEAPON_SWING_ATTACK);
   sklswing->on_action = CHARACTER_ACTION_REGULAR_ATK;
@@ -86,8 +85,8 @@ ecs_entity_t make_character_base(Ecs* ecs, const NewCharacterParams* params)
 
   equipment                  = ecs_add(ecs, entity, EQUIPMENT);
   equipment->weapon          = ECS_NULL_ENT;
-  equipment->weapon_anchor.x = 16 / 2;
-  equipment->weapon_anchor.y = -7;
+  equipment->attach_point.x = 16 / 2;
+  equipment->attach_point.y = -7;
 
   controller = ecs_add(ecs, entity, CONTROLLER);
 
@@ -119,6 +118,7 @@ ecs_entity_t make_character_base(Ecs* ecs, const NewCharacterParams* params)
                  });
 
   ecs_add_w_data(ecs, entity, MOVE_SPEED, &(MoveSpeed){ 120 });
+  ecs_add(ecs, entity, FACING_DIRECTION);
   return entity;
 }
 extern const u16 g_initial_hp_tbl[];
@@ -139,8 +139,8 @@ ecs_entity_t make_elf(Ecs* ecs, Vec2 position)
   NewCharacterParams params;
   params.position    = position;
   params.animations  = g_anims_elf_m;
-  params.hit_points  = g_initial_hp_tbl[JOB_KNIGHT];
-  params.mana_points = g_initial_mp_tbl[JOB_KNIGHT];
+  params.hit_points  = g_initial_hp_tbl[JOB_ELF];
+  params.mana_points = g_initial_mp_tbl[JOB_ELF];
   return make_character_base(ecs, &params);
 }
 
@@ -229,6 +229,7 @@ ecs_entity_t make_monster_base(Ecs* ecs, const NewMonsterParams* params)
   ecs_add(ecs, entity, ENABLE_TILE_COLLISION_TAG);
   ecs_add(ecs, entity, CHARACTER_ANIMATOR_TAG);
   ecs_add_w_data(ecs, entity, MOVE_SPEED, &(MoveSpeed){ 50 });
+  ecs_add(ecs, entity, FACING_DIRECTION);
   return entity;
 }
 
@@ -355,8 +356,8 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 position)
 
   equipment                  = ecs_add(ecs, entity, EQUIPMENT);
   equipment->weapon          = ECS_NULL_ENT;
-  equipment->weapon_anchor.x = 16 / 2;
-  equipment->weapon_anchor.y = -6;
+  equipment->attach_point.x = 16 / 2;
+  equipment->attach_point.y = -6;
 
   ecs_entity_t weapon = make_spear(ecs, BIT(CATEGORY_PLAYER));
 
@@ -410,7 +411,6 @@ ecs_entity_t make_cleaver(Ecs* ecs, u16 mask_bits)
   attrs          = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
   attrs->atk     = 2;
   attrs->type_id = WEAPON_CLEAVER;
-  attrs->mask    = mask_bits;
 
   sklswing            = ecs_add(ecs, entity, WEAPON_SWING_ATTACK);
   sklswing->on_action = CHARACTER_ACTION_REGULAR_ATK;
@@ -443,7 +443,6 @@ ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
   attrs          = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
   attrs->atk     = 2;
   attrs->type_id = WEAPON_LAVIS_SWORD;
-  attrs->mask    = mask_bits;
 
   sklswing            = ecs_add(ecs, entity, WEAPON_SWING_ATTACK);
   sklswing->on_action = CHARACTER_ACTION_REGULAR_ATK;
@@ -682,9 +681,8 @@ ecs_entity_t make_spear(Ecs* ecs, u16 mask)
   thust            = ecs_add(ecs, entity, WEAPON_THUST_ATTACK);
   thust->on_action = CHARACTER_ACTION_REGULAR_ATK;
 
-  attrs       = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
-  attrs->atk  = 1;
-  attrs->mask = mask;
+  attrs      = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
+  attrs->atk = 1;
 
   ecs_add(ecs, entity, HOLDER);
 
@@ -785,7 +783,6 @@ ecs_entity_t make_staff(Ecs* ecs, u16 mask)
 
   attrs          = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
   attrs->atk     = 1;
-  attrs->mask    = mask;
   attrs->type_id = WEAPON_STAFF;
 
   castable = ecs_add(ecs, entity, WEAPON_CAST);
@@ -830,7 +827,7 @@ ecs_entity_t make_fire_ball(Ecs* ecs, ecs_entity_t shooter, Vec2 pos, Vec2 direc
   attrs->effect           = 0;
   attrs->damage_type      = DAMAGE_TYPE_FIRE;
   attrs->impact           = TRUE;
-  attrs->impact_force     = vec2_mul(vec2_unit_vec(direction), 100.f);
+  attrs->impact_force     = vec2_mul(vec2_unit(direction), 100.f);
   attrs->impact_time      = 16;
   attrs->sfx              = SFX_ID_NULL;
   attrs->shooter          = shooter;
@@ -880,7 +877,7 @@ ecs_entity_t make_ice_arrow(Ecs* ecs, ecs_entity_t shooter, Vec2 position, Vec2 
   attrs->effect           = 0;
   attrs->damage_type      = DAMAGE_TYPE_ICE;
   attrs->impact           = TRUE;
-  attrs->impact_force     = vec2_mul(vec2_unit_vec(speed), 100.f);
+  attrs->impact_force     = vec2_mul(vec2_unit(speed), 100.f);
   attrs->impact_time      = 16;
   attrs->sfx              = SFX_ID_NULL;
   attrs->shooter          = shooter;
@@ -927,7 +924,7 @@ ecs_entity_t make_arrow(Ecs* ecs, ecs_entity_t shooter, Vec2 position, Vec2 spee
   attrs->effect           = 0;
   attrs->damage_type      = DAMAGE_TYPE_THUST;
   attrs->impact           = TRUE;
-  attrs->impact_force     = vec2_mul(vec2_unit_vec(speed), 100.f);
+  attrs->impact_force     = vec2_mul(vec2_unit(speed), 100.f);
   attrs->impact_time      = 16;
   attrs->sfx              = SFX_ID_NULL;
   attrs->shooter          = shooter;
@@ -1145,7 +1142,7 @@ ecs_entity_t make_npc_nova(Ecs* ecs, Vec2 position, u16 conversation_id)
   ecs_add_w_data(ecs,
                  entity,
                  EQUIPMENT,
-                 &(Equipment){ .weapon = ECS_NULL_ENT, .weapon_anchor = { 8, -9 } });
+                 &(Equipment){ .weapon = ECS_NULL_ENT, .attach_point = { 8, -9 } });
 
   ecs_add(ecs, entity, ENABLE_TILE_COLLISION_TAG);
   ecs_add_w_data(ecs, entity, MOVE_SPEED, &(MoveSpeed){ 120 });
@@ -1235,7 +1232,6 @@ ecs_entity_t make_bow(Ecs* ecs, u16 mask)
   attrs                             = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
   attrs->atk                        = 2;
   attrs->type_id                    = WEAPON_BOW;
-  attrs->mask                       = mask;
   attrs->sync_with_attack_direction = TRUE;
 
   ecs_add(ecs, entity, HOLDER);

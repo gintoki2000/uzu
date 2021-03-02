@@ -6,12 +6,27 @@
 static void cast_fire_ball(Ecs* ecs, ecs_entity_t caster, ecs_entity_t weapon);
 static void cast_ice_arrow(Ecs* ecs, ecs_entity_t caster, ecs_entity_t weapon);
 
+#define ICON_ICE_ARROW                                                                             \
+  {                                                                                                \
+    TEX_ICON_ICE_ARROW,                                                                            \
+    {                                                                                              \
+      0, 0, 16, 16                                                                                 \
+    }                                                                                              \
+  }
+#define ICON_FIRE_BALL                                                                             \
+  {                                                                                                \
+    TEX_ICON_FIRE_BALL,                                                                            \
+    {                                                                                              \
+      0, 0, 16, 16                                                                                 \
+    }                                                                                              \
+  }
+
 const Spell g_spell_tbl[NUM_SPELLS] = {
-  { "ice arrow", cast_ice_arrow, 1, 15, CAST_EFFECT_ICE, { TEX_ICON_ICE_ARROW, { 0, 0, 16, 16 } } },
-  { "fire ball", cast_fire_ball, 1, 10, CAST_EFFECT_FIRE, { TEX_ICON_FIRE_BALL, { 0, 0, 16, 16 } } },
+  { "ice arrow", cast_ice_arrow, 1, 15, CAST_EFFECT_ICE, ICON_ICE_ARROW },
+  { "fire ball", cast_fire_ball, 1, 10, CAST_EFFECT_FIRE, ICON_FIRE_BALL },
 };
 
-ecs_entity_t (*const g_cast_effect_fn_tbl[NUM_CAST_EFFECTS])(Ecs* ecs, Vec2 pos) = {
+ecs_entity_t (*const g_make_cast_effect_fn_tbl[NUM_CAST_EFFECTS])(Ecs* ecs, Vec2 pos) = {
   [CAST_EFFECT_ICE]  = make_fx_cast_ice,
   [CAST_EFFECT_FIRE] = make_fx_cast_fire,
 };
@@ -22,32 +37,37 @@ static void cast_fire_ball(Ecs* ecs, SDL_UNUSED ecs_entity_t caster, ecs_entity_
 {
   WeaponAttributes* attributes;
   Transform*        transform;
-  Controller* controller;
+  AttackMask*       attack_mask;
+  Controller*       controller;
 
-  transform = ecs_get(ecs, weapon, TRANSFORM);
-  controller = ecs_get(ecs, caster, CONTROLLER);
-
+  transform   = ecs_get(ecs, weapon, TRANSFORM);
+  controller  = ecs_get(ecs, caster, CONTROLLER);
+  attack_mask = ecs_get(ecs, caster, ATTACK_MASK);
 
   Vec2 speed = vec2_mul(controller->attack_direction, 120.f);
 
   attributes = ecs_get(ecs, weapon, WEAPON_ATTRIBUTES);
 
-  make_fire_ball(ecs, caster, transform->position, speed, attributes->mask);
+  make_fire_ball(ecs, caster, transform->position, speed, attack_mask->value);
   play_sound(SFX_FIRE_BALL_LAUCH);
 }
 
-static void cast_ice_arrow(Ecs* ecs, SDL_UNUSED ecs_entity_t caster, ecs_entity_t weapon)
+static void cast_ice_arrow(Ecs* ecs, ecs_entity_t caster, ecs_entity_t weapon)
 {
   WeaponAttributes* attributes;
   Transform*        transform;
+  AttackMask*       attack_mask;
+  FacingDirection*  facing_direction;
 
-  transform = ecs_get(ecs, weapon, TRANSFORM);
+  transform        = ecs_get(ecs, weapon, TRANSFORM);
+  attack_mask      = ecs_get(ecs, caster, ATTACK_MASK);
+  facing_direction = ecs_get(ecs, caster, FACING_DIRECTION);
 
-  Vec2 speed = { 100.f * transform->hdir, 0.f };
+  Vec2 speed = vec2_mul(facing_direction->value, 120.f);
 
   attributes = ecs_get(ecs, weapon, WEAPON_ATTRIBUTES);
 
-  make_ice_arrow(ecs, caster, transform->position, speed, attributes->mask);
+  make_ice_arrow(ecs, caster, transform->position, speed, attack_mask->value);
 
   play_sound(SFX_ICE_SHOOT);
 }

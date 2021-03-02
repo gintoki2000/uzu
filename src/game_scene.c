@@ -78,8 +78,8 @@ static void spawn_player(Vec2 position)
   ecs_entity_t (*make_character_fn)(Ecs*, Vec2);
   u16 mask = BIT(CATEGORY_ENEMY) | BIT(CATEGORY_INTERACABLE);
 
-  make_weapon_fn    = g_weapon_create_fn_tbl[g_session.weapon];
-  make_character_fn = g_char_create_fn_tbl[g_session.job];
+  make_weapon_fn    = g_make_weapon_fn_tbl[g_session.weapon];
+  make_character_fn = g_make_character_fn_tbl[g_session.job];
 
   player = make_character_fn(g_ecs, position);
   weapon = make_weapon_fn(g_ecs, mask);
@@ -284,10 +284,12 @@ static void update_game_logic(void)
   RUN_SYSTEM(ai_system);
   RUN_SYSTEM(health_system);
   RUN_SYSTEM(camera_system);
-  RUN_SYSTEM(map_update_animated_cells);
   RUN_SYSTEM(following_system);
-  RUN_SYSTEM(input_blocking_system);
+  RUN_SYSTEM(paralyzing_system);
   RUN_SYSTEM(self_destruction_system);
+  RUN_SYSTEM(update_attack_target_system);
+
+  (map_update_animated_cells());
 
   RUN_SYSTEM(weapon_swing_attack_system);
   RUN_SYSTEM(weapon_casting_system);

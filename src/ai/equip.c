@@ -74,7 +74,7 @@ static BTStatus __exec(BTTask_Equip* self, Ecs* ecs, ecs_entity_t entity)
   if (self->weapon_id == WEAPON_ID_NULL)
     return BT_STATUS_FAILURE;
 
-  ecs_entity_t weapon = g_weapon_create_fn_tbl[self->weapon_id](ecs, attack_mask->value);
+  ecs_entity_t weapon = g_make_weapon_fn_tbl[self->weapon_id](ecs, attack_mask->value);
   equip(ecs, entity, weapon);
 
   return BT_STATUS_SUCCESS;

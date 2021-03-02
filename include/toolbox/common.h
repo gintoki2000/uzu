@@ -152,6 +152,12 @@ INLINE float minf(float a, float b)
   return a < b ? a : b;
 }
 
+INLINE float signf(float x)
+{ return (x > 0) - (x < 0); }
+
+INLINE int sign(int x)
+{ return (x > 0) - (x < 0); }
+
 INLINE Vec2 vec2_max(Vec2 a, Vec2 b)
 {
   return (Vec2){ maxf(a.x, b.x), maxf(a.y, b.y) };
@@ -219,7 +225,7 @@ INLINE float vec2_mag2(Vec2 v)
   return v.x * v.x + v.y * v.y;
 }
 
-INLINE Vec2 vec2_unit_vec(Vec2 v)
+INLINE Vec2 vec2_unit(Vec2 v)
 {
   float len2  = vec2_mag2(v);
   float ivlen = invsqrt(len2);
@@ -230,7 +236,7 @@ INLINE Vec2 vec2_trunc(Vec2 v, float max_len)
 {
   if (vec2_mag2(v) > max_len * max_len)
   {
-    return vec2_mul(vec2_unit_vec(v), max_len);
+    return vec2_mul(vec2_unit(v), max_len);
   }
   return v;
 }

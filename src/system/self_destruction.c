@@ -15,7 +15,7 @@ void self_destruction_system()
   ecs_entity_t* entities;
   ecs_size_t    cnt;
 
-  SelfDestruction* self_destruction_array;
+  SelfDestruction* self_destruction;
 
   Vec2  position;
   Vec2  target_position;
@@ -29,7 +29,7 @@ void self_destruction_system()
   if (player == ECS_NULL_ENT)
     return;
 
-  ecs_raw(g_ecs, SELF_DESTRUCTION, &entities, (void**)&self_destruction_array, &cnt);
+  ecs_raw(g_ecs, SELF_DESTRUCTION, &entities, (void**)&self_destruction, &cnt);
 
   for (int i = cnt - 1; i >= 0; --i)
   {
@@ -37,10 +37,10 @@ void self_destruction_system()
     target_position = get_entity_position(g_ecs, player);
     rposition       = vec2_sub(position, target_position);
     distance        = vec2_mag(rposition);
-    vdir            = vec2_unit_vec(rposition);
+    vdir            = vec2_unit(rposition);
 
     force = vec2_mul(vdir, -150.f);
-    if (distance < self_destruction_array[i].range)
+    if (distance < self_destruction[i].range)
     {
       ems_broadcast(MSG_DEAL_DAMAGE,
                     &(MSG_DealDamage){ .dealer      = entities[i],

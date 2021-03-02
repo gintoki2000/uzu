@@ -15,22 +15,17 @@ static void apply_controller_input(void)
   ecs_entity_t* entities;
   ecs_size_t    cnt;
 
-  Controller* controllers;
-  Motion*     motion;
-  MoveSpeed*  move_speed;
-
-  // TODO: !(Flags->value & BLOCK_MOVEMENT)
+  const Controller* controllers;
+  const MoveSpeed*  move_speed;
+  Motion*           motion;
 
   ecs_raw(g_ecs, CONTROLLER, &entities, (void**)&controllers, &cnt);
   for (int i = 0; i < cnt; ++i)
   {
-    if (!ecs_has(g_ecs, entities[i], INPUT_BLOCKER))
+    if (!ecs_has(g_ecs, entities[i], PARALYZED) && (motion = ecs_get(g_ecs, entities[i], MOTION)) &&
+        (move_speed = ecs_get(g_ecs, entities[i], MOVE_SPEED)))
     {
-      if ((motion = ecs_get(g_ecs, entities[i], MOTION)) &&
-          (move_speed = ecs_get(g_ecs, entities[i], MOVE_SPEED)))
-      {
-        motion->vel = vec2_mul(controllers[i].desired_direction, (float)move_speed->value);
-      }
+      motion->vel = vec2_mul(controllers[i].desired_direction, (float)move_speed->value);
     }
   }
 }
@@ -42,18 +37,18 @@ void motion_system()
   ecs_size_t    cnt;
 
   Transform* transform;
-  Motion*    motion_raw_array;
+  Motion*    motion;
 
   apply_controller_input();
 
-  ecs_raw(g_ecs, MOTION, &entities, (void**)&motion_raw_array, &cnt);
+  ecs_raw(g_ecs, MOTION, &entities, (void**)&motion, &cnt);
 
   for (int i = 0; i < cnt; ++i)
   {
-    motion_raw_array[i].vel.x += motion_raw_array[i].acc.x;
-    motion_raw_array[i].vel.y += motion_raw_array[i].acc.y;
-    motion_raw_array[i].vel = vec2_trunc(motion_raw_array[i].vel, SPEED_LIMIT);
-    motion_raw_array[i].acc = VEC2_ZERO;
+    motion[i].vel.x += motion[i].acc.x;
+    motion[i].vel.y += motion[i].acc.y;
+    motion[i].vel = vec2_trunc(motion[i].vel, SPEED_LIMIT);
+    motion[i].acc = VEC2_ZERO;
   }
 
   for (int i = 0; i < cnt; ++i)
@@ -61,27 +56,22 @@ void motion_system()
     transform = ecs_get(g_ecs, entities[i], TRANSFORM);
 
     transform->prev_position = transform->position;
-    transform->position.x += motion_raw_array[i].vel.x * DT;
-    transform->position.y += motion_raw_array[i].vel.y * DT;
+    transform->position.x += motion[i].vel.x * DT;
+    transform->position.y += motion[i].vel.y * DT;
 
-    if (absf(motion_raw_array[i].vz) < 0.1f)
-      motion_raw_array[i].vz = 0.f;
-    transform->z += motion_raw_array[i].vz * DT;
+    if (absf(motion[i].vz) < 0.1f)
+      motion[i].vz = 0.f;
+    transform->z += motion[i].vz * DT;
     if (transform->z < 0.f)
     {
-      motion_raw_array[i].vz *= -motion_raw_array[i].bounching;
+      motion[i].vz *= -motion[i].bounching;
       transform->z = 0.f;
-    }
-
-    if ((!ecs_has(g_ecs, entities[i], INPUT_BLOCKER) && absf(motion_raw_array[i].vel.x) > 0.1f))
-    {
-      transform->hdir = motion_raw_array[i].vel.x > 0.f ? 1 : -1;
     }
   }
 
   for (int i = 0; i < cnt; ++i)
   {
-    motion_raw_array[i].vel = vec2_mul(motion_raw_array[i].vel, 1.f - motion_raw_array[i].friction);
-    motion_raw_array[i].vz += GRAVITY;
+    motion[i].vel = vec2_mul(motion[i].vel, 1.f - motion[i].friction);
+    motion[i].vz += GRAVITY;
   }
 }

@@ -34,13 +34,13 @@ void equipment_system()
     if (transform && visual && weapon_transform && weapon_visual && weapon_attrs)
     {
 
-      sign = transform->hdir;
+      sign = transform->horizontal_axis;
 
       weapon_transform->position.x =
-          transform->position.x + sign * (equiments[i].weapon_anchor.x + equiments[i].d.x);
+          transform->position.x + sign * (equiments[i].attach_point.x + equiments[i].d.x);
       weapon_transform->position.y =
-          transform->position.y + equiments[i].weapon_anchor.y + equiments[i].d.y - transform->z;
-      weapon_transform->hdir = transform->hdir;
+          transform->position.y + equiments[i].attach_point.y + equiments[i].d.y - transform->z;
+      weapon_transform->horizontal_axis = transform->horizontal_axis;
       if (!weapon_attrs->sync_with_attack_direction)
         weapon_visual->flip = visual->flip;
 

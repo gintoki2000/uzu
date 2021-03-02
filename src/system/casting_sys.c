@@ -58,7 +58,7 @@ void weapon_casting_system()
         castables[i].timer           = spell->cast_spd;
         mana_pool->mana_points -= spell->cost;
         spell->cast(g_ecs, holder->value, entities[i]);
-        g_cast_effect_fn_tbl[spell->casting_effect](g_ecs, transform->position);
+        g_make_cast_effect_fn_tbl[spell->casting_effect](g_ecs, transform->position);
       }
     }
   }

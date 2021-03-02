@@ -10,7 +10,7 @@ typedef struct CBThust_QueryHitEntitiesArgs
 {
   ecs_entity_t dealer;
   int          damage;
-  int          direction; // -1 / 1
+  float        direction;
 } CBThust_QueryHitEntitiesArgs;
 
 static const Vec2 k_impact_force = { 100.f, 0.f };
@@ -38,81 +38,88 @@ void weapon_thust_attack_system()
 
   WeaponAttributes*  attributes;
   Holder*            holder;
-  WeaponThustAttack* skl;
+  WeaponThustAttack* thust_attack;
   Controller*        holder_controller;
   Equipment*         holder_equipment;
+  AttackMask*        holder_attack_mask;
   Motion*            holder_motion;
+  FacingDirection*   holder_facing_direction;
   Transform*         transform;
   RECT               damage_area;
 
-  ecs_raw(g_ecs, WEAPON_THUST_ATTACK, &entities, (pointer_t*)&skl, &cnt);
+  ecs_raw(g_ecs, WEAPON_THUST_ATTACK, &entities, (pointer_t*)&thust_attack, &cnt);
   for (ecs_size_t i = 0; i < cnt; ++i)
   {
     if ((holder = ecs_get(g_ecs, entities[i], HOLDER)))
-      switch (skl[i].state)
+      switch (thust_attack[i].state)
       {
       case 0: // INACTIVE
         if ((holder_controller = ecs_get(g_ecs, holder->value, CONTROLLER)))
         {
-          if (holder_controller->action == skl[i].on_action)
+          if (holder_controller->action == thust_attack[i].on_action)
           {
-            holder_equipment = ecs_get(g_ecs, holder->value, EQUIPMENT);
-            holder_motion    = ecs_get(g_ecs, holder->value, MOTION);
-            transform        = ecs_get(g_ecs, entities[i], TRANSFORM);
+            holder_equipment        = ecs_get(g_ecs, holder->value, EQUIPMENT);
+            holder_motion           = ecs_get(g_ecs, holder->value, MOTION);
+            holder_facing_direction = ecs_get(g_ecs, holder->value, FACING_DIRECTION);
+            transform               = ecs_get(g_ecs, entities[i], TRANSFORM);
 
-            holder_equipment->d.x        = -10;
-            holder_equipment->d.y        = -5;
-            holder_controller->in_action = TRUE;
-            holder_controller->action    = CHARACTER_ACTION_NONE;
+            holder_equipment->adjustment.x  = -10;
+            holder_equipment->adjustment.y  = -5;
+            holder_controller->in_action    = TRUE;
+            holder_controller->action       = CHARACTER_ACTION_NONE;
+            holder_facing_direction->frezze = TRUE;
 
-            transform->rotation = -15.0 * transform->hdir;
+            transform->rotation = -15.0 * signf(holder_facing_direction->value.x);
 
-            skl[i].state = 1;
-            skl[i].timer = 7;
+            thust_attack[i].state = 1;
+            thust_attack[i].timer = 7;
           }
         }
         break;
       case 1:
-        if (TIMER_TICK(skl[i].timer))
+        if (TIMER_TICK(thust_attack[i].timer))
         {
-          holder_equipment = ecs_get(g_ecs, holder->value, EQUIPMENT);
-          transform        = ecs_get(g_ecs, entities[i], TRANSFORM);
+          holder_equipment        = ecs_get(g_ecs, holder->value, EQUIPMENT);
+          holder_facing_direction = ecs_get(g_ecs, holder->value, FACING_DIRECTION);
+          transform               = ecs_get(g_ecs, entities[i], TRANSFORM);
 
-          holder_equipment->d.x = -8;
-          holder_equipment->d.y = -4;
-          transform->rotation   = -12 * transform->hdir;
-          skl[i].state          = 2;
-          skl[i].timer          = 2;
+          holder_equipment->adjustment.x = -8;
+          holder_equipment->adjustment.y = -4;
+          transform->rotation            = -12 * signf(holder_facing_direction->value.x);
+          thust_attack[i].state          = 2;
+          thust_attack[i].timer          = 2;
         }
         break;
       case 2:
-        if (TIMER_TICK(skl[i].timer))
+        if (TIMER_TICK(thust_attack[i].timer))
         {
           holder_equipment = ecs_get(g_ecs, holder->value, EQUIPMENT);
           transform        = ecs_get(g_ecs, entities[i], TRANSFORM);
 
-          holder_equipment->d.x = 10;
-          holder_equipment->d.y = 0;
-          transform->rotation   = 0.0;
-          skl[i].state          = 3;
-          skl[i].timer          = 7;
+          holder_equipment->adjustment.x = 10;
+          holder_equipment->adjustment.y = 0;
+          transform->rotation            = 0.0;
+          thust_attack[i].state          = 3;
+          thust_attack[i].timer          = 7;
           Mix_PlayChannel(-1, get_sfx(SFX_PUNCH), 0);
         }
         break;
       case 3:
         if ((holder_controller = ecs_get(g_ecs, holder->value, CONTROLLER)))
         {
-          if (TIMER_TICK(skl[i].timer))
+          if (TIMER_TICK(thust_attack[i].timer))
           {
-            holder_equipment = ecs_get(g_ecs, holder->value, EQUIPMENT);
-            transform        = ecs_get(g_ecs, entities[i], TRANSFORM);
-            attributes       = ecs_get(g_ecs, entities[i], WEAPON_ATTRIBUTES);
+            holder_equipment        = ecs_get(g_ecs, holder->value, EQUIPMENT);
+            transform               = ecs_get(g_ecs, entities[i], TRANSFORM);
+            attributes              = ecs_get(g_ecs, entities[i], WEAPON_ATTRIBUTES);
+            holder_attack_mask      = ecs_get(g_ecs, holder->value, ATTACK_MASK);
+            holder_facing_direction = ecs_get(g_ecs, holder->value, FACING_DIRECTION);
 
-            holder_controller->in_action = FALSE;
-            holder_equipment->d.x        = 0;
-            holder_equipment->d.y        = 0;
-            skl[i].state                 = 0;
-            transform->lock_hdir         = FALSE;
+            holder_controller->in_action    = FALSE;
+            holder_equipment->adjustment.x  = 0;
+            holder_equipment->adjustment.y  = 0;
+            thust_attack[i].state           = 0;
+            holder_facing_direction->frezze = FALSE;
 
             damage_area.x = transform->position.x - 20;
             damage_area.y = transform->position.y - 9;
@@ -120,11 +127,11 @@ void weapon_thust_attack_system()
             damage_area.h = 12;
 
             collision_box_query(&damage_area,
-                                attributes->mask,
+                                attributes->atk,
                                 CALLBACK_1((&(CBThust_QueryHitEntitiesArgs){
                                                .dealer    = holder->value,
                                                .damage    = attributes->atk,
-                                               .direction = transform->hdir,
+                                               .direction = signf(holder_facing_direction->value.x),
                                            }),
                                            __cb_query_hit_entities));
           }

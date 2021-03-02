@@ -17,6 +17,8 @@ static void holder_init(Holder* holder);
 static void visual_init(Visual* v);
 static void brain_fini(Brain* ai_agent);
 static void hitbox_init(HitBox* h);
+static void facing_direction_init(FacingDirection* fd);
+static void attack_target_init(AttackTarget* attack_target);
 
 const EcsType g_comp_types[NUM_COMPONENTS] = {
   [VISUAL]                       = ECS_TYPE_EX(Visual, visual_init, NULL, NULL),
@@ -39,7 +41,7 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
   [WEAPON_CHARGE_ATTACK]         = ECS_TYPE(WeaponChargeAttack),
   [DROP]                         = ECS_TYPE(Drop),
   [INVULNERABLE]                 = ECS_TYPE(Invulnerable),
-  [INPUT_BLOCKER]                = ECS_TYPE(InputBlocker),
+  [PARALYZED]                    = ECS_TYPE(Paralyzed),
   [CAMERA_TARGET_TAG]            = ECS_TYPE(CameraTargetTag),
   [BRAIN]                        = ECS_TYPE_EX(Brain, NULL, brain_fini, NULL),
   [DESTINATION]                  = ECS_TYPE(Destination),
@@ -68,6 +70,8 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
   [ATTACKER]                     = ECS_TYPE(Attacker),
   [WEAPON_SHOOT]                 = ECS_TYPE(WeaponShoot),
   [MOVE_SPEED]                   = ECS_TYPE(MoveSpeed),
+  [FACING_DIRECTION]             = ECS_TYPE_EX(FacingDirection, facing_direction_init, NULL, NULL),
+  [ATTACK_TARGET]                = ECS_TYPE_EX(AttackTarget, attack_target_init, NULL, NULL),
 };
 
 void brain_fini(Brain* brain)
@@ -78,10 +82,10 @@ void brain_fini(Brain* brain)
 
 void hitbox_init(HitBox* h)
 {
-  h->proxy_id = RTREE_NULL_NODE;
-  h->anchor = (Vec2){ 0 };
-  h->category = 0;
-  h->size = (Vec2){ 16.f, 16.f };
+  h->proxy_id  = RTREE_NULL_NODE;
+  h->anchor    = (Vec2){ 0 };
+  h->category  = 0;
+  h->size      = (Vec2){ 16.f, 16.f };
   h->mask_bits = 0xffff;
 }
 
@@ -89,7 +93,7 @@ void ladder_attrs_init(LadderAttributes* attrs, const char* level, const char* d
 {
   ASSERT(level != NULL && dest != NULL);
   SDL_strlcpy(attrs->level, level, LADDER_ATTRS_MAX_LEVEL_NAME_LEN);
-  SDL_strlcpy(attrs->dest, dest, LADDER_ATTRS_MAX_LEVEL_NAME_LEN);
+  SDL_strlcpy(attrs->dest, dest, LADDER_ATTRS_MAX_DEST_LEN);
 }
 
 void name_init(Name* name, const char* value)
@@ -111,10 +115,10 @@ void text_init(Text* text, const char* value, FONT* font, COLOR color)
 
 void visual_init(Visual* v)
 {
-  v->color   = (COLOR){ 255, 255, 255, 255 };
-  v->anchor  = (POINT){ 0, 0 };
-  v->sprite  = (Sprite){ 0 };
-  v->flip    = SDL_FLIP_NONE;
+  v->color  = (COLOR){ 255, 255, 255, 255 };
+  v->anchor = (POINT){ 0 };
+  v->sprite = (Sprite){ 0 };
+  v->flip   = SDL_FLIP_NONE;
 }
 
 static void holder_init(Holder* holder)
@@ -124,9 +128,17 @@ static void holder_init(Holder* holder)
 
 static void transform_init(Transform* t)
 {
-  t->hdir          = 1;
-  t->prev_position = t->position = (Vec2){ 0.f, 0.f };
+  t->prev_position = t->position = (Vec2){ 0 };
   t->rotation                    = 0.0;
   t->z                           = 0.f;
-  t->lock_hdir                   = 0;
+}
+
+static void facing_direction_init(FacingDirection* fd)
+{
+  fd->value = (Vec2){ 1.f, 0.f };
+}
+
+static void attack_target_init(AttackTarget* attack_target)
+{
+  attack_target->value = ECS_NULL_ENT;
 }

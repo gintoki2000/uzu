@@ -28,7 +28,7 @@ typedef enum ComponentId
   DROP,
   PICKUPABLE_ATTRIBUTES,
   INVULNERABLE,
-  INPUT_BLOCKER,
+  PARALYZED,
   ENEMY_TAG,
   PLAYER_TAG,
   CAMERA_TARGET_TAG,
@@ -58,6 +58,8 @@ typedef enum ComponentId
   ATTACKER,
   SELF_DESTRUCTION,
   MOVE_SPEED,
+  FACING_DIRECTION,
+  ATTACK_TARGET,
   NUM_COMPONENTS
 } ComponentId;
 
@@ -78,9 +80,13 @@ typedef struct Transform
   Vec2   position;
   double rotation;
   float  z;
-  int    hdir;
-  BOOL   lock_hdir;
 } Transform;
+
+typedef struct FacingDirection
+{
+  Vec2 value;
+  BOOL frezze;
+} FacingDirection;
 
 typedef struct Visual
 {
@@ -99,7 +105,6 @@ typedef struct Spot
 typedef struct Controller
 {
   Vec2 desired_direction;
-  Vec2 attack_direction;
   u16  action;
   BOOL in_action;
 } Controller;
@@ -107,15 +112,14 @@ typedef struct Controller
 typedef struct Equipment
 {
   ecs_entity_t weapon;
-  Vec2         weapon_anchor;
-  Vec2         d;
+  Vec2         attach_point;
+  Vec2         adjustment;
 } Equipment;
 
 typedef struct WeaponAttributes
 {
   s32  atk;
   u16  type_id;
-  u16  mask;
   BOOL sync_with_attack_direction;
 } WeaponAttributes;
 
@@ -169,13 +173,9 @@ typedef int PlayerTag;
 
 typedef int EnemyTag;
 
-typedef int WeaponTag;
-
 typedef int CameraTargetTag;
 
 typedef int EnableTileCollisionTag;
-
-typedef int NpcTag;
 
 typedef int DestroyedTag;
 
@@ -254,15 +254,17 @@ typedef struct Drop
   u8  cnt;
 } Drop;
 
+//************^^status^^******************//
 typedef struct
 {
   int remaining;
-} InputBlocker;
+} Paralyzed;
 
 typedef struct
 {
   int remaining;
 } Invulnerable;
+//<======================================>//
 
 typedef struct
 {
@@ -357,6 +359,11 @@ typedef struct Attacker
 {
   ecs_entity_t value;
 } Attacker;
+
+typedef struct AttackTarget
+{
+  ecs_entity_t value;
+} AttackTarget;
 
 typedef struct SelfDestruction
 {

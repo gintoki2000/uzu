@@ -64,12 +64,12 @@ ecs_entity_t find_ladder(Ecs* ecs, const char* _name)
 
 BOOL equip(Ecs* ecs, ecs_entity_t entity, ecs_entity_t weapon)
 {
-  Equipment* equipment;
+  Hand* equipment;
 
   if (entity == ECS_NULL_ENT || weapon == ECS_NULL_ENT)
     return FALSE;
 
-  equipment = ecs_get(ecs, entity, EQUIPMENT);
+  equipment = ecs_get(ecs, entity, HAND);
 
   ecs_add_or_set(ecs, weapon, HOLDER, &(Holder){ .value = entity });
   if (equipment->weapon != ECS_NULL_ENT)
@@ -156,7 +156,7 @@ u16 get_weapon_type_id(Ecs* ecs, ecs_entity_t weapon)
 }
 ecs_entity_t get_equiped_weapon(Ecs* ecs, ecs_entity_t holder)
 {
-  return ((const Equipment*)ecs_get(ecs, holder, EQUIPMENT))->weapon;
+  return ((const Hand*)ecs_get(ecs, holder, HAND))->weapon;
 }
 u16 get_equiped_weapon_type_id(Ecs* ecs, ecs_entity_t holder)
 {

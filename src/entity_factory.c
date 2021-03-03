@@ -1,16 +1,7 @@
 #include "entity_factory.h"
-#include "ai/attack.h"
-#include "ai/equip.c"
-#include "ai/follow_attacker.h"
-#include "ai/follow_player.h"
-#include "ai/is_attacked.h"
-#include "ai/is_player_cross_spot.h"
-#include "ai/is_player_out_of_spot.h"
-#include "ai/move_to.h"
-#include "ai/set_dest_to_spot.h"
-#include "ai/wait.h"
 #include "animations.h"
 #include "behaviour_tree.h"
+#include "bttask.h"
 #include "components.h"
 #include "constances.h"
 #include "ecs/ecs.h"
@@ -67,7 +58,7 @@ ecs_entity_t make_character_base(Ecs* ecs, const NewCharacterParams* params)
   /*components */
   Transform*  transform;
   Visual*     visual;
-  Equipment*  equipment;
+  Hand*       equipment;
   Controller* controller;
   Animator*   animator;
   HitBox*     hitbox;
@@ -83,8 +74,8 @@ ecs_entity_t make_character_base(Ecs* ecs, const NewCharacterParams* params)
   visual->anchor.x = 16 / 2;
   visual->anchor.y = 28;
 
-  equipment                  = ecs_add(ecs, entity, EQUIPMENT);
-  equipment->weapon          = ECS_NULL_ENT;
+  equipment                 = ecs_add(ecs, entity, HAND);
+  equipment->weapon         = ECS_NULL_ENT;
   equipment->attach_point.x = 16 / 2;
   equipment->attach_point.y = -7;
 
@@ -248,20 +239,6 @@ ecs_entity_t make_imp(Ecs* ecs, Vec2 position)
                  SELF_DESTRUCTION,
                  &(SelfDestruction){ .range = 16, .target = ECS_NULL_ENT });
 
-  BTRoot*                     root;
-  BTCondition_IsPlayerInSpot* is_player_in_spot;
-  BTTask_FollowPlayer*        follow_player;
-
-  root              = bt_root_new();
-  is_player_in_spot = bt_condition_is_player_in_spot_new();
-  follow_player     = bt_task_follow_player_new(16);
-
-  ecs_add(ecs, entity, CONTROLLER);
-
-  bt_root_set_child(root, (BTNode*)is_player_in_spot);
-  bt_decorator_set_child((BTDecorator*)is_player_in_spot, (BTNode*)follow_player);
-
-  ecs_add_w_data(ecs, entity, BRAIN, &(Brain){ (BTNode*)root });
   ecs_add_w_data(ecs, entity, SPOT, &(Spot){ .position = position, .radius = 150.f });
   return entity;
 }
@@ -278,8 +255,7 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 position)
 
   /*components */
   Drop*       drop;
-  Brain*      brain;
-  Equipment*  equipment;
+  Hand*       equipment;
   Controller* controller;
   Spot*       spot;
 
@@ -306,56 +282,8 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 position)
 
   controller = ecs_add(ecs, entity, CONTROLLER);
 
-  BTRoot*                        root;
-  BTTask_MoveTo*                 move_to;
-  BTTask_Wait *                  wait, *wait_a_momment;
-  BTSelector*                    hostile;
-  BTTask_Attack*                 attack;
-  BTSequence*                    attack_seq;
-  BTCondition_IsPlayerInSpot*    is_player_cross_spot;
-  BTSequence*                    back_to_spot_seq;
-  BTTask_SetDestToSpot*          set_dest_to_spot;
-  BTSelector*                    selector;
-  BTCondition_IsPlayerOutOfSpot* is_player_out_of_spot;
-  BTTask_FollowPlayer*           chase;
-
-  root = bt_root_new();
-  wait = bt_task_wait_new(30);
-  // TODO: BTTask_SetAttackTargetToPlayer
-  attack                = bt_task_attack_new(BTTASK_ATTACK_MODE_PLAYER);
-  hostile               = bt_selector_new();
-  attack_seq            = bt_sequence_new();
-  is_player_cross_spot  = bt_condition_is_player_in_spot_new();
-  move_to               = bt_task_move_to_new(2.f);
-  back_to_spot_seq      = bt_sequence_new();
-  set_dest_to_spot      = bt_task_set_dest_to_spot_new();
-  selector              = bt_selector_new();
-  is_player_out_of_spot = bt_condition_is_player_out_of_spot_new();
-  wait_a_momment        = bt_task_wait_new(50);
-  chase                 = bt_task_follow_player_new(16.f);
-  bt_root_set_child(root, (BTNode*)selector);
-
-  bt_decorator_set_child((BTDecorator*)is_player_cross_spot, (BTNode*)hostile);
-  bt_decorator_set_child((BTDecorator*)is_player_out_of_spot, (BTNode*)back_to_spot_seq);
-
-  bt_sequence_add(attack_seq, (BTNode*)attack);
-  bt_sequence_add(attack_seq, (BTNode*)wait);
-
-  bt_sequence_add(back_to_spot_seq, (BTNode*)wait_a_momment);
-  bt_sequence_add(back_to_spot_seq, (BTNode*)set_dest_to_spot);
-  bt_sequence_add(back_to_spot_seq, (BTNode*)move_to);
-
-  bt_selector_add(hostile, (BTNode*)chase);
-  bt_selector_add(hostile, (BTNode*)attack_seq);
-
-  bt_selector_add(selector, (BTNode*)is_player_cross_spot);
-  bt_selector_add(selector, (BTNode*)is_player_out_of_spot);
-
-  brain       = ecs_add(ecs, entity, BRAIN);
-  brain->root = (BTNode*)root;
-
-  equipment                  = ecs_add(ecs, entity, EQUIPMENT);
-  equipment->weapon          = ECS_NULL_ENT;
+  equipment                 = ecs_add(ecs, entity, HAND);
+  equipment->weapon         = ECS_NULL_ENT;
   equipment->attach_point.x = 16 / 2;
   equipment->attach_point.y = -6;
 
@@ -386,9 +314,8 @@ ecs_entity_t make_axe(Ecs* ecs)
   return axe;
 }
 
-ecs_entity_t make_cleaver(Ecs* ecs, u16 mask_bits)
+ecs_entity_t make_cleaver(Ecs* ecs, u16 mask)
 {
-
   ecs_entity_t entity;
 
   TEXTURE* texture;
@@ -421,7 +348,7 @@ ecs_entity_t make_cleaver(Ecs* ecs, u16 mask_bits)
   return entity;
 }
 
-ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask_bits)
+ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask)
 {
   ecs_entity_t entity;
 
@@ -490,11 +417,7 @@ ecs_entity_t make_pickupable_entity(Ecs* ecs, u16 texture_id, u16 id, Vec2 posit
 
   visual                    = ecs_add(ecs, entity, VISUAL);
   visual->sprite.texture_id = texture_id;
-  SDL_QueryTexture(get_texture(texture_id),
-                   NULL,
-                   NULL,
-                   &visual->sprite.rect.w,
-                   &visual->sprite.rect.h);
+  sprite_init(&visual->sprite, texture_id);
   visual->anchor.x = visual->sprite.rect.w / 2;
   visual->anchor.y = visual->sprite.rect.h;
 
@@ -641,7 +564,7 @@ ecs_entity_t make_chest(Ecs* ecs, Vec2 position, Item items[CHEST_MAX_ITEMS], u1
   visual->anchor.y          = 16.f;
 
   chest = ecs_add(ecs, entity, CHEST);
-  memcpy(chest->items, items, cnt * sizeof(Item));
+  SDL_memcpy(chest->items, items, cnt * sizeof(Item));
   chest->num_items = cnt;
 
   interactable               = ecs_add(ecs, entity, INTERACTABLE);
@@ -1105,44 +1028,7 @@ ecs_entity_t make_npc_nova(Ecs* ecs, Vec2 position, u16 conversation_id)
 
   ecs_add(ecs, entity, CONTROLLER);
 
-  BTRoot*                 root;
-  BTTask_FollowAttacker*  follow_attacker;
-  BTCondition_IsAttacked* is_attacked;
-  BTTask_Attack*          attack;
-  BTTask_Equip*           task_equip;
-  BTSelector*             selector1;
-  BTSelector*             selector2;
-  BTSequence*             sequence;
-  BTTask_Wait*            wait_affter_attack;
-
-  root               = bt_root_new();
-  follow_attacker    = bt_task_follow_attacker_new(16.f);
-  is_attacked        = bt_condition_is_attacked_new();
-  attack             = bt_task_attack_new(BTTASK_ATTACK_MODE_ATTACKER);
-  task_equip         = bt_task_equip_new(WEAPON_ANIME_SWORD);
-  selector1          = bt_selector_new();
-  selector2          = bt_selector_new();
-  wait_affter_attack = bt_task_wait_new(40);
-  sequence           = bt_sequence_new();
-
-  bt_root_set_child(root, (BTNode*)is_attacked);
-  bt_decorator_set_child((BTDecorator*)is_attacked, (BTNode*)selector1);
-
-  bt_selector_add(selector1, (BTNode*)follow_attacker);
-  bt_selector_add(selector1, (BTNode*)selector2);
-
-  bt_selector_add(selector2, (BTNode*)sequence);
-  bt_selector_add(selector2, (BTNode*)task_equip);
-
-  bt_sequence_add(sequence, (BTNode*)attack);
-  bt_sequence_add(sequence, (BTNode*)wait_affter_attack);
-
-  ecs_add_w_data(ecs, entity, BRAIN, &(Brain){ (BTNode*)root });
-
-  ecs_add_w_data(ecs,
-                 entity,
-                 EQUIPMENT,
-                 &(Equipment){ .weapon = ECS_NULL_ENT, .attach_point = { 8, -9 } });
+  ecs_add_w_data(ecs, entity, HAND, &(Hand){ .weapon = ECS_NULL_ENT, .attach_point = { 8, -9 } });
 
   ecs_add(ecs, entity, ENABLE_TILE_COLLISION_TAG);
   ecs_add_w_data(ecs, entity, MOVE_SPEED, &(MoveSpeed){ 120 });

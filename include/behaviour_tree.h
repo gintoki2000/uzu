@@ -31,6 +31,7 @@ typedef struct BTNodeVtbl
   {                                                                                                \
     static __TName##Vtbl vtbl;                                                                     \
     static BOOL          initialized = FALSE;                                                      \
+    extern void          __tname##_vtbl_init(__TName##Vtbl*);                                      \
     if (!initialized)                                                                              \
     {                                                                                              \
       __tname##_vtbl_init(&vtbl);                                                                  \
@@ -212,6 +213,7 @@ struct BTCondition
   BT_EXTEND_NODE(BTDecorator)
   BOOL is_child_running;
   BOOL abort_if_fail;
+  BOOL invert_result;
 };
 
 typedef struct
@@ -227,7 +229,7 @@ typedef struct
 
 const BTNodeVtbl* bt_condition_vtbl_inst();
 void              bt_condition_vtbl_init(BTConditionVtbl* vtbl);
-BTCondition*      bt_condition_init(BTCondition* self, BOOL abort_if_fail);
+BTCondition*      bt_condition_init(BTCondition* self, BOOL abort_if_fail, BOOL invert_result);
 BTStatus          bt_condition_exec(BTCondition* self, Ecs* ecs, ecs_entity_t entity);
 
 #endif // BEHAVIOUR_TREE_H

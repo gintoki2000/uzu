@@ -21,15 +21,18 @@ static void update_player_facing_direction(void)
   ecs_entity_t     player = get_player(g_ecs);
   Vec2             mouse_position;
   Vec2             player_position;
-  Vec2             direction;
   FacingDirection* facing_direction;
+  extern RECT      g_viewport;
+
   if (player != ECS_NULL_ENT && (facing_direction = ecs_get(g_ecs, player, FACING_DIRECTION)))
   {
     if (!facing_direction->frezze)
     {
-      mouse_position  = get_mouse_position();
+      mouse_position                      = get_mouse_position();
+      mouse_position.x += g_viewport.x;
+      mouse_position.y += g_viewport.y;
       player_position = get_entity_position(g_ecs, player);
-      direction       = vec2_unit(vec2_sub(mouse_position, player_position));
+      facing_direction->value             = vec2_unit(vec2_sub(mouse_position, player_position));
     }
   }
 }
@@ -48,6 +51,8 @@ static void update_facing_direction_by_attack_target(void)
   ecs_raw(g_ecs, FACING_DIRECTION, &entities, (void**)&facing_direction, &count);
   for (int i = 0; i < count; ++i)
   {
+    if (ecs_has(g_ecs, entities[i], PLAYER_TAG))
+      continue;
     if (!facing_direction->frezze)
     {
       if ((attack_target = ecs_get(g_ecs, entities[i], ATTACK_TARGET)) &&

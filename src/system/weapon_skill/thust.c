@@ -40,7 +40,7 @@ void weapon_thust_attack_system()
   Holder*            holder;
   WeaponThustAttack* thust_attack;
   Controller*        holder_controller;
-  Equipment*         holder_equipment;
+  Hand*              holder_hand;
   AttackMask*        holder_attack_mask;
   Motion*            holder_motion;
   FacingDirection*   holder_facing_direction;
@@ -58,13 +58,13 @@ void weapon_thust_attack_system()
         {
           if (holder_controller->action == thust_attack[i].on_action)
           {
-            holder_equipment        = ecs_get(g_ecs, holder->value, EQUIPMENT);
+            holder_hand             = ecs_get(g_ecs, holder->value, HAND);
             holder_motion           = ecs_get(g_ecs, holder->value, MOTION);
             holder_facing_direction = ecs_get(g_ecs, holder->value, FACING_DIRECTION);
             transform               = ecs_get(g_ecs, entities[i], TRANSFORM);
 
-            holder_equipment->adjustment.x  = -10;
-            holder_equipment->adjustment.y  = -5;
+            holder_hand->adjustment.x       = -10;
+            holder_hand->adjustment.y       = -5;
             holder_controller->in_action    = TRUE;
             holder_controller->action       = CHARACTER_ACTION_NONE;
             holder_facing_direction->frezze = TRUE;
@@ -79,12 +79,12 @@ void weapon_thust_attack_system()
       case 1:
         if (TIMER_TICK(thust_attack[i].timer))
         {
-          holder_equipment        = ecs_get(g_ecs, holder->value, EQUIPMENT);
+          holder_hand             = ecs_get(g_ecs, holder->value, HAND);
           holder_facing_direction = ecs_get(g_ecs, holder->value, FACING_DIRECTION);
           transform               = ecs_get(g_ecs, entities[i], TRANSFORM);
 
-          holder_equipment->adjustment.x = -8;
-          holder_equipment->adjustment.y = -4;
+          holder_hand->adjustment.x      = -8;
+          holder_hand->adjustment.y      = -4;
           transform->rotation            = -12 * signf(holder_facing_direction->value.x);
           thust_attack[i].state          = 2;
           thust_attack[i].timer          = 2;
@@ -93,11 +93,11 @@ void weapon_thust_attack_system()
       case 2:
         if (TIMER_TICK(thust_attack[i].timer))
         {
-          holder_equipment = ecs_get(g_ecs, holder->value, EQUIPMENT);
+          holder_hand      = ecs_get(g_ecs, holder->value, HAND);
           transform        = ecs_get(g_ecs, entities[i], TRANSFORM);
 
-          holder_equipment->adjustment.x = 10;
-          holder_equipment->adjustment.y = 0;
+          holder_hand->adjustment.x      = 10;
+          holder_hand->adjustment.y      = 0;
           transform->rotation            = 0.0;
           thust_attack[i].state          = 3;
           thust_attack[i].timer          = 7;
@@ -109,15 +109,15 @@ void weapon_thust_attack_system()
         {
           if (TIMER_TICK(thust_attack[i].timer))
           {
-            holder_equipment        = ecs_get(g_ecs, holder->value, EQUIPMENT);
+            holder_hand             = ecs_get(g_ecs, holder->value, HAND);
             transform               = ecs_get(g_ecs, entities[i], TRANSFORM);
             attributes              = ecs_get(g_ecs, entities[i], WEAPON_ATTRIBUTES);
             holder_attack_mask      = ecs_get(g_ecs, holder->value, ATTACK_MASK);
             holder_facing_direction = ecs_get(g_ecs, holder->value, FACING_DIRECTION);
 
             holder_controller->in_action    = FALSE;
-            holder_equipment->adjustment.x  = 0;
-            holder_equipment->adjustment.y  = 0;
+            holder_hand->adjustment.x       = 0;
+            holder_hand->adjustment.y       = 0;
             thust_attack[i].state           = 0;
             holder_facing_direction->frezze = FALSE;
 

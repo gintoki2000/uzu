@@ -26,7 +26,7 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
   [ANIMATOR]                     = ECS_TYPE(Animator),
   [PLAYER_TAG]                   = ECS_TYPE(PlayerTag),
   [CONTROLLER]                   = ECS_TYPE(Controller),
-  [EQUIPMENT]                    = ECS_TYPE(Equipment),
+  [HAND]                         = ECS_TYPE(Hand),
   [HEALTH]                       = ECS_TYPE(Health),
   [HITBOX]                       = ECS_TYPE_EX(HitBox, hitbox_init, NULL, NULL),
   [ENEMY_TAG]                    = ECS_TYPE(PlayerTag),
@@ -135,7 +135,8 @@ static void transform_init(Transform* t)
 
 static void facing_direction_init(FacingDirection* fd)
 {
-  fd->value = (Vec2){ 1.f, 0.f };
+  fd->value  = (Vec2){ 1.f, 0.f };
+  fd->frezze = 0;
 }
 
 static void attack_target_init(AttackTarget* attack_target)

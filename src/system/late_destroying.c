@@ -1,6 +1,6 @@
-#include "system/game_logic.h"
-#include "entity_utils.h"
 #include "components.h"
+#include "entity_utils.h"
+#include "system/game_logic.h"
 #include "toolbox/toolbox.h"
 
 extern Ecs* g_ecs;
@@ -32,12 +32,12 @@ static void destroy_tagged_entities()
   ecs_entity_t* entities;
   ecs_size_t    cnt;
 
-  Equipment* equipment;
+  Hand* equipment;
 
   ecs_raw(g_ecs, DESTROYED_TAG, &entities, NULL, &cnt);
   for (int i = cnt - 1; i >= 0; --i)
   {
-    if ((equipment = ecs_get(g_ecs, entities[i], EQUIPMENT)))
+    if ((equipment = ecs_get(g_ecs, entities[i], HAND)))
     {
       if (equipment->weapon != ECS_NULL_ENT)
         ecs_destroy(g_ecs, equipment->weapon);

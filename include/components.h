@@ -13,7 +13,7 @@ typedef enum ComponentId
   MOTION,
   ANIMATOR,
   CONTROLLER,
-  EQUIPMENT,
+  HAND,
   HEALTH,
   HITBOX,
   HEAL_BAR,
@@ -114,7 +114,7 @@ typedef struct Equipment
   ecs_entity_t weapon;
   Vec2         attach_point;
   Vec2         adjustment;
-} Equipment;
+} Hand;
 
 typedef struct WeaponAttributes
 {

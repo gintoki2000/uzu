@@ -1,12 +1,10 @@
-#include "system/game_logic.h"
-
 #include "components.h"
 #include "entity_utils.h"
-
-extern Ecs* g_ecs;
+#include "system/game_logic.h"
 
 void following_system(void)
 {
+  extern Ecs*      g_ecs;
   ecs_entity_t*    entities;
   ecs_size_t       cnt;
   FollowingTarget* target;

@@ -38,13 +38,13 @@ static void cast_fire_ball(Ecs* ecs, SDL_UNUSED ecs_entity_t caster, ecs_entity_
   WeaponAttributes* attributes;
   Transform*        transform;
   AttackMask*       attack_mask;
-  Controller*       controller;
+  FacingDirection*  facing_direction;
 
-  transform   = ecs_get(ecs, weapon, TRANSFORM);
-  controller  = ecs_get(ecs, caster, CONTROLLER);
-  attack_mask = ecs_get(ecs, caster, ATTACK_MASK);
+  transform        = ecs_get(ecs, weapon, TRANSFORM);
+  attack_mask      = ecs_get(ecs, caster, ATTACK_MASK);
+  facing_direction = ecs_get(ecs, caster, FACING_DIRECTION);
 
-  Vec2 speed = vec2_mul(controller->attack_direction, 120.f);
+  Vec2 speed = vec2_mul(facing_direction->value, 120.f);
 
   attributes = ecs_get(ecs, weapon, WEAPON_ATTRIBUTES);
 

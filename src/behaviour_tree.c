@@ -450,21 +450,24 @@ void bt_condition_vtbl_init(BTConditionVtbl* vtbl)
   vtbl->pred                  = NULL;
 }
 
-BTCondition* bt_condition_init(BTCondition* self, BOOL abort_if_fail)
+BTCondition* bt_condition_init(BTCondition* self, BOOL abort_if_fail, BOOL invert_result)
 {
   bt_decorator_init((BTDecorator*)self);
   self->abort_if_fail    = abort_if_fail;
   self->is_child_running = FALSE;
+  self->invert_result    = invert_result;
   return self;
 }
 
 BTStatus bt_condition_exec(BTCondition* self, Ecs* ecs, ecs_entity_t entity)
 {
-  if (bt_condition_vc_pred(self, ecs, entity))
+  BOOL predict_result = bt_condition_vc_pred(self, ecs, entity);
+  predict_result      = self->invert_result ? !predict_result : predict_result;
+  if (predict_result)
   {
     BTStatus stt = bt_node_vc_exec(((BTDecorator*)self)->child, ecs, entity);
     if (stt == BT_STATUS_FAILURE || stt == BT_STATUS_SUCCESS)
-      bt_node_vc_finish(self->__parent_inst.child, ecs, entity, stt);
+      bt_node_vc_finish(((BTDecorator*)self)->child, ecs, entity, stt);
     return stt;
   }
   else

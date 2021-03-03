@@ -288,6 +288,7 @@ static void update_game_logic(void)
   RUN_SYSTEM(paralyzing_system);
   RUN_SYSTEM(self_destruction_system);
   RUN_SYSTEM(update_attack_target_system);
+  RUN_SYSTEM(update_facing_direction_system);
 
   (map_update_animated_cells());
 

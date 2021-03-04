@@ -218,6 +218,12 @@ typedef enum
   NUM_CAST_EFFECTS
 } CastEffectType;
 
+typedef struct Cursor
+{
+  Sprite    sprite;
+  SDL_Point hotspot;
+} Cursor;
+
 extern ecs_entity_t (*const g_make_weapon_fn_tbl[NUM_WEAPONS])(Ecs*, u16);
 extern ecs_entity_t (*const g_make_character_fn_tbl[NUM_JOBS])(Ecs*, Vec2);
 extern ecs_entity_t (*const g_make_pickupable_fn_tbl[NUM_ITEM_TYPES])(Ecs*, Vec2 pos);

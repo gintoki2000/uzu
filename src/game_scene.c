@@ -35,6 +35,7 @@
 
 #include "entity_utils.h"
 #include "system/event_messaging_sys.h"
+#include "dungeon.h"
 
 static void on_load(void);
 static void on_unload(void);
@@ -92,6 +93,8 @@ static void spawn_player(Vec2 position)
 }
 static void on_load()
 {
+  extern Cursor g_cursor_cross;
+  push_cursor_state(g_cursor_cross);
   g_ecs = ecs_new(g_comp_types, NUM_COMPONENTS);
 
   ems_init();

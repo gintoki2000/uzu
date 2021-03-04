@@ -127,7 +127,7 @@ void weapon_thust_attack_system()
             damage_area.h = 12;
 
             collision_box_query(&damage_area,
-                                attributes->atk,
+                                holder_attack_mask->value,
                                 CALLBACK_1((&(CBThust_QueryHitEntitiesArgs){
                                                .dealer    = holder->value,
                                                .damage    = attributes->atk,

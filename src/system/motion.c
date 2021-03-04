@@ -15,9 +15,9 @@ static void apply_controller_input(void)
   ecs_entity_t* entities;
   ecs_size_t    cnt;
 
-  const Controller* controllers;
-  const MoveSpeed*  move_speed;
-  Motion*           motion;
+  Controller*      controllers;
+  const MoveSpeed* move_speed;
+  Motion*          motion;
 
   ecs_raw(g_ecs, CONTROLLER, &entities, (void**)&controllers, &cnt);
   for (int i = 0; i < cnt; ++i)
@@ -26,6 +26,7 @@ static void apply_controller_input(void)
         (move_speed = ecs_get(g_ecs, entities[i], MOVE_SPEED)))
     {
       motion->vel = vec2_mul(controllers[i].desired_direction, (float)move_speed->value);
+      controllers[i].desired_direction = (Vec2){ 0 };
     }
   }
 }

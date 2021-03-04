@@ -44,7 +44,7 @@ void weapon_shoot_system()
           shoots[i].timer       = shoots[i].fire_rate;
           controller->in_action = TRUE;
           controller->action    = CHARACTER_ACTION_NONE;
-          projspd               = vec2_mul(facing_direction->value, 100.f);
+          projspd               = vec2_mul(facing_direction->value, 170.f);
           make_arrow(g_ecs, holder->value, transform->position, projspd, attack_mask->value);
         }
       }

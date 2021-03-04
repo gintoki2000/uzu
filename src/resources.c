@@ -70,6 +70,8 @@ static const char*  _texture_files[NUM_TEXS] = {
   [TEX_INVENTORY]            = "asserts/ui/inventory.png",
   [TEX_INVENTORY_TAB_ACTIVE] = "asserts/ui/inventory_tab_active.png",
   [TEX_INVENTORY_CURSOR]     = "asserts/ui/inventory_cursor.png",
+  [TEX_CURSOR_CROSS]         = "asserts/crosshair.png",
+  [TEX_CURSOR_POINTER]       = "asserts/cursor_pointer.png",
 };
 
 static Mix_Music*  _bg_musics[NUM_BG_MUSICS];

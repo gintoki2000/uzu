@@ -1,24 +1,26 @@
 #include "bttask.h"
+#include "components.h"
 
 struct BTTask_Wait
 {
   BT_EXTEND_NODE(BTNode)
-  int total_ticks;
-  int remaining;
+  int  total_ticks;
+  int  remaining;
+  BOOL is_running;
 };
 
 static const BTNodeVtbl* __vtbl_inst();
 static void              __vtbl_init(BTNodeVtbl* vtbl);
 
-#define TASK BTTask_Wait
+#define NODE BTTask_Wait
 
-static TASK*    __init(TASK* self, int total_ticks);
-static void     __abort(TASK* self, Ecs* ecs, ecs_entity_t entity);
-static void     __finish(TASK* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status);
-static BTStatus __exec(TASK* self, Ecs* ecs, ecs_entity_t entity);
+static NODE*    __init(NODE* self, int total_ticks);
+static void     __abort(NODE* self, Ecs* ecs, ecs_entity_t entity);
+static void     __finish(NODE* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status);
+static BTStatus __exec(NODE* self, Ecs* ecs, ecs_entity_t entity);
 
 BT_STATIC_VTBL_INST_FN(BTNode, _)
-BT_ALLOC_FN(TASK, _)
+BT_ALLOC_FN(NODE, _)
 
 void __vtbl_init(BTNodeVtbl* vtbl)
 {
@@ -29,40 +31,56 @@ void __vtbl_init(BTNodeVtbl* vtbl)
   vtbl->finish = (bt_finish_fn_t)__finish;
 }
 
-TASK* bt_task_wait_new(int total_ticks)
+NODE* bt_task_wait_new(int total_ticks)
 {
   return __init(__alloc(), total_ticks);
 }
 
-TASK* __init(TASK* self, int total_ticks)
+NODE* __init(NODE* self, int total_ticks)
 {
   bt_node_init((BTNode*)self);
   self->total_ticks = total_ticks;
   self->remaining   = total_ticks;
+  self->is_running  = SDL_FALSE;
   return self;
 }
 
-void __finish(TASK*      self,
-              SDL_UNUSED Ecs*         ecs,
-              SDL_UNUSED ecs_entity_t entity,
-              SDL_UNUSED BTStatus     finish_status)
+void __finish(NODE*               self,
+              Ecs*                ecs,
+              ecs_entity_t        entity,
+              SDL_UNUSED BTStatus finish_status /*success? -> BOOL*/)
 {
-  self->remaining = self->total_ticks;
+  Controller* controller = ecs_get(ecs, entity, CONTROLLER);
+  self->remaining        = self->total_ticks;
+  self->is_running       = FALSE;
+  controller->in_action  = FALSE;
 }
 
-void __abort(TASK* self, SDL_UNUSED Ecs* ecs, SDL_UNUSED ecs_entity_t entity)
+void __abort(NODE* self, SDL_UNUSED Ecs* ecs, SDL_UNUSED ecs_entity_t entity)
 {
-  self->remaining = self->total_ticks;
+  Controller* controller = ecs_get(ecs, entity, CONTROLLER);
+  self->remaining        = self->total_ticks;
+  self->is_running       = FALSE;
+  controller->in_action  = FALSE;
 }
 
-BTStatus __exec(TASK* self, SDL_UNUSED Ecs* ecs, SDL_UNUSED ecs_entity_t entity)
+BTStatus __exec(NODE* self, SDL_UNUSED Ecs* ecs, SDL_UNUSED ecs_entity_t entity)
 {
-  if (self->remaining > 0 && --self->remaining == 0)
+  if (self->is_running)
   {
-    return BT_STATUS_SUCCESS;
+    if (self->remaining > 0 && --self->remaining == 0)
+      return BT_STATUS_SUCCESS;
+    else
+      return BT_STATUS_RUNNING;
   }
   else
+  {
+    Controller* controller = ecs_get(ecs, entity, CONTROLLER);
+    if (controller == NULL || controller->in_action)
+      return BT_STATUS_FAILURE;
+    self->is_running = TRUE;
     return BT_STATUS_RUNNING;
+  }
 }
 
-#undef TASK
+#undef NODE

@@ -27,11 +27,36 @@ static int get_height()
   return _num_entries * ENTRY_HEIGHT + (_num_entries - 1) * ENTRY_VGAP;
 }
 
+static RECT get_bound(void)
+{
+  RECT bound;
+  bound.x = _pos_x;
+  bound.y = _pos_y;
+  bound.w = UI_LIST_WIDTH;
+  bound.h = get_height();
+  return bound;
+}
+
 static void process_key_input(SDL_UNUSED void* arg)
 {
+  SDL_Point mouse_position;
+  SDL_GetMouseState(&mouse_position.x, &mouse_position.y);
+  mouse_position.x /= SCL_X;
+  mouse_position.y /= SCL_Y;
+
+  RECT bound         = get_bound();
+  BOOL mouse_in_rect = SDL_PointInRect(&mouse_position, &bound);
+
+  if (mouse_in_rect)
+  {
+    int y = mouse_position.y - _pos_y - FIRST_ENTRY_Y;
+    y /= (ENTRY_HEIGHT + ENTRY_VGAP);
+    _selected = y;
+  }
+
   if (button_just_pressed(BUTTON_UP))
   {
-    _selected = max(0, _selected -1);
+    _selected = max(0, _selected - 1);
     Mix_PlayChannel(-1, get_sfx(SFX_BUTTON), 0);
   }
 
@@ -46,7 +71,8 @@ static void process_key_input(SDL_UNUSED void* arg)
     ui_list_close();
   }
 
-  if (button_just_pressed(BUTTON_INTERACT))
+  if (button_just_pressed(BUTTON_INTERACT) ||
+      (mouse_in_rect && mouse_button_just_pressed(SDL_BUTTON_LEFT)))
   {
     ui_list_close();
     INVOKE_EVENT(_events[UI_LIST_ON_SELECT], (const char*)_entries[_selected].text);
@@ -80,7 +106,7 @@ void ui_list_draw()
   COLOR color;
   for (int i = 0; i < _num_entries; ++i)
   {
-    color = UI_COLOR_TEXT;
+    color = (i != _selected) ? UI_COLOR_TEXT : UI_COLOR_TEXT_SELECT;
     FC_DrawEffect(get_font(FONT_ITEM_PICKED_UP),
                   g_renderer,
                   _pos_x + UI_LIST_WIDTH / 2,

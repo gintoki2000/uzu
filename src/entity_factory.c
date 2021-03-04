@@ -58,7 +58,7 @@ ecs_entity_t make_character_base(Ecs* ecs, const NewCharacterParams* params)
   /*components */
   Transform*  transform;
   Visual*     visual;
-  Hand*       equipment;
+  Hand*       hand;
   Controller* controller;
   Animator*   animator;
   HitBox*     hitbox;
@@ -74,10 +74,12 @@ ecs_entity_t make_character_base(Ecs* ecs, const NewCharacterParams* params)
   visual->anchor.x = 16 / 2;
   visual->anchor.y = 28;
 
-  equipment                 = ecs_add(ecs, entity, HAND);
-  equipment->weapon         = ECS_NULL_ENT;
-  equipment->attach_point.x = 16 / 2;
-  equipment->attach_point.y = -7;
+  hand                   = ecs_add(ecs, entity, HAND);
+  hand->weapon           = ECS_NULL_ENT;
+  hand->attach_point.x   = 8;
+  hand->attach_point.y   = 0;
+  hand->original_point.x = 0;
+  hand->original_point.y = -7;
 
   controller = ecs_add(ecs, entity, CONTROLLER);
 
@@ -255,7 +257,7 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 position)
 
   /*components */
   Drop*       drop;
-  Hand*       equipment;
+  Hand*       hand;
   Controller* controller;
   Spot*       spot;
 
@@ -282,10 +284,10 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 position)
 
   controller = ecs_add(ecs, entity, CONTROLLER);
 
-  equipment                 = ecs_add(ecs, entity, HAND);
-  equipment->weapon         = ECS_NULL_ENT;
-  equipment->attach_point.x = 16 / 2;
-  equipment->attach_point.y = -6;
+  hand                 = ecs_add(ecs, entity, HAND);
+  hand->weapon         = ECS_NULL_ENT;
+  hand->attach_point.x = 16 / 2;
+  hand->attach_point.y = -6;
 
   ecs_entity_t weapon = make_spear(ecs, BIT(CATEGORY_PLAYER));
 
@@ -704,9 +706,10 @@ ecs_entity_t make_staff(Ecs* ecs, u16 mask)
   visual->anchor.x = visual->sprite.rect.w / 2;
   visual->anchor.y = visual->sprite.rect.h / 2 + 4;
 
-  attrs          = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
-  attrs->atk     = 1;
-  attrs->type_id = WEAPON_STAFF;
+  attrs              = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
+  attrs->atk         = 1;
+  attrs->type_id     = WEAPON_STAFF;
+  attrs->rotate_hand = FALSE;
 
   castable = ecs_add(ecs, entity, WEAPON_CAST);
 
@@ -1112,13 +1115,13 @@ ecs_entity_t make_bow(Ecs* ecs, u16 mask)
 
   visual = ecs_add(ecs, entity, VISUAL);
   sprite_init(&visual->sprite, TEX_BOW);
-  visual->anchor.x = visual->sprite.rect.w / 2;
+  visual->anchor.x = 0;
   visual->anchor.y = visual->sprite.rect.h / 2;
 
-  attrs                             = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
-  attrs->atk                        = 2;
-  attrs->type_id                    = WEAPON_BOW;
-  attrs->sync_with_attack_direction = TRUE;
+  attrs              = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
+  attrs->atk         = 2;
+  attrs->type_id     = WEAPON_BOW;
+  attrs->rotate_hand = TRUE;
 
   ecs_add(ecs, entity, HOLDER);
 

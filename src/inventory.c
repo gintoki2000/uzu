@@ -1,6 +1,7 @@
 #include "inventory.h"
 
 #include "constances.h"
+#include "dungeon.h"
 #include "engine/keyboard.h"
 #include "entity_utils.h"
 #include "game_scene.h"
@@ -24,6 +25,11 @@
 #define CURSOR_HEIGHT 26
 #define CURSOR_FRAME_DURATION 10
 #define CURSOR_NUM_FRAMES 6
+
+static RECT _cell_panel = { FIRST_CELL_X,
+                            FIRST_CELL_Y,
+                            (CELL_SIZE + CELL_GAP) * NUM_COLS,
+                            (CELL_SIZE + CELL_GAP) * NUM_ROWS };
 
 extern RENDERER* g_renderer;
 
@@ -76,7 +82,7 @@ static const char        _text_drop[] = "DROP";
 static const char* const _opts[]      = { _text_use, _text_drop };
 
 //<----------------------------------event callbacks--------------------------->//
-static void process_key_input(void*);
+static void process_input(void*);
 static void on_list_selected(pointer_t arg, const char* item);
 //<============================================================================>//
 
@@ -107,8 +113,24 @@ static void play_sound(SfxId id)
   Mix_PlayChannel(-1, get_sfx(id), 0);
 }
 
-static void process_key_input(SDL_UNUSED void* arg)
+static void process_input(SDL_UNUSED void* arg)
 {
+  SDL_Point mouse_position;
+  SDL_GetMouseState(&mouse_position.x, &mouse_position.y);
+  mouse_position.x /= SCL_X;
+  mouse_position.y /= SCL_Y;
+
+  if (SDL_PointInRect(&mouse_position, &_cell_panel))
+  {
+    SDL_Point cell_position = mouse_position;
+    cell_position.x -= FIRST_CELL_X;
+    cell_position.y -= FIRST_CELL_Y;
+
+    cell_position.x /= (CELL_SIZE + CELL_GAP);
+    cell_position.y /= (CELL_SIZE + CELL_GAP);
+    _curr_col = cell_position.x;
+    _curr_row = cell_position.y;
+  }
   if (button_just_pressed(BUTTON_LEFT))
   {
     _curr_col = max(0, _curr_col - 1);
@@ -138,22 +160,31 @@ static void process_key_input(SDL_UNUSED void* arg)
     ui_list_hook(UI_LIST_ON_SELECT, CALLBACK_2(on_list_selected));
   }
 
-  if (mouse_button_just_pressed(SDL_BUTTON_LEFT) && _category > 0)
-  {
-    --_category;
-    play_sound(SFX_INTERACTION);
-  }
-
-  if (mouse_button_just_pressed(SDL_BUTTON_RIGHT) && _category < NUM_ITEM_CATEGORIES - 1)
-  {
-    ++_category;
-    play_sound(SFX_INTERACTION);
-  }
-
   if (button_just_pressed(BUTTON_CANCEL))
   {
     inventory_close();
     play_sound(SFX_INTERACTION);
+  }
+
+  if (mouse_button_just_pressed(SDL_BUTTON_LEFT))
+  {
+    for (int i = 0; i < NUM_ITEM_CATEGORIES; ++i)
+    {
+      if (SDL_PointInRect(&mouse_position, &_icon_dst_tbl[i]))
+      {
+        _category = i;
+        play_sound(SFX_INTERACTION);
+      }
+    }
+
+    if (SDL_PointInRect(&mouse_position, &_cell_panel))
+    {
+
+      play_sound(SFX_INTERACTION);
+      ui_list_display((const char**)_opts, 2);
+      ui_list_set_pos(UI_LIST_POS_CENTER_X, UI_LIST_POS_CENTER_Y);
+      ui_list_hook(UI_LIST_ON_SELECT, CALLBACK_2(on_list_selected));
+    }
   }
 }
 
@@ -254,7 +285,9 @@ void inventory_display()
 {
   game_scene_pause();
   _visible = TRUE;
-  input_push_state(INPUT_STATE_INST_1(process_key_input));
+  input_push_state(INPUT_STATE_INST_1(process_input));
+  extern Cursor g_cursor_pointer;
+  push_cursor_state(g_cursor_pointer);
 }
 
 void inventory_close()
@@ -262,6 +295,7 @@ void inventory_close()
   game_scene_resume();
   _visible = FALSE;
   input_pop_state();
+  pop_cursor_state();
 }
 
 static void draw_cursor(void)

@@ -113,6 +113,7 @@ typedef struct Equipment
 {
   ecs_entity_t weapon;
   Vec2         attach_point;
+  Vec2         original_point;
   Vec2         adjustment;
 } Hand;
 
@@ -120,7 +121,7 @@ typedef struct WeaponAttributes
 {
   s32  atk;
   u16  type_id;
-  BOOL sync_with_attack_direction;
+  BOOL rotate_hand;
 } WeaponAttributes;
 
 /*Weapon skills*/

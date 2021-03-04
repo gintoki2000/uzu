@@ -156,14 +156,7 @@ BTStatus bt_selector_exec(BTSelector* self, Ecs* ecs, ecs_entity_t entity)
     break;
   case BT_STATUS_FAILURE:
     bt_node_vc_finish(current_node, ecs, entity, BT_STATUS_FAILURE);
-    if (bt_selector_next_child(self))
-    {
-      return BT_STATUS_RUNNING;
-    }
-    else
-    {
-      return BT_STATUS_FAILURE;
-    }
+    return bt_selector_next_child(self) ? BT_STATUS_RUNNING : BT_STATUS_FAILURE;
     break;
   case BT_STATUS_SUCCESS:
     bt_node_vc_finish(current_node, ecs, entity, BT_STATUS_SUCCESS);
@@ -253,14 +246,7 @@ BTStatus bt_sequence_exec(BTSequence* self, Ecs* ecs, ecs_entity_t entity)
     break;
   case BT_STATUS_SUCCESS:
     bt_node_vc_finish(current_node, ecs, entity, BT_STATUS_SUCCESS);
-    if (bt_sequence_next_child(self))
-    {
-      return BT_STATUS_RUNNING;
-    }
-    else
-    {
-      return BT_STATUS_SUCCESS;
-    }
+    return bt_sequence_next_child(self) ? BT_STATUS_RUNNING : BT_STATUS_SUCCESS;
     break;
   case BT_STATUS_FAILURE:
     bt_node_finish(current_node, ecs, entity, BT_STATUS_FAILURE);
@@ -341,6 +327,7 @@ void bt_decorator_del_child(BTDecorator* self)
     self->child = NULL;
   }
 }
+
 
 /***********************************************************/
 

@@ -177,7 +177,7 @@ static void process_input(SDL_UNUSED void* arg)
       }
     }
 
-    if (SDL_PointInRect(&mouse_position, &_cell_panel))
+    if (SDL_PointInRect(&mouse_position, &_cell_panel) && current_item()->num_items > 0)
     {
 
       play_sound(SFX_INTERACTION);

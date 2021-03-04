@@ -22,7 +22,7 @@ static BTStatus __exec(NODE* self, Ecs* ecs, ecs_entity_t entity);
 BT_STATIC_VTBL_INST_FN(BTNode, _)
 BT_ALLOC_FN(NODE, _)
 
-void __vtbl_init(BTNodeVtbl* vtbl)
+static void __vtbl_init(BTNodeVtbl* vtbl)
 {
   bt_node_vtbl_init(vtbl);
   vtbl->parent = bt_node_vtbl_inst();
@@ -36,7 +36,7 @@ NODE* bt_task_wait_new(int total_ticks)
   return __init(__alloc(), total_ticks);
 }
 
-NODE* __init(NODE* self, int total_ticks)
+static NODE* __init(NODE* self, int total_ticks)
 {
   bt_node_init((BTNode*)self);
   self->total_ticks = total_ticks;
@@ -45,7 +45,7 @@ NODE* __init(NODE* self, int total_ticks)
   return self;
 }
 
-void __finish(NODE*               self,
+static void __finish(NODE*               self,
               Ecs*                ecs,
               ecs_entity_t        entity,
               SDL_UNUSED BTStatus finish_status /*success? -> BOOL*/)
@@ -56,7 +56,7 @@ void __finish(NODE*               self,
   controller->in_action  = FALSE;
 }
 
-void __abort(NODE* self, SDL_UNUSED Ecs* ecs, SDL_UNUSED ecs_entity_t entity)
+static void __abort(NODE* self, SDL_UNUSED Ecs* ecs, SDL_UNUSED ecs_entity_t entity)
 {
   Controller* controller = ecs_get(ecs, entity, CONTROLLER);
   self->remaining        = self->total_ticks;
@@ -64,7 +64,7 @@ void __abort(NODE* self, SDL_UNUSED Ecs* ecs, SDL_UNUSED ecs_entity_t entity)
   controller->in_action  = FALSE;
 }
 
-BTStatus __exec(NODE* self, SDL_UNUSED Ecs* ecs, SDL_UNUSED ecs_entity_t entity)
+static BTStatus __exec(NODE* self, SDL_UNUSED Ecs* ecs, SDL_UNUSED ecs_entity_t entity)
 {
   if (self->is_running)
   {

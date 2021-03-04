@@ -1,6 +1,7 @@
 #include "entity_factory.h"
 #include "animations.h"
 #include "behaviour_tree.h"
+#include "btcondition.h"
 #include "bttask.h"
 #include "components.h"
 #include "constances.h"
@@ -223,6 +224,7 @@ ecs_entity_t make_monster_base(Ecs* ecs, const NewMonsterParams* params)
   ecs_add(ecs, entity, CHARACTER_ANIMATOR_TAG);
   ecs_add_w_data(ecs, entity, MOVE_SPEED, &(MoveSpeed){ 50 });
   ecs_add(ecs, entity, FACING_DIRECTION);
+  ecs_add_w_data(ecs, entity, ATTACK_MASK, &(AttackMask){ BIT(CATEGORY_PLAYER) });
   return entity;
 }
 
@@ -248,6 +250,37 @@ ecs_entity_t make_imp(Ecs* ecs, Vec2 position)
 ecs_entity_t make_wogol(Ecs* ecs, Vec2 position)
 {
   return make_monster_base(ecs, &(NewMonsterParams){ position, g_anims_wogol, 5, s_small_size });
+}
+
+static BTNode* create_chort_behavior_tree(void)
+{
+  BTRoot* root;
+
+  BTSelector*                  selector;
+  BTCondition_HasAttackTarget* has_attack_target;
+  BTSequence*                  sequence1;
+  BTTask_Wait*                 wait;
+  BTTask_FollowAttackTarget*   follow_attack_target;
+  BTTask_Attack*               attack;
+
+  root                 = bt_root_new();
+  selector             = bt_selector_new();
+  has_attack_target    = bt_condition_has_attack_target_new(FALSE);
+  sequence1            = bt_sequence_new();
+  wait                 = bt_task_wait_new(30);
+  attack               = bt_task_attack_new();
+  follow_attack_target = bt_task_follow_attack_target_new(16);
+
+  bt_root_set_child(root, (BTNode*)selector);
+
+  bt_selector_add(selector, (BTNode*)has_attack_target);
+
+  bt_decorator_set_child((BTDecorator*)has_attack_target, (BTNode*)sequence1);
+  bt_sequence_add(sequence1, (BTNode*)follow_attack_target);
+  bt_sequence_add(sequence1, (BTNode*)attack);
+  bt_sequence_add(sequence1, (BTNode*)wait);
+
+  return (BTNode*)root;
 }
 
 ecs_entity_t make_chort(Ecs* ecs, Vec2 position)
@@ -292,6 +325,8 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 position)
   ecs_entity_t weapon = make_spear(ecs, BIT(CATEGORY_PLAYER));
 
   equip(ecs, entity, weapon);
+
+  ecs_add_w_data(ecs, entity, BRAIN, &(Brain){ create_chort_behavior_tree() });
 
   return entity;
 }

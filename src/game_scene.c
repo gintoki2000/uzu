@@ -111,6 +111,7 @@ static void on_load()
   chest_system_init();
   player_controller_system_init();
   effect_system_init();
+  update_attack_target_system_init();
 
   // init ui
   ui_dialogue_init();

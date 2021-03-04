@@ -8,19 +8,19 @@ struct BTTask_MoveTo
   float arrive_radius;
 };
 
-#define TASK BTTask_MoveTo
+#define NODE BTTask_MoveTo
 
 static const BTNodeVtbl* __vtbl_inst();
 static void              __vtbl_init(BTNodeVtbl* vtbl);
-static TASK*             __init(TASK*, float);
-static BTStatus          __exec(TASK*, Ecs*, ecs_entity_t);
-static void              __abort(TASK*, Ecs*, ecs_entity_t);
-static void              __finish(TASK*, Ecs*, ecs_entity_t, BTStatus);
+static NODE*             __init(NODE*, float);
+static BTStatus          __exec(NODE*, Ecs*, ecs_entity_t);
+static void              __abort(NODE*, Ecs*, ecs_entity_t);
+static void              __finish(NODE*, Ecs*, ecs_entity_t, BTStatus);
 
 BT_ALLOC_FN(BTTask_MoveTo, _)
 BT_STATIC_VTBL_INST_FN(BTNode, _)
 
-TASK* bt_task_move_to_new(float arrive_radius)
+NODE* bt_task_move_to_new(float arrive_radius)
 {
   return __init(__alloc(), arrive_radius);
 }
@@ -34,14 +34,14 @@ void __vtbl_init(BTNodeVtbl* vtbl)
   vtbl->abort  = (bt_abort_fn_t)__abort;
 }
 
-static TASK* __init(TASK* self, float arrive_radius)
+static NODE* __init(NODE* self, float arrive_radius)
 {
   bt_node_init((BTNode*)self);
   self->arrive_radius = arrive_radius;
   return self;
 }
 
-static BTStatus __exec(TASK* self, Ecs* ecs, ecs_entity_t entity)
+static BTStatus __exec(NODE* self, Ecs* ecs, ecs_entity_t entity)
 {
   Destination* destination;
   Transform*   transform;
@@ -68,7 +68,7 @@ static BTStatus __exec(TASK* self, Ecs* ecs, ecs_entity_t entity)
   }
 }
 
-static void __abort(SDL_UNUSED TASK* self, Ecs* ecs, ecs_entity_t entity)
+static void __abort(SDL_UNUSED NODE* self, Ecs* ecs, ecs_entity_t entity)
 {
   Motion* motion;
   if (ecs_has(ecs, entity, DESTINATION) && (motion = ecs_get(ecs, entity, MOTION)))
@@ -78,7 +78,7 @@ static void __abort(SDL_UNUSED TASK* self, Ecs* ecs, ecs_entity_t entity)
   }
 }
 
-static void __finish(SDL_UNUSED TASK* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status)
+static void __finish(SDL_UNUSED NODE* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status)
 {
   Motion* motion;
   if (finish_status == BT_STATUS_SUCCESS && (motion = ecs_get(ecs, entity, MOTION)))
@@ -88,4 +88,4 @@ static void __finish(SDL_UNUSED TASK* self, Ecs* ecs, ecs_entity_t entity, BTSta
   }
 }
 
-#undef TASK
+#undef NODE

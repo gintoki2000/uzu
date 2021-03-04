@@ -1,10 +1,30 @@
 #include "components.h"
 #include "ecs/ecs.h"
 #include "entity_utils.h"
+#include "system/event_messaging_sys.h"
+
+extern Ecs* g_ecs;
+
+static void on_entity_died(SDL_UNUSED void* arg, MSG_EntityDied* event)
+{
+  ecs_entity_t* entities;
+  ecs_size_t    cnt;
+  AttackTarget* attack_target;
+  ecs_raw(g_ecs, ATTACK_TARGET, &entities, (void**)&attack_target, &cnt);
+  for (int i = cnt - 1; i >= 0; --i)
+  {
+    if (attack_target[i].value == event->entity)
+      ecs_rmv(g_ecs, entities[i], ATTACK_TARGET);
+  }
+}
+
+void update_attack_target_system_init()
+{
+  ems_connect(MSG_ENTITY_DIED, NULL, on_entity_died);
+}
 
 void update_attack_target_system(void)
 {
-  extern Ecs*   g_ecs;
   ecs_entity_t* entities;
   ecs_size_t    cnt;
   Vec2          target_position;

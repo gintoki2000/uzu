@@ -10,16 +10,16 @@ struct BTTask_Attack
   BOOL is_running;
 };
 
-#define TASK BTTask_Attack
+#define NODE BTTask_Attack
 
 static void     __vtbl_init(BTNodeVtbl* vtbl);
-static TASK*    __init(BTTask_Attack* self);
-static void     __finish(TASK* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status);
-static void     __abort(TASK* self, Ecs* ecs, ecs_entity_t entity);
-static BTStatus __exec(TASK* self, Ecs* ecs, ecs_entity_t entity);
+static NODE*    __init(BTTask_Attack* self);
+static void     __finish(NODE* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status);
+static void     __abort(NODE* self, Ecs* ecs, ecs_entity_t entity);
+static BTStatus __exec(NODE* self, Ecs* ecs, ecs_entity_t entity);
 
 BT_STATIC_VTBL_INST_FN(BTNode, _)
-BT_ALLOC_FN(TASK, _)
+BT_ALLOC_FN(NODE, _)
 
 static void __vtbl_init(BTNodeVtbl* vtbl)
 {
@@ -30,24 +30,24 @@ static void __vtbl_init(BTNodeVtbl* vtbl)
   vtbl->finish = (bt_finish_fn_t)__finish;
 }
 
-TASK* bt_task_attack_new()
+NODE* bt_task_attack_new()
 {
   return __init(__alloc());
 }
 
-static TASK* __init(BTTask_Attack* self)
+static NODE* __init(BTTask_Attack* self)
 {
   bt_node_init((BTNode*)self);
   self->is_running = FALSE;
   return self;
 }
 
-static void __abort(TASK* self, SDL_UNUSED Ecs* ecs, SDL_UNUSED ecs_entity_t entity)
+static void __abort(NODE* self, SDL_UNUSED Ecs* ecs, SDL_UNUSED ecs_entity_t entity)
 {
   self->is_running = FALSE;
 }
 
-static void __finish(TASK*      self,
+static void __finish(NODE*      self,
                      SDL_UNUSED Ecs*         ecs,
                      SDL_UNUSED ecs_entity_t entity,
                      SDL_UNUSED BTStatus     finish_status)
@@ -55,7 +55,7 @@ static void __finish(TASK*      self,
   self->is_running = FALSE;
 }
 
-static BTStatus __exec(TASK* self, Ecs* ecs, ecs_entity_t entity)
+static BTStatus __exec(NODE* self, Ecs* ecs, ecs_entity_t entity)
 {
   Controller*   controller;
   Hand*         hand;
@@ -84,10 +84,9 @@ static BTStatus __exec(TASK* self, Ecs* ecs, ecs_entity_t entity)
       return BT_STATUS_RUNNING;
     else
     {
-      self->is_running = FALSE;
       return BT_STATUS_SUCCESS;
     }
   }
 }
 
-#undef TASK
+#undef NODE

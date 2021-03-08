@@ -35,8 +35,8 @@ void equipment_system()
         theta             = SDL_atan2f(facing_diection->value.y, facing_diection->value.x);
         x                 = hand[i].attach_point.x + hand[i].adjustment.x;
         y                 = hand[i].attach_point.y + hand[i].adjustment.y;
-        s                 = SDL_sinf(theta);
-        c                 = SDL_cosf(theta);
+        s                 = facing_diection->value.y;
+        c                 = facing_diection->value.x;
         weapon_position.x = x * c - y * s;
         weapon_position.y = x * s + y * c;
         weapon_position.x += hand[i].original_point.x;

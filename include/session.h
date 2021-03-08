@@ -12,7 +12,7 @@ struct Session
   u16  spell;
   u16  coins;
   Vec2 pos;
-  char level[255];
+  char level[256];
 };
 
 extern struct Session g_session;

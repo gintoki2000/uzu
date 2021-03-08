@@ -89,11 +89,12 @@ void hitbox_init(HitBox* h)
   h->mask_bits = 0xffff;
 }
 
-void ladder_attrs_init(LadderAttributes* attrs, const char* level, const char* dest)
+void ladder_attrs_init(LadderAttributes* attrs, const char* level, const char* dest, u16 direction)
 {
   ASSERT(level != NULL && dest != NULL);
   SDL_strlcpy(attrs->level, level, LADDER_ATTRS_MAX_LEVEL_NAME_LEN);
   SDL_strlcpy(attrs->dest, dest, LADDER_ATTRS_MAX_DEST_LEN);
+  attrs->exit_direction = direction;
 }
 
 void name_init(Name* name, const char* value)

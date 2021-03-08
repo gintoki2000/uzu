@@ -18,6 +18,7 @@ typedef struct ParseFnParams
   Vec2         size;
   const char*  name;
   json_object* properties;
+  u16          id;
 } ParseFnParams;
 
 typedef struct ParseFnTblItem
@@ -96,7 +97,7 @@ static void parse_item(Item* item, json_object* json)
   item->num_items = num_items;
 }
 
-static void parse_item_list(Item items[5], int* num_items, const char* input)
+static void parse_item_list(Item items[5], u16* num_items, const char* input)
 {
   json_object* json = NULL;
 
@@ -181,6 +182,7 @@ static int parse_objectgroup(const json_object* object_group_json_obj)
     params.size.y     = json_object_object_get_as_double(obj_json_obj, "height");
     params.name       = json_object_object_get_as_string(obj_json_obj, "name");
     params.properties = json_object_object_get(obj_json_obj, "properties");
+    params.id         = json_object_object_get_as_int(obj_json_obj, "id");
 
     if ((parse_fn = get_entity_create_fn(objtype)) != NULL)
       parse_fn(&params);
@@ -258,23 +260,48 @@ static void parse_huge_demon(const ParseFnParams* params)
 }
 static void parse_chest(const ParseFnParams* params)
 {
-  Vec2 real_position = { params->position.x + params->size.x / 2.f,
-                         params->position.y + params->size.y };
+  NewChestParams chest_params;
+  chest_params.position.x = params->position.x + params->size.x / 2.f;
+  chest_params.position.y = params->position.y + params->size.y;
+  chest_params.id         = params->id;
+  chest_params.state      = CHEST_STATE_CLOSE;
 
-  Item items[CHEST_MAX_ITEMS];
-  int  num_items;
-
-  parse_item_list(items, &num_items, json_object_object_get_as_string(params->properties, "items"));
-  make_chest(g_ecs, real_position, items, num_items);
+  parse_item_list(chest_params.items,
+                  &chest_params.num_slots,
+                  json_object_object_get_as_string(params->properties, "items"));
+  make_chest(g_ecs, &chest_params);
 }
+
+static int direction_from_string(const char* value)
+{
+
+  static struct
+  {
+    const char* string_value;
+    u16         int_value;
+  } lut[4] = { { "up", UP }, { "down", DOWN }, { "left", LEFT }, { "right", RIGHT } };
+
+  for (int i = 0; i < 4; ++i)
+  {
+    if (SDL_strcmp(value, lut[i].string_value) == 0)
+      return lut[i].int_value;
+  }
+
+  ASSERT(FALSE && "invalid value");
+  return -1;
+}
+
 static void parse_ladder(const ParseFnParams* _params)
 {
+
   NewLadderParams params;
   params.level    = json_object_object_get_as_string(_params->properties, "level");
   params.dest     = json_object_object_get_as_string(_params->properties, "dest");
   params.name     = _params->name;
   params.position = _params->position;
   params.size     = _params->size;
+  params.direction =
+      direction_from_string(json_object_object_get_as_string(_params->properties, "direction"));
 
   make_ladder(g_ecs, &params);
 }

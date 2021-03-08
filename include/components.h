@@ -332,10 +332,17 @@ typedef struct Merchant
 } Merchant;
 
 #define CHEST_MAX_ITEMS 5
+enum 
+{
+  CHEST_STATE_CLOSE,
+  CHEST_STATE_OPEN,
+};
 typedef struct
 {
   Item items[CHEST_MAX_ITEMS];
-  u8   num_items;
+  u16  num_slots;
+  u16  state;
+  u32  id;
 } Chest;
 
 typedef struct
@@ -412,7 +419,7 @@ typedef struct Defense
   u16 lightning;
 } Defense;
 
-void ladder_attrs_init(LadderAttributes* sw, const char* level, const char* dest);
+void ladder_attrs_init(LadderAttributes* sw, const char* level, const char* dest, u16 direction);
 void name_init(Name* name, const char* value);
 void text_init(Text* text, const char* value, FONT* font, COLOR color);
 

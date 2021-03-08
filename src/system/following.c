@@ -18,7 +18,8 @@ void following_system(void)
   ecs_raw(g_ecs, FOLLOWING_TARGET, &entities, (void**)&target, &cnt);
   for (int i = cnt - 1; i >= 0; --i)
   {
-    if (!ecs_is_valid(g_ecs, target[i].entity))
+    if (!ecs_is_valid(g_ecs, target[i].entity) &&
+        (controller = ecs_get(g_ecs, entities[i], CONTROLLER)))
     {
       ecs_rmv(g_ecs, entities[i], FOLLOWING_TARGET);
       controller->desired_direction = VEC2_ZERO;

@@ -38,8 +38,8 @@ const u16 g_initial_spell[] = {
   SPELL_ID_NULL,
 };
 
-#define STARTING_POSITION_X (TILE_SIZE * 5)
-#define STARTING_POSITION_Y (TILE_SIZE * 7)
+#define STARTING_POSITION_X (20)
+#define STARTING_POSITION_Y (50)
 
 void new_game(u16 starting_job)
 {
@@ -55,5 +55,5 @@ void new_game(u16 starting_job)
   add_to_inv(g_initial_item1_tbl[starting_job], 1);
   add_to_inv(g_initial_item2_tbl[starting_job], 1);
 
-  strcpy(g_session.level, "0");
+  strcpy(g_session.level, "demon_ruin");
 }

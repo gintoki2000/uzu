@@ -39,7 +39,7 @@ void character_controller_system()
         (facing_direction = ecs_get(g_ecs, entities[i], FACING_DIRECTION)))
     {
 
-      if (ecs_has(g_ecs, entities[i], INVULNERABLE))
+      if (ecs_has(g_ecs, entities[i], INVULNERABLE) || ecs_has(g_ecs, entities[i], PARALYZED))
       {
         play_animation(animator, ANIM_STATE_HIT);
         return;
@@ -56,8 +56,6 @@ void character_controller_system()
       next_state = (absf(vx) > 0.1f || absf(vy) > 0.1f) ? ANIM_STATE_RUN : ANIM_STATE_IDLE;
 
       play_animation(animator, next_state);
-      if (ecs_has(g_ecs, entities[i], PLAYER_TAG))
-        SDL_Log("%f, %f", facing_direction->value.x, facing_direction->value.y);
       visual->flip = signf(facing_direction->value.x) < 0 ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
     }
   }

@@ -346,6 +346,8 @@ void inventory_draw()
       item_icon = item_type->icon;
 
       SDL_RenderCopy(g_renderer, get_texture(item_icon.texture_id), &item_icon.rect, &item_rect);
+      if (items[idx].num_items >= 1)
+        FC_Draw(_font, g_renderer, item_rect.x, item_rect.y, "%d", items[idx].num_items);
     }
   }
   int current_item_index = _curr_row * NUM_COLS + _curr_col;

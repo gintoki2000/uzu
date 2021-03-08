@@ -6,7 +6,8 @@
 #include "toolbox/toolbox.h"
 
 ecs_entity_t make_golden_cross_hit_effect(Ecs* ecs, Vec2 position);
-ecs_entity_t make_pickupable_entity(Ecs* ecs, u16 texture_id, u16 item_type_id, Vec2 position, u8 quality);
+ecs_entity_t
+             make_pickupable_entity(Ecs* ecs, u16 texture_id, u16 item_type_id, Vec2 position, u8 quality);
 ecs_entity_t make_thunder_storm(Ecs* ecs, Vec2 center);
 ecs_entity_t make_thunder(Ecs* ecs, Vec2 position, u16 mask_bits);
 
@@ -17,6 +18,7 @@ typedef struct NewLadderParams
   const char* dest;
   Vec2        position;
   Vec2        size;
+  u16         direction;
 } NewLadderParams;
 ecs_entity_t make_ladder(Ecs* ecs, const NewLadderParams* params);
 ecs_entity_t
@@ -52,8 +54,17 @@ ecs_entity_t make_wogol(Ecs* ecs, Vec2 position);
 ecs_entity_t make_imp(Ecs* ecs, Vec2 position);
 
 // misc
+typedef struct NewChestParams
+{
+  Vec2 position;
+  Item items[CHEST_MAX_ITEMS];
+  u16  num_slots;
+  u16  state;
+  u32  id;
+} NewChestParams;
+
 ecs_entity_t make_door(Ecs* ecs, Vec2 position);
-ecs_entity_t make_chest(Ecs* ecs, Vec2 position, Item items[CHEST_MAX_ITEMS], u16 cnt);
+ecs_entity_t make_chest(Ecs* ecs, const NewChestParams* params);
 ecs_entity_t make_trigger(Ecs* ecs, Vec2 position, Vec2 size, u16 mask);
 
 // effects
@@ -69,10 +80,10 @@ ecs_entity_t make_fx_fire_bust(Ecs* ecs, Vec2 position);
 
 typedef struct NewProjectileParams
 {
-	ecs_entity_t shooter;
-	Vec2 position;
-	Vec2 direction;
-	u16  mask;
+  ecs_entity_t shooter;
+  Vec2         position;
+  Vec2         direction;
+  u16          mask;
 } NewProjectileParams;
 // projectiles
 ecs_entity_t

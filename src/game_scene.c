@@ -33,9 +33,9 @@
 
 #include <json-c/json.h>
 
+#include "dungeon.h"
 #include "entity_utils.h"
 #include "system/event_messaging_sys.h"
-#include "dungeon.h"
 
 static void on_load(void);
 static void on_unload(void);
@@ -128,9 +128,9 @@ static void on_load()
 
   if (g_session.new_game)
   {
-    load_level("0");
+    load_level(g_session.level);
     ems_broadcast(MSG_NEW_GAME, NULL);
-    ems_broadcast(MSG_LEVEL_LOADED, &(MSG_LevelLoaded){ "0" });
+    ems_broadcast(MSG_LEVEL_LOADED, &(MSG_LevelLoaded){ g_session.level });
     spawn_player(g_session.pos);
     g_session.new_game = FALSE;
   }
@@ -205,31 +205,29 @@ static void on_entity_died(SDL_UNUSED pointer_t arg, SDL_UNUSED const MSG_Entity
     _player_died = TRUE;
 }
 
-typedef struct MusTblItem
+static Mix_Music* music_from_level_name(const char* level_name)
 {
-  const char* level_name;
-  u16         mus_id;
-} MusTblItem;
-
-static MusTblItem _mustbl[] = {
-  { "0", BG_MUS_LV1 },
-  { "1", BG_MUS_LV2 },
-  { NULL, 0 },
-};
-
-static Mix_Music* get_bgmusic_by_level_name(const char* level_name)
-{
-  for (int i = 0; _mustbl[i].level_name != NULL; ++i)
+  static struct
   {
-    if (STREQ(level_name, _mustbl[i].level_name))
-      return get_bg_mus(_mustbl[i].mus_id);
+    const char* level_name;
+    u16         mus_id;
+  } lut[] = {
+    { "central", BG_MUS_BOSS },
+    { "corridor", BG_MUS_LV2 },
+    { "demon_ruin", BG_MUS_LV1 },
+    { 0 },
+  };
+  for (int i = 0; lut[i].level_name != NULL; ++i)
+  {
+    if (STREQ(level_name, lut[i].level_name))
+      return get_bg_mus(lut[i].mus_id);
   }
   return NULL;
 }
 
 static void music_player_on_level_loaded(SDL_UNUSED void* arg, const MSG_LevelLoaded* event)
 {
-  Mix_Music* mus = get_bgmusic_by_level_name(event->level_name);
+  Mix_Music* mus = music_from_level_name(event->level_name);
   if (mus != NULL)
     Mix_PlayMusic(mus, -1);
 }
@@ -242,6 +240,7 @@ static void __callback_clear_entities(SDL_UNUSED pointer_t arg, Ecs* ecs, ecs_en
 static void unload_current_level()
 {
   // TODO: copy dữ liệu của player sang ecs registry tạm
+  ems_broadcast(MSG_LEVEL_UNLOADED, &(MSG_LevelUnloaded){ g_session.level });
   ecs_entity_t player = get_player(g_ecs);
   g_session.hp        = get_entity_hit_points(g_ecs, player);
   g_session.mp        = get_entity_mana_points(g_ecs, player);
@@ -319,10 +318,27 @@ static void render_game_world(void)
 
 static Vec2 get_spawn_localtion(ecs_entity_t ladder)
 {
-
-  Vec2 position = get_entity_position(g_ecs, ladder);
-  position.x += 8;
-  position.y += 30;
+  LadderAttributes* attrs    = ecs_get(g_ecs, ladder, LADDER_ATTRIBUTES);
+  HitBox*           hixbox   = ecs_get(g_ecs, ladder, HITBOX);
+  Vec2              position = get_entity_position(g_ecs, ladder);
+  switch (attrs->exit_direction)
+  {
+  case UP:
+    position.x += hixbox->size.x / 2.f;
+    position.y -= 5;
+    break;
+  case DOWN:
+    position.x += hixbox->size.x / 2.f;
+    position.y += 30;
+    break;
+  case LEFT:
+    position.x -= hixbox->size.x / 2.f + 5.f;
+    position.y += hixbox->size.y / 2.f;
+    break;
+  case RIGHT:
+    position.x += hixbox->size.x / 2.f + 5.f;
+    position.y += hixbox->size.y / 2.f;
+  }
   return position;
 }
 
@@ -337,6 +353,7 @@ static void next_level(void)
     spawn_localtion = get_spawn_localtion(ladder);
     spawn_player(spawn_localtion);
   }
+  SDL_strlcpy(g_session.level, _next_level, 255);
   ems_broadcast(MSG_LEVEL_LOADED, &(MSG_LevelLoaded){ _next_level });
 
   _has_next_level = FALSE;

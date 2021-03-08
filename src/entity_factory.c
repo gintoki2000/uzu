@@ -529,7 +529,7 @@ ecs_entity_t make_ladder(Ecs* ecs, const NewLadderParams* params)
   hitbox->anchor.x  = 0;
   hitbox->anchor.y  = 0;
 
-  ladder_attrs_init(ecs_add(ecs, entity, LADDER_ATTRIBUTES), params->level, params->dest);
+  ladder_attrs_init(ecs_add(ecs, entity, LADDER_ATTRIBUTES), params->level, params->dest, params->direction);
 
   name_init(ecs_add(ecs, entity, NAME), params->name);
 
@@ -583,7 +583,7 @@ ecs_entity_t make_fx_item_picked_up(Ecs* ecs, Vec2 position, const char* item_na
                             (COLOR){ 122, 196, 10, 255 });
 }
 
-ecs_entity_t make_chest(Ecs* ecs, Vec2 position, Item items[CHEST_MAX_ITEMS], u16 cnt)
+ecs_entity_t make_chest(Ecs* ecs, const NewChestParams* params)
 {
   ecs_entity_t entity;
 
@@ -596,13 +596,16 @@ ecs_entity_t make_chest(Ecs* ecs, Vec2 position, Item items[CHEST_MAX_ITEMS], u1
   entity                    = ecs_create(ecs);
   visual                    = ecs_add(ecs, entity, VISUAL);
   visual->sprite.texture_id = TEX_CHEST;
-  visual->sprite.rect       = RECT_CHEST_CLOSE;
-  visual->anchor.x          = 8.f;
-  visual->anchor.y          = 16.f;
+  visual->sprite.rect = params->state == CHEST_STATE_CLOSE ? RECT_CHEST_CLOSE : RECT_CHEST_CLOSE;
+  visual->anchor.x    = 8.f;
+  visual->anchor.y    = 16.f;
+
 
   chest = ecs_add(ecs, entity, CHEST);
-  SDL_memcpy(chest->items, items, cnt * sizeof(Item));
-  chest->num_items = cnt;
+  SDL_memcpy(chest->items, params->items, params->num_slots * sizeof(Item));
+  chest->num_slots = params->num_slots;
+  chest->id        = params->id;
+  chest->state     = params->state;
 
   interactable               = ecs_add(ecs, entity, INTERACTABLE);
   interactable->num_commands = 1;
@@ -615,9 +618,9 @@ ecs_entity_t make_chest(Ecs* ecs, Vec2 position, Item items[CHEST_MAX_ITEMS], u1
   hitbox->mask_bits = 0;
 
   transform           = ecs_add(ecs, entity, TRANSFORM);
-  transform->position = position;
+  transform->position = params->position;
 
-  return ECS_NULL_ENT;
+  return entity;
 }
 
 ecs_entity_t make_spear(Ecs* ecs, u16 mask)

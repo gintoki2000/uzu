@@ -9,8 +9,8 @@
 
 extern Ecs* g_ecs;
 
-static void on_level_loaded(SDL_UNUSED void*, const MSG_LevelLoaded*);
-static void on_level_unload(SDL_UNUSED void*, const MSG_LevelUnloaded*);
+static void on_level_loaded(void*, const MSG_LevelLoaded*);
+static void on_level_unload(void*, const MSG_LevelUnloaded*);
 
 static void open_chest(ecs_entity_t entity)
 {

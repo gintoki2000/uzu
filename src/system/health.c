@@ -9,14 +9,12 @@ extern Ecs* g_ecs;
 static void on_deal_damage(void* arg, const MSG_DealDamage* event)
 {
   (void)arg;
-  Health*    health;
-  Motion*    motion;
-  Paralyzed* paralyzed;
+  Health*       health;
+  Motion*       motion;
   if ((health = ecs_get(g_ecs, event->receiver, HEALTH)) != NULL &&
       !ecs_has(g_ecs, event->receiver, INVULNERABLE))
   {
     health->hit_points -= event->damage;
-    Invulnerable* invulnerable;
     ems_broadcast(MSG_GET_DAMAGED,
                   &(MSG_GetDamaged){
                       .dealer  = event->dealer,
@@ -24,8 +22,7 @@ static void on_deal_damage(void* arg, const MSG_DealDamage* event)
                       .damage  = event->damage,
                       .type    = event->type,
                   });
-    invulnerable            = ecs_add(g_ecs, event->receiver, INVULNERABLE);
-    invulnerable->remaining = event->impact_time;
+    ecs_add_w_data(g_ecs, event->receiver, INVULNERABLE, &(Invulnerable){ event->impact_time });
 
     if (event->dealer != ECS_NULL_ENT)
     {
@@ -39,8 +36,7 @@ static void on_deal_damage(void* arg, const MSG_DealDamage* event)
       motion->vz = event->zforce;
       if (!ecs_has(g_ecs, event->receiver, PARALYZED))
       {
-        paralyzed            = ecs_add(g_ecs, event->receiver, PARALYZED);
-        paralyzed->remaining = event->impact_time;
+        ecs_add_w_data(g_ecs, event->receiver, PARALYZED, &(Paralyzed){ event->impact_time });
       }
     }
     if (health->hit_points <= 0)

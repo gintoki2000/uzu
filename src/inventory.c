@@ -179,7 +179,6 @@ static void process_input(SDL_UNUSED void* arg)
 
     if (SDL_PointInRect(&mouse_position, &_cell_panel) && current_item()->num_items > 0)
     {
-
       play_sound(SFX_INTERACTION);
       ui_list_display((const char**)_opts, 2);
       ui_list_set_pos(UI_LIST_POS_CENTER_X, UI_LIST_POS_CENTER_Y);
@@ -265,14 +264,7 @@ Item* get_item(ItemTypeId type_id)
 {
   u16 category = g_item_types[type_id].category;
   int index    = find_item(type_id);
-  if (index != -1)
-  {
-    return &_items[category][index];
-  }
-  else
-  {
-    return NULL;
-  }
+  return index != -1 ? &_items[category][index] : NULL;
 }
 
 u8 get_item_count(ItemTypeId type_id)

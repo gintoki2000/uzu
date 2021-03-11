@@ -12,36 +12,20 @@
 
 extern Ecs* g_ecs;
 
-typedef struct ParseFnParams
+typedef struct EntityProperties
 {
   Vec2         position;
   Vec2         size;
   const char*  name;
   json_object* properties;
   u16          id;
-} ParseFnParams;
-
-typedef struct ParseFnTblItem
-{
-  const char* name;
-  void (*const fn)(const ParseFnParams*);
-} ParseFnTblItem;
+} EntityProperties;
 
 //<Helper functions>//
 static char* _layer_name_tbl[NUM_MAP_LAYERS] = {
   [MAP_LAYER_FLOOR]      = "floor",
   [MAP_LAYER_BACK_WALL]  = "back-wall",
   [MAP_LAYER_FRONT_WALL] = "front-wall",
-};
-
-static const char* _item_name_tbl[NUM_ITEM_TYPES] = {
-  [ITEM_TYPE_RED_FLASK]        = "RedFlask",
-  [ITEM_TYPE_BIG_RED_FLASK]    = "BigRedFlask",
-  [ITEM_TYPE_BLUE_FLASK]       = "BlueFlask",
-  [ITEM_TYPE_SCROLL_ICE_ARROW] = "IceArrowScroll",
-  [ITEM_TYPE_SCROLL_FIRE_BALL] = "FireBallScroll",
-  [ITEM_TYPE_KEY_1_1]          = "Key_1_1",
-  [ITEM_TYPE_STAFF]            = "RedStaff",
 };
 
 static void level_name_to_file_name(const char* level_name, char* dest)
@@ -51,10 +35,19 @@ static void level_name_to_file_name(const char* level_name, char* dest)
   strcat(dest, ".json");
 }
 
-static int item_name_to_id(const char* name)
+static int item_id_from_string(const char* name)
 {
+  static const char* lut[NUM_ITEM_TYPES] = {
+    [ITEM_TYPE_RED_FLASK]        = "RedFlask",
+    [ITEM_TYPE_BIG_RED_FLASK]    = "BigRedFlask",
+    [ITEM_TYPE_BLUE_FLASK]       = "BlueFlask",
+    [ITEM_TYPE_SCROLL_ICE_ARROW] = "IceArrowScroll",
+    [ITEM_TYPE_SCROLL_FIRE_BALL] = "FireBallScroll",
+    [ITEM_TYPE_KEY_1_1]          = "Key_1_1",
+    [ITEM_TYPE_STAFF]            = "RedStaff",
+  };
   for (int i = 0; i < NUM_ITEM_TYPES; ++i)
-    if (_item_name_tbl[i] && strcmp(_item_name_tbl[i], name) == 0)
+    if (lut[i] && SDL_strcmp(lut[i], name) == 0)
       return i;
   return -1;
 }
@@ -62,7 +55,7 @@ static int item_name_to_id(const char* name)
 static int layer_name_to_id(const char* name)
 {
   for (int i = 0; i < NUM_MAP_LAYERS; ++i)
-    if (strcmp(_layer_name_tbl[i], name) == 0)
+    if (SDL_strcmp(_layer_name_tbl[i], name) == 0)
       return i;
   return -1;
 }
@@ -71,19 +64,13 @@ static int layer_name_to_id(const char* name)
 static int parse_tilelayer(const json_object* tilelayer_json_obj);
 static int parse_objectgroup(const json_object* object_group_json_obj);
 
-static void parse_imp(const ParseFnParams* params);
-static void parse_wogol(const ParseFnParams* params);
-static void parse_huge_demon(const ParseFnParams* params);
-static void parse_chest(const ParseFnParams* params);
-static void parse_ladder(const ParseFnParams* params);
-static void parse_chort(const ParseFnParams* params);
-static void parse_door(const ParseFnParams* params);
-
-static ParseFnTblItem _entity_parse_fn_tbl[] = {
-  { "Imp", parse_imp },     { "Wogol", parse_wogol },   { "BigDemon", parse_huge_demon },
-  { "Chest", parse_chest }, { "Ladder", parse_ladder }, { "Chort", parse_chort },
-  { "Door", parse_door }
-};
+static void parse_imp(Ecs* registry, const EntityProperties* params);
+static void parse_wogol(Ecs* registry, const EntityProperties* params);
+static void parse_huge_demon(Ecs* registry, const EntityProperties* params);
+static void parse_chest(Ecs* registry, const EntityProperties* params);
+static void parse_ladder(Ecs* registry, const EntityProperties* params);
+static void parse_chort(Ecs* registry, const EntityProperties* params);
+static void parse_door(Ecs* registry, const EntityProperties* params);
 
 static void parse_item(Item* item, json_object* json)
 {
@@ -93,7 +80,7 @@ static void parse_item(Item* item, json_object* json)
 
   item_name       = json_object_object_get_as_string(json, "type");
   num_items       = json_object_object_get_as_int(json, "count");
-  item->type_id   = item_name_to_id(item_name);
+  item->type_id   = item_id_from_string(item_name);
   item->num_items = num_items;
 }
 
@@ -149,11 +136,21 @@ static int parse_tilelayer(const json_object* tilelayer_json_obj)
   return 0;
 }
 
-static void (*get_entity_create_fn(const char* entity_type_name))(const ParseFnParams*)
+static void (*get_entity_create_fn(const char* entity_type_name))(Ecs*, const EntityProperties*)
 {
-  for (int i = 0; _entity_parse_fn_tbl[i].name != NULL; ++i)
-    if (!strcmp(_entity_parse_fn_tbl[i].name, entity_type_name))
-      return _entity_parse_fn_tbl[i].fn;
+  struct
+  {
+    const char* name;
+    void (*const fn)(Ecs*, const EntityProperties*);
+  } static lut[] = {
+    { "Imp", parse_imp },     { "Wogol", parse_wogol },   { "BigDemon", parse_huge_demon },
+    { "Chest", parse_chest }, { "Ladder", parse_ladder }, { "Chort", parse_chort },
+    { "Door", parse_door }
+  };
+
+  for (int i = 0; lut[i].name != NULL; ++i)
+    if (!SDL_strcmp(lut[i].name, entity_type_name))
+      return lut[i].fn;
   return NULL;
 }
 
@@ -164,8 +161,8 @@ static int parse_objectgroup(const json_object* object_group_json_obj)
   const char*        objtype;
   const json_object* obj_json_obj;
 
-  ParseFnParams params;
-  void (*parse_fn)(const ParseFnParams*);
+  EntityProperties params;
+  void (*parse_fn)(Ecs*, const EntityProperties*);
 
   objects_json_obj = json_object_object_get(object_group_json_obj, "objects");
   objcnt           = json_object_array_length(objects_json_obj);
@@ -185,7 +182,7 @@ static int parse_objectgroup(const json_object* object_group_json_obj)
     params.id         = json_object_object_get_as_int(obj_json_obj, "id");
 
     if ((parse_fn = get_entity_create_fn(objtype)) != NULL)
-      parse_fn(&params);
+      parse_fn(g_ecs, &params);
   }
 
   return 0;
@@ -196,11 +193,11 @@ static int parse_layer(const json_object* layer_json_obj)
   const char* layer_type;
 
   layer_type = json_object_object_get_as_string(layer_json_obj, "type");
-  if (strcmp(layer_type, "tilelayer") == 0)
+  if (SDL_strcmp(layer_type, "tilelayer") == 0)
   {
     parse_tilelayer(layer_json_obj);
   }
-  else if (strcmp(layer_type, "objectgroup") == 0)
+  else if (SDL_strcmp(layer_type, "objectgroup") == 0)
   {
     parse_objectgroup(layer_json_obj);
   }
@@ -239,37 +236,37 @@ int load_level(const char* level_name)
   return LOAD_LEVEL_OK;
 }
 
+static Vec2 real_position(Vec2 top_left, Vec2 size)
+{
+  Vec2 result;
+  result.x = top_left.x + size.x / 2.f;
+  result.y = top_left.y + size.y;
+  return result;
+}
 //*****************************************************************************//
-static void parse_imp(const ParseFnParams* params)
+static void parse_imp(Ecs* registry, const EntityProperties* props)
 {
-  Vec2 real_position = { params->position.x + params->size.x / 2.f,
-                         params->position.y + params->size.y };
-  make_imp(g_ecs, real_position);
+  make_imp(registry, real_position(props->position, props->size));
 }
-static void parse_wogol(const ParseFnParams* params)
+static void parse_wogol(Ecs* registry, const EntityProperties* props)
 {
-  Vec2 real_position = { params->position.x + params->size.x / 2.f,
-                         params->position.y + params->size.y };
-  make_wogol(g_ecs, real_position);
+  make_wogol(registry, real_position(props->position, props->size));
 }
-static void parse_huge_demon(const ParseFnParams* params)
+static void parse_huge_demon(Ecs* registry, const EntityProperties* props)
 {
-  Vec2 real_position = { params->position.x + params->size.x / 2.f,
-                         params->position.y + params->size.y };
-  make_huge_demon(g_ecs, real_position);
+  make_huge_demon(registry, real_position(props->position, props->size));
 }
-static void parse_chest(const ParseFnParams* params)
+static void parse_chest(Ecs* registry, const EntityProperties* props)
 {
   NewChestParams chest_params;
-  chest_params.position.x = params->position.x + params->size.x / 2.f;
-  chest_params.position.y = params->position.y + params->size.y;
-  chest_params.id         = params->id;
-  chest_params.state      = CHEST_STATE_CLOSE;
+  chest_params.position = real_position(props->position, props->size);
+  chest_params.id       = props->id;
+  chest_params.state    = CHEST_STATE_CLOSE;
 
   parse_item_list(chest_params.items,
                   &chest_params.num_slots,
-                  json_object_object_get_as_string(params->properties, "items"));
-  make_chest(g_ecs, &chest_params);
+                  json_object_object_get_as_string(props->properties, "items"));
+  make_chest(registry, &chest_params);
 }
 
 static int direction_from_string(const char* value)
@@ -291,29 +288,28 @@ static int direction_from_string(const char* value)
   return -1;
 }
 
-static void parse_ladder(const ParseFnParams* _params)
+static void parse_ladder(Ecs* registry, const EntityProperties* props)
 {
+  const char* direction;
 
+  direction = json_object_object_get_as_string(props->properties, "direction");
   NewLadderParams params;
-  params.level    = json_object_object_get_as_string(_params->properties, "level");
-  params.dest     = json_object_object_get_as_string(_params->properties, "dest");
-  params.name     = _params->name;
-  params.position = _params->position;
-  params.size     = _params->size;
-  params.direction =
-      direction_from_string(json_object_object_get_as_string(_params->properties, "direction"));
+  params.level     = json_object_object_get_as_string(props->properties, "level");
+  params.dest      = json_object_object_get_as_string(props->properties, "dest");
+  params.name      = props->name;
+  params.position  = props->position;
+  params.size      = props->size;
+  params.direction = direction_from_string(direction);
 
-  make_ladder(g_ecs, &params);
+  make_ladder(registry, &params);
 }
-static void parse_chort(const ParseFnParams* params)
+
+static void parse_chort(Ecs* registry, const EntityProperties* params)
 {
-  Vec2 real_position = { params->position.x + params->size.x / 2.f,
-                         params->position.y + params->size.y };
-  make_chort(g_ecs, real_position);
+  make_chort(registry, real_position(params->position, params->size));
 }
-static void parse_door(const ParseFnParams* params)
+
+static void parse_door(Ecs* registry, const EntityProperties* params)
 {
-  Vec2 real_position = { params->position.x + params->size.x / 2.f,
-                         params->position.y + params->size.y };
-  make_door(g_ecs, real_position);
+  make_door(registry, real_position(params->position, params->size));
 }

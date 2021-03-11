@@ -7,25 +7,28 @@ typedef enum
   GAME_EVENT_KILL_MONSTER,
 } GameEventCode;
 
-#define EVENT_SAVE_AND_LOAD_FN(__file_name)                                                        \
-  static BOOL load_save_data()                                                                     \
+#define SAVE_AND_LOAD_FN()                                                                         \
+  static void init_default_data(void);                                                             \
+  static void write_data(void)                                                                     \
   {                                                                                                \
-    FILE* file;                                                                                    \
-    if ((file = fopen(__file_name, "r")) != NULL)                                                  \
+    SDL_RWops* rw;                                                                                 \
+    if ((rw = SDL_RWFromFile(SAV_FILE_NAME, "w")) != NULL)                                         \
     {                                                                                              \
-      fread(&_save_block, sizeof(_save_block), 1, file);                                           \
-      fclose(file);                                                                                \
-      return TRUE;                                                                                 \
+      SDL_RWwrite(rw, &_save_block, sizeof(_save_block), 1);                                       \
+      return;                                                                                      \
     }                                                                                              \
-    return FALSE;                                                                                  \
+    INFO("failed to write_data event data: %s\n", SAV_FILE_NAME);                                  \
   }                                                                                                \
-  static void write_save_data()                                                                    \
+  static void load_data(void)                                                                      \
   {                                                                                                \
-    FILE* file;                                                                                    \
-    if ((file = fopen(__file_name, "w")) != NULL)                                                  \
+    SDL_RWops* rw;                                                                                 \
+    if ((rw = SDL_RWFromFile(SAV_FILE_NAME, "r")) != NULL)                                         \
     {                                                                                              \
-      fwrite(&_save_block, sizeof(_save_block), 1, file);                                          \
-      fclose(file);                                                                                \
+      SDL_RWread(rw, &_save_block, sizeof(_save_block), 1);                                        \
+    }                                                                                              \
+    else                                                                                           \
+    {                                                                                              \
+      init_default_data();                                                                         \
     }                                                                                              \
   }
 

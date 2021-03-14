@@ -103,15 +103,15 @@ ecs_entity_t make_character_base(Ecs* ecs, const NewCharacterParams* params)
   ecs_add(ecs, entity, ENABLE_TILE_COLLISION_TAG);
   ecs_add(ecs, entity, CHARACTER_ANIMATOR_TAG);
 
-  ecs_add_w_data(ecs,
-                 entity,
-                 MANA_POOL,
-                 &(ManaPool){
-                     params->mana_points,
-                     params->mana_points,
-                 });
+  ecs_set(ecs,
+          entity,
+          MANA_POOL,
+          &(ManaPool){
+              params->mana_points,
+              params->mana_points,
+          });
 
-  ecs_add_w_data(ecs, entity, MOVE_SPEED, &(MoveSpeed){ 120 });
+  ecs_set(ecs, entity, MOVE_SPEED, &(MoveSpeed){ 120 });
   ecs_add(ecs, entity, FACING_DIRECTION);
   return entity;
 }
@@ -222,9 +222,9 @@ ecs_entity_t make_monster_base(Ecs* ecs, const NewMonsterParams* params)
 
   ecs_add(ecs, entity, ENABLE_TILE_COLLISION_TAG);
   ecs_add(ecs, entity, CHARACTER_ANIMATOR_TAG);
-  ecs_add_w_data(ecs, entity, MOVE_SPEED, &(MoveSpeed){ 50 });
+  ecs_set(ecs, entity, MOVE_SPEED, &(MoveSpeed){ 50 });
   ecs_add(ecs, entity, FACING_DIRECTION);
-  ecs_add_w_data(ecs, entity, ATTACK_MASK, &(AttackMask){ BIT(CATEGORY_PLAYER) });
+  ecs_set(ecs, entity, ATTACK_MASK, &(AttackMask){ BIT(CATEGORY_PLAYER) });
   return entity;
 }
 
@@ -238,12 +238,9 @@ ecs_entity_t make_imp(Ecs* ecs, Vec2 position)
 {
   ecs_entity_t entity =
       make_monster_base(ecs, &(NewMonsterParams){ position, g_anims_imp, 5, s_small_size });
-  ecs_add_w_data(ecs,
-                 entity,
-                 SELF_DESTRUCTION,
-                 &(SelfDestruction){ .range = 16, .target = ECS_NULL_ENT });
+  ecs_set(ecs, entity, SELF_DESTRUCTION, &(SelfDestruction){ .range = 16, .target = ECS_NULL_ENT });
 
-  ecs_add_w_data(ecs, entity, SPOT, &(Spot){ .position = position, .radius = 150.f });
+  ecs_set(ecs, entity, SPOT, &(Spot){ .position = position, .radius = 150.f });
   return entity;
 }
 
@@ -298,8 +295,6 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 position)
   spot->radius   = TILE_SIZE * 7;
   spot->position = position;
 
-  ecs_add(ecs, entity, ENEMY_TAG);
-
   drop          = ecs_add(ecs, entity, DROP);
   drop->type[0] = PICKUPABLE_RED_FLASK;
   drop->type[1] = PICKUPABLE_BLUE_FLASK;
@@ -326,7 +321,7 @@ ecs_entity_t make_chort(Ecs* ecs, Vec2 position)
 
   equip(ecs, entity, weapon);
 
-  ecs_add_w_data(ecs, entity, BRAIN, &(Brain){ create_chort_behavior_tree() });
+  ecs_set(ecs, entity, BRAIN, &(Brain){ create_chort_behavior_tree() });
 
   return entity;
 }
@@ -473,7 +468,7 @@ ecs_entity_t make_pickupable_entity(Ecs* ecs, u16 texture_id, u16 id, Vec2 posit
   attrs->sfx     = SFX_INTERACTION;
   attrs->quality = quality;
 
-  ecs_add_w_data(ecs, entity, MOTION, &(Motion){ .friction = .2f, .bounching = .8f });
+  ecs_set(ecs, entity, MOTION, &(Motion){ .friction = .2f, .bounching = .8f });
   return entity;
 }
 
@@ -497,10 +492,10 @@ ecs_entity_t make_player(Ecs* ecs, ecs_entity_t character, ecs_entity_t weapon)
   attunement_slot           = ecs_add(ecs, character, ATTUNEMENT_SLOT);
   attunement_slot->spell_id = SPELL_ID_NULL;
 
-  ecs_add_w_data(ecs,
-                 character,
-                 ATTACK_MASK,
-                 &(AttackMask){ BIT(CATEGORY_ENEMY) | BIT(CATEGORY_INTERACABLE) });
+  ecs_set(ecs,
+          character,
+          ATTACK_MASK,
+          &(AttackMask){ BIT(CATEGORY_ENEMY) | BIT(CATEGORY_INTERACABLE) });
 
   return character;
 }
@@ -529,7 +524,10 @@ ecs_entity_t make_ladder(Ecs* ecs, const NewLadderParams* params)
   hitbox->anchor.x  = 0;
   hitbox->anchor.y  = 0;
 
-  ladder_attrs_init(ecs_add(ecs, entity, LADDER_ATTRIBUTES), params->level, params->dest, params->direction);
+  ladder_attrs_init(ecs_add(ecs, entity, LADDER_ATTRIBUTES),
+                    params->level,
+                    params->dest,
+                    params->direction);
 
   name_init(ecs_add(ecs, entity, NAME), params->name);
 
@@ -600,7 +598,6 @@ ecs_entity_t make_chest(Ecs* ecs, const NewChestParams* params)
   visual->anchor.x    = 8.f;
   visual->anchor.y    = 16.f;
 
-
   chest = ecs_add(ecs, entity, CHEST);
   SDL_memcpy(chest->items, params->items, params->num_slots * sizeof(Item));
   chest->num_slots = params->num_slots;
@@ -646,8 +643,6 @@ ecs_entity_t make_spear(Ecs* ecs, u16 mask)
 
   attrs      = ecs_add(ecs, entity, WEAPON_ATTRIBUTES);
   attrs->atk = 1;
-
-  ecs_add(ecs, entity, HOLDER);
 
   return entity;
 }
@@ -700,10 +695,10 @@ static const Animation* _blood_effect_tbl[] = {
 ecs_entity_t make_fx_blood_loss(Ecs* ecs, Vec2 position)
 {
   ecs_entity_t entity;
-
-  Visual*    visual;
-  Transform* transform;
-  LifeSpan*  life_span;
+  Visual*      visual;
+  Transform*   transform;
+  LifeSpan*    life_span;
+  Animator*    animator;
 
   const int sw = 100;
   const int sh = 100;
@@ -717,13 +712,12 @@ ecs_entity_t make_fx_blood_loss(Ecs* ecs, Vec2 position)
   visual->anchor.x = sw / 2;
   visual->anchor.y = sh / 2;
 
-  ecs_add_w_data(ecs, entity, ANIMATOR, &(Animator){ .anims = _blood_effect_tbl[i] });
+  animator = ecs_set(ecs, entity, ANIMATOR, &(Animator){ .anims = _blood_effect_tbl[i] });
 
   transform           = ecs_add(ecs, entity, TRANSFORM);
   transform->position = position;
 
-  life_span            = ecs_add(ecs, entity, LIFE_SPAN);
-  life_span->remaining = 28;
+  life_span = ecs_set(ecs, entity, LIFE_SPAN, &(LifeSpan){ 28 });
 
   return entity;
 }
@@ -798,7 +792,7 @@ ecs_entity_t make_fire_ball(Ecs* ecs, ecs_entity_t shooter, Vec2 pos, Vec2 direc
 
   ecs_add(ecs, entity, REMOVE_IF_OFFSCREEN);
 
-  ecs_add_w_data(ecs, entity, ANIMATOR, &(Animator){ .anims = &g_anim_fire_ball });
+  ecs_set(ecs, entity, ANIMATOR, &(Animator){ .anims = &g_anim_fire_ball });
 
   return entity;
 }
@@ -825,7 +819,7 @@ ecs_entity_t make_ice_arrow(Ecs* ecs, ecs_entity_t shooter, Vec2 position, Vec2 
   motion->vel      = speed;
   motion->friction = 0.f;
 
-  ecs_add_w_data(ecs, entity, ANIMATOR, &(Animator){ .anims = &g_anim_ice_arrow });
+  ecs_set(ecs, entity, ANIMATOR, &(Animator){ .anims = &g_anim_ice_arrow });
 
   hitbox            = ecs_add(ecs, entity, HITBOX);
   hitbox->size.x    = 32;
@@ -914,8 +908,8 @@ ecs_entity_t make_fx_cast_ice(Ecs* ecs, Vec2 pos)
   transform           = ecs_add(ecs, entity, TRANSFORM);
   transform->position = pos;
 
-  ecs_add_w_data(ecs, entity, ANIMATOR, &(Animator){ .anims = &g_anim_ice_cast });
-  ecs_add_w_data(ecs, entity, LIFE_SPAN, &(LifeSpan){ 29 });
+  ecs_set(ecs, entity, ANIMATOR, &(Animator){ .anims = &g_anim_ice_cast });
+  ecs_set(ecs, entity, LIFE_SPAN, &(LifeSpan){ 29 });
   return entity;
 }
 
@@ -935,8 +929,8 @@ ecs_entity_t make_fx_cast_fire(Ecs* ecs, Vec2 position)
   transform           = ecs_add(ecs, entity, TRANSFORM);
   transform->position = position;
 
-  ecs_add_w_data(ecs, entity, ANIMATOR, &(Animator){ .anims = &g_anim_fire_cast });
-  ecs_add_w_data(ecs, entity, LIFE_SPAN, &(LifeSpan){ 29 });
+  ecs_set(ecs, entity, ANIMATOR, &(Animator){ .anims = &g_anim_fire_cast });
+  ecs_set(ecs, entity, LIFE_SPAN, &(LifeSpan){ 29 });
   return entity;
 }
 
@@ -958,7 +952,7 @@ ecs_entity_t make_fx_slash(Ecs* ecs, Vec2 position, SDL_RendererFlip flip)
   visual->anchor.y = sh / 2;
   visual->flip     = flip;
 
-  ecs_add_w_data(ecs, entity, ANIMATOR, &(Animator){ .anims = &g_anim_slash });
+  ecs_set(ecs, entity, ANIMATOR, &(Animator){ .anims = &g_anim_slash });
   transform           = ecs_add(ecs, entity, TRANSFORM);
   transform->position = position;
 
@@ -986,7 +980,7 @@ ecs_entity_t make_fx_fire_hit(Ecs* ecs, Vec2 position)
   visual->anchor.x = sw / 2;
   visual->anchor.y = sh / 2;
 
-  ecs_add_w_data(ecs, entity, ANIMATOR, &(Animator){ .anims = &g_anim_fire_hit });
+  ecs_set(ecs, entity, ANIMATOR, &(Animator){ .anims = &g_anim_fire_hit });
 
   transform           = ecs_add(ecs, entity, TRANSFORM);
   transform->position = position;
@@ -1013,7 +1007,7 @@ ecs_entity_t make_fx_ice_hit(Ecs* ecs, Vec2 position)
   visual->anchor.x = sw / 2;
   visual->anchor.y = sh / 2;
 
-  ecs_add_w_data(ecs, entity, ANIMATOR, &(Animator){ .anims = &g_anim_ice_hit });
+  ecs_set(ecs, entity, ANIMATOR, &(Animator){ .anims = &g_anim_ice_hit });
 
   transform           = ecs_add(ecs, entity, TRANSFORM);
   transform->position = position;
@@ -1032,20 +1026,16 @@ ecs_entity_t make_npc_nova(Ecs* ecs, Vec2 position, u16 conversation_id)
   Animator*     animator;
   Visual*       visual;
 
-  ecs_add_w_data(ecs, entity, TRANSFORM, &(Transform){ .position = position });
-  ecs_add_w_data(ecs, entity, DIALOGUE, &(Dialogue){ conversation_id });
-  ecs_add_w_data(ecs, entity, NAME, &(Name){ .value = "nova" });
-  ecs_add_w_data(ecs,
-                 entity,
-                 ATTACK_MASK,
-                 &(AttackMask){ BIT(CATEGORY_PLAYER) | BIT(CATEGORY_ENEMY) });
-  ecs_add_w_data(ecs, entity, HEALTH, &(Health){ 15, 15 });
-  ecs_add_w_data(
-      ecs,
-      entity,
-      HEAL_BAR,
-      &(HealthBar){ .color = { 0x03, 0xb6, 0xfc, 0xff }, .len = 20, .anchor = { 6, 23 } });
-  ecs_add_w_data(ecs, entity, MOTION, &(Motion){ 0 });
+  ecs_set(ecs, entity, TRANSFORM, &(Transform){ .position = position });
+  ecs_set(ecs, entity, DIALOGUE, &(Dialogue){ conversation_id });
+  ecs_set(ecs, entity, NAME, &(Name){ .value = "nova" });
+  ecs_set(ecs, entity, ATTACK_MASK, &(AttackMask){ BIT(CATEGORY_PLAYER) | BIT(CATEGORY_ENEMY) });
+  ecs_set(ecs, entity, HEALTH, &(Health){ 15, 15 });
+  ecs_set(ecs,
+          entity,
+          HEAL_BAR,
+          &(HealthBar){ .color = { 0x03, 0xb6, 0xfc, 0xff }, .len = 20, .anchor = { 6, 23 } });
+  ecs_set(ecs, entity, MOTION, &(Motion){ 0 });
   ecs_add(ecs, entity, CHARACTER_ANIMATOR_TAG);
 
   hitbox            = ecs_add(ecs, entity, HITBOX);
@@ -1069,10 +1059,10 @@ ecs_entity_t make_npc_nova(Ecs* ecs, Vec2 position, u16 conversation_id)
 
   ecs_add(ecs, entity, CONTROLLER);
 
-  ecs_add_w_data(ecs, entity, HAND, &(Hand){ .weapon = ECS_NULL_ENT, .attach_point = { 8, -9 } });
+  ecs_set(ecs, entity, HAND, &(Hand){ .weapon = ECS_NULL_ENT, .attach_point = { 8, -9 } });
 
   ecs_add(ecs, entity, ENABLE_TILE_COLLISION_TAG);
-  ecs_add_w_data(ecs, entity, MOVE_SPEED, &(MoveSpeed){ 120 });
+  ecs_set(ecs, entity, MOVE_SPEED, &(MoveSpeed){ 120 });
   return entity;
 }
 
@@ -1089,7 +1079,7 @@ ecs_entity_t make_trigger(Ecs* ecs, Vec2 pos, Vec2 size, u16 mask)
   hitbox->mask_bits = mask;
   hitbox->category  = CATEGORY_TRIGGER;
 
-  ecs_add_w_data(ecs, entity, TRANSFORM, &(Transform){ .position = pos });
+  ecs_set(ecs, entity, TRANSFORM, &(Transform){ .position = pos });
 
   return entity;
 }
@@ -1130,7 +1120,7 @@ ecs_entity_t make_coin(Ecs* ecs, Vec2 position, u8 quality)
   attrs->sfx     = SFX_COIN;
   attrs->quality = quality;
 
-  ecs_add_w_data(ecs, entity, MOTION, &(Motion){ .friction = .2f, .bounching = .8f });
+  ecs_set(ecs, entity, MOTION, &(Motion){ .friction = .2f, .bounching = .8f });
   return entity;
 }
 
@@ -1163,14 +1153,14 @@ ecs_entity_t make_bow(Ecs* ecs, u16 mask)
 
   ecs_add(ecs, entity, HOLDER);
 
-  ecs_add_w_data(ecs,
-                 entity,
-                 WEAPON_SHOOT,
-                 &(WeaponShoot){
-                     .on_action = CHARACTER_ACTION_REGULAR_ATK,
-                     .projspd   = 170.f,
-                     .fire_rate = 20,
-                 });
+  ecs_set(ecs,
+          entity,
+          WEAPON_SHOOT,
+          &(WeaponShoot){
+              .on_action = CHARACTER_ACTION_REGULAR_ATK,
+              .projspd   = 170.f,
+              .fire_rate = 20,
+          });
 
   return entity;
 }

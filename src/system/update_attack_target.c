@@ -49,7 +49,7 @@ void update_attack_target_system(void)
       player_position = get_entity_position(g_ecs, player);
       if (vec2_dist(player_position, spot[i].position) <= spot[i].radius)
       {
-        ecs_add_w_data(g_ecs, entities[i], ATTACK_TARGET, &(AttackTarget){ player });
+        ecs_set(g_ecs, entities[i], ATTACK_TARGET, &(AttackTarget){ player });
       }
     }
   }

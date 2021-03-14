@@ -8,7 +8,7 @@
 #include "json_helper.h"
 #include "map.h"
 
-#define LEVEL_DATA_DIR "asserts/level/"
+#define LEVEL_DATA_DIR "res/level/"
 
 extern Ecs* g_ecs;
 

@@ -46,7 +46,7 @@ ecs_entity_t find_ladder(Ecs* ecs, const char* _name)
   ecs_size_t    cnt;
 
   LadderAttributes* switchers;
-  Name*          name;
+  Name*             name;
 
   ecs_raw(ecs, LADDER_ATTRIBUTES, &entities, (pointer_t*)&switchers, &cnt);
   for (int i = 0; i < cnt; ++i)
@@ -71,7 +71,7 @@ BOOL equip(Ecs* ecs, ecs_entity_t entity, ecs_entity_t weapon)
 
   equipment = ecs_get(ecs, entity, HAND);
 
-  ecs_add_or_set(ecs, weapon, HOLDER, &(Holder){ .value = entity });
+  ecs_set(ecs, weapon, HOLDER, &(Holder){ .value = entity });
   if (equipment->weapon != ECS_NULL_ENT)
     ecs_add(ecs, equipment->weapon, DESTROYED_TAG);
   equipment->weapon = weapon;

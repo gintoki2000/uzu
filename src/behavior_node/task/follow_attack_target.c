@@ -67,10 +67,10 @@ static BTStatus __exec(NODE* self, Ecs* ecs, ecs_entity_t entity)
   else if ((attack_target = ecs_get(ecs, entity, ATTACK_TARGET)) != NULL)
   {
     self->is_running = TRUE;
-    ecs_add_w_data(ecs,
-                   entity,
-                   FOLLOWING_TARGET,
-                   &(FollowingTarget){ attack_target->value, .radius = self->distance });
+    ecs_set(ecs,
+            entity,
+            FOLLOWING_TARGET,
+            &(FollowingTarget){ attack_target->value, .radius = self->distance });
     return BT_STATUS_RUNNING;
   }
   return BT_STATUS_FAILURE;

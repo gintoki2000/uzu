@@ -56,15 +56,14 @@ static void on_command_selected(pointer_t arg, const MSG_CommandSelected* event)
 
 static void on_level_unload(SDL_UNUSED void* arg, const MSG_LevelUnloaded* event)
 {
-
   char       sav[256];
   SDL_RWops* file;
 
   Chest*     chest;
   ecs_size_t num_chests;
 
-  SDL_strlcpy(sav, event->level_name, 255);
-  SDL_strlcat(sav, ".item", 255);
+  SDL_strlcpy(sav, "chest.", 255);
+  SDL_strlcat(sav, event->level_name, 255);
 
   if ((file = SDL_RWFromFile(sav, "w")) != NULL)
   {

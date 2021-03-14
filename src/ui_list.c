@@ -4,6 +4,7 @@
 #include "engine/keyboard.h"
 #include "resources.h"
 #include "ui_helper.h"
+#include "dungeon.h"
 
 #define UI_LIST_WIDTH 100
 #define MAX_ENTRIES 10
@@ -90,7 +91,10 @@ void ui_list_display(const char** items, u32 cnt)
   }
   _selected = 0;
 
+  extern Cursor g_cursor_pointer;
+
   input_push_state(INPUT_STATE_INST_1(process_key_input));
+  push_cursor_state(g_cursor_pointer);
   Mix_PlayChannel(-1, get_sfx(SFX_INTERACTION), 0);
 }
 
@@ -125,6 +129,7 @@ void ui_list_close()
   if (_visible)
   {
     input_pop_state();
+    pop_cursor_state();
     _visible = FALSE;
     Mix_PlayChannel(-1, get_sfx(SFX_INTERACTION), 0);
   }

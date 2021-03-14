@@ -109,12 +109,12 @@ void ecs_pool_fini(EcsPool* self)
   }
 }
 
-BOOL ecs_pool_add(EcsPool* self, ecs_entity_t e)
+void* ecs_pool_add(EcsPool* self, ecs_entity_t e)
 {
   ecs_size_t idx = ECS_ENT_IDX(e);
 
-  if (ECS_POOL_CONTAINS_W_EIDX(self, idx))
-    return FALSE;
+  ASSERT(!ECS_POOL_CONTAINS_W_EIDX(self, idx) && "already assigned");
+
   if (idx >= self->sparse.size)
     realloc_sparse_array(self, idx + 1);
 
@@ -123,7 +123,7 @@ BOOL ecs_pool_add(EcsPool* self, ecs_entity_t e)
 
   self->sparse.data[idx]                    = self->dense.cnt++;
   self->dense.entities[self->dense.cnt - 1] = e;
-  return TRUE;
+  return ECS_POOL_DATA_OFFSET(self, self->dense.cnt - 1);
 }
 
 void ecs_pool_rmv(EcsPool* self, ecs_entity_t e)

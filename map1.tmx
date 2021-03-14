@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.0" tiledversion="1.0.3" orientation="orthogonal" renderorder="right-down" width="51" height="50" tilewidth="16" tileheight="16" nextobjectid="51">
- <tileset firstgid="1" source="asserts/untitled.tsx"/>
+ <tileset firstgid="1" source="res/untitled.tsx"/>
  <layer name="floor" width="51" height="50">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,61,0,0,0,0,0,0,0,0,0,0,26,5,5,5,5,0,0,0,0,

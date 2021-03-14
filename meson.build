@@ -10,16 +10,18 @@ deps = [
   dependency('SDL2', required: true), 
   dependency('SDL2_image', required: true), 
   dependency('SDL2_mixer', required: true), 
-  dependency('SDL2_gfx'),
-  dependency('SDL2_ttf'),
-  dependency('json-c', static: true),
+  dependency('SDL2_gfx', required: true),
+  dependency('SDL2_ttf', required: true),
+  dependency('json-c', static: true, required: true),
 ]
+
+dist_dir = meson.source_root() / 'dist'
 
 executable(project_name, source_files, 
   include_directories: incdirs,
   dependencies: deps,
   install : true,
-  install_dir: meson.source_root() / 'dist'
+  install_dir: dist_dir
 )
 
-install_subdir('asserts', install_dir:  meson.source_root() / 'dist')
+install_subdir('res', install_dir: dist_dir)

@@ -22,11 +22,11 @@ static void on_deal_damage(void* arg, const MSG_DealDamage* event)
                       .damage  = event->damage,
                       .type    = event->type,
                   });
-    ecs_add_w_data(g_ecs, event->receiver, INVULNERABLE, &(Invulnerable){ event->impact_time });
+    ecs_set(g_ecs, event->receiver, INVULNERABLE, &(Invulnerable){ event->impact_time });
 
     if (event->dealer != ECS_NULL_ENT)
     {
-      ecs_add_or_set(g_ecs, event->receiver, ATTACKER, &(Attacker){ event->dealer });
+      ecs_set(g_ecs, event->receiver, ATTACKER, &(Attacker){ event->dealer });
     }
 
     if (event->impact_time > 0 && (motion = ecs_get(g_ecs, event->receiver, MOTION)))
@@ -36,7 +36,7 @@ static void on_deal_damage(void* arg, const MSG_DealDamage* event)
       motion->vz = event->zforce;
       if (!ecs_has(g_ecs, event->receiver, PARALYZED))
       {
-        ecs_add_w_data(g_ecs, event->receiver, PARALYZED, &(Paralyzed){ event->impact_time });
+        ecs_set(g_ecs, event->receiver, PARALYZED, &(Paralyzed){ event->impact_time });
       }
     }
     if (health->hit_points <= 0)

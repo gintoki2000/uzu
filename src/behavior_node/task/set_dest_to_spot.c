@@ -40,7 +40,7 @@ static BTStatus __exec(SDL_UNUSED NODE* self, Ecs* ecs, ecs_entity_t entity)
   if (spot == NULL)
     return BT_STATUS_FAILURE;
 
-  dest = ecs_add_w_data(ecs, entity, DESTINATION, &spot->position);
+  dest = ecs_set(ecs, entity, DESTINATION, &spot->position);
 
   return BT_STATUS_SUCCESS;
 }

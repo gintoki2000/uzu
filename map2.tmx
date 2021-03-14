@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.0" tiledversion="1.0.3" orientation="orthogonal" renderorder="right-down" width="10" height="25" tilewidth="16" tileheight="16" nextobjectid="14">
- <tileset firstgid="1" source="asserts/untitled.tsx"/>
+ <tileset firstgid="1" source="res/untitled.tsx"/>
  <layer name="floor" width="10" height="25">
   <data encoding="csv">
 0,0,0,5,5,5,5,0,0,0,
@@ -35,8 +35,6 @@
   <object id="6" type="Chort" x="64.5" y="226.5" width="16" height="16"/>
   <object id="7" type="Chort" x="71.5" y="24.5" width="16" height="16"/>
   <object id="8" type="Chort" x="86" y="100" width="16" height="16"/>
-  <object id="9" type="Imp" x="80.5" y="158" width="16" height="16"/>
-  <object id="10" type="Imp" x="52.5" y="59.5" width="16" height="16"/>
   <object id="12" name="central" type="Ladder" x="48" y="1.5" width="64" height="16">
    <properties>
     <property name="dest" value="corridor"/>

@@ -80,15 +80,15 @@ static s32* _layers[] = {
 
 const TileInfo g_tile_info_tbl[] = {
   { TILE_TYPE_FLOOR }, // 0
-  { TILE_TYPE_FLOOR },  // 1
-  { TILE_TYPE_FLOOR },  // 2
-  { TILE_TYPE_FLOOR },  // 3
-  { TILE_TYPE_FLOOR },  // 4
-  { TILE_TYPE_FLOOR },  // 5
-  { TILE_TYPE_FLOOR },  // 6
-  { TILE_TYPE_FLOOR },  // 7
-  { TILE_TYPE_FLOOR },  // 8
-  { TILE_TYPE_FLOOR },  // 9
+  { TILE_TYPE_FLOOR }, // 1
+  { TILE_TYPE_FLOOR }, // 2
+  { TILE_TYPE_FLOOR }, // 3
+  { TILE_TYPE_FLOOR }, // 4
+  { TILE_TYPE_FLOOR }, // 5
+  { TILE_TYPE_FLOOR }, // 6
+  { TILE_TYPE_FLOOR }, // 7
+  { TILE_TYPE_FLOOR }, // 8
+  { TILE_TYPE_FLOOR }, // 9
   { TILE_TYPE_TRAP },  // 10
   { TILE_TYPE_TRAP },  // 11
   { TILE_TYPE_TRAP },  // 12
@@ -274,4 +274,7 @@ void map_clear()
   _animated_cell_list.cnt = 0;
   _col_cnt                = 0;
   _row_cnt                = 0;
+  SDL_memset(_floor_layer, 0, sizeof(_floor_layer));
+  SDL_memset(_wall_layer, 0, sizeof(_floor_layer));
+  SDL_memset(_front_layer, 0, sizeof(_floor_layer));
 }

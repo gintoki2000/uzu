@@ -1,11 +1,10 @@
-#include "system/game_logic.h"
 #include "components.h"
 #include "system/event_messaging_sys.h"
-
-extern Ecs* g_ecs;
+#include "system/game_logic.h"
 
 void life_span_system()
 {
+  extern Ecs*   g_ecs;
   ecs_entity_t* entities;
   ecs_size_t    cnt;
   LifeSpan*     life_span;

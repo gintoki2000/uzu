@@ -82,7 +82,6 @@ static void signal_internal_disconnect(Signal* sig, pointer_t func_or_instance)
 
 void signal_disconnect(Signal* sig, pointer_t func_or_instance)
 {
-  ASSERT(!sig->is_emiting);
   if (sig->is_emiting)
   {
     if (sig->disconnect_buff_cnt == sig->disconnect_buff_cap)

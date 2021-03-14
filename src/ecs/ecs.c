@@ -7,6 +7,28 @@
 #include <stdlib.h>
 #include <string.h>
 
+INLINE void construct_component(const EcsType* type, void* component)
+{
+  if (type->init_fn != NULL)
+    type->init_fn(component);
+  else
+    SDL_memset(component, 0, type->size);
+}
+
+INLINE void destruct_component(const EcsType* type, void* component)
+{
+  if (type->fini_fn != NULL)
+    type->fini_fn(component);
+}
+
+INLINE void copy_component(const EcsType* type, void* dst, const void* src)
+{
+  if (type->cpy_fn != NULL)
+    type->cpy_fn(dst, src);
+  else
+    SDL_memcpy(dst, src, type->size);
+}
+
 Ecs* ecs_new(const EcsType* types, ecs_size_t cnt)
 {
   return ecs_init(SDL_malloc(sizeof(Ecs)), types, cnt);
@@ -68,29 +90,17 @@ void ecs_destroy(Ecs* self, ecs_entity_t entity)
 
 void* ecs_add(Ecs* self, ecs_entity_t entity, ecs_size_t type_id)
 {
-  void*          component;
-  const EcsType* type;
-  EcsPool*       pool;
+  void* component;
 
   ASSERT(type_id < self->type_cnt && "invalid type");
   ASSERT(ecs_is_valid(self, entity) && "invalid entity");
 
-  pool = self->pools[type_id];
-  if (ecs_pool_add(pool, entity))
-  {
-    component = ecs_pool_get(pool, entity);
-    type      = &self->types[type_id];
-    if (type->init_fn != NULL)
-      type->init_fn(component);
-    else
-      SDL_memset(component, 0, type->size);
-    EcsComponentEvent event;
-    event.entity    = entity;
-    event.component = component;
-    dispatcher_emit(self->on_add, type_id, &event);
-    return component;
-  }
-  return ecs_pool_get(pool, entity);
+  component = ecs_pool_add(self->pools[type_id], entity);
+  construct_component(&self->types[type_id], component);
+  dispatcher_emit(self->on_add,
+                  type_id,
+                  &(EcsComponentEvent){ .entity = entity, .component = component });
+  return component;
 }
 
 void ecs_rmv(Ecs* self, ecs_entity_t entity, ecs_size_t type_id)
@@ -98,25 +108,21 @@ void ecs_rmv(Ecs* self, ecs_entity_t entity, ecs_size_t type_id)
   ASSERT(type_id < self->type_cnt && "invalid type");
   ASSERT(ecs_is_valid(self, entity) && "invalid entity");
 
-  void*    component;
-  EcsPool* pool;
+  void* component;
 
-  pool = self->pools[type_id];
-
-  if ((component = ecs_pool_get(pool, entity)) != NULL)
+  if ((component = ecs_pool_get(self->pools[type_id], entity)) != NULL)
   {
-    EcsComponentEvent event;
-    event.component = component;
-    event.entity    = entity;
-    dispatcher_emit(self->on_rmv, type_id, &event);
-    ecs_pool_rmv(pool, entity);
+    dispatcher_emit(self->on_rmv,
+                    type_id,
+                    &(EcsComponentEvent){ .entity = entity, .component = component });
+    destruct_component(&self->types[type_id], component);
+    ecs_pool_rmv(self->pools[type_id], entity);
   }
 }
 
 void ecs_rmv_all(Ecs* self, ecs_entity_t entity)
 {
   ASSERT(ecs_is_valid(self, entity) && "invalid entity");
-  EcsPool*       ppool;
   void*          component;
   const EcsType* types;
   EcsPool**      pools;
@@ -126,15 +132,13 @@ void ecs_rmv_all(Ecs* self, ecs_entity_t entity)
   EcsComponentEvent event;
   for (int i = 0; i < self->type_cnt; ++i)
   {
-    ppool = pools[i];
-    if ((component = ecs_pool_get(ppool, entity)) != NULL)
+    if ((component = ecs_pool_get(pools[i], entity)) != NULL)
     {
       event.component = component;
       event.entity    = entity;
       dispatcher_emit(self->on_rmv, i, &event);
-      if (types[i].fini_fn != NULL)
-        types[i].fini_fn(component);
-      ecs_pool_rmv(ppool, entity);
+      destruct_component(&types[i], component);
+      ecs_pool_rmv(pools[i], entity);
     }
   }
 }
@@ -272,63 +276,33 @@ void ecs_clear(Ecs* self)
   ecs_each(self, NULL, cb_clear);
 }
 
-void ecs_set(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const void* data)
-{
-  ASSERT(ecs_is_valid(self, entity) && "invalid entity");
-  ASSERT(type_id < self->type_cnt && "invalid component type id");
-  void* raw = ecs_pool_get(self->pools[type_id], entity);
-  ASSERT(raw != NULL && "entity do not have given component");
-  if (self->types[type_id].cpy_fn != NULL)
-  {
-    self->types[type_id].cpy_fn(raw, data);
-  }
-  else
-  {
-    SDL_memcpy(raw, data, self->types[type_id].size);
-  }
-}
-
-void ecs_add_or_set(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const void* data)
+void* ecs_set(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const void* data)
 {
   ASSERT(ecs_is_valid(self, entity) && "invalid entity");
   ASSERT(type_id < self->type_cnt && "invalid component type id");
   void* raw = ecs_pool_get(self->pools[type_id], entity);
 
-  if (raw == NULL)
+  if (raw != NULL)
   {
-    ecs_pool_add(self->pools[type_id], entity);
-    raw = ecs_pool_get(self->pools[type_id], entity);
-  }
-
-  if (self->types[type_id].cpy_fn != NULL)
-    self->types[type_id].cpy_fn(raw, data);
-  else
-    SDL_memcpy(raw, data, self->types[type_id].size);
-}
-
-void* ecs_add_w_data(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const void* data)
-{
-  ASSERT(ecs_is_valid(self, entity) && "invalid entity");
-  ASSERT(type_id < self->type_cnt && "invalid component type id");
-  ecs_pool_add(self->pools[type_id], entity);
-  void* raw = ecs_pool_get(self->pools[type_id], entity);
-  if (self->types[type_id].cpy_fn != NULL)
-  {
-    self->types[type_id].cpy_fn(raw, data);
+    copy_component(&self->types[type_id], raw, data);
   }
   else
   {
-    SDL_memcpy(raw, data, self->types[type_id].size);
+    raw = ecs_pool_add(self->pools[type_id], entity);
+    copy_component(&self->types[type_id], raw, data);
+    dispatcher_emit(self->on_add,
+                    type_id,
+                    &(EcsComponentEvent){ .entity = entity, .component = raw });
   }
   return raw;
 }
 
-void ecs_on_add(Ecs *ecs, ecs_size_t type_id, funcptr_t fn, pointer_t arg)
+void ecs_on_add(Ecs* ecs, ecs_size_t type_id, funcptr_t fn, pointer_t arg)
 {
   dispatcher_connect(ecs->on_add, type_id, arg, fn);
 }
 
-void ecs_on_rmv(Ecs *ecs, ecs_size_t type_id, funcptr_t fn, pointer_t arg)
+void ecs_on_rmv(Ecs* ecs, ecs_size_t type_id, funcptr_t fn, pointer_t arg)
 {
   dispatcher_connect(ecs->on_rmv, type_id, arg, fn);
 }

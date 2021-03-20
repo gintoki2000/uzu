@@ -11,7 +11,6 @@
 #include "ui_msgbox.h"
 #include "ui_subtile.h"
 
-#define SAV_FILE_NAME "event.begining"
 extern Ecs* g_ecs;
 enum
 {
@@ -27,9 +26,8 @@ static struct
 } _save_block;
 
 static Vec2 _npc_location_tbl[]     = { { 710.f, 90.f }, { 710.f, 90.f } };
-static RECT _phase_1a_zone_to_clear = { 50, 31, 60, 217 };
 
-SAVE_AND_LOAD_FN()
+SAVE_AND_LOAD_FN("event.begining")
 //*event callback*//
 static void on_scene_unload(void* arg, const void* msg);
 static void on_level_loaded(void* arg, const MSG_LevelLoaded* msg);
@@ -37,6 +35,7 @@ static void on_level_unload(void* arg, const MSG_LevelUnloaded* msg);
 static void on_entity_died(void* arg, const MSG_EntityDied* msg);
 static void phase_initial_on_conversation_finished(void* arg, const MSG_ConversationFinished* msg);
 static void phase_1a_on_entity_died(void* arg, const MSG_EntityDied* msg);
+static void phase_2a_on_conversation_finished(void* arg, const MSG_ConversationFinished* msg);
 
 static void init_default_data(void)
 {
@@ -80,6 +79,7 @@ static void on_level_loaded(SDL_UNUSED void* arg, const MSG_LevelLoaded* msg)
     if (SDL_strcmp(msg->level_name, "demon_ruin") == 0)
     {
       make_npc_nova(g_ecs, _npc_location_tbl[PHASE_1A], CONVERSATION_NOVA_2A_1);
+      ems_connect(MSG_CONVERSATION_FINISHED, NULL, phase_2a_on_conversation_finished);
     }
     break;
   }
@@ -101,6 +101,12 @@ static void on_level_unload(SDL_UNUSED void* arg, const MSG_LevelUnloaded* msg)
     if (SDL_strcmp(msg->level_name, "corridor") == 0)
     {
       ems_disconnect(MSG_ENTITY_DIED, (void*)phase_1a_on_entity_died);
+    }
+    break;
+  case PHASE_2A:
+    if (SDL_strcmp(msg->level_name, "demon_ruin") == 0)
+    {
+      ems_disconnect(MSG_ENTITY_DIED, (void*)phase_2a_on_conversation_finished);
     }
   }
 }
@@ -147,6 +153,33 @@ static void phase_1a_on_entity_died(SDL_UNUSED void* arg, const MSG_EntityDied* 
   }
 }
 
+static void phase_2a_on_conversation_finished(SDL_UNUSED void*                arg,
+                                              const MSG_ConversationFinished* msg)
+{
+  Item* required_item = get_item(ITEM_TYPE_RED_FLASK);
+  BOOL  give_him_healing_stuffs;
+  BOOL  you_have_enough_items;
+  if (SDL_strcmp(msg->conversation_name, "nova_2A_1") == 0)
+  {
+    give_him_healing_stuffs = SDL_strcmp(msg->response, "Give he some recovery medicine") == 0;
+    you_have_enough_items   = required_item->num_items >= 3;
+    if (give_him_healing_stuffs)
+    {
+      if (you_have_enough_items)
+      {
+        required_item->num_items -= 3;
+        ui_msgbox_display("give to nova x3 red flask");
+      } else 
+      {
+        ui_msgbox_display("you do not have enough required items");
+      }
+    }
+    else 
+    {
+      
+    }
+  }
+}
 void GE_begining_init(void)
 {
   load_data();

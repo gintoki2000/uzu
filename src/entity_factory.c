@@ -930,7 +930,7 @@ ecs_entity_t make_fx_cast_fire(Ecs* ecs, Vec2 position)
   transform->position = position;
 
   ecs_set(ecs, entity, ANIMATOR, &(Animator){ .anims = &g_anim_fire_cast });
-  ecs_set(ecs, entity, LIFE_SPAN, &(LifeSpan){ 29 });
+  //ecs_set(ecs, entity, LIFE_SPAN, &(LifeSpan){ 29 });
   return entity;
 }
 
@@ -984,9 +984,6 @@ ecs_entity_t make_fx_fire_hit(Ecs* ecs, Vec2 position)
 
   transform           = ecs_add(ecs, entity, TRANSFORM);
   transform->position = position;
-
-  life_span            = ecs_add(ecs, entity, LIFE_SPAN);
-  life_span->remaining = 44;
 
   return entity;
 }

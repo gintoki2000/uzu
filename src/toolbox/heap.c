@@ -12,30 +12,30 @@ INLINE void ensure_capacity(Heap* heap)
     heap->storage = realloc(heap->storage, heap->cap * sizeof(pointer_t));
   }
 }
-INLINE int  get_left_child_index(int parent_index) { return 2 * parent_index + 1; }
-INLINE int  get_right_child_index(int parent_index) { return 2 * parent_index + 2; }
-INLINE int  get_parent_index(int child_index) { return (child_index - 1) / 2; }
+INLINE int  left_child_index(int parent_index) { return 2 * parent_index + 1; }
+INLINE int  right_child_index(int parent_index) { return 2 * parent_index + 2; }
+INLINE int  parent_index(int child_index) { return (child_index - 1) / 2; }
 INLINE BOOL has_left_child(Heap* heap, int index)
 {
-  return get_left_child_index(index) < heap->cnt;
+  return left_child_index(index) < heap->cnt;
 }
 INLINE BOOL has_right_child(Heap* heap, int index)
 {
-  return get_right_child_index(index) < heap->cnt;
+  return right_child_index(index) < heap->cnt;
 }
-INLINE BOOL has_parent(int index) { return get_parent_index(index) >= 0; }
+INLINE BOOL has_parent(int index) { return parent_index(index) >= 0; }
 
 INLINE pointer_t left_child(Heap* heap, int index)
 {
-  return heap->storage[get_left_child_index(index)];
+  return heap->storage[left_child_index(index)];
 }
 
 INLINE pointer_t right_child(Heap* heap, int index)
 {
-  return heap->storage[get_right_child_index(index)];
+  return heap->storage[right_child_index(index)];
 }
 
-INLINE pointer_t parent(Heap* heap, int index) { return heap->storage[get_parent_index(index)]; }
+INLINE pointer_t parent(Heap* heap, int index) { return heap->storage[parent_index(index)]; }
 
 INLINE void swap(Heap* heap, int lhs, int rhs)
 {
@@ -47,13 +47,13 @@ INLINE void swap(Heap* heap, int lhs, int rhs)
 INLINE void heapify_up(Heap* heap)
 {
   int index = heap->cnt - 1;
-  int parent_index;
+  int parent_idx;
 
   while (has_parent(index) && heap->compare_fn(parent(heap, index), heap->storage[index]) > 0)
   {
-    parent_index = get_parent_index(index);
-    swap(heap, parent_index, index);
-    index = parent_index;
+    parent_idx = parent_index(index);
+    swap(heap, parent_idx, index);
+    index = parent_idx;
   }
 }
 
@@ -64,11 +64,11 @@ INLINE void heapify_down(Heap* heap)
   compare_fn_t compare_fn = heap->compare_fn;
   while (has_left_child(heap, index))
   {
-    int smaller_child_index = get_left_child_index(index);
+    int smaller_child_index = left_child_index(index);
     if (has_right_child(heap, index) &&
         compare_fn(right_child(heap, index), left_child(heap, index)) < 0)
     {
-      smaller_child_index = get_right_child_index(index);
+      smaller_child_index = right_child_index(index);
     }
 
     if (compare_fn(storage[index], storage[smaller_child_index]) < 0)

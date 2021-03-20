@@ -23,4 +23,7 @@ pointer_t heap_peak(Heap* heap);
 pointer_t heap_poll(Heap* heap);
 void      heap_add(Heap* heap, pointer_t v);
 
+INLINE BOOL heap_empty(const Heap* heap)
+{ return heap->cnt == 0; }
+
 #endif // HEAP_H

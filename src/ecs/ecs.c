@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-INLINE void construct_component(const EcsType* type, void* component)
+INLINE void construct(const EcsType* type, void* component)
 {
   if (type->init_fn != NULL)
     type->init_fn(component);
@@ -15,13 +15,13 @@ INLINE void construct_component(const EcsType* type, void* component)
     SDL_memset(component, 0, type->size);
 }
 
-INLINE void destruct_component(const EcsType* type, void* component)
+INLINE void destruct(const EcsType* type, void* component)
 {
   if (type->fini_fn != NULL)
     type->fini_fn(component);
 }
 
-INLINE void copy_component(const EcsType* type, void* dst, const void* src)
+INLINE void copy(const EcsType* type, void* dst, const void* src)
 {
   if (type->cpy_fn != NULL)
     type->cpy_fn(dst, src);
@@ -96,7 +96,7 @@ void* ecs_add(Ecs* self, ecs_entity_t entity, ecs_size_t type_id)
   ASSERT(ecs_is_valid(self, entity) && "invalid entity");
 
   component = ecs_pool_add(self->pools[type_id], entity);
-  construct_component(&self->types[type_id], component);
+  construct(&self->types[type_id], component);
   dispatcher_emit(self->on_add,
                   type_id,
                   &(EcsComponentEvent){ .entity = entity, .component = component });
@@ -115,7 +115,7 @@ void ecs_rmv(Ecs* self, ecs_entity_t entity, ecs_size_t type_id)
     dispatcher_emit(self->on_rmv,
                     type_id,
                     &(EcsComponentEvent){ .entity = entity, .component = component });
-    destruct_component(&self->types[type_id], component);
+    destruct(&self->types[type_id], component);
     ecs_pool_rmv(self->pools[type_id], entity);
   }
 }
@@ -137,7 +137,7 @@ void ecs_rmv_all(Ecs* self, ecs_entity_t entity)
       event.component = component;
       event.entity    = entity;
       dispatcher_emit(self->on_rmv, i, &event);
-      destruct_component(&types[i], component);
+      destruct(&types[i], component);
       ecs_pool_rmv(pools[i], entity);
     }
   }
@@ -284,12 +284,12 @@ void* ecs_set(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const void* da
 
   if (raw != NULL)
   {
-    copy_component(&self->types[type_id], raw, data);
+    copy(&self->types[type_id], raw, data);
   }
   else
   {
     raw = ecs_pool_add(self->pools[type_id], entity);
-    copy_component(&self->types[type_id], raw, data);
+    copy(&self->types[type_id], raw, data);
     dispatcher_emit(self->on_add,
                     type_id,
                     &(EcsComponentEvent){ .entity = entity, .component = raw });

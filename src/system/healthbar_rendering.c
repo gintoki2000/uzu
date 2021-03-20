@@ -1,13 +1,25 @@
-#include "system/rendering.h"
 #include "components.h"
 #include "ecs/ecs.h"
+#include "system/rendering.h"
 
 extern SDL_Rect      g_viewport;
 extern SDL_Renderer* g_renderer;
 extern Ecs*          g_ecs;
 
+void health_bar_rendering_system(ecs_entity_t     entity,
+                                 const Transform* transform,
+                                 const Health*    health,
+                                 const HealthBar* health_bar)
+{
+  (void)entity;
+  (void)transform;
+  (void)health;
+  (void)health_bar;
+}
+
 void healthbar_rendering_system()
 {
+  health_bar_rendering_system(0, 0, 0, 0);
   ecs_entity_t* entities;
   ecs_size_t    cnt;
 
@@ -41,10 +53,10 @@ void healthbar_rendering_system()
     inner.w = health_bar[i].len * p;
     inner.h = 1;
     SDL_SetRenderDrawColor(g_renderer,
-    		health_bar[i].color.r,
-			health_bar[i].color.g,
-			health_bar[i].color.b,
-			health_bar->color.a);
+                           health_bar[i].color.r,
+                           health_bar[i].color.g,
+                           health_bar[i].color.b,
+                           health_bar->color.a);
     SDL_RenderFillRect(g_renderer, &inner);
   }
 }

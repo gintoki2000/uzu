@@ -43,7 +43,6 @@ ecs_entity_t ecs_clone(Ecs* self, ecs_entity_t prototype);
 ecs_entity_t ecs_cpy(Ecs* self, Ecs* srcworld, ecs_entity_t srcentity);
 void         ecs_destroy(Ecs* self, ecs_entity_t entity);
 void*        ecs_add(Ecs* self, ecs_entity_t entity, ecs_size_t type_id);
-void*        ecs_add_w_data(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const void* data);
 void*        ecs_set(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const void* data);
 void         ecs_rmv(Ecs* self, ecs_entity_t entity, ecs_size_t type_id);
 void*        ecs_get(Ecs* self, ecs_entity_t entity, ecs_size_t type_id);
@@ -72,4 +71,7 @@ static BOOL ecs_is_valid(Ecs* self, ecs_entity_t entity)
 
 void ecs_on_add(Ecs* ecs, ecs_size_t type_id, funcptr_t fn, pointer_t arg);
 void ecs_on_rmv(Ecs* ecs, ecs_size_t type_id, funcptr_t fn, pointer_t arg);
+
+void ecs_connect(Ecs* self, int event, ecs_size_t type_id, Callback cb);
+void ecs_disconnect(Ecs* self, int event, ecs_size_t type_id, pointer_t fn_or_arg);
 #endif // WORLD_H

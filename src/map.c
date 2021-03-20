@@ -228,8 +228,8 @@ void map_draw(int layer)
 
 void map_set_size(s32 w, s32 h)
 {
-  SDL_assert(w < MAP_MAX_COL);
-  SDL_assert(h < MAP_MAX_ROW);
+  SDL_assert(w <= MAP_MAX_COL);
+  SDL_assert(h <= MAP_MAX_ROW);
   _row_cnt = h;
   _col_cnt = w;
 }

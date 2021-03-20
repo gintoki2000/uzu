@@ -64,23 +64,22 @@ void signal_connect(Signal* sig, pointer_t user_data, funcptr_t func)
   sig->slots[sig->cnt++] = CALLBACK_1(user_data, func);
 }
 
-static void signal_internal_disconnect(Signal* sig, pointer_t func_or_instance)
+static void signal_internal_disconnect(Signal* sig, pointer_t func_or_user_data)
 {
   Callback* slots = sig->slots;
-  u32       cnt   = sig->cnt;
+  int       cnt   = sig->cnt;
 
-  for (u32 i = 0; i < cnt; ++i)
+  for (int i = cnt - 1; i >= 0; --i)
   {
-    if (slots[i].func == (void (*)())func_or_instance || slots[i].user_data == func_or_instance)
+    if ((pointer_t)slots[i].func == func_or_user_data || slots[i].user_data == func_or_user_data)
     {
-      slots[i] = slots[cnt - 1];
+      slots[i] = slots[sig->cnt - 1];
       --sig->cnt;
-      return;
     }
   }
 }
 
-void signal_disconnect(Signal* sig, pointer_t func_or_instance)
+void signal_disconnect(Signal* sig, pointer_t func_or_user_data)
 {
   if (sig->is_emiting)
   {
@@ -89,11 +88,11 @@ void signal_disconnect(Signal* sig, pointer_t func_or_instance)
       sig->disconnect_buff_cap *= 2;
       sig->disconnect_buff = realloc(sig->disconnect_buff, sig->disconnect_buff_cap);
     }
-    sig->disconnect_buff[sig->disconnect_buff_cnt++] = func_or_instance;
+    sig->disconnect_buff[sig->disconnect_buff_cnt++] = func_or_user_data;
   }
   else
   {
-    signal_internal_disconnect(sig, func_or_instance);
+    signal_internal_disconnect(sig, func_or_user_data);
   }
 }
 
@@ -132,7 +131,7 @@ static void dispatcher_fini(Dispatcher* dp)
   {
     signal_fini(dp->signals + i);
   }
-  free (dp->signals);
+  free(dp->signals);
 }
 
 Dispatcher* dispatcher_new(u32 num_singals)
@@ -156,9 +155,9 @@ void dispatcher_connect(Dispatcher* dp, int sig, pointer_t user_data, funcptr_t 
   signal_connect(dp->signals + sig, user_data, func);
 }
 
-void dispatcher_disconnect(Dispatcher* dp, int sig, pointer_t func_or_instance)
+void dispatcher_disconnect(Dispatcher* dp, int sig, pointer_t func_or_user_data)
 {
-  signal_disconnect(dp->signals + sig, func_or_instance);
+  signal_disconnect(dp->signals + sig, func_or_user_data);
 }
 
 void dispatcher_emit(Dispatcher* dp, int sig, const void* evt)

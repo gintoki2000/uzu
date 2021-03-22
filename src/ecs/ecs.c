@@ -54,8 +54,8 @@ Ecs* ecs_init(Ecs* self, const EcsType* types, ecs_size_t cnt)
     self->pools[i] = ecs_pool_new(types[i].size);
   }
   ecs_entity_pool_init(&self->entity_pool);
-  self->on_add = dispatcher_new(cnt);
-  self->on_rmv = dispatcher_new(cnt);
+  self->dispatcher[ECS_EVT_ADD_COMP] = dispatcher_new(cnt);
+  self->dispatcher[ECS_EVT_RMV_COMP] = dispatcher_new(cnt);
   return self;
 }
 
@@ -73,8 +73,10 @@ void ecs_fini(Ecs* self)
   free(self->pools);
   free(self->types);
   ecs_entity_pool_fini(&self->entity_pool);
-  dispatcher_destroy(self->on_add);
-  dispatcher_destroy(self->on_rmv);
+  for (int i = 0; i < ECS_NUM_EVENTS; ++i)
+  {
+    dispatcher_destroy(self->dispatcher[i]);
+  }
 }
 
 ecs_entity_t ecs_create(Ecs* self)
@@ -97,7 +99,7 @@ void* ecs_add(Ecs* self, ecs_entity_t entity, ecs_size_t type_id)
 
   component = ecs_pool_add(self->pools[type_id], entity);
   construct(&self->types[type_id], component);
-  dispatcher_emit(self->on_add,
+  dispatcher_emit(self->dispatcher[ECS_EVT_ADD_COMP],
                   type_id,
                   &(EcsComponentEvent){ .entity = entity, .component = component });
   return component;
@@ -112,7 +114,7 @@ void ecs_rmv(Ecs* self, ecs_entity_t entity, ecs_size_t type_id)
 
   if ((component = ecs_pool_get(self->pools[type_id], entity)) != NULL)
   {
-    dispatcher_emit(self->on_rmv,
+    dispatcher_emit(self->dispatcher[ECS_EVT_RMV_COMP],
                     type_id,
                     &(EcsComponentEvent){ .entity = entity, .component = component });
     destruct(&self->types[type_id], component);
@@ -136,7 +138,7 @@ void ecs_rmv_all(Ecs* self, ecs_entity_t entity)
     {
       event.component = component;
       event.entity    = entity;
-      dispatcher_emit(self->on_rmv, i, &event);
+      dispatcher_emit(self->dispatcher[ECS_EVT_RMV_COMP], i, &event);
       destruct(&types[i], component);
       ecs_pool_rmv(pools[i], entity);
     }
@@ -290,19 +292,23 @@ void* ecs_set(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const void* da
   {
     raw = ecs_pool_add(self->pools[type_id], entity);
     copy(&self->types[type_id], raw, data);
-    dispatcher_emit(self->on_add,
+    dispatcher_emit(self->dispatcher[ECS_EVT_ADD_COMP],
                     type_id,
                     &(EcsComponentEvent){ .entity = entity, .component = raw });
   }
   return raw;
 }
 
-void ecs_on_add(Ecs* ecs, ecs_size_t type_id, funcptr_t fn, pointer_t arg)
+void ecs_connect(Ecs* self, int event, ecs_size_t type_id, Callback cb)
 {
-  dispatcher_connect(ecs->on_add, type_id, arg, fn);
+  ASSERT((event >= 0 && event < ECS_NUM_EVENTS) && "invalid event type");
+  ASSERT(type_id < self->type_cnt && "invalid component type id");
+  dispatcher_connect(self->dispatcher[event], type_id, cb.user_data, cb.func);
 }
 
-void ecs_on_rmv(Ecs* ecs, ecs_size_t type_id, funcptr_t fn, pointer_t arg)
+void ecs_disconnect(Ecs* self, int event, ecs_size_t type_id, pointer_t fn_or_arg)
 {
-  dispatcher_connect(ecs->on_rmv, type_id, arg, fn);
+  ASSERT((event >= 0 && event < ECS_NUM_EVENTS) && "invalid event type");
+  ASSERT(type_id < self->type_cnt && "invalid component type id");
+  dispatcher_disconnect(self->dispatcher[event], type_id, fn_or_arg);
 }

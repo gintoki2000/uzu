@@ -5,14 +5,20 @@
 #include "ecs/pool.h"
 #include "toolbox/toolbox.h"
 
+enum
+{
+  ECS_EVT_RMV_COMP,
+  ECS_EVT_ADD_COMP,
+  ECS_NUM_EVENTS,
+};
+
 typedef struct Ecs
 {
   ecs_size_t    type_cnt;
   EcsType*      types;
   EcsPool**     pools;
   EcsEntityPool entity_pool;
-  Dispatcher*   on_rmv;
-  Dispatcher*   on_add;
+  Dispatcher*   dispatcher[ECS_NUM_EVENTS];
 } Ecs;
 
 typedef struct EcsFilter
@@ -68,9 +74,6 @@ static BOOL ecs_is_valid(Ecs* self, ecs_entity_t entity)
 {
   return ecs_entity_pool_is_valid(&self->entity_pool, entity);
 }
-
-void ecs_on_add(Ecs* ecs, ecs_size_t type_id, funcptr_t fn, pointer_t arg);
-void ecs_on_rmv(Ecs* ecs, ecs_size_t type_id, funcptr_t fn, pointer_t arg);
 
 void ecs_connect(Ecs* self, int event, ecs_size_t type_id, Callback cb);
 void ecs_disconnect(Ecs* self, int event, ecs_size_t type_id, pointer_t fn_or_arg);

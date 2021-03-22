@@ -1,6 +1,6 @@
-#include "system/collision_sys.h"
 #include "components.h"
 #include "game_scene.h"
+#include "system/collision_sys.h"
 #include "system/event_messaging_sys.h"
 #include "toolbox/toolbox.h"
 
@@ -23,7 +23,7 @@ static void on_hitbox_remove(SDL_UNUSED void* arg, const EcsComponentEvent* even
   }
 }
 
-INLINE RECT* get_bounding_rect(RECT* r, const HitBox* hitbox, const Transform* transform)
+INLINE RECT* calculate_bounding_rect(RECT* r, const HitBox* hitbox, const Transform* transform)
 {
   r->w = hitbox->size.x;
   r->h = hitbox->size.y;
@@ -177,8 +177,8 @@ static void narrow_phase(Ecs* ecs)
     {
       transform1 = ecs_get(g_ecs, _pair_buff[i].e1, TRANSFORM);
       transform2 = ecs_get(g_ecs, _pair_buff[i].e2, TRANSFORM);
-      get_bounding_rect(&r1, hitbox1, transform1);
-      get_bounding_rect(&r2, hitbox2, transform2);
+      calculate_bounding_rect(&r1, hitbox1, transform1);
+      calculate_bounding_rect(&r2, hitbox2, transform2);
       if (SDL_HasIntersection(&r1, &r2))
       {
         ems_broadcast(MSG_COLLISION,
@@ -194,7 +194,7 @@ static void narrow_phase(Ecs* ecs)
 void collision_system_init()
 {
   _rtree = rtree_new();
-  ecs_on_rmv(g_ecs, HITBOX, on_hitbox_remove, NULL);
+  ecs_connect(g_ecs, ECS_EVT_RMV_COMP, HITBOX, CALLBACK_2(on_hitbox_remove));
 }
 
 void collision_system_fini()
@@ -245,7 +245,7 @@ static BOOL __callback_box_query(CBCollision_BoxQueryArgs* vars, int proxy_id)
 
   if (BIT(hitbox->category) & vars->mask_bits)
   {
-    get_bounding_rect(&bounding_rect, hitbox, transform);
+    calculate_bounding_rect(&bounding_rect, hitbox, transform);
     if (SDL_HasIntersection(vars->rect, &bounding_rect))
     {
       return INVOKE_CALLBACK(vars->callback, BOOL, entity);

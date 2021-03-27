@@ -930,7 +930,7 @@ ecs_entity_t make_fx_cast_fire(Ecs* ecs, Vec2 position)
   transform->position = position;
 
   ecs_set(ecs, entity, ANIMATOR, &(Animator){ .anims = &g_anim_fire_cast });
-  //ecs_set(ecs, entity, LIFE_SPAN, &(LifeSpan){ 29 });
+  ecs_set(ecs, entity, LIFE_SPAN, &(LifeSpan){ 29 });
   return entity;
 }
 
@@ -969,7 +969,6 @@ ecs_entity_t make_fx_fire_hit(Ecs* ecs, Vec2 position)
 
   Visual*    visual;
   Transform* transform;
-  LifeSpan*  life_span;
 
   const int sw = 64;
   const int sh = 64;
@@ -981,6 +980,7 @@ ecs_entity_t make_fx_fire_hit(Ecs* ecs, Vec2 position)
   visual->anchor.y = sh / 2;
 
   ecs_set(ecs, entity, ANIMATOR, &(Animator){ .anims = &g_anim_fire_hit });
+  ecs_set(ecs, entity, LIFE_SPAN, &(LifeSpan){ 44 });
 
   transform           = ecs_add(ecs, entity, TRANSFORM);
   transform->position = position;

@@ -19,7 +19,9 @@ $ cd json-c-build
 $ cmake ../json-c  -DBUILD_STATIC_LIBS=TRUE
 ```
 
->$make install
+```
+$make install
+```
 ### Build & run
 ```
 $ meson build

@@ -1,0 +1,42 @@
+include(src/behavior_node/CMakeLists.txt)
+include(src/system/CMakeLists.txt)
+include(src/ecs/CMakeLists.txt)
+include(src/engine/CMakeLists.txt)
+
+set(SOURCE_FILES 
+  src/SDL_FontCache.c
+  src/animations.c
+  src/behaviour_tree.c 
+  src/components.c
+  src/constances.c
+  src/dungeon.c 
+  src/entity_factory.c
+  src/entity_utils.c
+  src/game_scene.c
+  src/global.c
+  src/inventory.c
+  src/item.c
+  src/json_helper.c
+  src/level_loader.c
+  src/main_menu.c
+  src/map.c 
+  src/path_finder.c
+  src/read_all.c
+  src/resources.c 
+  src/select_character.c
+  src/session.c
+  src/spells.c
+  src/struct_meta_data.c
+  src/ui_dialogue.c
+  src/ui_helper.c
+  src/ui_list.c
+  src/ui_msgbox.c
+  src/ui_msgbox_w_icon.c
+  src/ui_quality.c
+  src/ui_subtile.c
+  ${BEHAVIOR_TREE_SOURCE_FILES}
+  ${ECS_SOURCE_FILES}
+  ${ENGINE_SOURCE_FILES}
+  ${GAME_EVENT_SOURCE_FILES}
+  ${SYSTEM_SOURCE_FILES}
+)

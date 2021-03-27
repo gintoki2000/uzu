@@ -7,11 +7,14 @@
 * **meson**
 * **ninja**
 ### Install dependencies
+
+#### sdl2 libraries
+install sdl libraries via apt
 ```
 $ sudo apt-get install libsdl2-dev libsdl2-gfx-dev libsdl2-image libsdl2-mixer
 ```
-
-Compile and install json-c
+#### json-c
+We need install json-c library manually
 ```
 $ git clone https://github.com/json-c/json-c.git
 $ mkdir json-c-build

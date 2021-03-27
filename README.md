@@ -14,16 +14,13 @@ install sdl libraries via apt
 $ sudo apt-get install libsdl2-dev libsdl2-gfx-dev libsdl2-image libsdl2-mixer
 ```
 #### json-c
-We need install json-c library manually
+uzu depends on json-c so we need too install it too, but from source.
 ```
 $ git clone https://github.com/json-c/json-c.git
 $ mkdir json-c-build
 $ cd json-c-build
 $ cmake ../json-c  -DBUILD_STATIC_LIBS=TRUE
-```
-
-```
-$make install
+$ make install
 ```
 ### Build & run
 ```

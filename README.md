@@ -3,7 +3,7 @@
 ![scr2](screenshot-2.png)
 #  Build Instructions
 ###  Prerequisites: 
-* **gcc**, **clang** compiler 
+* **gcc** or **clang** compiler 
 * **meson**
 * **ninja**
 ### Install dependencies
@@ -11,7 +11,7 @@
 #### sdl2 libraries
 install sdl libraries via apt
 ```
-$ sudo apt-get install libsdl2-dev libsdl2-gfx-dev libsdl2-image libsdl2-mixer
+$ sudo apt-get install libsdl2-dev libsdl2-gfx-dev libsdl2-image-dev libsdl2-mixer-dev
 ```
 #### json-c
 uzu depends on json-c so we need too install it too, but from source.

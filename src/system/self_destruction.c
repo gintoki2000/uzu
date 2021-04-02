@@ -2,7 +2,7 @@
 
 #include "components.h"
 #include "entity_factory.h"
-#include "include/entity_utils.h"
+#include "entity_utils.h"
 #include "resources.h"
 #include "system/event_messaging_sys.h"
 

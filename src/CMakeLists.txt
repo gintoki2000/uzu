@@ -2,6 +2,8 @@ include(src/behavior_node/CMakeLists.txt)
 include(src/system/CMakeLists.txt)
 include(src/ecs/CMakeLists.txt)
 include(src/engine/CMakeLists.txt)
+include(src/toolbox/CMakeLists.txt)
+include(src/game_event/CMakeLists.txt)
 
 set(SOURCE_FILES 
   src/SDL_FontCache.c
@@ -34,9 +36,10 @@ set(SOURCE_FILES
   src/ui_msgbox_w_icon.c
   src/ui_quality.c
   src/ui_subtile.c
-  ${BEHAVIOR_TREE_SOURCE_FILES}
+  ${BEHAVIOR_NODE_SOURCE_FILES}
   ${ECS_SOURCE_FILES}
   ${ENGINE_SOURCE_FILES}
   ${GAME_EVENT_SOURCE_FILES}
   ${SYSTEM_SOURCE_FILES}
+  ${TOOLBOX_SOURCE_FILES}
 )

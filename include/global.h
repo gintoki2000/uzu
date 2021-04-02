@@ -75,7 +75,7 @@ typedef struct SpriteSheet
   u16 count;
 } SpriteSheet;
 
-typedef struct
+typedef struct Animation
 {
   u16 frame_duration;
   u16 mode;

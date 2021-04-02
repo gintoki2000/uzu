@@ -7,7 +7,7 @@ extern Ecs* g_ecs;
 
 void animator_system(void)
 {
-  ecs_entity_t* ett;
+  ecs_entity_t* entities;
   Animator*     animator;
   Visual*       visual;
   ecs_size_t    cnt;
@@ -16,11 +16,11 @@ void animator_system(void)
   int              idx;
   RECT             rect;
 
-  ecs_raw(g_ecs, ANIMATOR, &ett, (void**)&animator, &cnt);
+  ecs_raw(g_ecs, ANIMATOR, &entities, (void**)&animator, &cnt);
 
   for (int i = 0; i < cnt; ++i)
   {
-    visual = ecs_get(g_ecs, ett[i], VISUAL);
+    visual = ecs_get(g_ecs, entities[i], VISUAL);
     curr   = &animator[i].anims[animator[i].current_anim];
 
     idx = animator[i].elapsed / curr->frame_duration;

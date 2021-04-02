@@ -1,11 +1,12 @@
 #include "ecs/ecs.h"
 #include "ecs/common.h"
-#include "ecs/entity_pool.h"
 #include "ecs/pool.h"
 #include "toolbox/toolbox.h"
 
 #include <stdlib.h>
 #include <string.h>
+
+#define ECS_DEFAULT_SIZE 16
 
 INLINE void construct(const EcsType* type, void* component)
 {
@@ -39,7 +40,7 @@ void ecs_del(Ecs* ecs)
   if (ecs)
   {
     ecs_fini(ecs);
-    free(ecs);
+    SDL_free(ecs);
   }
 }
 
@@ -53,15 +54,22 @@ Ecs* ecs_init(Ecs* self, const EcsType* types, ecs_size_t cnt)
   {
     self->pools[i] = ecs_pool_new(types[i].size);
   }
-  ecs_entity_pool_init(&self->entity_pool);
-  self->dispatcher[ECS_EVT_ADD_COMP] = dispatcher_new(cnt);
-  self->dispatcher[ECS_EVT_RMV_COMP] = dispatcher_new(cnt);
+  self->cnt             = 0;
+  self->size            = ECS_DEFAULT_SIZE;
+  self->destroyed_index = 0;
+  self->entities        = SDL_malloc(ECS_DEFAULT_SIZE * sizeof(ecs_entity_t));
+
+  for (int i = 0; i < ECS_DEFAULT_SIZE - 1; ++i)
+    self->entities[i] = ECS_ENT(i + 1, 0);
+
+  self->entities[ECS_DEFAULT_SIZE - 1] = ECS_ENT(ECS_NULL_IDX, 0);
+  self->dispatcher[ECS_EVT_ADD_COMP]   = dispatcher_new(cnt);
+  self->dispatcher[ECS_EVT_RMV_COMP]   = dispatcher_new(cnt);
   return self;
 }
 
-static void cb_clear(void* udata, Ecs* ecs, ecs_entity_t entity)
+static void cb_clear(SDL_UNUSED void* udata, Ecs* ecs, ecs_entity_t entity)
 {
-  (void)udata;
   ecs_destroy(ecs, entity);
 }
 
@@ -70,9 +78,9 @@ void ecs_fini(Ecs* self)
   ecs_each(self, NULL, cb_clear);
   for (int i = 0; i < self->type_cnt; ++i)
     ecs_pool_del(self->pools[i]);
-  free(self->pools);
-  free(self->types);
-  ecs_entity_pool_fini(&self->entity_pool);
+  SDL_free(self->pools);
+  SDL_free(self->types);
+  SDL_free(self->entities);
   for (int i = 0; i < ECS_NUM_EVENTS; ++i)
   {
     dispatcher_destroy(self->dispatcher[i]);
@@ -81,13 +89,47 @@ void ecs_fini(Ecs* self)
 
 ecs_entity_t ecs_create(Ecs* self)
 {
-  return ecs_entity_pool_alloc_ent(&self->entity_pool);
+  ecs_size_t ver;
+  ecs_size_t idx;
+
+  if (self->destroyed_index == ECS_NULL_IDX)
+  {
+    self->size *= 2;
+    self->entities = realloc(self->entities, self->size * sizeof(ecs_entity_t));
+    for (int i = self->cnt; i < self->size - 1; ++i)
+    {
+      self->entities[i] = ECS_ENT(i + 1, 0);
+    }
+    self->entities[self->size - 1] = ECS_ENT(ECS_NULL_IDX, 0);
+    self->destroyed_index          = self->cnt;
+  }
+
+  idx                   = self->destroyed_index;
+  ver                   = ECS_ENT_VER(self->entities[idx]);
+  self->destroyed_index = ECS_ENT_IDX(self->entities[idx]);
+  self->entities[idx]   = ECS_ENT(idx, ver);
+  self->cnt++;
+
+  return ECS_ENT(idx, ver);
+}
+
+INLINE void recycle(Ecs* self, ecs_entity_t entity)
+{
+  ecs_size_t ent_ver;
+  ecs_size_t ent_idx;
+
+  ent_ver = ECS_ENT_VER(entity);
+  ent_idx = ECS_ENT_IDX(entity);
+
+  self->entities[ent_idx] = ECS_ENT(self->destroyed_index, ent_ver + 1);
+  self->destroyed_index   = ent_idx;
+  self->cnt--;
 }
 
 void ecs_destroy(Ecs* self, ecs_entity_t entity)
 {
   ecs_rmv_all(self, entity);
-  ecs_entity_pool_free_ent(&self->entity_pool, entity);
+  recycle(self, entity);
 }
 
 void* ecs_add(Ecs* self, ecs_entity_t entity, ecs_size_t type_id)
@@ -157,9 +199,9 @@ void ecs_each(Ecs* self, void* user_data, ecs_each_fn_t each_fn)
   ecs_size_t    size;
   ecs_entity_t* entities;
 
-  size     = self->entity_pool.size;
-  entities = self->entity_pool.entities;
-  if (self->entity_pool.destroyed_index == ECS_NULL_IDX)
+  size     = self->size;
+  entities = self->entities;
+  if (self->destroyed_index == ECS_NULL_IDX)
   {
     for (int i = size - 1; i >= 0; --i)
       each_fn(user_data, self, entities[i]);
@@ -311,4 +353,14 @@ void ecs_disconnect(Ecs* self, int event, ecs_size_t type_id, pointer_t fn_or_ar
   ASSERT((event >= 0 && event < ECS_NUM_EVENTS) && "invalid event type");
   ASSERT(type_id < self->type_cnt && "invalid component type id");
   dispatcher_disconnect(self->dispatcher[event], type_id, fn_or_arg);
+}
+
+void ecs_fill(Ecs* self, ecs_size_t entity, const ecs_size_t* types, ecs_size_t cnt, void** arr)
+{
+  ASSERT(ecs_is_valid(self, entity) && "invalid entity");
+  for (int i = 0; i < cnt; ++i)
+  {
+    ASSERT(types[i] >= 0 && types[i] < self->type_cnt);
+    arr[i] = ecs_pool_get(self->pools[types[i]], entity);
+  }
 }

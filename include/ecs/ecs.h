@@ -1,7 +1,6 @@
 #ifndef WORLD_H
 #define WORLD_H
 #include "ecs/common.h"
-#include "ecs/entity_pool.h"
 #include "ecs/pool.h"
 #include "toolbox/toolbox.h"
 
@@ -17,8 +16,11 @@ typedef struct Ecs
   ecs_size_t    type_cnt;
   EcsType*      types;
   EcsPool**     pools;
-  EcsEntityPool entity_pool;
   Dispatcher*   dispatcher[ECS_NUM_EVENTS];
+  ecs_entity_t* entities;
+  ecs_size_t    cnt;
+  ecs_size_t    size;
+  ecs_size_t    destroyed_index;
 } Ecs;
 
 typedef struct EcsFilter
@@ -60,10 +62,8 @@ void         ecs_each_w_filter(Ecs*             self,
                                void*            user_data,
                                ecs_each_ex_fn_t each_fn);
 void         ecs_clear(Ecs* self);
+void ecs_fill(Ecs* self, ecs_size_t entity, const ecs_size_t* types, ecs_size_t cnt, void** arr);
 
-ecs_size_t ecs_find(Ecs* self, void* component, ecs_size_t type_id);
-
-BOOL ecs_has_ex(Ecs* self, const ecs_size_t* types, ecs_size_t cnt);
 void ecs_raw(Ecs*           self,
              ecs_size_t     type,
              ecs_entity_t** entities_ptr,
@@ -72,7 +72,8 @@ void ecs_raw(Ecs*           self,
 
 static BOOL ecs_is_valid(Ecs* self, ecs_entity_t entity)
 {
-  return ecs_entity_pool_is_valid(&self->entity_pool, entity);
+  ecs_size_t idx = ECS_ENT_IDX(entity);
+  return (idx < self->size) && (self->entities[idx] == entity);
 }
 
 void ecs_connect(Ecs* self, int event, ecs_size_t type_id, Callback cb);

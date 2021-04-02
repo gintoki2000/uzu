@@ -63,10 +63,8 @@ static struct PingPongValue _transparent = {
   .dir = 1,
 };
 
-static void on_load(void);
-static void on_unload(void);
-static void on_event(SDL_UNUSED const SDL_Event* event);
-static void on_update(void);
+DEFINE_SCENE(select_character);
+
 static void process_input(void*);
 static void draw_character(void);
 static void draw_jobdesc(void);
@@ -75,10 +73,6 @@ static void draw_icon(Icon icon, int x, int y);
 
 static u8 ppv_step(struct PingPongValue* pp);
 
-const Scene g_select_character_scene = { .on_load   = on_load,
-                                         .on_unload = on_unload,
-                                         .on_update = on_update,
-                                         .on_event  = on_event };
 
 static void on_load()
 {
@@ -123,7 +117,7 @@ static void process_input(SDL_UNUSED void* arg)
   }
   if (button_just_pressed(BUTTON_CANCEL))
   {
-    set_scene(&g_main_menu);
+    set_scene(&g_main_scene);
     Mix_PlayChannel(-1, _back_fx, 0);
   }
   if (button_just_pressed(BUTTON_INTERACT))

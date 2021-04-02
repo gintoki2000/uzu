@@ -6,25 +6,16 @@
 #include "resources.h"
 #include "session.h"
 
-static void on_load();
-static void on_unload();
-static void on_update();
-static void on_event(const SDL_Event*);
 static void main_state_process_input(void*);
 static void draw_main_menu(void);
 static void draw_about_panel(void);
 static void about_state_process_input(void*);
 
-const Scene g_main_menu = {
-  .on_load   = on_load,
-  .on_unload = on_unload,
-  .on_update = on_update,
-  .on_event  = on_event,
-};
+DEFINE_SCENE(main);
 
 #define MAIN_MENU_POS_X 117
 #define MAIN_MENU_POS_Y 78
-#define MAIN_MENU_NUM_OPS 4
+#define MAIN_MENU_NUM_OPTS 4
 
 enum
 {
@@ -44,7 +35,7 @@ static const char _text_load[]     = "Load";
 static s8         _select;
 static u8         _state;
 
-static const char* const _options[MAIN_MENU_NUM_OPS] = { _text_load,
+static const char* const _options[MAIN_MENU_NUM_OPTS] = { _text_load,
                                                          _text_new_game,
                                                          _text_about,
                                                          _text_exit };
@@ -100,7 +91,7 @@ static void on_event(const SDL_UNUSED SDL_Event* e)
 
 static void main_state_process_input(SDL_UNUSED void* arg)
 {
-  if (button_just_pressed(BUTTON_DOWN) && _select < MAIN_MENU_NUM_OPS - 1)
+  if (button_just_pressed(BUTTON_DOWN) && _select < MAIN_MENU_NUM_OPTS - 1)
   {
     ++_select;
     Mix_PlayChannel(-1, get_sfx(SFX_BUTTON), 0);
@@ -145,7 +136,7 @@ static void draw_main_menu(void)
   };
 
   x = MAIN_MENU_POS_X + 44;
-  for (int i = 0; i < MAIN_MENU_NUM_OPS; ++i)
+  for (int i = 0; i < MAIN_MENU_NUM_OPTS; ++i)
   {
     y = MAIN_MENU_POS_Y + 10 + i * 15;
     FC_DrawEffect(_font, g_renderer, x, y, effect, _options[i]);

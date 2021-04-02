@@ -17,7 +17,7 @@
 
 SDL_Rect g_viewport;
 
-static const Scene* _curr_scr = NULL;
+static const Scene* _current_scene = NULL;
 
 extern SDL_Renderer* g_renderer;
 extern SDL_Window*   g_window;
@@ -29,9 +29,9 @@ Cursor g_cursor_pointer = { .sprite = { TEX_CURSOR_POINTER, { 0, 0, 9, 9 } }, .h
 static Cursor _cursor_state[CURSOR_MAX_STATES];
 static u8     _cursor_state_count = 0;
 
-#define SHOW_FPS 1
+#define SHOW_TIME_ELAPSED 1
 
-#if SHOW_FPS
+#if SHOW_TIME_ELAPSED
 static FONT* _fps_font;
 #endif
 
@@ -58,9 +58,9 @@ static BOOL on_game_init()
 
   SDL_ShowCursor(SDL_DISABLE);
   push_cursor_state(g_cursor_pointer);
-  set_scene(&g_main_menu);
+  set_scene(&g_main_scene);
 
-#if SHOW_FPS
+#if SHOW_TIME_ELAPSED
   _fps_font = get_font(FONT_DAMAGE_INDICATOR);
 #endif
 
@@ -69,8 +69,8 @@ static BOOL on_game_init()
 
 static void on_game_fini()
 {
-  if (_curr_scr != NULL)
-    _curr_scr->on_unload();
+  if (_current_scene != NULL)
+    _current_scene->on_unload();
   resources_unload();
 }
 static void draw_cursor(void)
@@ -94,9 +94,9 @@ static void draw_cursor(void)
 static void on_game_loop()
 {
   u32 start = SDL_GetTicks();
-  if (_curr_scr != NULL)
-    _curr_scr->on_update();
-#if SHOW_FPS
+  if (_current_scene != NULL)
+    _current_scene->on_update();
+#if SHOW_TIME_ELAPSED
   FC_Draw(_fps_font, g_renderer, 0, 0, "%dms", SDL_GetTicks() - start);
 #endif
   draw_cursor();
@@ -105,13 +105,9 @@ static void on_game_loop()
 static void on_event(const SDL_Event* e)
 {
   if (e->type == SDL_QUIT)
-  {
     on_game_quit();
-  }
-  else if (_curr_scr != NULL)
-  {
-    _curr_scr->on_event(e);
-  }
+  else if (_current_scene != NULL)
+    _current_scene->on_event(e);
 }
 
 static void on_game_quit()
@@ -119,15 +115,15 @@ static void on_game_quit()
   engine_stop();
 }
 
-void set_scene(const Scene* newscr)
+void set_scene(const Scene* new_scene)
 {
-  if (_curr_scr == newscr)
+  if (_current_scene == new_scene)
     return;
-  if (_curr_scr != NULL)
-    _curr_scr->on_unload();
-  if (newscr != NULL)
-    newscr->on_load();
-  _curr_scr = newscr;
+  if (_current_scene != NULL)
+    _current_scene->on_unload();
+  if (new_scene != NULL)
+    new_scene->on_load();
+  _current_scene = new_scene;
 }
 
 static GameDelegate delegate = {

@@ -10,8 +10,20 @@ typedef struct Scene
   void (*on_event)(const SDL_Event*);
 } Scene;
 
-extern const Scene g_game_scene;
-extern const Scene g_title_scene;
-extern const Scene g_main_menu;
-extern const Scene g_select_character_scene;
+#define DEFINE_SCENE(name)                                                                         \
+  static void on_load(void);                                                                       \
+  static void on_unload(void);                                                                     \
+  static void on_update(void);                                                                     \
+  static void on_event(const SDL_Event*);                                                          \
+  const Scene g_##name##_scene = { .on_load   = on_load,                                           \
+                                   .on_unload = on_unload,                                         \
+                                   .on_update = on_update,                                         \
+                                   .on_event  = on_event }
+
+#define DECLARE_SCENE(name) extern const Scene g_##name##_scene
+
+DECLARE_SCENE(game);
+DECLARE_SCENE(title);
+DECLARE_SCENE(main);
+DECLARE_SCENE(select_character);
 #endif // SCENE_H

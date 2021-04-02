@@ -37,10 +37,6 @@
 #include "entity_utils.h"
 #include "system/event_messaging_sys.h"
 
-static void on_load(void);
-static void on_unload(void);
-static void on_event(const SDL_Event* evt);
-static void on_update();
 static void on_player_hit_ladder(pointer_t arg, const MSG_HitLadder* event);
 static void on_entity_died(pointer_t arg, const MSG_EntityDied* event);
 static void unload_current_level(void);
@@ -56,12 +52,7 @@ static void music_player_on_level_loaded(void* arg, const MSG_LevelLoaded* event
 
 extern EcsType g_comp_types[];
 
-const Scene g_game_scene = {
-  .on_load   = on_load,
-  .on_unload = on_unload,
-  .on_event  = on_event,
-  .on_update = on_update,
-};
+DEFINE_SCENE(game);
 
 Ecs* g_ecs;
 

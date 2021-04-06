@@ -11,10 +11,10 @@ void move_target_rendering_system_update()
   ecs_entity_t* entities;
   ecs_size_t    cnt;
 
-  Destination* dest;
+  Destination*     dest;
   FollowingTarget* target;
-  Transform*           transform;
-  Spot*                spot;
+  Transform*       transform;
+  AggroArea*       aggro_area;
   ecs_raw(g_ecs, DESTINATION, &entities, (void**)&dest, &cnt);
   SDL_SetRenderDrawColor(g_renderer, 3, 252, 119, 255);
   int x1, y1, x2, y2;
@@ -49,12 +49,12 @@ void move_target_rendering_system_update()
 
   int   x, y;
   float r;
-  ecs_raw(g_ecs, SPOT, &entities, (void**)&spot, &cnt);
+  ecs_raw(g_ecs, AGGRO_AREA, &entities, (void**)&aggro_area, &cnt);
   for (int i = 0; i < cnt; ++i)
   {
-    x = spot[i].position.x - g_viewport.x;
-    y = spot[i].position.y - g_viewport.y;
-    r = spot[i].radius;
+    x = aggro_area[i].position.x - g_viewport.x;
+    y = aggro_area[i].position.y - g_viewport.y;
+    r = aggro_area[i].radius;
 
     aacircleColor(g_renderer, x, y, (Sint16)r, 0xffffffff);
   }

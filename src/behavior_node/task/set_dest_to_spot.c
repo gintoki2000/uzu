@@ -32,10 +32,10 @@ static NODE* __init(NODE* self)
 
 static BTStatus __exec(SDL_UNUSED NODE* self, Ecs* ecs, ecs_entity_t entity)
 {
-  Spot*        spot;
+  AggroArea*   spot;
   Destination* dest;
 
-  spot = ecs_get(ecs, entity, SPOT);
+  spot = ecs_get(ecs, entity, AGGRO_AREA);
 
   if (spot == NULL)
     return BT_STATUS_FAILURE;

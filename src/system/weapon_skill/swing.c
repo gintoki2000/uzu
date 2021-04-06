@@ -16,7 +16,7 @@ typedef struct CBSwing_QueryHitEntitiesArgs
   Vec2         force;
 } CBSwing_QueryHitEntitiesArgs;
 
-const static Vec2 _impact_force = { 50.f, 0.f };
+static const Vec2 _impact_force = { 50.f, 0.f };
 
 static BOOL __cb_query_hit_entities(CBSwing_QueryHitEntitiesArgs* args, ecs_entity_t e)
 {

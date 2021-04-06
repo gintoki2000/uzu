@@ -68,23 +68,21 @@ Ecs* ecs_init(Ecs* self, const EcsType* types, ecs_size_t cnt)
   return self;
 }
 
-static void cb_clear(SDL_UNUSED void* udata, Ecs* ecs, ecs_entity_t entity)
+static void __callback_clear(void* udata, ecs_entity_t entity)
 {
-  ecs_destroy(ecs, entity);
+  ecs_destroy((Ecs*)udata, entity);
 }
 
 void ecs_fini(Ecs* self)
 {
-  ecs_each(self, NULL, cb_clear);
+  ecs_each(self, CALLBACK_1(self, __callback_clear));
   for (int i = 0; i < self->type_cnt; ++i)
     ecs_pool_del(self->pools[i]);
   SDL_free(self->pools);
   SDL_free(self->types);
   SDL_free(self->entities);
   for (int i = 0; i < ECS_NUM_EVENTS; ++i)
-  {
     dispatcher_destroy(self->dispatcher[i]);
-  }
 }
 
 ecs_entity_t ecs_create(Ecs* self)
@@ -194,103 +192,21 @@ void* ecs_get(Ecs* self, ecs_entity_t entity, ecs_size_t type)
   return ecs_pool_get(self->pools[type], entity);
 }
 
-void ecs_each(Ecs* self, void* user_data, ecs_each_fn_t each_fn)
+void ecs_each(Ecs* self, Callback callback)
 {
   ecs_size_t    size;
   ecs_entity_t* entities;
 
-  size     = self->size;
-  entities = self->entities;
+  size                          = self->size;
+  entities                      = self->entities;
+  void (*fn)(void*, ecs_size_t) = (void (*)(void*, ecs_size_t))callback.func;
   if (self->destroyed_index == ECS_NULL_IDX)
-  {
     for (int i = size - 1; i >= 0; --i)
-      each_fn(user_data, self, entities[i]);
-  }
+      fn(callback.user_data, entities[i]);
   else
-  {
     for (int i = size - 1; i >= 0; --i)
       if (ECS_ENT_IDX(entities[i]) == i)
-        each_fn(user_data, self, entities[i]);
-  }
-}
-
-void ecs_each_w_filter(Ecs*             self,
-                       const EcsFilter* filter,
-                       void*            user_data,
-                       ecs_each_ex_fn_t each_fn)
-{
-  int      min_cnt;
-  EcsPool* min_pool;
-
-  ecs_entity_t* entities;
-  ecs_size_t    entity_cnt;
-  EcsPool**     pools;
-  ecs_size_t    pool_cnt;
-  void*         components[filter->rcnt];
-  EcsPool*      tp;
-  ecs_entity_t  te;
-  SDL_bool      match;
-
-  pool_cnt = self->type_cnt;
-  pools    = self->pools;
-
-  /**
-   * tìm ra pool chứa ít phần tử nhất trong danh sách type
-   * việc này giúp chúng giảm tối đa việc duyệt và so khớp nhất có thể
-   */
-  min_pool = pools[filter->required[0]];
-  min_cnt  = ecs_pool_cnt(min_pool);
-
-  for (int ti = 1; ti < filter->rcnt; ++ti)
-  {
-    tp = pools[filter->required[ti]];
-    if (ecs_pool_cnt(tp) < min_cnt)
-    {
-      min_cnt  = ecs_pool_cnt(tp);
-      min_pool = tp;
-    }
-  }
-
-  /**
-   * sau khi có được pool có ít phần từ nhất duyệt qua nó và kiểm tra
-   * từng entity trong pool có khớp với tập component đầu vào hay không
-   * nếu có thì lấy component tương ứng và đưa vào mảng tạm và gọi callback
-   */
-  entities   = min_pool->dense.entities;
-  entity_cnt = min_pool->dense.cnt;
-
-  for (int ei = 0; ei < entity_cnt; ++ei)
-  {
-
-    te    = entities[ei];
-    match = SDL_TRUE;
-    for (int ti = 0; ti < filter->rcnt; ++ti)
-    {
-      tp = pools[filter->required[ti]];
-      if (tp != min_pool && !ecs_pool_contains(tp, te))
-      {
-        match = SDL_FALSE;
-        break;
-      }
-    }
-    if (match)
-      for (int ti = 0; ti < filter->ecnt; ++ti)
-      {
-        if (ecs_pool_contains(tp, te))
-        {
-          match = SDL_FALSE;
-          break;
-        }
-      }
-    if (match)
-    {
-      for (int ti = 0; ti < filter->rcnt; ++ti)
-      {
-        components[ti] = ecs_pool_get(pools[filter->required[ti]], te);
-      }
-      each_fn(user_data, self, te, components);
-    }
-  }
+        fn(callback.user_data, entities[i]);
 }
 
 void ecs_raw(Ecs*           self,
@@ -317,7 +233,7 @@ SDL_bool ecs_has(Ecs* self, ecs_entity_t entity, ecs_size_t type_id)
 
 void ecs_clear(Ecs* self)
 {
-  ecs_each(self, NULL, cb_clear);
+  ecs_each(self, CALLBACK_1(self, __callback_clear));
 }
 
 void* ecs_set(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const void* data)
@@ -362,5 +278,76 @@ void ecs_fill(Ecs* self, ecs_size_t entity, const ecs_size_t* types, ecs_size_t 
   {
     ASSERT(types[i] >= 0 && types[i] < self->type_cnt);
     arr[i] = ecs_pool_get(self->pools[types[i]], entity);
+  }
+}
+
+ecs_entity_t ecs_cpy(Ecs* dst_registry, Ecs* src_registry, ecs_entity_t src_entity)
+{
+  ecs_entity_t clone_entity;
+  void*        src_data;
+  void*        cpy_data;
+  ASSERT(ecs_is_valid(src_registry, src_entity) && "invalid entity");
+
+  clone_entity = ecs_create(dst_registry);
+  for (int itype_id = 0; itype_id < dst_registry->type_cnt; ++itype_id)
+  {
+    if ((src_data = ecs_pool_get(src_registry->pools[itype_id], src_entity)) != NULL)
+    {
+      cpy_data = ecs_pool_add(dst_registry->pools[itype_id], clone_entity);
+      copy(&dst_registry->types[itype_id], cpy_data, src_data);
+      dispatcher_emit(dst_registry->dispatcher[ECS_EVT_ADD_COMP],
+                      itype_id,
+                      &(EcsComponentEvent){ .entity = clone_entity, .component = cpy_data });
+    }
+  }
+
+  return clone_entity;
+}
+
+static ecs_size_t get_smallest_type_index(Ecs* registry, const ecs_size_t* types, ecs_size_t count)
+{
+  ecs_size_t smallest_type_index = 0;
+  for (int i = 1; i < count; ++i)
+    if (ecs_pool_cnt(registry->pools[types[i]]) <
+        ecs_pool_cnt(registry->pools[types[smallest_type_index]]))
+      smallest_type_index = i;
+  return smallest_type_index;
+}
+
+static BOOL has_any(Ecs* self, ecs_entity_t entity, const ecs_size_t* types, ecs_size_t cnt)
+{
+  for (int i = 0; i < cnt; ++i)
+    if (ecs_pool_contains(self->pools[types[i]], entity))
+      return TRUE;
+  return FALSE;
+}
+
+void ecs_each_ex(Ecs* self, const EcsFilter* filter, Callback callback)
+{
+  ecs_size_t smallest_type_index = get_smallest_type_index(self, filter->required, filter->rcnt);
+  EcsPool**  pools               = self->pools;
+  ecs_size_t count               = ecs_pool_cnt(pools[filter->required[smallest_type_index]]);
+  const ecs_entity_t* entities   = pools[filter->required[smallest_type_index]]->dense.entities;
+  void (*fn)(void*, ecs_entity_t, void**) = (void (*)(void*, ecs_entity_t, void**))callback.func;
+  int   itype;
+  void* components[filter->rcnt];
+  BOOL  match;
+  for (int iett = 0; iett < count; ++iett)
+  {
+    if (!has_any(self, entities[iett], filter->exclude, filter->ecnt))
+    {
+      match = TRUE;
+      for (itype = 0; itype < filter->rcnt; ++itype)
+      {
+        if ((components[itype] = ecs_pool_get(pools[filter->required[itype]], entities[iett])) ==
+            NULL)
+        {
+          match = FALSE;
+          break;
+        }
+      }
+      if (match)
+        fn(callback.user_data, entities[iett], components);
+    }
   }
 }

@@ -6,8 +6,11 @@
 #include "toolbox/toolbox.h"
 
 ecs_entity_t make_golden_cross_hit_effect(Ecs* ecs, Vec2 position);
-ecs_entity_t
-             make_pickupable_entity(Ecs* ecs, u16 texture_id, u16 item_type_id, Vec2 position, u8 quality);
+ecs_entity_t make_static_pickupable_entity(Ecs* ecs,
+                                           u16  texture_id,
+                                           u16  item_type_id,
+                                           Vec2 position,
+                                           u8   quality);
 ecs_entity_t make_thunder_storm(Ecs* ecs, Vec2 center);
 ecs_entity_t make_thunder(Ecs* ecs, Vec2 position, u16 mask_bits);
 

@@ -29,17 +29,17 @@ void update_attack_target_system(void)
   ecs_size_t    cnt;
   Vec2          target_position;
   AttackTarget* attack_target;
-  Spot*         spot;
+  AggroArea*    aggro_area;
   ecs_entity_t  player;
   Vec2          player_position;
 
-  ecs_raw(g_ecs, SPOT, &entities, (void**)&spot, &cnt);
+  ecs_raw(g_ecs, AGGRO_AREA, &entities, (void**)&aggro_area, &cnt);
   for (int i = 0; i < cnt; ++i)
   {
     if ((attack_target = ecs_get(g_ecs, entities[i], ATTACK_TARGET)))
     {
       target_position = get_entity_position(g_ecs, attack_target->value);
-      if (vec2_dist(target_position, spot[i].position) > spot[i].radius)
+      if (vec2_dist(target_position, aggro_area[i].position) > aggro_area[i].radius)
       {
         ecs_rmv(g_ecs, entities[i], ATTACK_TARGET);
       }
@@ -47,7 +47,7 @@ void update_attack_target_system(void)
     else if ((player = get_player(g_ecs)) != ECS_NULL_ENT)
     {
       player_position = get_entity_position(g_ecs, player);
-      if (vec2_dist(player_position, spot[i].position) <= spot[i].radius)
+      if (vec2_dist(player_position, aggro_area[i].position) <= aggro_area[i].radius)
       {
         ecs_set(g_ecs, entities[i], ATTACK_TARGET, &(AttackTarget){ player });
       }

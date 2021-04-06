@@ -40,7 +40,7 @@ typedef enum ComponentId
   DESTINATION,
   PATH,
   FOLLOWING_TARGET,
-  SPOT,
+  AGGRO_AREA,
   LADDER_ATTRIBUTES,
   NAME,
   INTERACTABLE,
@@ -100,7 +100,7 @@ typedef struct Spot
 {
   Vec2  position;
   float radius;
-} Spot;
+} AggroArea;
 
 typedef struct Controller
 {

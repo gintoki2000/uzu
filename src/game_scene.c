@@ -30,9 +30,6 @@
 #include "system/debug/draw_path.h"
 #include "system/debug/draw_position.h"
 #include "system/debug/draw_target.h"
-
-#include <json-c/json.h>
-
 #include "dungeon.h"
 #include "entity_utils.h"
 #include "system/event_messaging_sys.h"
@@ -45,8 +42,6 @@ static void render_ui(void);
 static void update_game_logic(void);
 static void render_game_world(void);
 static void next_level(void);
-
-static void __callback_clear_entities(pointer_t arg, Ecs* ecs, ecs_entity_t entity);
 
 static void music_player_on_level_loaded(void* arg, const MSG_LevelLoaded* event);
 
@@ -223,9 +218,9 @@ static void music_player_on_level_loaded(SDL_UNUSED void* arg, const MSG_LevelLo
     Mix_PlayMusic(mus, -1);
 }
 
-static void __callback_clear_entities(SDL_UNUSED pointer_t arg, Ecs* ecs, ecs_entity_t entity)
+static void __callback_clear_entities(SDL_UNUSED pointer_t arg, ecs_entity_t entity)
 {
-  ecs_destroy(ecs, entity);
+  ecs_destroy(g_ecs, entity);
 }
 
 static void unload_current_level()
@@ -237,7 +232,7 @@ static void unload_current_level()
   g_session.mp        = get_entity_mana_points(g_ecs, player);
   g_session.spell     = get_spell(g_ecs, player);
   g_session.weapon    = get_equiped_weapon_type_id(g_ecs, player);
-  ecs_each(g_ecs, NULL, __callback_clear_entities);
+  ecs_each(g_ecs, CALLBACK_2(__callback_clear_entities));
   map_clear();
 }
 

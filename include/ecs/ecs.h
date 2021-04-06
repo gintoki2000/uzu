@@ -37,9 +37,6 @@ typedef struct EcsComponentEvent
   void*        component;
 } EcsComponentEvent;
 
-typedef void (*ecs_each_fn_t)(void* user_data, Ecs* ecs, ecs_entity_t entity);
-typedef void (*ecs_each_ex_fn_t)(void* user_data, Ecs* ecs, ecs_entity_t entity, void** components);
-
 Ecs* ecs_new(const EcsType* types, ecs_size_t cnt);
 void ecs_del(Ecs* ecs);
 
@@ -48,21 +45,19 @@ void ecs_fini(Ecs* self);
 
 ecs_entity_t ecs_create(Ecs* self);
 ecs_entity_t ecs_clone(Ecs* self, ecs_entity_t prototype);
-ecs_entity_t ecs_cpy(Ecs* self, Ecs* srcworld, ecs_entity_t srcentity);
-void         ecs_destroy(Ecs* self, ecs_entity_t entity);
-void*        ecs_add(Ecs* self, ecs_entity_t entity, ecs_size_t type_id);
-void*        ecs_set(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const void* data);
-void         ecs_rmv(Ecs* self, ecs_entity_t entity, ecs_size_t type_id);
-void*        ecs_get(Ecs* self, ecs_entity_t entity, ecs_size_t type_id);
-BOOL         ecs_has(Ecs* self, ecs_entity_t entity, ecs_size_t type_id);
-void         ecs_rmv_all(Ecs* self, ecs_entity_t entity);
-void         ecs_each(Ecs* self, void* user_data, ecs_each_fn_t each_fn);
-void         ecs_each_w_filter(Ecs*             self,
-                               const EcsFilter* filter,
-                               void*            user_data,
-                               ecs_each_ex_fn_t each_fn);
-void         ecs_clear(Ecs* self);
-void ecs_fill(Ecs* self, ecs_size_t entity, const ecs_size_t* types, ecs_size_t cnt, void** arr);
+
+void  ecs_destroy(Ecs* self, ecs_entity_t entity);
+void* ecs_add(Ecs* self, ecs_entity_t entity, ecs_size_t type_id);
+void* ecs_set(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const void* data);
+void  ecs_rmv(Ecs* self, ecs_entity_t entity, ecs_size_t type_id);
+void* ecs_get(Ecs* self, ecs_entity_t entity, ecs_size_t type_id);
+BOOL  ecs_has(Ecs* self, ecs_entity_t entity, ecs_size_t type_id);
+void  ecs_rmv_all(Ecs* self, ecs_entity_t entity);
+void  ecs_each(Ecs* self, Callback callback);
+void  ecs_each_ex(Ecs* self, const EcsFilter* filter, Callback callback);
+void  ecs_clear(Ecs* self);
+void  ecs_fill(Ecs* self, ecs_size_t entity, const ecs_size_t* types, ecs_size_t cnt, void** arr);
+ecs_entity_t ecs_cpy(Ecs* dst_registry, Ecs* src_registry, ecs_entity_t src_entity);
 
 void ecs_raw(Ecs*           self,
              ecs_size_t     type,
@@ -70,7 +65,7 @@ void ecs_raw(Ecs*           self,
              void**         components_ptr,
              ecs_size_t*    cnt_ptr);
 
-static BOOL ecs_is_valid(Ecs* self, ecs_entity_t entity)
+INLINE BOOL ecs_is_valid(Ecs* self, ecs_entity_t entity)
 {
   ecs_size_t idx = ECS_ENT_IDX(entity);
   return (idx < self->size) && (self->entities[idx] == entity);

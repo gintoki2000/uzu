@@ -1,8 +1,10 @@
 #include "game_scene.h"
 #include "SDL_mixer.h"
 #include "components.h"
+#include "config.h"
 #include "constances.h"
 #include "ecs/ecs.h"
+#include "engine/engine.h"
 #include "entity_factory.h"
 #include "inventory.h"
 #include "level_loader.h"
@@ -10,6 +12,7 @@
 #include "resources.h"
 #include "scene.h"
 #include "session.h"
+#include "sprite_renderer.h"
 #include "ui_dialogue.h"
 #include "ui_list.h"
 #include "ui_msgbox.h"
@@ -26,12 +29,12 @@
 
 #include "game_event/game_event.h"
 
+#include "dungeon.h"
+#include "entity_utils.h"
 #include "system/debug/draw_hitbox.h"
 #include "system/debug/draw_path.h"
 #include "system/debug/draw_position.h"
 #include "system/debug/draw_target.h"
-#include "dungeon.h"
-#include "entity_utils.h"
 #include "system/event_messaging_sys.h"
 
 static void on_player_hit_ladder(pointer_t arg, const MSG_HitLadder* event);
@@ -56,6 +59,13 @@ static char _next_level[LADDER_ATTRS_MAX_LEVEL_NAME_LEN + 1];
 static char _spwan_location[LADDER_ATTRS_MAX_DEST_LEN + 1];
 static BOOL _paused;
 static BOOL _player_died;
+
+#if DEBUG
+static BOOL _db_tile_colliders;
+static BOOL _db_hitbox;
+static BOOL _db_position;
+static BOOL _db_rtree;
+#endif
 
 static void spawn_player(Vec2 position)
 {
@@ -114,7 +124,12 @@ static void on_load()
 
   if (g_session.new_game)
   {
-    load_level(g_session.level);
+    if (load_level(g_session.level) != LOAD_LEVEL_OK)
+    {
+      engine_stop();
+      INFO("Fail to load file\n");
+      return;
+    }
     ems_broadcast(MSG_NEW_GAME, NULL);
     ems_broadcast(MSG_LEVEL_LOADED, &(MSG_LevelLoaded){ g_session.level });
     spawn_player(g_session.pos);
@@ -147,6 +162,25 @@ static void on_event(const SDL_UNUSED SDL_Event* evt)
 
 static void on_update()
 {
+#if DEBUG
+  static BOOL  db_pressed_h, db_pressed_j, db_pressed_k, db_pressed_l;
+  const Uint8* keystate = SDL_GetKeyboardState(NULL);
+
+  if (!db_pressed_h && keystate[SDL_SCANCODE_H])
+    _db_hitbox = !_db_hitbox;
+  if (!db_pressed_j && keystate[SDL_SCANCODE_J])
+    _db_position = !_db_position;
+  if (!db_pressed_k && keystate[SDL_SCANCODE_K])
+    _db_tile_colliders = !_db_tile_colliders;
+  if (!db_pressed_l && keystate[SDL_SCANCODE_L])
+    _db_rtree = !_db_rtree;
+
+  db_pressed_h = keystate[SDL_SCANCODE_H];
+  db_pressed_j = keystate[SDL_SCANCODE_J];
+  db_pressed_k = keystate[SDL_SCANCODE_K];
+  db_pressed_l = keystate[SDL_SCANCODE_L];
+
+#endif
   if (_has_next_level)
   {
     unload_current_level();
@@ -164,11 +198,17 @@ static void on_update()
     render_game_world();
     render_ui();
 
-#if 0
-    // render debug
-    collision_system_render_debug();
-    hitbox_rendering_system_update();
-    position_rendering_system_update();
+#if DEBUG
+#define _(c, ...)                                                                                  \
+  if (c)                                                                                           \
+  {                                                                                                \
+    __VA_ARGS__                                                                                    \
+  }
+    _(_db_hitbox, { hitbox_rendering_system_update(); });
+    _(_db_position, { position_rendering_system_update(); });
+    _(_db_tile_colliders, { draw_map_colliders(); });
+    _(_db_rtree, { collision_system_render_debug(); });
+#undef _
 #endif
 
     // late update
@@ -290,11 +330,11 @@ static void update_game_logic(void)
 
 static void render_game_world(void)
 {
-  map_draw(MAP_LAYER_FLOOR);
-  map_draw(MAP_LAYER_BACK_WALL);
+  sprite_renderer_begin();
+  map_draw();
   RUN_SYSTEM(rendering_system);
+  sprite_renderer_end();
   RUN_SYSTEM(healthbar_rendering_system);
-  map_draw(MAP_LAYER_FRONT_WALL);
   RUN_SYSTEM(text_rendering_system);
   RUN_SYSTEM(interactable_rendering_system);
   RUN_SYSTEM(hub_rendering_system);

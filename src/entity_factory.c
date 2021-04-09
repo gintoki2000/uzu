@@ -742,7 +742,7 @@ ecs_entity_t make_door(Ecs* registry, Vec2 position)
   interactable->commands[0]  = TEXT_COMMAND_OPEN;
 
   door_info               = ecs_add(registry, entity, DOOR_ATTRIBUTES);
-  door_info->required_key = ITEM_TYPE_KEY_1_1;
+  door_info->required_key = DOOR_NO_REQUIRED_KEY;
   door_info->state        = DOOR_STATE_CLOSE;
 
   return entity;

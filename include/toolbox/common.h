@@ -19,6 +19,16 @@ typedef bool (*equal_fn_t)(constpointer_t lhs, constpointer_t rhs);
 typedef bool (*consume_fn_t)(pointer_t user_data, pointer_t val);
 typedef void (*funcptr_t)();
 
+#define RECT SDL_Rect
+#define POINT SDL_Point
+#define COLOR SDL_Color
+#define POINT SDL_Point
+#define FONT FC_Font
+#define RENDERER SDL_Renderer
+#define TEXTURE SDL_Texture
+#define FLIP SDL_RendererFlip
+#define TEXT_EFFECT FC_TextEffect
+
 typedef struct
 {
   pointer_t user_data;
@@ -28,13 +38,6 @@ typedef struct
 #define BOOL SDL_bool
 #define TRUE SDL_TRUE
 #define FALSE SDL_FALSE
-#define RECT SDL_Rect
-#define POINT SDL_Point
-#define COLOR SDL_Color
-#define POINT SDL_Point
-#define FONT FC_Font
-#define RENDERER SDL_Renderer
-#define TEXTURE SDL_Texture
 
 #define TIMER_TICK(__timer) ((__timer) > 0 && --(__timer) == 0)
 

@@ -1,7 +1,7 @@
 #ifndef CONSTANCES_H
 #define CONSTANCES_H
 
-#include "toolbox/toolbox.h"
+#include "global.h"
 
 #define TILE_SIZE 16
 #define WIN_WIDTH 320

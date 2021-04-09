@@ -9,6 +9,7 @@
 #include "map.h"
 
 #define LEVEL_DATA_DIR "res/level/"
+#define JV(json_object, type, name) json_object_object_get_as_##type(json_object, name)
 
 extern Ecs* g_ecs;
 
@@ -20,13 +21,6 @@ typedef struct EntityProperties
   json_object* properties;
   u16          id;
 } EntityProperties;
-
-//<Helper functions>//
-static char* _layer_name_tbl[NUM_MAP_LAYERS] = {
-  [MAP_LAYER_FLOOR]      = "floor",
-  [MAP_LAYER_BACK_WALL]  = "back-wall",
-  [MAP_LAYER_FRONT_WALL] = "front-wall",
-};
 
 static void level_name_to_file_name(const char* level_name, char* dest)
 {
@@ -52,17 +46,10 @@ static int item_id_from_string(const char* name)
   return -1;
 }
 
-static int layer_name_to_id(const char* name)
-{
-  for (int i = 0; i < NUM_MAP_LAYERS; ++i)
-    if (SDL_strcmp(_layer_name_tbl[i], name) == 0)
-      return i;
-  return -1;
-}
 //**********************************************************************//
 
-static int parse_tilelayer(const json_object* tilelayer_json_obj);
-static int parse_objectgroup(const json_object* object_group_json_obj);
+static int parse_tilelayer(const json_object* tilelayer_json_obj, tile_t* data);
+static int parse_objectgroup(const json_object* jobjectgroup);
 
 static void parse_imp(Ecs* registry, const EntityProperties* params);
 static void parse_wogol(Ecs* registry, const EntityProperties* params);
@@ -78,8 +65,8 @@ static void parse_item(Item* item, json_object* json)
   const char* item_name;
   int         num_items;
 
-  item_name       = json_object_object_get_as_string(json, "type");
-  num_items       = json_object_object_get_as_int(json, "count");
+  item_name       = JV(json, string, "type"   );
+  num_items       = JV(json, int   , "quality");
   item->type_id   = item_id_from_string(item_name);
   item->num_items = num_items;
 }
@@ -106,32 +93,29 @@ static void parse_item_list(Item items[5], u16* num_items, const char* input)
   json_object_put(json);
 }
 
-static int parse_tilelayer(const json_object* tilelayer_json_obj)
+static json_object* find_layer(json_object* layers, const char* layer_name)
 {
-  int*               data;
+  int          nlayer = json_object_array_length(layers);
+  json_object* jlayer;
+  for (int i = 0; i < nlayer; ++i)
+  {
+    jlayer = json_object_array_get_idx(layers, i);
+    if (!SDL_strcmp(layer_name, JV(jlayer, string, "name")))
+      return jlayer;
+  }
+  return NULL;
+}
+
+static int parse_tilelayer(const json_object* tilelayer_json_obj, tile_t* data)
+{
   int                datalen;
   const json_object* data_json_obj;
-  const char*        name;
-  int                layer;
 
   data_json_obj = json_object_object_get(tilelayer_json_obj, "data");
-  name          = json_object_object_get_as_string(tilelayer_json_obj, "name");
   datalen       = json_object_array_length(data_json_obj);
 
-  data = malloc(datalen * sizeof(int));
-
   for (int i = 0; i < datalen; ++i)
-  {
     data[i] = json_object_array_get_idx_as_int(data_json_obj, i);
-  }
-
-  if ((layer = layer_name_to_id(name)) != -1)
-  {
-    map_set_data(layer, data, datalen);
-    map_scan_animated_cells(layer);
-  }
-
-  free(data);
 
   return 0;
 }
@@ -154,32 +138,32 @@ static void (*get_entity_create_fn(const char* entity_type_name))(Ecs*, const En
   return NULL;
 }
 
-static int parse_objectgroup(const json_object* object_group_json_obj)
+static int parse_objectgroup(const json_object* jobjectgroup)
 {
-  const json_object* objects_json_obj;
+  const json_object* jobjects;
   int                objcnt;
   const char*        objtype;
-  const json_object* obj_json_obj;
+  const json_object* jobj;
 
   EntityProperties params;
   void (*parse_fn)(Ecs*, const EntityProperties*);
 
-  objects_json_obj = json_object_object_get(object_group_json_obj, "objects");
-  objcnt           = json_object_array_length(objects_json_obj);
+  jobjects = json_object_object_get(jobjectgroup, "objects");
+  objcnt   = json_object_array_length(jobjects);
 
   for (int i = 0; i < objcnt; ++i)
   {
-    obj_json_obj = json_object_array_get_idx(objects_json_obj, i);
+    jobj = json_object_array_get_idx(jobjects, i);
 
     // common attributes
-    objtype           = json_object_object_get_as_string(obj_json_obj, "type");
-    params.position.x = json_object_object_get_as_double(obj_json_obj, "x");
-    params.position.y = json_object_object_get_as_double(obj_json_obj, "y");
-    params.size.x     = json_object_object_get_as_double(obj_json_obj, "width");
-    params.size.y     = json_object_object_get_as_double(obj_json_obj, "height");
-    params.name       = json_object_object_get_as_string(obj_json_obj, "name");
-    params.properties = json_object_object_get(obj_json_obj, "properties");
-    params.id         = json_object_object_get_as_int(obj_json_obj, "id");
+    objtype           = json_object_object_get_as_string(jobj, "type");
+    params.position.x = json_object_object_get_as_double(jobj, "x");
+    params.position.y = json_object_object_get_as_double(jobj, "y");
+    params.size.x     = json_object_object_get_as_double(jobj, "width");
+    params.size.y     = json_object_object_get_as_double(jobj, "height");
+    params.name       = json_object_object_get_as_string(jobj, "name");
+    params.properties = json_object_object_get(jobj, "properties");
+    params.id         = json_object_object_get_as_int(jobj, "id");
 
     if ((parse_fn = get_entity_create_fn(objtype)) != NULL)
       parse_fn(g_ecs, &params);
@@ -188,40 +172,40 @@ static int parse_objectgroup(const json_object* object_group_json_obj)
   return 0;
 }
 
-static int parse_layer(const json_object* layer_json_obj)
+static int parse(const json_object* jmap)
 {
-  const char* layer_type;
+  json_object *jlayers, *jentities_layer, *jwall_layer, *jfloor_layer;
+  int          w, h;
+  tile_t*      floor;
+  tile_t*      wall;
 
-  layer_type = json_object_object_get_as_string(layer_json_obj, "type");
-  if (SDL_strcmp(layer_type, "tilelayer") == 0)
-  {
-    parse_tilelayer(layer_json_obj);
-  }
-  else if (SDL_strcmp(layer_type, "objectgroup") == 0)
-  {
-    parse_objectgroup(layer_json_obj);
-  }
+  jlayers = json_object_object_get(jmap, "layers");
+  w       = JV(jmap, int, "width");
+  h       = JV(jmap, int, "height");
+
+  floor = SDL_malloc(w * h * sizeof(tile_t));
+  wall  = SDL_malloc(w * h * sizeof(tile_t));
+
+  jentities_layer = find_layer(jlayers, "entities");
+  jwall_layer     = find_layer(jlayers, "wall");
+  jfloor_layer    = find_layer(jlayers, "floor");
+
+  ASSERT(jentities_layer != NULL && STREQ(JV(jentities_layer, string, "type"), "objectgroup"));
+  ASSERT(jfloor_layer != NULL && STREQ(JV(jfloor_layer, string, "type"), "tilelayer"));
+  ASSERT(jwall_layer != NULL && STREQ(JV(jwall_layer, string, "type"), "tilelayer"));
+  parse_objectgroup(jentities_layer);
+  parse_tilelayer(jfloor_layer, floor);
+  parse_tilelayer(jwall_layer, wall);
+
+  map_load(floor, wall, w, h);
+
+  SDL_free(floor);
+  SDL_free(wall);
 
   return 0;
 }
 
-static int parse(const json_object* map_json_obj)
-{
-  const json_object* layers_json_obj;
-  const json_object* layer_json_obj;
-  int                cnt, w, h;
-  layers_json_obj = json_object_object_get(map_json_obj, "layers");
-  cnt             = json_object_array_length(layers_json_obj);
-  w               = json_object_object_get_as_int(map_json_obj, "width");
-  h               = json_object_object_get_as_int(map_json_obj, "height");
-  map_set_size(w, h);
-  for (int i = 0; i < cnt; ++i)
-  {
-    layer_json_obj = json_object_array_get_idx(layers_json_obj, i);
-    parse_layer(layer_json_obj);
-  }
-  return 0;
-}
+#undef JV
 
 int load_level(const char* level_name)
 {

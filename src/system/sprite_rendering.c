@@ -1,67 +1,23 @@
 #include "components.h"
 #include "ecs/ecs.h"
 #include "resources.h"
+#include "sprite_renderer.h"
 #include "system/game_logic.h"
 #include <stdlib.h>
 
-extern SDL_Rect      g_viewport;
-extern SDL_Renderer* g_renderer;
-extern Ecs*          g_ecs;
-
-typedef struct DrawCommand
-{
-  TEXTURE*         texture;
-  RECT             src;
-  RECT             dst;
-  POINT            center;
-  double           rotation;
-  SDL_RendererFlip flip;
-  COLOR            color;
-  float            z;
-} DrawCommand;
-
-#define MAX_COMMAND_CNT 255
-static DrawCommand _buff[MAX_COMMAND_CNT];
-static u16         _count;
-
-static int compare_draw_command(const DrawCommand* lhs, const DrawCommand* rhs)
-{
-  return (lhs->dst.y + lhs->dst.h) - (rhs->dst.y + rhs->dst.h);
-}
-
-static void sort_by_bottom(void)
-{
-  qsort(_buff, _count, sizeof(DrawCommand), (__compar_fn_t)compare_draw_command);
-}
-
-static void draw_all(void)
-{
-  RECT dst;
-  for (int i = 0; i < _count; ++i)
-  {
-    dst = _buff[i].dst;
-    dst.y -= _buff[i].z;
-    SDL_SetTextureColorMod(_buff[i].texture, _buff[i].color.r, _buff[i].color.g, _buff[i].color.b);
-    SDL_RenderCopyEx(g_renderer,
-                     _buff[i].texture,
-                     &_buff[i].src,
-                     &dst,
-                     _buff[i].rotation,
-                     &_buff[i].center,
-                     _buff[i].flip);
-    SDL_SetTextureColorMod(_buff[i].texture, 0xff, 0xff, 0xff);
-  }
-}
-
 void rendering_system(void)
 {
-  ecs_entity_t* entities;
-  Visual*       visuals;
-  Transform*    transform;
-  ecs_size_t    cnt;
-  SDL_Rect      dst;
+  extern SDL_Rect      g_viewport;
+  extern SDL_Renderer* g_renderer;
+  extern Ecs*          g_ecs;
+  ecs_entity_t*        entities;
+  Visual*              visuals;
+  Transform*           transform;
+  ecs_size_t           cnt;
 
-  _count = 0;
+  POINT position;
+  int   depth;
+  RECT  dst;
 
   ecs_raw(g_ecs, VISUAL, &entities, (void**)&visuals, &cnt);
 
@@ -69,29 +25,27 @@ void rendering_system(void)
   {
     if ((transform = ecs_get(g_ecs, entities[i], TRANSFORM)))
     {
-      dst.x = transform->position.x - visuals[i].anchor.x;
-      dst.y = transform->position.y - visuals[i].anchor.y;
+      position.x = transform->position.x - visuals[i].anchor.x;
+      position.y = transform->position.y - visuals[i].anchor.y;
+      depth      = position.y + visuals[i].sprite.rect.h;
+
+      dst.x = position.x;
+      dst.y = position.y;
       dst.w = visuals[i].sprite.rect.w;
       dst.h = visuals[i].sprite.rect.h;
+
       if (SDL_HasIntersection(&g_viewport, &dst))
       {
-        ASSERT(_count < MAX_COMMAND_CNT);
-        dst.x -= g_viewport.x;
-        dst.y -= g_viewport.y;
-        _buff[_count++] = (DrawCommand){
-          .texture  = get_texture(visuals[i].sprite.texture_id),
-          .src      = visuals[i].sprite.rect,
-          .dst      = dst,
-          .center   = visuals[i].anchor,
-          .rotation = transform->rotation,
-          .flip     = visuals[i].flip,
-          .color    = visuals[i].color,
-          .z        = transform->z,
-        };
+        position.x -= g_viewport.x;
+        position.y -= g_viewport.y;
+        sprite_renderer_draw_ex(visuals[i].sprite,
+                                position,
+                                visuals[i].anchor,
+                                transform->rotation,
+                                visuals[i].flip,
+                                visuals[i].color,
+                                depth);
       }
     }
   }
-
-  sort_by_bottom();
-  draw_all();
 }

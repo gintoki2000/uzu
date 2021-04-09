@@ -38,8 +38,8 @@ const u16 g_initial_spell[] = {
   SPELL_ID_NULL,
 };
 
-#define STARTING_POSITION_X (20)
-#define STARTING_POSITION_Y (50)
+#define STARTING_POSITION_X (150)
+#define STARTING_POSITION_Y (90)
 
 void new_game(u16 starting_job)
 {

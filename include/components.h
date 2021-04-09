@@ -90,9 +90,9 @@ typedef struct FacingDirection
 
 typedef struct Visual
 {
+  Sprite           sprite;
   SDL_Point        anchor;
   SDL_RendererFlip flip;
-  Sprite           sprite;
   COLOR            color;
 } Visual;
 
@@ -332,7 +332,7 @@ typedef struct Merchant
 } Merchant;
 
 #define CHEST_MAX_ITEMS 5
-enum 
+enum
 {
   CHEST_STATE_CLOSE,
   CHEST_STATE_OPEN,

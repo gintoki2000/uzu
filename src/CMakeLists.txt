@@ -36,6 +36,7 @@ set(SOURCE_FILES
   src/ui_msgbox_w_icon.c
   src/ui_quality.c
   src/ui_subtile.c
+  src/sprite_renderer.c
   ${BEHAVIOR_NODE_SOURCE_FILES}
   ${ECS_SOURCE_FILES}
   ${ENGINE_SOURCE_FILES}

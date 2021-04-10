@@ -4,6 +4,7 @@
 #include <constances.h>
 #include <map.h>
 #include <toolbox/toolbox.h>
+#include "config.h"
 
 struct _Components
 {
@@ -21,12 +22,14 @@ static BOOL check_midle(int, int, int, int);
 static BOOL check_right(int, int, int, int);
 static BOOL check_left(int, int, int, int);
 
+#if DEBUG
 /*****************************************************/
 /* debug functions                                   */
 /*****************************************************/
 static void draw_midle(int, int);
 static void draw_left(int, int);
 static void draw_right(int, int);
+#endif
 
 #define _(id, fn) [id] = fn
 static BOOL (*const _check_fn_tbl[NUM_TILES])(int, int, int, int) = {
@@ -40,6 +43,7 @@ static BOOL (*const _check_fn_tbl[NUM_TILES])(int, int, int, int) = {
   _(56, check_left),  _(57, check_right),
 };
 
+#if DEBUG
 static void (*const _debug_fn_tbl[NUM_TILES])(int, int) = {
   _(14, draw_midle), _(15, draw_midle), _(16, draw_midle), _(17, draw_midle), _(19, draw_right),
   _(20, draw_left),  _(21, draw_midle), _(22, draw_midle), _(23, draw_midle), _(24, draw_midle),
@@ -48,6 +52,7 @@ static void (*const _debug_fn_tbl[NUM_TILES])(int, int) = {
   _(46, draw_left),  _(47, draw_midle), _(48, draw_midle), _(51, draw_midle), _(52, draw_midle),
   _(53, draw_midle), _(54, draw_left),  _(55, draw_right), _(56, draw_left),  _(57, draw_right),
 };
+#endif
 #undef _
 
 static const ecs_size_t _component_ids[] = { TRANSFORM, HITBOX };
@@ -67,6 +72,8 @@ INLINE BOOL check(int obj_x, int obj_y, int cell_x, int cell_y)
   return FALSE;
 }
 
+
+#if DEBUG
 void draw_map_colliders(void)
 {
   int w, h;
@@ -96,6 +103,7 @@ void draw_map_colliders(void)
         _debug_fn_tbl[tile - 1](x, y);
     }
 }
+#endif
 
 INLINE int get_obj_bottom(const struct _Components c)
 {
@@ -188,6 +196,7 @@ static BOOL check_left(int obj_x, int obj_y, int cell_x, int cell_y)
   return SDL_PointInRect(&obj_pos, &collider);
 }
 
+#if DEBUG
 static const COLOR _collider_color = { 0x00, 0xff, 0x00, 0xff };
 
 static void draw_midle(int cell_x, int cell_y)
@@ -251,3 +260,4 @@ static void draw_right(int cell_x, int cell_y)
                          _collider_color.a);
   SDL_RenderDrawRect(g_renderer, &collider);
 }
+#endif

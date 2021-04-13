@@ -35,7 +35,7 @@ static void process_input(void*);
 
 void merchant_system_init()
 {
-  ems_connect(MSG_COMANND_SELECTED, NULL, on_command_selected);
+  ems_connect(MSG_COMANND_SELECTED, CALLBACK_2(on_command_selected));
 }
 
 void merchant_system()

@@ -20,7 +20,7 @@ static void on_entity_died(SDL_UNUSED void* arg, MSG_EntityDied* event)
 
 void update_attack_target_system_init()
 {
-  ems_connect(MSG_ENTITY_DIED, NULL, on_entity_died);
+  ems_connect(MSG_ENTITY_DIED, CALLBACK_2(on_entity_died));
 }
 
 void update_attack_target_system(void)

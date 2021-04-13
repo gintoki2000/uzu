@@ -152,11 +152,9 @@ BTStatus bt_selector_exec(BTSelector* self, Ecs* ecs, ecs_entity_t entity)
   {
   case BT_STATUS_RUNNING:
     return BT_STATUS_RUNNING;
-    break;
   case BT_STATUS_FAILURE:
     bt_node_vc_finish(current_node, ecs, entity, FALSE);
     return bt_selector_next_child(self) ? BT_STATUS_RUNNING : BT_STATUS_FAILURE;
-    break;
   case BT_STATUS_SUCCESS:
     bt_node_vc_finish(current_node, ecs, entity, TRUE);
     return BT_STATUS_SUCCESS;

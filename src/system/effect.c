@@ -1,3 +1,4 @@
+#include "SDL_stdinc.h"
 #include "components.h"
 #include "ecs/ecs.h"
 #include "entity_factory.h"
@@ -6,7 +7,6 @@
 #include "resources.h"
 #include "system/event_messaging_sys.h"
 #include "system/game_logic.h"
-#include "SDL_stdinc.h"
 
 extern Ecs* g_ecs;
 
@@ -18,9 +18,9 @@ static void on_coin_picked_up(void* arg, const MSG_CoinPickedUp* event);
 
 void effect_system_init()
 {
-  ems_connect(MSG_ITEM_PICKED_UP, NULL, on_item_picked_up);
-  ems_connect(MSG_GET_DAMAGED, NULL, on_get_damaged);
-  ems_connect(MSG_COIN_PICKED_UP, NULL, on_coin_picked_up);
+  ems_connect(MSG_ITEM_PICKED_UP, CALLBACK_2(on_item_picked_up));
+  ems_connect(MSG_GET_DAMAGED, CALLBACK_2(on_get_damaged));
+  ems_connect(MSG_COIN_PICKED_UP, CALLBACK_2(on_coin_picked_up));
 }
 
 static void on_item_picked_up(SDL_UNUSED void* arg, const MSG_ItemPickedUp* event)
@@ -34,8 +34,7 @@ static void on_item_picked_up(SDL_UNUSED void* arg, const MSG_ItemPickedUp* even
 }
 
 static ecs_entity_t (*const s_hit_effect_fn_tbl[])(Ecs*, Vec2) = {
-  make_fx_blood_loss, make_fx_blood_loss, make_fx_fire_hit,
-  make_fx_blood_loss, make_fx_ice_hit,
+  make_fx_blood_loss, make_fx_blood_loss, make_fx_fire_hit, make_fx_blood_loss, make_fx_ice_hit,
 };
 
 static COLOR s_damage_type_color_tbl[] = {
@@ -65,9 +64,9 @@ static void on_get_damaged(void* arg, const MSG_GetDamaged* event)
     particle_position.x = transform->position.x;
     particle_position.y = transform->position.y - 30.f;
     make_fx_damage_indicator(g_ecs,
-                                   particle_position,
-                                   s_damage_type_color_tbl[event->type],
-                                   event->damage);
+                             particle_position,
+                             s_damage_type_color_tbl[event->type],
+                             event->damage);
 
     p.x = transform->position.x;
     p.y = transform->position.y;

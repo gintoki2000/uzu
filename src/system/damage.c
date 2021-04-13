@@ -50,6 +50,6 @@ static void on_projectile_hit(SDL_UNUSED void* arg, const MSG_ProjectileHit* eve
 
 void damage_system_init()
 {
-  ems_connect(MSG_HIT_TRAP, NULL, on_hit_trap);
-  ems_connect(MSG_PROJECTILE_HIT, NULL, on_projectile_hit);
+  ems_connect(MSG_HIT_TRAP, CALLBACK_2(on_hit_trap));
+  ems_connect(MSG_PROJECTILE_HIT, CALLBACK_2(on_projectile_hit));
 }

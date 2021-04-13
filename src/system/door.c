@@ -16,8 +16,8 @@ static void on_entity_collied_door(void* arg, const MSG_HitDoor* event);
 
 void door_system_init()
 {
-  ems_connect(MSG_COMANND_SELECTED, NULL, on_command_selected);
-  ems_connect(MSG_HIT_DOOR, NULL, on_entity_collied_door);
+  ems_connect(MSG_COMANND_SELECTED, CALLBACK_2(on_command_selected));
+  ems_connect(MSG_HIT_DOOR, CALLBACK_2(on_entity_collied_door));
 }
 
 static void on_command_selected(SDL_UNUSED void* arg, const MSG_CommandSelected* event)

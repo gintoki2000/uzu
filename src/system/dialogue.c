@@ -57,7 +57,7 @@ static void on_dialogue_finished(pointer_t arg, const UI_DialogueEvent_DialogueF
 
 void dialogue_system_init()
 {
-  ems_connect(MSG_COMANND_SELECTED, NULL, on_command_selected);
+  ems_connect(MSG_COMANND_SELECTED, CALLBACK_2(on_command_selected));
 }
 
 void dialogue_system_fini()

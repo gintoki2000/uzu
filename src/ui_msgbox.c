@@ -11,13 +11,13 @@ static char _msg[512];
 
 extern SDL_Renderer* g_renderer;
 
-static const RECT      BOX_RECT     = { WIN_WIDTH / 2 - 50, WIN_HEIGHT / 2 - 15, 100, 30 };
-static const RECT      TEXT_RECT    = { WIN_WIDTH / 2 - 46, WIN_HEIGHT / 2 - 11, 94, 24 };
-static const FC_Effect TEXT_EFFECT  = { .alignment = FC_ALIGN_CENTER,
-                                       .scale     = { 1.f, 1.f },
-                                       .color     = { 0xff, 0xff, 0xff, 0xff } };
-static const COLOR     BG_COLOR     = { 0x00, 0x00, 0x00, 0x90 };
-static const COLOR     BORDER_COLOR = { 0xff, 0xff, 0xff, 0x80 };
+static const RECT      _box_rect         = { WIN_WIDTH / 2 - 50, WIN_HEIGHT / 2 - 15, 100, 30 };
+static const RECT      _text_rect        = { WIN_WIDTH / 2 - 46, WIN_HEIGHT / 2 - 11, 94, 24 };
+static const FC_Effect _text_effect      = { .alignment = FC_ALIGN_CENTER,
+                                        .scale     = { 1.f, 1.f },
+                                        .color     = { 0xff, 0xff, 0xff, 0xff } };
+static const COLOR     _background_color = { 0x00, 0x00, 0x00, 0x90 };
+static const COLOR     _border_color     = { 0xff, 0xff, 0xff, 0x80 };
 
 static void close()
 {
@@ -60,6 +60,6 @@ void ui_msgbox_draw()
     return;
   }
 
-  draw_bordered_box(&BOX_RECT, BG_COLOR, BORDER_COLOR);
-  FC_DrawBoxEffect(get_font(FONT_ITEM_PICKED_UP), g_renderer, TEXT_RECT, TEXT_EFFECT, _msg);
+  draw_bordered_box(&_box_rect, _background_color, _border_color);
+  FC_DrawBoxEffect(get_font(FONT_ITEM_PICKED_UP), g_renderer, _text_rect, _text_effect, _msg);
 }

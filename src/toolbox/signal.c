@@ -10,11 +10,11 @@ struct Signal
   Callback* slots;
   u32       disconnect_buff_cap;
   u32       disconnect_buff_cnt;
-  void**    disconnect_buff;
-  BOOL      is_emiting;
+  void (**disconnect_buff)();
+  BOOL is_emiting;
 };
 
-struct Dispatcher
+struct Emitter
 {
   u32     num_singals;
   Signal* signals;
@@ -54,24 +54,24 @@ void signal_destroy(Signal* sig)
   }
 }
 
-void signal_connect(Signal* sig, pointer_t user_data, funcptr_t func)
+void signal_connect(Signal* sig, Callback callback)
 {
   if (sig->cnt == sig->cap)
   {
     sig->cap *= 2;
     sig->slots = realloc(sig->slots, sig->cap * sizeof(Callback));
   }
-  sig->slots[sig->cnt++] = CALLBACK_1(user_data, func);
+  sig->slots[sig->cnt++] = callback;
 }
 
-static void signal_internal_disconnect(Signal* sig, pointer_t func_or_user_data)
+static void signal_internal_disconnect(Signal* sig, void (*fn)())
 {
   Callback* slots = sig->slots;
   int       cnt   = sig->cnt;
 
   for (int i = cnt - 1; i >= 0; --i)
   {
-    if ((pointer_t)slots[i].func == func_or_user_data || slots[i].user_data == func_or_user_data)
+    if (slots[i].func == fn)
     {
       slots[i] = slots[sig->cnt - 1];
       --sig->cnt;
@@ -79,20 +79,20 @@ static void signal_internal_disconnect(Signal* sig, pointer_t func_or_user_data)
   }
 }
 
-void signal_disconnect(Signal* sig, pointer_t func_or_user_data)
+void signal_disconnect(Signal* self, void (*fn)())
 {
-  if (sig->is_emiting)
+  if (self->is_emiting)
   {
-    if (sig->disconnect_buff_cnt == sig->disconnect_buff_cap)
+    if (self->disconnect_buff_cnt == self->disconnect_buff_cap)
     {
-      sig->disconnect_buff_cap *= 2;
-      sig->disconnect_buff = realloc(sig->disconnect_buff, sig->disconnect_buff_cap);
+      self->disconnect_buff_cap *= 2;
+      self->disconnect_buff = realloc(self->disconnect_buff, self->disconnect_buff_cap);
     }
-    sig->disconnect_buff[sig->disconnect_buff_cnt++] = func_or_user_data;
+    self->disconnect_buff[self->disconnect_buff_cnt++] = fn;
   }
   else
   {
-    signal_internal_disconnect(sig, func_or_user_data);
+    signal_internal_disconnect(self, fn);
   }
 }
 
@@ -114,7 +114,7 @@ void signal_emit(Signal* sig, const void* evt)
   signal_do_removing(sig);
 }
 
-static Dispatcher* dispatcher_init(Dispatcher* dp, u32 num_singals)
+static Emitter* dispatcher_init(Emitter* dp, u32 num_singals)
 {
   dp->num_singals = num_singals;
   dp->signals     = calloc(num_singals, sizeof(Signal));
@@ -125,7 +125,7 @@ static Dispatcher* dispatcher_init(Dispatcher* dp, u32 num_singals)
   return dp;
 }
 
-static void dispatcher_fini(Dispatcher* dp)
+static void emitter_fini(Emitter* dp)
 {
   for (u32 i = 0; i < dp->num_singals; ++i)
   {
@@ -134,33 +134,33 @@ static void dispatcher_fini(Dispatcher* dp)
   free(dp->signals);
 }
 
-Dispatcher* dispatcher_new(u32 num_singals)
+Emitter* emitter_new(u32 num_singals)
 {
-  Dispatcher* dp = malloc(sizeof(Dispatcher));
+  Emitter* dp = malloc(sizeof(Emitter));
   dispatcher_init(dp, num_singals);
   return dp;
 }
 
-void dispatcher_destroy(Dispatcher* dp)
+void emitter_delete(Emitter* dp)
 {
   if (dp)
   {
-    dispatcher_fini(dp);
+    emitter_fini(dp);
     free(dp);
   }
 }
 
-void dispatcher_connect(Dispatcher* dp, int sig, pointer_t user_data, funcptr_t func)
+void emitter_connect(Emitter* dp, int sig, Callback callback)
 {
-  signal_connect(dp->signals + sig, user_data, func);
+  signal_connect(dp->signals + sig, callback);
 }
 
-void dispatcher_disconnect(Dispatcher* dp, int sig, pointer_t func_or_user_data)
+void emitter_disconnect(Emitter* dp, int sig, void (*fn)())
 {
-  signal_disconnect(dp->signals + sig, func_or_user_data);
+  signal_disconnect(dp->signals + sig, fn);
 }
 
-void dispatcher_emit(Dispatcher* dp, int sig, const void* evt)
+void emitter_emit(Emitter* dp, int sig, const void* evt)
 {
   signal_emit(dp->signals + sig, evt);
 }

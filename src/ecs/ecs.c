@@ -8,6 +8,13 @@
 
 #define ECS_DEFAULT_SIZE 16
 
+#define ASSERT_VALID_ENTITY(registry, entity)                                                      \
+  ASSERT(ecs_is_valid(registry, entity) && "invalid entity")
+#define ASSERT_VALID_TYPE_ID(registry, type_id)                                                    \
+  ASSERT((type_id) < registry->type_cnt && "invalid type id")
+#define ASSERT_VALID_EVENT_ID(event_id)                                                            \
+  ASSERT((event_id >= 0 && event_id < ECS_NUM_EVENTS) && "invalid event id")
+
 INLINE void construct(const EcsType* type, void* component)
 {
   if (type->init_fn != NULL)
@@ -63,8 +70,8 @@ Ecs* ecs_init(Ecs* self, const EcsType* types, ecs_size_t cnt)
     self->entities[i] = ECS_ENT(i + 1, 0);
 
   self->entities[ECS_DEFAULT_SIZE - 1] = ECS_ENT(ECS_NULL_IDX, 0);
-  self->dispatcher[ECS_EVT_ADD_COMP]   = dispatcher_new(cnt);
-  self->dispatcher[ECS_EVT_RMV_COMP]   = dispatcher_new(cnt);
+  self->emitter[ECS_EVT_ADD_COMP]      = emitter_new(cnt);
+  self->emitter[ECS_EVT_RMV_COMP]      = emitter_new(cnt);
   return self;
 }
 
@@ -82,7 +89,7 @@ void ecs_fini(Ecs* self)
   SDL_free(self->types);
   SDL_free(self->entities);
   for (int i = 0; i < ECS_NUM_EVENTS; ++i)
-    dispatcher_destroy(self->dispatcher[i]);
+    emitter_delete(self->emitter[i]);
 }
 
 ecs_entity_t ecs_create(Ecs* self)
@@ -134,29 +141,28 @@ void* ecs_add(Ecs* self, ecs_entity_t entity, ecs_size_t type_id)
 {
   void* component;
 
-  ASSERT(type_id < self->type_cnt && "invalid type");
-  ASSERT(ecs_is_valid(self, entity) && "invalid entity");
+  ASSERT_VALID_TYPE_ID(self, type_id);
+  ASSERT_VALID_ENTITY(self, entity);
 
   component = ecs_pool_add(self->pools[type_id], entity);
   construct(&self->types[type_id], component);
-  dispatcher_emit(self->dispatcher[ECS_EVT_ADD_COMP],
-                  type_id,
-                  &(EcsComponentEvent){ .entity = entity, .component = component });
+  emitter_emit(self->emitter[ECS_EVT_ADD_COMP],
+               type_id,
+               &(EcsComponentEvent){ .entity = entity, .component = component });
   return component;
 }
 
 void ecs_rmv(Ecs* self, ecs_entity_t entity, ecs_size_t type_id)
 {
-  ASSERT(type_id < self->type_cnt && "invalid type");
-  ASSERT(ecs_is_valid(self, entity) && "invalid entity");
-
+  ASSERT_VALID_TYPE_ID(self, type_id);
+  ASSERT_VALID_ENTITY(self, entity);
   void* component;
 
   if ((component = ecs_pool_get(self->pools[type_id], entity)) != NULL)
   {
-    dispatcher_emit(self->dispatcher[ECS_EVT_RMV_COMP],
-                    type_id,
-                    &(EcsComponentEvent){ .entity = entity, .component = component });
+    emitter_emit(self->emitter[ECS_EVT_RMV_COMP],
+                 type_id,
+                 &(EcsComponentEvent){ .entity = entity, .component = component });
     destruct(&self->types[type_id], component);
     ecs_pool_rmv(self->pools[type_id], entity);
   }
@@ -164,7 +170,7 @@ void ecs_rmv(Ecs* self, ecs_entity_t entity, ecs_size_t type_id)
 
 void ecs_rmv_all(Ecs* self, ecs_entity_t entity)
 {
-  ASSERT(ecs_is_valid(self, entity) && "invalid entity");
+  ASSERT_VALID_ENTITY(self, entity);
   void*          component;
   const EcsType* types;
   EcsPool**      pools;
@@ -178,7 +184,7 @@ void ecs_rmv_all(Ecs* self, ecs_entity_t entity)
     {
       event.component = component;
       event.entity    = entity;
-      dispatcher_emit(self->dispatcher[ECS_EVT_RMV_COMP], i, &event);
+      emitter_emit(self->emitter[ECS_EVT_RMV_COMP], i, &event);
       destruct(&types[i], component);
       ecs_pool_rmv(pools[i], entity);
     }
@@ -187,8 +193,8 @@ void ecs_rmv_all(Ecs* self, ecs_entity_t entity)
 
 void* ecs_get(Ecs* self, ecs_entity_t entity, ecs_size_t type)
 {
-  ASSERT(type < self->type_cnt && "invalid type");
-  ASSERT(ecs_is_valid(self, entity) && "invalid entity");
+  ASSERT_VALID_TYPE_ID(self, type);
+  ASSERT_VALID_ENTITY(self, entity);
   return ecs_pool_get(self->pools[type], entity);
 }
 
@@ -215,7 +221,7 @@ void ecs_raw(Ecs*           self,
              void**         components_ptr,
              ecs_size_t*    cnt_ptr)
 {
-  ASSERT(type < self->type_cnt && "invalid type");
+  ASSERT_VALID_TYPE_ID(self, type);
   if (entities_ptr)
     *entities_ptr = self->pools[type]->dense.entities;
   if (components_ptr)
@@ -226,8 +232,8 @@ void ecs_raw(Ecs*           self,
 
 SDL_bool ecs_has(Ecs* self, ecs_entity_t entity, ecs_size_t type_id)
 {
-  ASSERT(type_id < self->type_cnt && "invalid type");
-  ASSERT(ecs_is_valid(self, entity) && "invalid entity");
+  ASSERT_VALID_TYPE_ID(self, type_id);
+  ASSERT_VALID_ENTITY(self, entity);
   return ecs_pool_contains(self->pools[type_id], entity);
 }
 
@@ -238,8 +244,8 @@ void ecs_clear(Ecs* self)
 
 void* ecs_set(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const void* data)
 {
-  ASSERT(ecs_is_valid(self, entity) && "invalid entity");
-  ASSERT(type_id < self->type_cnt && "invalid component type id");
+  ASSERT_VALID_TYPE_ID(self, type_id);
+  ASSERT_VALID_ENTITY(self, entity);
   void* raw = ecs_pool_get(self->pools[type_id], entity);
 
   if (raw != NULL)
@@ -250,33 +256,33 @@ void* ecs_set(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const void* da
   {
     raw = ecs_pool_add(self->pools[type_id], entity);
     copy(&self->types[type_id], raw, data);
-    dispatcher_emit(self->dispatcher[ECS_EVT_ADD_COMP],
-                    type_id,
-                    &(EcsComponentEvent){ .entity = entity, .component = raw });
+    emitter_emit(self->emitter[ECS_EVT_ADD_COMP],
+                 type_id,
+                 &(EcsComponentEvent){ .entity = entity, .component = raw });
   }
   return raw;
 }
 
 void ecs_connect(Ecs* self, int event, ecs_size_t type_id, Callback cb)
 {
-  ASSERT((event >= 0 && event < ECS_NUM_EVENTS) && "invalid event type");
-  ASSERT(type_id < self->type_cnt && "invalid component type id");
-  dispatcher_connect(self->dispatcher[event], type_id, cb.user_data, cb.func);
+  ASSERT_VALID_EVENT_ID(event);
+  ASSERT_VALID_TYPE_ID(self, type_id);
+  emitter_connect(self->emitter[event], type_id, cb);
 }
 
-void ecs_disconnect(Ecs* self, int event, ecs_size_t type_id, pointer_t fn_or_arg)
+void ecs_disconnect(Ecs* self, int event, ecs_size_t type_id, void (*fn)())
 {
-  ASSERT((event >= 0 && event < ECS_NUM_EVENTS) && "invalid event type");
-  ASSERT(type_id < self->type_cnt && "invalid component type id");
-  dispatcher_disconnect(self->dispatcher[event], type_id, fn_or_arg);
+  ASSERT_VALID_EVENT_ID(event);
+  ASSERT_VALID_TYPE_ID(self, type_id);
+  emitter_disconnect(self->emitter[event], type_id, fn);
 }
 
 void ecs_fill(Ecs* self, ecs_size_t entity, const ecs_size_t* types, ecs_size_t cnt, void** arr)
 {
-  ASSERT(ecs_is_valid(self, entity) && "invalid entity");
+  ASSERT_VALID_ENTITY(self, entity);
   for (int i = 0; i < cnt; ++i)
   {
-    ASSERT(types[i] >= 0 && types[i] < self->type_cnt);
+    ASSERT_VALID_TYPE_ID(self, types[i]);
     arr[i] = ecs_pool_get(self->pools[types[i]], entity);
   }
 }
@@ -286,7 +292,7 @@ ecs_entity_t ecs_cpy(Ecs* dst_registry, Ecs* src_registry, ecs_entity_t src_enti
   ecs_entity_t clone_entity;
   void*        src_data;
   void*        cpy_data;
-  ASSERT(ecs_is_valid(src_registry, src_entity) && "invalid entity");
+  ASSERT_VALID_ENTITY(src_registry, src_entity);
 
   clone_entity = ecs_create(dst_registry);
   for (int itype_id = 0; itype_id < dst_registry->type_cnt; ++itype_id)
@@ -295,9 +301,9 @@ ecs_entity_t ecs_cpy(Ecs* dst_registry, Ecs* src_registry, ecs_entity_t src_enti
     {
       cpy_data = ecs_pool_add(dst_registry->pools[itype_id], clone_entity);
       copy(&dst_registry->types[itype_id], cpy_data, src_data);
-      dispatcher_emit(dst_registry->dispatcher[ECS_EVT_ADD_COMP],
-                      itype_id,
-                      &(EcsComponentEvent){ .entity = clone_entity, .component = cpy_data });
+      emitter_emit(dst_registry->emitter[ECS_EVT_ADD_COMP],
+                   itype_id,
+                   &(EcsComponentEvent){ .entity = clone_entity, .component = cpy_data });
     }
   }
 

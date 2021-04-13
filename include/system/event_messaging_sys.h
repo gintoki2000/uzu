@@ -171,8 +171,8 @@ typedef struct
 
 void ems_init();
 void ems_fini();
-void ems_connect(int sig_id, pointer_t arg, funcptr_t func);
-void ems_disconnect(int sig_id, pointer_t func_or_instance);
-void ems_broadcast(int sig_id, const void* event);
+void ems_connect(int signal, Callback callback);
+void ems_disconnect(int signal, void (*fn)());
+void ems_broadcast(int signal, const void* data);
 
 #endif // MEDIATOR_H

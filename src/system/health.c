@@ -9,8 +9,8 @@ extern Ecs* g_ecs;
 static void on_deal_damage(void* arg, const MSG_DealDamage* event)
 {
   (void)arg;
-  Health*       health;
-  Motion*       motion;
+  Health* health;
+  Motion* motion;
   if ((health = ecs_get(g_ecs, event->receiver, HEALTH)) != NULL &&
       !ecs_has(g_ecs, event->receiver, INVULNERABLE))
   {
@@ -50,7 +50,7 @@ static void on_deal_damage(void* arg, const MSG_DealDamage* event)
 
 void health_system_init()
 {
-  ems_connect(MSG_DEAL_DAMAGE, NULL, on_deal_damage);
+  ems_connect(MSG_DEAL_DAMAGE, CALLBACK_2(on_deal_damage));
 }
 
 void health_system()

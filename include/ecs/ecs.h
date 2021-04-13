@@ -16,7 +16,7 @@ typedef struct Ecs
   ecs_size_t    type_cnt;
   EcsType*      types;
   EcsPool**     pools;
-  Dispatcher*   dispatcher[ECS_NUM_EVENTS];
+  Emitter*      emitter[ECS_NUM_EVENTS];
   ecs_entity_t* entities;
   ecs_size_t    cnt;
   ecs_size_t    size;
@@ -72,5 +72,5 @@ INLINE BOOL ecs_is_valid(Ecs* self, ecs_entity_t entity)
 }
 
 void ecs_connect(Ecs* self, int event, ecs_size_t type_id, Callback cb);
-void ecs_disconnect(Ecs* self, int event, ecs_size_t type_id, pointer_t fn_or_arg);
+void ecs_disconnect(Ecs* self, int event, ecs_size_t type_id, void(*fn)());
 #endif // WORLD_H

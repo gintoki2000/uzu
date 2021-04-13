@@ -109,7 +109,7 @@ static void on_level_loaded(SDL_UNUSED void* arg, const MSG_LevelLoaded* event)
 
 void chest_system_init()
 {
-  ems_connect(MSG_COMANND_SELECTED, NULL, on_command_selected);
-  ems_connect(MSG_LEVEL_LOADED, NULL, on_level_loaded);
-  ems_connect(MSG_LEVEL_UNLOADED, NULL, on_level_unload);
+  ems_connect(MSG_COMANND_SELECTED, CALLBACK_2(on_command_selected));
+  ems_connect(MSG_LEVEL_LOADED, CALLBACK_2(on_level_loaded));
+  ems_connect(MSG_LEVEL_UNLOADED, CALLBACK_2(on_level_unload));
 }

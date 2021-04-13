@@ -178,5 +178,5 @@ void player_process_input(SDL_UNUSED void* arg)
 
 void player_controller_system_init(void)
 {
-  ems_connect(MSG_LEVEL_UNLOADED, NULL, on_level_unloaded);
+  ems_connect(MSG_LEVEL_UNLOADED, CALLBACK_2(on_level_unloaded));
 }

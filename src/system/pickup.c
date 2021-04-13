@@ -59,5 +59,5 @@ static void callback2(ecs_entity_t entity, const PickupableAttributes* attrs, co
 }
 void pickup_system_init()
 {
-  ems_connect(MSG_PLAYER_HIT_ITEM, NULL, on_hit_pickupable_entity);
+  ems_connect(MSG_PLAYER_HIT_ITEM, CALLBACK_2(on_hit_pickupable_entity));
 }

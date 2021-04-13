@@ -63,7 +63,7 @@ static void (*_handle_fn_tbl[NUM_CATEGORIES][NUM_CATEGORIES])(ecs_entity_t, ecs_
 
 void collision_manager_system_init()
 {
-  ems_connect(MSG_COLLISION, NULL, on_collision);
+  ems_connect(MSG_COLLISION, CALLBACK_2(on_collision));
 }
 
 static void on_collision(SDL_UNUSED void* arg, MSG_Collision* event)

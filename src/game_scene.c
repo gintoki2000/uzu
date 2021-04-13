@@ -116,9 +116,9 @@ static void on_load()
 
   inventory_init();
 
-  ems_connect(MSG_HIT_LADDER, NULL, on_player_hit_ladder);
-  ems_connect(MSG_ENTITY_DIED, NULL, on_entity_died);
-  ems_connect(MSG_LEVEL_LOADED, NULL, music_player_on_level_loaded);
+  ems_connect(MSG_HIT_LADDER, CALLBACK_2(on_player_hit_ladder));
+  ems_connect(MSG_ENTITY_DIED, CALLBACK_2(on_entity_died));
+  ems_connect(MSG_LEVEL_LOADED, CALLBACK_2(music_player_on_level_loaded));
 
   input_push_state(INPUT_STATE_INST_1(player_process_input));
 

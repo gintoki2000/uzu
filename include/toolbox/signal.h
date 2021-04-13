@@ -23,6 +23,5 @@ void        dispatcher_destroy(Dispatcher* dispatcher);
 void        dispatcher_connect(Dispatcher* self, int sig, pointer_t user_data, funcptr_t func);
 void        dispatcher_disconnect(Dispatcher* self, int sig, pointer_t func_or_instance);
 void        dispatcher_emit(Dispatcher* self, int sig, const void* evt);
-void        dispatcher_update(Dispatcher* self, int sig);
 
 #endif // SIGNAL_H

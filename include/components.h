@@ -34,6 +34,7 @@ typedef enum ComponentId
   CAMERA_TARGET_TAG,
   ENABLE_TILE_COLLISION_TAG,
   CHARACTER_ANIMATOR_TAG,
+  BOSS_ROOM,
   PROJECTILE_ATTRIBUTES,
   DOOR_TAG,
   BRAIN,
@@ -60,6 +61,7 @@ typedef enum ComponentId
   MOVE_SPEED,
   FACING_DIRECTION,
   ATTACK_TARGET,
+  TRIGGER,
   NUM_COMPONENTS
 } ComponentId;
 
@@ -181,6 +183,11 @@ typedef int EnableTileCollisionTag;
 typedef int DestroyedTag;
 
 typedef int CharacterAnimatorTag;
+
+typedef struct BossRoom
+{
+  RECT rect;
+} BossRoom;
 
 typedef struct ProjectileAttributes
 {

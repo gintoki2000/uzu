@@ -14,7 +14,7 @@ struct BTTask_Attack
 
 static void     __vtbl_init(BTNodeVtbl* vtbl);
 static NODE*    __init(BTTask_Attack* self);
-static void     __finish(NODE* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status);
+static void     __finish(NODE* self, Ecs* ecs, ecs_entity_t entity, BOOL succeed);
 static void     __abort(NODE* self, Ecs* ecs, ecs_entity_t entity);
 static BTStatus __exec(NODE* self, Ecs* ecs, ecs_entity_t entity);
 
@@ -47,10 +47,8 @@ static void __abort(NODE* self, SDL_UNUSED Ecs* ecs, SDL_UNUSED ecs_entity_t ent
   self->is_running = FALSE;
 }
 
-static void __finish(NODE*      self,
-                     SDL_UNUSED Ecs*         ecs,
-                     SDL_UNUSED ecs_entity_t entity,
-                     SDL_UNUSED BTStatus     finish_status)
+static void
+__finish(NODE* self, SDL_UNUSED Ecs* ecs, SDL_UNUSED ecs_entity_t entity, SDL_UNUSED BOOL succeed)
 {
   self->is_running = FALSE;
 }

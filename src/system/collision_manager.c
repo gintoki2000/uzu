@@ -2,8 +2,8 @@
 #define COLLISION_FILTER_H
 #include "system/game_logic.h"
 
-#include "system/event_messaging_sys.h"
 #include "components.h"
+#include "system/event_messaging_sys.h"
 #include <toolbox/toolbox.h>
 
 extern Ecs* g_ecs;
@@ -22,7 +22,7 @@ static void entity_vs_interacable(ecs_entity_t entity, ecs_entity_t interacable)
 static void entity_vs_trigger(ecs_entity_t entity, ecs_entity_t trigger);
 static void trigger_vs_entity(ecs_entity_t trigger, ecs_entity_t entity);
 
-static void (*s_handler_fn_tbl[NUM_CATEGORIES][NUM_CATEGORIES])(ecs_entity_t, ecs_entity_t) =
+static void (*_handle_fn_tbl[NUM_CATEGORIES][NUM_CATEGORIES])(ecs_entity_t, ecs_entity_t) =
 {
   [CATEGORY_PLAYER] = {
     [CATEGORY_WEAPON] = entity_vs_weapon,
@@ -76,7 +76,7 @@ static void on_collision(SDL_UNUSED void* arg, MSG_Collision* event)
       (hitbox2 = ecs_get(g_ecs, event->e2, HITBOX)) != NULL)
   {
 
-    fn = s_handler_fn_tbl[hitbox1->category][hitbox2->category];
+    fn = _handle_fn_tbl[hitbox1->category][hitbox2->category];
     if (fn != NULL)
       fn(event->e1, event->e2);
   }
@@ -119,8 +119,8 @@ static void player_vs_item(ecs_entity_t player, ecs_entity_t item)
 {
   ems_broadcast(MSG_PLAYER_HIT_ITEM,
                 &(MSG_HitPickupableEntity){
-                    .pickupable_entity   = item,
-                    .player = player,
+                    .pickupable_entity = item,
+                    .player            = player,
                 });
 }
 
@@ -128,8 +128,8 @@ static void item_vs_player(ecs_entity_t item, ecs_entity_t player)
 {
   ems_broadcast(MSG_PLAYER_HIT_ITEM,
                 &(MSG_HitPickupableEntity){
-                    .pickupable_entity   = item,
-                    .player = player,
+                    .pickupable_entity = item,
+                    .player            = player,
                 });
 }
 

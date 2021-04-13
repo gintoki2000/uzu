@@ -39,12 +39,11 @@ void bt_node_abort(BTNode* self, Ecs* ecs, ecs_entity_t entity)
   (void)entity;
 }
 
-void bt_node_finish(BTNode* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status)
+void bt_node_finish(SDL_UNUSED BTNode* self,
+                    SDL_UNUSED Ecs*         ecs,
+                    SDL_UNUSED ecs_entity_t entity,
+                    SDL_UNUSED BOOL         succeed)
 {
-  (void)self;
-  (void)ecs;
-  (void)entity;
-  (void)finish_status;
 }
 
 /*************************************************************/
@@ -81,7 +80,7 @@ BTStatus bt_root_exec(BTRoot* self, Ecs* ecs, ecs_entity_t entity)
 {
   BTStatus finish_status = bt_node_vc_exec(self->child, ecs, entity);
   if (finish_status != BT_STATUS_RUNNING)
-    bt_node_vc_finish(self->child, ecs, entity, finish_status);
+    bt_node_vc_finish(self->child, ecs, entity, finish_status == BT_STATUS_SUCCESS);
   return BT_STATUS_RUNNING;
 }
 
@@ -155,20 +154,20 @@ BTStatus bt_selector_exec(BTSelector* self, Ecs* ecs, ecs_entity_t entity)
     return BT_STATUS_RUNNING;
     break;
   case BT_STATUS_FAILURE:
-    bt_node_vc_finish(current_node, ecs, entity, BT_STATUS_FAILURE);
+    bt_node_vc_finish(current_node, ecs, entity, FALSE);
     return bt_selector_next_child(self) ? BT_STATUS_RUNNING : BT_STATUS_FAILURE;
     break;
   case BT_STATUS_SUCCESS:
-    bt_node_vc_finish(current_node, ecs, entity, BT_STATUS_SUCCESS);
+    bt_node_vc_finish(current_node, ecs, entity, TRUE);
     return BT_STATUS_SUCCESS;
   }
 }
 
-void bt_selector_finish(BTSelector* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status)
+void bt_selector_finish(BTSelector* self,
+                        SDL_UNUSED Ecs*         ecs,
+                        SDL_UNUSED ecs_entity_t entity,
+                        SDL_UNUSED BOOL         succeed)
 {
-  (void)ecs;
-  (void)entity;
-  (void)finish_status;
   self->curr = 0;
 }
 
@@ -245,20 +244,20 @@ BTStatus bt_sequence_exec(BTSequence* self, Ecs* ecs, ecs_entity_t entity)
     return BT_STATUS_RUNNING;
     break;
   case BT_STATUS_SUCCESS:
-    bt_node_vc_finish(current_node, ecs, entity, BT_STATUS_SUCCESS);
+    bt_node_vc_finish(current_node, ecs, entity, TRUE);
     return bt_sequence_next_child(self) ? BT_STATUS_RUNNING : BT_STATUS_SUCCESS;
     break;
   case BT_STATUS_FAILURE:
-    bt_node_finish(current_node, ecs, entity, BT_STATUS_FAILURE);
+    bt_node_finish(current_node, ecs, entity, FALSE);
     return BT_STATUS_FAILURE;
   }
 }
 
-void bt_sequence_finish(BTSequence* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status)
+void bt_sequence_finish(BTSequence* self,
+                        SDL_UNUSED Ecs*         ecs,
+                        SDL_UNUSED ecs_entity_t entity,
+                        SDL_UNUSED BOOL         succeed)
 {
-  (void)ecs;
-  (void)entity;
-  (void)finish_status;
   self->curr = 0;
 }
 
@@ -301,7 +300,6 @@ void bt_decorator_abort(BTDecorator* self, Ecs* ecs, ecs_entity_t entity)
 
 void bt_decorator_set_child(BTDecorator* self, BTNode* node)
 {
-
   ASSERT(node->parent == NULL && "node already attach to other node");
   bt_decorator_del_child(self);
   self->child  = node;
@@ -328,12 +326,12 @@ void bt_decorator_del_child(BTDecorator* self)
   }
 }
 
-
 /***********************************************************/
 
 BT_VTBL_INST_FN(BTRepeater, bt_repeater)
 BT_ALLOC_FN(BTRepeater, bt_repeater)
 
+#define SUPER ((BTDecorator*)self)
 static BTRepeater* bt_repeater_init(BTRepeater* self, int times)
 {
   bt_decorator_init((BTDecorator*)self);
@@ -368,9 +366,9 @@ BTStatus bt_repeater_exec(BTRepeater* self, Ecs* ecs, ecs_entity_t entity)
   if (self->times > 0)
   {
     self->times--;
-    finish_status = bt_node_vc_exec(((BTDecorator*)self)->child, ecs, entity);
+    finish_status = bt_node_vc_exec(SUPER->child, ecs, entity);
     if (finish_status != BT_STATUS_RUNNING)
-      bt_node_vc_finish(((BTDecorator*)self)->child, ecs, entity, finish_status);
+      bt_node_vc_finish(SUPER->child, ecs, entity, finish_status == BT_STATUS_SUCCESS);
     return BT_STATUS_RUNNING;
   }
   else
@@ -379,16 +377,15 @@ BTStatus bt_repeater_exec(BTRepeater* self, Ecs* ecs, ecs_entity_t entity)
   }
 }
 
-void bt_repeater_finish(BTRepeater* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status)
+void bt_repeater_finish(BTRepeater* self,
+                        SDL_UNUSED Ecs*         ecs,
+                        SDL_UNUSED ecs_entity_t entity,
+                        SDL_UNUSED BOOL         succeed)
 {
-  (void)ecs;
-  (void)entity;
-  (void)finish_status;
   self->times = self->original_times;
 }
 
 /**************************************************************/
-
 BT_VTBL_INST_FN(BTInverter, bt_inverter)
 BT_ALLOC_FN(BTInverter, bt_inverter)
 
@@ -410,14 +407,14 @@ BTInverter* bt_inverter_new()
 
 BTStatus bt_inverter_exec(BTInverter* self, Ecs* ecs, ecs_entity_t entity)
 {
-  switch (bt_node_vc_exec(((BTDecorator*)self)->child, ecs, entity))
+  switch (bt_node_vc_exec(SUPER->child, ecs, entity))
   {
   case BT_STATUS_SUCCESS:
-    bt_node_vc_finish(((BTDecorator*)self)->child, ecs, entity, BT_STATUS_SUCCESS);
+    bt_node_vc_finish(SUPER->child, ecs, entity, TRUE);
     return BT_STATUS_FAILURE;
     break;
   case BT_STATUS_FAILURE:
-    bt_node_vc_finish(((BTDecorator*)self)->child, ecs, entity, BT_STATUS_SUCCESS);
+    bt_node_vc_finish(SUPER->child, ecs, entity, FALSE);
     return BT_STATUS_SUCCESS;
     break;
   case BT_STATUS_RUNNING:
@@ -452,9 +449,9 @@ BTStatus bt_condition_exec(BTCondition* self, Ecs* ecs, ecs_entity_t entity)
   predict_result      = self->invert_result ? !predict_result : predict_result;
   if (predict_result)
   {
-    BTStatus stt = bt_node_vc_exec(((BTDecorator*)self)->child, ecs, entity);
+    BTStatus stt = bt_node_vc_exec(SUPER->child, ecs, entity);
     if (stt == BT_STATUS_FAILURE || stt == BT_STATUS_SUCCESS)
-      bt_node_vc_finish(((BTDecorator*)self)->child, ecs, entity, stt);
+      bt_node_vc_finish(SUPER->child, ecs, entity, stt == BT_STATUS_SUCCESS);
     return stt;
   }
   else

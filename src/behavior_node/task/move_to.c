@@ -15,7 +15,7 @@ static void              __vtbl_init(BTNodeVtbl* vtbl);
 static NODE*             __init(NODE*, float);
 static BTStatus          __exec(NODE*, Ecs*, ecs_entity_t);
 static void              __abort(NODE*, Ecs*, ecs_entity_t);
-static void              __finish(NODE*, Ecs*, ecs_entity_t, BTStatus);
+static void              __finish(NODE*, Ecs*, ecs_entity_t, BOOL);
 
 BT_ALLOC_FN(BTTask_MoveTo, _)
 BT_STATIC_VTBL_INST_FN(BTNode, _)
@@ -78,10 +78,10 @@ static void __abort(SDL_UNUSED NODE* self, Ecs* ecs, ecs_entity_t entity)
   }
 }
 
-static void __finish(SDL_UNUSED NODE* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status)
+static void __finish(SDL_UNUSED NODE* self, Ecs* ecs, ecs_entity_t entity, BOOL succeed)
 {
   Motion* motion;
-  if (finish_status == BT_STATUS_SUCCESS && (motion = ecs_get(ecs, entity, MOTION)))
+  if (succeed && (motion = ecs_get(ecs, entity, MOTION)))
   {
     ecs_rmv(ecs, entity, DESTINATION);
     motion->vel = VEC2_ZERO;

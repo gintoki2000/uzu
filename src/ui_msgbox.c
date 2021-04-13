@@ -11,13 +11,13 @@ static char _msg[512];
 
 extern SDL_Renderer* g_renderer;
 
-const static RECT      BOX_RECT     = { WIN_WIDTH / 2 - 50, WIN_HEIGHT / 2 - 15, 100, 30 };
-const static RECT      TEXT_RECT    = { WIN_WIDTH / 2 - 46, WIN_HEIGHT / 2 - 11, 94, 24 };
-const static FC_Effect TEXT_EFFECT  = { .alignment = FC_ALIGN_CENTER,
+static const RECT      BOX_RECT     = { WIN_WIDTH / 2 - 50, WIN_HEIGHT / 2 - 15, 100, 30 };
+static const RECT      TEXT_RECT    = { WIN_WIDTH / 2 - 46, WIN_HEIGHT / 2 - 11, 94, 24 };
+static const FC_Effect TEXT_EFFECT  = { .alignment = FC_ALIGN_CENTER,
                                        .scale     = { 1.f, 1.f },
                                        .color     = { 0xff, 0xff, 0xff, 0xff } };
-const static COLOR     BG_COLOR     = { 0x00, 0x00, 0x00, 0x90 };
-const static COLOR     BORDER_COLOR = { 0xff, 0xff, 0xff, 0x80 };
+static const COLOR     BG_COLOR     = { 0x00, 0x00, 0x00, 0x90 };
+static const COLOR     BORDER_COLOR = { 0xff, 0xff, 0xff, 0x80 };
 
 static void close()
 {

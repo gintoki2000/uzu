@@ -15,7 +15,7 @@ typedef struct BTNode BTNode;
 
 typedef BTStatus (*bt_exec_fn_t)(BTNode*, Ecs*, ecs_entity_t);
 typedef void (*bt_abort_fn_t)(BTNode*, Ecs* ecs, ecs_entity_t);
-typedef void (*bt_finish_fn_t)(BTNode*, Ecs* ecs, ecs_entity_t, BTStatus finish_status);
+typedef void (*bt_finish_fn_t)(BTNode*, Ecs* ecs, ecs_entity_t, BOOL succeed);
 
 typedef struct BTNodeVtbl
 {
@@ -97,7 +97,7 @@ void    bt_node_del(BTNode* node);
 BTNode* bt_node_init(BTNode* self);
 void    bt_node_fini(BTNode* self);
 void    bt_node_abort(BTNode* self, Ecs*, ecs_entity_t);
-void    bt_node_finish(BTNode* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status);
+void    bt_node_finish(BTNode* self, Ecs* ecs, ecs_entity_t entity, BOOL succeed);
 
 typedef struct
 {
@@ -127,7 +127,7 @@ BTSelector* bt_selector_new();
 BTSelector* bt_selector_init(BTSelector* self);
 void        bt_selector_fini(BTSelector* self);
 void        bt_selector_abort(BTSelector* self, Ecs* ecs, ecs_entity_t entity);
-void bt_selector_finish(BTSelector* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status);
+void bt_selector_finish(BTSelector* self, Ecs* ecs, ecs_entity_t entity, BOOL succeed);
 BTStatus bt_selector_exec(BTSelector* self, Ecs* ecs, ecs_entity_t entity);
 void     bt_selector_add(BTSelector* self, BTNode* node);
 
@@ -143,7 +143,7 @@ void              bt_sequence_vtbl_init(BTNodeVtbl* vtbl);
 BTSequence*       bt_sequence_new();
 BTSequence*       bt_sequence_init(BTSequence* self);
 void              bt_sequence_fini(BTSequence* self);
-void bt_sequence_finish(BTSequence* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status);
+void bt_sequence_finish(BTSequence* self, Ecs* ecs, ecs_entity_t entity, BOOL succeed);
 void bt_sequence_abort(BTSequence* self, Ecs* ecs, ecs_entity_t entity);
 BTStatus bt_sequence_exec(BTSequence* self, Ecs* ecs, ecs_entity_t entity);
 void     bt_sequence_add(BTSequence* self, BTNode* node);
@@ -185,7 +185,7 @@ typedef struct
 const BTNodeVtbl* bt_repeater_vtbl_inst();
 void              bt_repeater_vtbl_init(BTRepeaterVtbl* vtbl);
 BTRepeater*       bt_repeater_new(int times);
-void bt_repeater_finish(BTRepeater* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status);
+void bt_repeater_finish(BTRepeater* self, Ecs* ecs, ecs_entity_t entity, BOOL succeed);
 void bt_repeater_abort(BTRepeater* self, Ecs* ecs, ecs_entity_t entity);
 BTStatus bt_repeater_exec(BTRepeater* self, Ecs* ecs, ecs_entity_t entity);
 

@@ -26,7 +26,7 @@ void rendering_system(void)
     if ((transform = ecs_get(g_ecs, entities[i], TRANSFORM)))
     {
       position.x = transform->position.x - visuals[i].anchor.x;
-      position.y = transform->position.y - visuals[i].anchor.y;
+      position.y = transform->position.y - visuals[i].anchor.y - transform->z;
       depth      = position.y + visuals[i].sprite.rect.h;
 
       dst.x = position.x;

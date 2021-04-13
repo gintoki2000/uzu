@@ -14,7 +14,7 @@ static void              __vtbl_init(BTNodeVtbl* vtbl);
 
 static NODE*    __init(NODE*, float);
 static void     __abort(NODE*, Ecs*, ecs_entity_t);
-static void     __finish(NODE*, Ecs*, ecs_entity_t, BTStatus);
+static void     __finish(NODE*, Ecs*, ecs_entity_t, BOOL);
 static BTStatus __exec(NODE*, Ecs*, ecs_entity_t);
 
 BT_STATIC_VTBL_INST_FN(BTNode, _)
@@ -43,31 +43,31 @@ static NODE* __init(NODE* self, float distance)
 }
 
 static void __finish(NODE*      self,
-                     SDL_UNUSED Ecs*         ecs,
+                     SDL_UNUSED Ecs*         registry,
                      SDL_UNUSED ecs_entity_t entity,
-                     SDL_UNUSED BTStatus     finish_status)
+                     SDL_UNUSED BOOL         succeed)
 {
   self->is_running = FALSE;
 }
 
-static void __abort(NODE* self, Ecs* ecs, ecs_entity_t entity)
+static void __abort(NODE* self, Ecs* registry, ecs_entity_t entity)
 {
   self->is_running = FALSE;
-  ecs_rmv(ecs, entity, FOLLOWING_TARGET);
+  ecs_rmv(registry, entity, FOLLOWING_TARGET);
 }
 
-static BTStatus __exec(NODE* self, Ecs* ecs, ecs_entity_t entity)
+static BTStatus __exec(NODE* self, Ecs* registry, ecs_entity_t entity)
 {
   AttackTarget* attack_target;
 
   if (self->is_running)
   {
-    return (ecs_has(ecs, entity, FOLLOWING_TARGET)) ? BT_STATUS_RUNNING : BT_STATUS_SUCCESS;
+    return (ecs_has(registry, entity, FOLLOWING_TARGET)) ? BT_STATUS_RUNNING : BT_STATUS_SUCCESS;
   }
-  else if ((attack_target = ecs_get(ecs, entity, ATTACK_TARGET)) != NULL)
+  else if ((attack_target = ecs_get(registry, entity, ATTACK_TARGET)) != NULL)
   {
     self->is_running = TRUE;
-    ecs_set(ecs,
+    ecs_set(registry,
             entity,
             FOLLOWING_TARGET,
             &(FollowingTarget){ attack_target->value, .radius = self->distance });
@@ -75,5 +75,4 @@ static BTStatus __exec(NODE* self, Ecs* ecs, ecs_entity_t entity)
   }
   return BT_STATUS_FAILURE;
 }
-
 #undef NODE

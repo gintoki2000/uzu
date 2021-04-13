@@ -16,7 +16,7 @@ static void              __vtbl_init(BTNodeVtbl* vtbl);
 
 static NODE*    __init(NODE* self, int total_ticks);
 static void     __abort(NODE* self, Ecs* ecs, ecs_entity_t entity);
-static void     __finish(NODE* self, Ecs* ecs, ecs_entity_t entity, BTStatus finish_status);
+static void     __finish(NODE* self, Ecs* ecs, ecs_entity_t entity, BOOL succeed);
 static BTStatus __exec(NODE* self, Ecs* ecs, ecs_entity_t entity);
 
 BT_STATIC_VTBL_INST_FN(BTNode, _)
@@ -45,10 +45,7 @@ static NODE* __init(NODE* self, int total_ticks)
   return self;
 }
 
-static void __finish(NODE*               self,
-              Ecs*                ecs,
-              ecs_entity_t        entity,
-              SDL_UNUSED BTStatus finish_status /*success? -> BOOL*/)
+static void __finish(NODE* self, Ecs* ecs, ecs_entity_t entity, SDL_UNUSED BOOL succeed)
 {
   Controller* controller = ecs_get(ecs, entity, CONTROLLER);
   self->remaining        = self->total_ticks;

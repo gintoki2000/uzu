@@ -219,7 +219,7 @@ typedef struct DoorInfo
 
 typedef struct PickupableAttributes
 {
-  u16 id;
+  u16 id; /**/
   u16 sfx;
   u8  quality;
 } PickupableAttributes;

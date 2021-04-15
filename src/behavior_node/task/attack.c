@@ -77,14 +77,7 @@ static BTStatus __exec(NODE* self, Ecs* ecs, ecs_entity_t entity)
     return BT_STATUS_RUNNING;
   }
   else
-  {
-    if (controller->in_action)
-      return BT_STATUS_RUNNING;
-    else
-    {
-      return BT_STATUS_SUCCESS;
-    }
-  }
+    return controller->in_action ? BT_STATUS_RUNNING : BT_STATUS_SUCCESS;
 }
 
 #undef NODE

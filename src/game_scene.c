@@ -108,6 +108,7 @@ static void on_load()
   player_controller_system_init();
   effect_system_init();
   update_attack_target_system_init();
+  action_system_init();
 
   // init ui
   ui_dialogue_init();
@@ -318,6 +319,7 @@ static void update_game_logic(void)
   RUN_SYSTEM(self_destruction_system);
   RUN_SYSTEM(update_attack_target_system);
   RUN_SYSTEM(update_facing_direction_system);
+  RUN_SYSTEM(action_system);
 
   (map_update_animated_cells());
 

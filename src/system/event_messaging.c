@@ -1,29 +1,34 @@
 #include "system/event_messaging_sys.h"
 
-static Emitter* _dispatcher;
+static Emitter* _emitter;
 
 void ems_init()
 {
-  _dispatcher = emitter_new(NUM_MSGS);
+  _emitter = emitter_new(NUM_MSGS);
 }
 
 void ems_fini()
 {
-  emitter_delete(_dispatcher);
-  _dispatcher = NULL;
+  emitter_delete(_emitter);
+  _emitter = NULL;
 }
 
 void ems_connect(int signal, Callback callback)
 {
-  emitter_connect(_dispatcher, signal, callback);
+  emitter_connect(_emitter, signal, callback);
 }
 
 void ems_broadcast(int signal, const void* event)
 {
-  emitter_emit(_dispatcher, signal, event);
+  emitter_emit(_emitter, signal, event);
 }
 
 void ems_disconnect(int signal, void (*fn)())
 {
-  emitter_disconnect(_dispatcher, signal, fn);
+  emitter_disconnect(_emitter, signal, fn);
+}
+
+void ems_disconnect_ex(int signal, void* instance, void (*fn)())
+{
+  emitter_disconnect_ex(_emitter, signal, instance, fn);
 }

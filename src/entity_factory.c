@@ -1126,7 +1126,7 @@ ecs_entity_t make_npc_nova(Ecs* registry, Vec2 position, u16 conversation_id)
   ecs_set(registry, entity, HAND, &(Hand){ .weapon = ECS_NULL_ENT, .attach_point = { 8, -9 } });
 
   ecs_add(registry, entity, ENABLE_TILE_COLLISION_TAG);
-  ecs_set(registry, entity, MOVE_SPEED, &(MoveSpeed){ 120 });
+  ecs_set(registry, entity, MOVE_SPEED, &(MoveSpeed){ 50 });
   return entity;
 }
 

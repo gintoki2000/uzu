@@ -16,12 +16,12 @@ void ui_init(struct UI* self, int num_events)
   self->on_show  = _ui_on_show;
 
   self->is_visible = FALSE;
-  self->dispatcher = dispatcher_new(num_events);
+  self->emitter    = emitter_new(num_events);
 }
 
 void _ui_cleanup(void* self)
 {
-  dispatcher_destroy(UI(self)->dispatcher);
+  emitter_delete(UI(self)->emitter);
 }
 
 void _ui_on_hide(SDL_UNUSED void* self)
@@ -43,14 +43,15 @@ void ui_set_visible(struct UI* self, BOOL value)
 
 void ui_emit_event(struct UI* ui, u16 event, const void* data)
 {
-  dispatcher_emit(ui->dispatcher, event, data);
+  emitter_emit(ui->emitter, event, data);
 }
 
 void ui_connect(struct UI* self, u16 event, Callback callback)
 {
-  dispatcher_connect(self->dispatcher, event, callback.user_data, callback.func);
+  emitter_connect(self->emitter, event, callback);
 }
 
 void ui_disconnect_function(struct UI* self, u16 event, void (*fn)())
 {
+  emitter_disconnect(self->emitter, event, fn);
 }

@@ -38,6 +38,8 @@ void tile_collision_system(void);
 void update_facing_direction_system(void);
 void update_attack_target_system_init(void);
 void update_attack_target_system(void);
+void action_system_init(void);
+void action_system(void);
 
 void draw_map_colliders(void);
 

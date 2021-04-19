@@ -25,7 +25,7 @@ static struct
   BOOL is_nova_alive;
 } _save_block;
 
-static Vec2 _npc_location_tbl[] = { { 710.f, 90.f }, { 710.f, 90.f } };
+static Vec2 _npc_location_tbl[] = { { 730.f, 90.f }, { 710.f, 90.f } };
 
 SAVE_AND_LOAD_FN("event.begining")
 //*event callback*//
@@ -121,6 +121,21 @@ static void on_entity_died(SDL_UNUSED void* arg, const MSG_EntityDied* msg)
   }
 }
 
+static Action* create_action()
+{
+  Action* sequence = sequence_action_new();
+  Action* w1       = walk_action_new((Vec2){ 48.f * 16.f, 5.f * 16.f });
+  Action* w2       = walk_action_new((Vec2){ 65.f * 16.f, 5.f * 16.f });
+  Action* w3       = walk_action_new((Vec2){ 65.f * 16.f, 14.f * 16.f });
+  composite_action_addn(COMPOSITE_ACTION(sequence), 3, w1, w2, w3);
+  return sequence;
+}
+
+static void on_action_finished(SDL_UNUSED void* arg, SDL_UNUSED const void* e)
+{
+  INFO("nova arrived destination\n");
+}
+
 static void phase_initial_on_conversation_finished(SDL_UNUSED void*                arg,
                                                    const MSG_ConversationFinished* msg)
 {
@@ -136,6 +151,10 @@ static void phase_initial_on_conversation_finished(SDL_UNUSED void*             
     }
     else
     {
+      ecs_set(g_ecs,
+              msg->npc,
+              SCRIPT,
+              &(Script){ create_action(), CALLBACK_2(on_action_finished) });
     }
   }
 }

@@ -127,6 +127,7 @@ typedef struct
   const char*  npc_name;
   const char*  conversation_name;
   const char*  response;
+  u16          id;
 } MSG_ConversationFinished;
 
 typedef struct
@@ -173,6 +174,7 @@ void ems_init();
 void ems_fini();
 void ems_connect(int signal, Callback callback);
 void ems_disconnect(int signal, void (*fn)());
+void ems_disconnect_ex(int signal, void* instance, void (*fn)());
 void ems_broadcast(int signal, const void* data);
 
 #endif // MEDIATOR_H

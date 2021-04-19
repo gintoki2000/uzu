@@ -1,6 +1,7 @@
 #ifndef COMPONENTS_H
 #define COMPONENTS_H
 #include "SDL_FontCache.h"
+#include "action.h"
 #include "behaviour_tree.h"
 #include "global.h"
 #include "path_finder.h"
@@ -62,6 +63,7 @@ typedef enum ComponentId
   FACING_DIRECTION,
   ATTACK_TARGET,
   TRIGGER,
+  SCRIPT,
   NUM_COMPONENTS
 } ComponentId;
 
@@ -425,6 +427,12 @@ typedef struct Defense
   u16 ice;
   u16 lightning;
 } Defense;
+
+typedef struct Script
+{
+  Action*  action;
+  Callback finished_callback;
+} Script;
 
 void ladder_attrs_init(LadderAttributes* sw, const char* level, const char* dest, u16 direction);
 void name_init(Name* name, const char* value);

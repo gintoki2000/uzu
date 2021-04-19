@@ -32,6 +32,7 @@ set(SYSTEM_SOURCE_FILES
   src/system/tile_collision.c
   src/system/update_attack_target.c
   src/system/update_facing_direction.c
+  src/system/action.c
 
   #weapon skill systems
   src/system/weapon_skill/charge.c

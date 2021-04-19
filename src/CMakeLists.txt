@@ -37,6 +37,8 @@ set(SOURCE_FILES
   src/ui_quality.c
   src/ui_subtile.c
   src/sprite_renderer.c
+  src/action.c
+  src/action/walk.c
   ${BEHAVIOR_NODE_SOURCE_FILES}
   ${ECS_SOURCE_FILES}
   ${ENGINE_SOURCE_FILES}

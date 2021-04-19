@@ -19,6 +19,9 @@ static void brain_fini(Brain* ai_agent);
 static void hitbox_init(HitBox* h);
 static void facing_direction_init(FacingDirection* fd);
 static void attack_target_init(AttackTarget* attack_target);
+static void script_fini(Script* script);
+
+void delete_action(void* action);
 
 const EcsType g_comp_types[NUM_COMPONENTS] = {
   [VISUAL]                       = ECS_TYPE_EX(Visual, visual_init, NULL, NULL),
@@ -72,6 +75,7 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
   [MOVE_SPEED]                   = ECS_TYPE(MoveSpeed),
   [FACING_DIRECTION]             = ECS_TYPE_EX(FacingDirection, facing_direction_init, NULL, NULL),
   [ATTACK_TARGET]                = ECS_TYPE_EX(AttackTarget, attack_target_init, NULL, NULL),
+  [SCRIPT]                       = ECS_TYPE_EX(Script, NULL, script_fini, NULL),
 };
 
 void brain_fini(Brain* brain)
@@ -143,4 +147,10 @@ static void facing_direction_init(FacingDirection* fd)
 static void attack_target_init(AttackTarget* attack_target)
 {
   attack_target->value = ECS_NULL_ENT;
+}
+
+void script_fini(Script* script)
+{
+  action_delete(script->action);
+  script->action = NULL;
 }

@@ -46,6 +46,7 @@ typedef struct
 #define FLIP_TO_SIGN(__f) (__f == SDL_FLIP_NONE ? 1 : -1)
 
 #define ASSERT(cd) SDL_assert(cd)
+#define ASSERT_MSG(cd, msg) ASSERT((cd) && (msg))
 
 #define CALLBACK_1(_user_data, _func)                                                              \
   ((Callback){                                                                                     \
@@ -136,40 +137,64 @@ typedef struct
 } AABB;
 
 INLINE int max(int a, int b)
-{ return a > b ? a : b; }
+{
+  return a > b ? a : b;
+}
 
 INLINE int min(int a, int b)
-{ return a < b ? a : b; }
+{
+  return a < b ? a : b;
+}
 
 INLINE float maxf(float a, float b)
-{ return a > b ? a : b; }
+{
+  return a > b ? a : b;
+}
 
 INLINE float minf(float a, float b)
-{ return a < b ? a : b; }
+{
+  return a < b ? a : b;
+}
 
 INLINE float signf(float x)
-{ return (x > 0) - (x < 0); }
+{
+  return (x > 0) - (x < 0);
+}
 
 INLINE int sign(int x)
-{ return (x > 0) - (x < 0); }
+{
+  return (x > 0) - (x < 0);
+}
 
 INLINE Vec2 vec2_max(Vec2 a, Vec2 b)
-{ return (Vec2){ maxf(a.x, b.x), maxf(a.y, b.y) }; }
+{
+  return (Vec2){ maxf(a.x, b.x), maxf(a.y, b.y) };
+}
 
 INLINE Vec2 vec2_min(Vec2 a, Vec2 b)
-{ return (Vec2){ minf(a.x, b.x), minf(a.y, b.y) }; }
+{
+  return (Vec2){ minf(a.x, b.x), minf(a.y, b.y) };
+}
 
 INLINE float absf(float x)
-{ return x >= 0.f ? x : -x; }
+{
+  return x >= 0.f ? x : -x;
+}
 
 INLINE Vec2 vec2_sub(Vec2 a, Vec2 b)
-{ return (Vec2){ a.x - b.x, a.y - b.y }; }
+{
+  return (Vec2){ a.x - b.x, a.y - b.y };
+}
 
 INLINE Vec2 vec2_mul(Vec2 a, float k)
-{ return (Vec2){ a.x * k, a.y * k }; }
+{
+  return (Vec2){ a.x * k, a.y * k };
+}
 
 INLINE float vec2_mag(Vec2 v)
-{ return SDL_sqrt(v.x * v.x + v.y * v.y); }
+{
+  return SDL_sqrt(v.x * v.x + v.y * v.y);
+}
 
 INLINE float vec2_normalize(Vec2* v)
 {
@@ -225,7 +250,9 @@ INLINE Vec2 vec2_trunc(Vec2 v, float max_len)
 }
 
 INLINE float vec2_dist(Vec2 a, Vec2 b)
-{ return vec2_mag(vec2_sub(a, b)); }
+{
+  return vec2_mag(vec2_sub(a, b));
+}
 
 INLINE bool aabb_test_overlap(const AABB* a, const AABB* b)
 {

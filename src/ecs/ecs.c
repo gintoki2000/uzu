@@ -283,7 +283,8 @@ void ecs_fill(Ecs* self, ecs_size_t entity, const ecs_size_t* types, ecs_size_t 
   for (int i = 0; i < cnt; ++i)
   {
     ASSERT_VALID_TYPE_ID(self, types[i]);
-    arr[i] = ecs_pool_get(self->pools[types[i]], entity);
+    if ((arr[i] = ecs_pool_get(self->pools[types[i]], entity)) == NULL)
+      break;
   }
 }
 

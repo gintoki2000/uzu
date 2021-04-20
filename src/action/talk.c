@@ -1,5 +1,8 @@
 #include "action.h"
+#include "resources.h"
 #include "system/event_messaging_sys.h"
+
+extern void display_dialogue(u16 conversation_id, ecs_entity_t entity);
 
 typedef struct TalkAction
 {
@@ -14,9 +17,9 @@ static void on_conversation_finished(TalkAction* self, const MSG_ConversationFin
     self->finished = TRUE;
 }
 
-static void start(void* _self, SDL_UNUSED ecs_entity_t target)
+static void start(void* _self, ecs_entity_t target)
 {
-  // TODO: display dialogue
+  display_dialogue(CONVERSATION_NOVA_2A_1, target);
   ems_connect(MSG_CONVERSATION_FINISHED, CALLBACK_1(_self, on_conversation_finished));
 }
 

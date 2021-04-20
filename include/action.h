@@ -41,4 +41,5 @@ void             composite_action_addn(CompositeAction* self, int n, ...);
 Action* parallel_action_new(void);
 Action* sequence_action_new(void);
 Action* walk_action_new(Vec2 destination);
+Action* talk_action_new(u16 conversation_id);
 #endif // ACTION_H

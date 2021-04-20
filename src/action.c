@@ -1,4 +1,5 @@
 #include "action.h"
+#include "config.h"
 
 void action_delete(Action* action)
 {
@@ -11,10 +12,16 @@ void action_delete(Action* action)
 
 void action_default_cleanup_func(SDL_UNUSED void* self)
 {
+#if DEBUG
+  INFO("action cleanup\n");
+#endif
 }
 
 void action_default_start_func(SDL_UNUSED void* self, SDL_UNUSED ecs_entity_t target)
 {
+#if DEBUG
+  INFO("action start\n");
+#endif
 }
 
 void action_default_end_func(SDL_UNUSED void* self, SDL_UNUSED ecs_entity_t target)
@@ -165,10 +172,17 @@ void static sequence_action_end(void* self, SDL_UNUSED ecs_entity_t target)
   SEQUENCE_ACTION(self)->current_child_index = -1;
 }
 
+INLINE Action* sequence_action_next_child(SequenceAction* self)
+{
+  return self->current_child_index < COMPOSITE_ACTION(self)->children->cnt - 1
+             ? ptr_array_at(COMPOSITE_ACTION(self)->children, ++self->current_child_index)
+             : NULL;
+}
+
 static BOOL sequence_action_update(void* _self, ecs_entity_t target)
 {
   SequenceAction* self = _self;
-  Action*         current_child;
+  Action *        current_child, *next_child;
   PtrArray*       children;
 
   children = COMPOSITE_ACTION(self)->children;
@@ -177,8 +191,10 @@ static BOOL sequence_action_update(void* _self, ecs_entity_t target)
   current_child = ptr_array_at(children, self->current_child_index);
   if (ACTION_UPDATE(current_child, target))
   {
-    ++self->current_child_index;
-    if (self->current_child_index == children->cnt)
+    ACTION_END(current_child, target);
+    if ((next_child = sequence_action_next_child(self)) != NULL)
+      ACTION_START(next_child, target);
+    else
       return TRUE;
   }
   return FALSE;

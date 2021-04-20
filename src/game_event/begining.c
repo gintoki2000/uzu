@@ -127,7 +127,8 @@ static Action* create_action()
   Action* w1       = walk_action_new((Vec2){ 48.f * 16.f, 5.f * 16.f });
   Action* w2       = walk_action_new((Vec2){ 65.f * 16.f, 5.f * 16.f });
   Action* w3       = walk_action_new((Vec2){ 65.f * 16.f, 14.f * 16.f });
-  composite_action_addn(COMPOSITE_ACTION(sequence), 3, w1, w2, w3);
+  Action* talk     = talk_action_new(CONVERSATION_NOVA_2A_1);
+  composite_action_addn(COMPOSITE_ACTION(sequence), 4, w1, w2, w3, talk);
   return sequence;
 }
 
@@ -139,15 +140,13 @@ static void on_action_finished(SDL_UNUSED void* arg, SDL_UNUSED const void* e)
 static void phase_initial_on_conversation_finished(SDL_UNUSED void*                arg,
                                                    const MSG_ConversationFinished* msg)
 {
-  Dialogue* dialogue;
-  if (SDL_strcmp(msg->conversation_name, "nova_00") == 0)
+  if (msg->id == CONVERSATION_NOVA_00)
   {
     ems_disconnect(MSG_CONVERSATION_FINISHED, phase_initial_on_conversation_finished);
     if (SDL_strcmp(msg->response, "accept his request") == 0)
     {
-      _save_block.phase         = PHASE_1A;
-      dialogue                  = ecs_get(g_ecs, msg->npc, DIALOGUE);
-      dialogue->conversation_id = CONVERSATION_NOVA_1A_1;
+      _save_block.phase = PHASE_1A;
+      set_entity_conversation(g_ecs, msg->npc, CONVERSATION_NOVA_1A_1);
     }
     else
     {
@@ -178,7 +177,7 @@ static void phase_2a_on_conversation_finished(SDL_UNUSED void*                ar
   Item* required_item = get_item(ITEM_TYPE_RED_FLASK);
   BOOL  give_him_healing_stuffs;
   BOOL  you_have_enough_items;
-  if (SDL_strcmp(msg->conversation_name, "nova_2A_1") == 0)
+  if (msg->id == CONVERSATION_NOVA_2A_1)
   {
     give_him_healing_stuffs = SDL_strcmp(msg->response, "Give he some recovery medicine") == 0;
     you_have_enough_items   = required_item->num_items >= 3;

@@ -162,3 +162,8 @@ u16 get_equiped_weapon_type_id(Ecs* ecs, ecs_entity_t holder)
 {
   return get_weapon_type_id(ecs, get_equiped_weapon(ecs, holder));
 }
+
+void set_entity_conversation(Ecs* ecs, ecs_entity_t entity, u16 conversation_id)
+{
+  ecs_set(ecs, entity, DIALOGUE, &(Dialogue){ conversation_id });
+}

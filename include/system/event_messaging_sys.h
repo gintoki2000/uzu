@@ -124,8 +124,6 @@ typedef struct
 typedef struct
 {
   ecs_entity_t npc;
-  const char*  npc_name;
-  const char*  conversation_name;
   const char*  response;
   u16          id;
 } MSG_ConversationFinished;

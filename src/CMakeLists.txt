@@ -39,6 +39,7 @@ set(SOURCE_FILES
   src/sprite_renderer.c
   src/action.c
   src/action/walk.c
+  src/action/talk.c
   ${BEHAVIOR_NODE_SOURCE_FILES}
   ${ECS_SOURCE_FILES}
   ${ENGINE_SOURCE_FILES}

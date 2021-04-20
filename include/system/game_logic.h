@@ -15,6 +15,7 @@ void collision_manager_system_init(void);
 void dialogue_system_init(void);
 void dialogue_system_fini(void);
 void dialogue_system(void);
+void display_dialogue(u16 conversation_id, ecs_entity_t entity);
 void damage_system_init(void);
 void door_system_init(void);
 void drop_system_init(void);

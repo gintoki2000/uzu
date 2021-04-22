@@ -127,9 +127,9 @@ BTSelector* bt_selector_new();
 BTSelector* bt_selector_init(BTSelector* self);
 void        bt_selector_fini(BTSelector* self);
 void        bt_selector_abort(BTSelector* self, Ecs* ecs, ecs_entity_t entity);
-void bt_selector_finish(BTSelector* self, Ecs* ecs, ecs_entity_t entity, BOOL succeed);
-BTStatus bt_selector_exec(BTSelector* self, Ecs* ecs, ecs_entity_t entity);
-void     bt_selector_add(BTSelector* self, BTNode* node);
+void        bt_selector_finish(BTSelector* self, Ecs* ecs, ecs_entity_t entity, BOOL succeed);
+BTStatus    bt_selector_exec(BTSelector* self, Ecs* ecs, ecs_entity_t entity);
+void        bt_selector_add(BTSelector* self, BTNode* node);
 
 typedef struct
 {
@@ -143,10 +143,10 @@ void              bt_sequence_vtbl_init(BTNodeVtbl* vtbl);
 BTSequence*       bt_sequence_new();
 BTSequence*       bt_sequence_init(BTSequence* self);
 void              bt_sequence_fini(BTSequence* self);
-void bt_sequence_finish(BTSequence* self, Ecs* ecs, ecs_entity_t entity, BOOL succeed);
-void bt_sequence_abort(BTSequence* self, Ecs* ecs, ecs_entity_t entity);
-BTStatus bt_sequence_exec(BTSequence* self, Ecs* ecs, ecs_entity_t entity);
-void     bt_sequence_add(BTSequence* self, BTNode* node);
+void              bt_sequence_finish(BTSequence* self, Ecs* ecs, ecs_entity_t entity, BOOL succeed);
+void              bt_sequence_abort(BTSequence* self, Ecs* ecs, ecs_entity_t entity);
+BTStatus          bt_sequence_exec(BTSequence* self, Ecs* ecs, ecs_entity_t entity);
+void              bt_sequence_add(BTSequence* self, BTNode* node);
 
 /*==DECORATOR==*/
 typedef struct
@@ -185,9 +185,9 @@ typedef struct
 const BTNodeVtbl* bt_repeater_vtbl_inst();
 void              bt_repeater_vtbl_init(BTRepeaterVtbl* vtbl);
 BTRepeater*       bt_repeater_new(int times);
-void bt_repeater_finish(BTRepeater* self, Ecs* ecs, ecs_entity_t entity, BOOL succeed);
-void bt_repeater_abort(BTRepeater* self, Ecs* ecs, ecs_entity_t entity);
-BTStatus bt_repeater_exec(BTRepeater* self, Ecs* ecs, ecs_entity_t entity);
+void              bt_repeater_finish(BTRepeater* self, Ecs* ecs, ecs_entity_t entity, BOOL succeed);
+void              bt_repeater_abort(BTRepeater* self, Ecs* ecs, ecs_entity_t entity);
+BTStatus          bt_repeater_exec(BTRepeater* self, Ecs* ecs, ecs_entity_t entity);
 
 typedef struct
 {

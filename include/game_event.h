@@ -13,27 +13,20 @@ typedef enum
   {                                                                                                \
     SDL_RWops* rw;                                                                                 \
     if ((rw = SDL_RWFromFile(file_name, "w")) != NULL)                                             \
-    {                                                                                              \
       SDL_RWwrite(rw, &_save_block, sizeof(_save_block), 1);                                       \
-      return;                                                                                      \
-    }                                                                                              \
-    INFO("failed to write_data event data: %s\n", file_name);                                              \
+    else                                                                                           \
+      INFO("failed to write_data event data: %s\n", file_name);                                    \
   }                                                                                                \
   static void load_data(void)                                                                      \
   {                                                                                                \
     SDL_RWops* rw;                                                                                 \
     if ((rw = SDL_RWFromFile(file_name, "r")) != NULL)                                             \
-    {                                                                                              \
       SDL_RWread(rw, &_save_block, sizeof(_save_block), 1);                                        \
-    }                                                                                              \
     else                                                                                           \
-    {                                                                                              \
       init_default_data();                                                                         \
-    }                                                                                              \
   }
 
 void game_event_init(void);
 void game_event_fini(void);
-void notify_game_event_finished(GameEventCode event_code);
 
 #endif // GAME_EVENT_H

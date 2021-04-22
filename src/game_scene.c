@@ -27,7 +27,7 @@
 #include "system/rendering.h"
 #include "system/weapon_skills.h"
 
-#include "game_event/game_event.h"
+#include "game_event.h"
 
 #include "dungeon.h"
 #include "entity_utils.h"

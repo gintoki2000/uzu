@@ -127,8 +127,9 @@ static Action* create_action()
   Action* w1       = walk_action_new((Vec2){ 48.f * 16.f, 5.f * 16.f });
   Action* w2       = walk_action_new((Vec2){ 65.f * 16.f, 5.f * 16.f });
   Action* w3       = walk_action_new((Vec2){ 65.f * 16.f, 14.f * 16.f });
-  Action* talk     = talk_action_new(CONVERSATION_NOVA_2A_1);
-  composite_action_addn(COMPOSITE_ACTION(sequence), 4, w1, w2, w3, talk);
+  Action* e1       = express_emotion_action_new(EMOJI_QUESTION, -1);
+  //Action* talk     = talk_action_new(CONVERSATION_NOVA_2A_1);
+  composite_action_addn(COMPOSITE_ACTION(sequence), 4, w1, w2, w3, e1);
   return sequence;
 }
 

@@ -56,7 +56,7 @@ void  ecs_rmv_all(Ecs* self, ecs_entity_t entity);
 void  ecs_each(Ecs* self, Callback callback);
 void  ecs_each_ex(Ecs* self, const EcsFilter* filter, Callback callback);
 void  ecs_clear(Ecs* self);
-void  ecs_fill(Ecs* self, ecs_size_t entity, const ecs_size_t* types, ecs_size_t cnt, void** arr);
+void  ecs_fill(Ecs* self, ecs_entity_t entity, const ecs_size_t* types, ecs_size_t cnt, void** arr);
 ecs_entity_t ecs_cpy(Ecs* dst_registry, Ecs* src_registry, ecs_entity_t src_entity);
 
 void ecs_raw(Ecs*           self,

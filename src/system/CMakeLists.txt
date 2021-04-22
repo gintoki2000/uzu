@@ -33,6 +33,7 @@ set(SYSTEM_SOURCE_FILES
   src/system/update_attack_target.c
   src/system/update_facing_direction.c
   src/system/action.c
+  src/system/emoji.c
 
   #weapon skill systems
   src/system/weapon_skill/charge.c

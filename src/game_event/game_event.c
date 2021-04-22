@@ -10,7 +10,7 @@ void game_event_init()
   GE_begining_init();
 }
 
-void notify_game_event_finished(GameEventCode event_code)
+void game_event_fini()
 {
-	ems_broadcast(MSG_EVENT_FINISHED, &(MSG_EventFinished){ event_code });
+
 }

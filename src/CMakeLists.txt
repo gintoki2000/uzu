@@ -40,6 +40,7 @@ set(SOURCE_FILES
   src/action.c
   src/action/walk.c
   src/action/talk.c
+  src/action/express_emotion.c
   ${BEHAVIOR_NODE_SOURCE_FILES}
   ${ECS_SOURCE_FILES}
   ${ENGINE_SOURCE_FILES}

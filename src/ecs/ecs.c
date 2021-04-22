@@ -203,9 +203,9 @@ void ecs_each(Ecs* self, Callback callback)
   ecs_size_t    size;
   ecs_entity_t* entities;
 
-  size                          = self->size;
-  entities                      = self->entities;
-  void (*fn)(void*, ecs_size_t) = (void (*)(void*, ecs_size_t))callback.func;
+  size                            = self->size;
+  entities                        = self->entities;
+  void (*fn)(void*, ecs_entity_t) = callback.func;
   if (self->destroyed_index == ECS_NULL_IDX)
     for (int i = size - 1; i >= 0; --i)
       fn(callback.user_data, entities[i]);
@@ -277,7 +277,7 @@ void ecs_disconnect(Ecs* self, int event, ecs_size_t type_id, void (*fn)())
   emitter_disconnect(self->emitter[event], type_id, fn);
 }
 
-void ecs_fill(Ecs* self, ecs_size_t entity, const ecs_size_t* types, ecs_size_t cnt, void** arr)
+void ecs_fill(Ecs* self, ecs_entity_t entity, const ecs_size_t* types, ecs_size_t cnt, void** arr)
 {
   ASSERT_VALID_ENTITY(self, entity);
   for (int i = 0; i < cnt; ++i)

@@ -148,9 +148,9 @@ static void on_load()
 static void on_unload()
 {
   inventory_save();
-  ui_dialogue_fini();
   ems_broadcast(MSG_GAME_SCENE_UNLOAD, NULL);
   dialogue_system_fini();
+  game_event_fini();
   ecs_del(g_ecs);
   ems_fini();
 
@@ -259,11 +259,6 @@ static void music_player_on_level_loaded(SDL_UNUSED void* arg, const MSG_LevelLo
     Mix_PlayMusic(mus, -1);
 }
 
-static void __callback_clear_entities(SDL_UNUSED pointer_t arg, ecs_entity_t entity)
-{
-  ecs_destroy(g_ecs, entity);
-}
-
 static void unload_current_level()
 {
   // TODO: copy dữ liệu của player sang ecs registry tạm
@@ -273,7 +268,7 @@ static void unload_current_level()
   g_session.mp        = get_entity_mana_points(g_ecs, player);
   g_session.spell     = get_spell(g_ecs, player);
   g_session.weapon    = get_equiped_weapon_type_id(g_ecs, player);
-  ecs_each(g_ecs, CALLBACK_2(__callback_clear_entities));
+  ecs_clear(g_ecs);
   map_clear();
 }
 
@@ -335,6 +330,7 @@ static void render_game_world(void)
   sprite_renderer_begin();
   map_draw();
   RUN_SYSTEM(rendering_system);
+  RUN_SYSTEM(emoji_system);
   sprite_renderer_end();
   RUN_SYSTEM(healthbar_rendering_system);
   RUN_SYSTEM(text_rendering_system);

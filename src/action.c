@@ -1,6 +1,13 @@
 #include "action.h"
 #include "config.h"
 
+void* action_alloc(const ActionVtbl* type)
+{
+  Action* action = SDL_malloc(type->size);
+  action->vtbl   = type;
+  return action;
+}
+
 void action_delete(Action* action)
 {
   if (action != NULL)
@@ -125,17 +132,15 @@ static BOOL parallel_action_update(void* _self, ecs_entity_t target)
   return finished;
 }
 
-static ActionVtbl _parallel_action_vtbl = { .start   = parallel_action_start,
+static ActionVtbl _parallel_action_vtbl = { .size    = sizeof(ParallelAction),
+                                            .start   = parallel_action_start,
                                             .end     = parallel_action_end,
                                             .update  = parallel_action_update,
                                             .cleanup = composite_action_cleanup };
 
 Action* parallel_action_new(void)
 {
-  ParallelAction* action = SDL_malloc(sizeof(ParallelAction));
-  ACTION(action)->vtbl   = &_parallel_action_vtbl;
-  parallel_action_init(action);
-  return ACTION(action);
+  return (Action*)parallel_action_init(action_alloc(&_parallel_action_vtbl));
 }
 
 //==============================================================//
@@ -200,15 +205,13 @@ static BOOL sequence_action_update(void* _self, ecs_entity_t target)
   return FALSE;
 }
 
-static ActionVtbl _sequence_action_vtbl = { .start   = sequence_action_start,
+static ActionVtbl _sequence_action_vtbl = { .size    = sizeof(SequenceAction),
+                                            .start   = sequence_action_start,
                                             .end     = sequence_action_end,
                                             .update  = sequence_action_update,
                                             .cleanup = composite_action_cleanup };
 
 Action* sequence_action_new(void)
 {
-  SequenceAction* action = SDL_malloc(sizeof(SequenceAction));
-  ACTION(action)->vtbl   = &_sequence_action_vtbl;
-  sequence_action_init(action);
-  return ACTION(action);
+  return (Action*)sequence_action_init(action_alloc(&_sequence_action_vtbl));
 }

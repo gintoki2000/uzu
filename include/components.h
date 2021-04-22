@@ -64,6 +64,7 @@ typedef enum ComponentId
   ATTACK_TARGET,
   TRIGGER,
   SCRIPT,
+  EMOJI,
   NUM_COMPONENTS
 } ComponentId;
 
@@ -433,6 +434,21 @@ typedef struct Script
   Action*  action;
   Callback finished_callback;
 } Script;
+
+enum EmojiType
+{
+  EMOJI_QUESTION,
+  EMOJI_BANG,
+  EMOJI_SILENT,
+  NUM_EMOJIES,
+};
+
+typedef struct Emoji
+{
+  int      id;
+  int      time;
+  Callback time_out_callback;
+} Emoji;
 
 void ladder_attrs_init(LadderAttributes* sw, const char* level, const char* dest, u16 direction);
 void name_init(Name* name, const char* value);

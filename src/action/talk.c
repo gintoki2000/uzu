@@ -34,6 +34,7 @@ static BOOL update(void* _self, SDL_UNUSED ecs_entity_t target)
 }
 
 static ActionVtbl _talk_action_vtbl = {
+  .size    = sizeof(TalkAction),
   .start   = start,
   .end     = end,
   .update  = update,
@@ -43,8 +44,7 @@ static ActionVtbl _talk_action_vtbl = {
 Action* talk_action_new(u16 conversation_id)
 {
   // alloc
-  TalkAction* action   = SDL_malloc(sizeof(TalkAction));
-  ACTION(action)->vtbl = &_talk_action_vtbl;
+  TalkAction* action = action_alloc(&_talk_action_vtbl);
 
   // init
   action->conversation_id = conversation_id;

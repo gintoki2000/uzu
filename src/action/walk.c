@@ -36,6 +36,7 @@ static void end(void* _self, ecs_entity_t target)
 }
 
 static ActionVtbl _walk_action_vtbl = {
+  .size    = sizeof(WalkAction),
   .start   = action_default_start_func,
   .end     = end,
   .update  = update,
@@ -44,8 +45,7 @@ static ActionVtbl _walk_action_vtbl = {
 
 Action* walk_action_new(Vec2 destination)
 {
-  WalkAction* action   = SDL_malloc(sizeof(WalkAction));
-  ACTION(action)->vtbl = &_walk_action_vtbl;
-  action->destination  = destination;
+  WalkAction* action  = action_alloc(&_walk_action_vtbl);
+  action->destination = destination;
   return ACTION(action);
 }

@@ -130,7 +130,8 @@ typedef struct
 
 typedef struct
 {
-  int event_code;
+  int code;
+  int status;
 } MSG_EventFinished;
 
 typedef struct

@@ -121,6 +121,8 @@ void player_process_input(SDL_UNUSED void* arg)
 
   if ((player = get_player(g_ecs)) == ECS_NULL_ENT)
     return;
+  if (ecs_has(g_ecs, player, SCRIPT))
+    return;
   find_interacable_entity();
 
   controller = ecs_get(g_ecs, player, CONTROLLER);

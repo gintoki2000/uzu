@@ -1,0 +1,48 @@
+#include "action.h"
+#include "components.h"
+
+typedef struct ExpressEmotionAction
+{
+  Action parent_instance;
+  int    emoji;
+  int    time;
+  BOOL   finished;
+} ExpressEmotionAction;
+
+extern Ecs* g_ecs;
+
+static void on_emoji_time_out(ExpressEmotionAction* self, SDL_UNUSED const void* data)
+{
+  self->finished = TRUE;
+}
+
+static void start(void* _self, ecs_entity_t target)
+{
+  ExpressEmotionAction* self = _self;
+  ecs_set(g_ecs, target, EMOJI, &(Emoji){ self->emoji, self->time, { self, on_emoji_time_out } });
+}
+
+static BOOL update(void* _self, SDL_UNUSED ecs_entity_t target)
+{
+  ExpressEmotionAction* self = _self;
+  return self->finished;
+}
+
+static ActionVtbl _express_emotion_action_vtbl = {
+  .size    = sizeof(ExpressEmotionAction),
+  .start   = start,
+  .end     = action_default_end_func,
+  .update  = update,
+  .cleanup = action_default_cleanup_func,
+};
+
+Action* express_emotion_action_new(int emoji, int time)
+{
+  ExpressEmotionAction* obj = action_alloc(&_express_emotion_action_vtbl);
+
+  obj->emoji    = emoji;
+  obj->finished = FALSE;
+  obj->time     = time;
+
+  return (Action*)obj;
+}

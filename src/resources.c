@@ -72,6 +72,9 @@ static const char*  _texture_files[NUM_TEXS] = {
   [TEX_INVENTORY_CURSOR]     = "res/ui/inventory_cursor.png",
   [TEX_CURSOR_CROSS]         = "res/crosshair.png",
   [TEX_CURSOR_POINTER]       = "res/cursor_pointer.png",
+  [TEX_EMOJI_BANG]           = "res/emoji/bang.png",
+  [TEX_EMOJI_QUESTION]       = "res/emoji/question.png",
+  [TEX_EMOJI_SILENT]         = "res/emoji/silent.png",
 };
 
 static Mix_Music*  _bg_musics[NUM_BG_MUSICS];
@@ -106,7 +109,7 @@ static Conversation _conversations[NUM_CONVERSATIONS];
 static char*        _conversation_files[NUM_CONVERSATIONS] = {
   [CONVERSATION_NOVA_00]   = "res/conversation/nova_00.json",
   [CONVERSATION_NOVA_1A_1] = "res/conversation/nova_1A_1.json",
-  [CONVERSATION_NOVA_2A_1]   = "res/conversation/nova_2A_1.json",
+  [CONVERSATION_NOVA_2A_1] = "res/conversation/nova_2A_1.json",
 };
 
 extern SDL_Renderer* g_renderer;

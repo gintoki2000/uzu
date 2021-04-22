@@ -453,5 +453,6 @@ typedef struct Emoji
 void ladder_attrs_init(LadderAttributes* sw, const char* level, const char* dest, u16 direction);
 void name_init(Name* name, const char* value);
 void text_init(Text* text, const char* value, FONT* font, COLOR color);
+void interactable_init(Interactable* i, const char* const cmds[]);
 
 #endif // COMPONENTS_H

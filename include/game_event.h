@@ -3,8 +3,7 @@
 
 typedef enum
 {
-  GAME_EVENT_GET_WEAPON,
-  GAME_EVENT_KILL_MONSTER,
+  EVT_BRIAN_FIRST_ENCOUNTER,
 } GameEventCode;
 
 #define SAVE_AND_LOAD_FN(file_name)                                                                \
@@ -13,7 +12,7 @@ typedef enum
   {                                                                                                \
     SDL_RWops* rw;                                                                                 \
     if ((rw = SDL_RWFromFile(file_name, "w")) != NULL)                                             \
-      SDL_RWwrite(rw, &_save_block, sizeof(_save_block), 1);                                       \
+      SDL_RWwrite(rw, &_save, sizeof(_save), 1);                                                   \
     else                                                                                           \
       INFO("failed to write_data event data: %s\n", file_name);                                    \
   }                                                                                                \
@@ -21,7 +20,7 @@ typedef enum
   {                                                                                                \
     SDL_RWops* rw;                                                                                 \
     if ((rw = SDL_RWFromFile(file_name, "r")) != NULL)                                             \
-      SDL_RWread(rw, &_save_block, sizeof(_save_block), 1);                                        \
+      SDL_RWread(rw, &_save, sizeof(_save), 1);                                                    \
     else                                                                                           \
       init_default_data();                                                                         \
   }

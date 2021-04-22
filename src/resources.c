@@ -107,9 +107,9 @@ static FONT* _fonts[NUM_FONTS];
 
 static Conversation _conversations[NUM_CONVERSATIONS];
 static char*        _conversation_files[NUM_CONVERSATIONS] = {
-  [CONVERSATION_NOVA_00]   = "res/conversation/nova_00.json",
-  [CONVERSATION_NOVA_1A_1] = "res/conversation/nova_1A_1.json",
-  [CONVERSATION_NOVA_2A_1] = "res/conversation/nova_2A_1.json",
+  [CON_BRIAN_FIRST_ENCOUNTER] = "res/conversation/nova_00.json",
+  [CONVERSATION_NOVA_1A_1]    = "res/conversation/nova_1A_1.json",
+  [CONVERSATION_NOVA_2A_1]    = "res/conversation/nova_2A_1.json",
 };
 
 extern SDL_Renderer* g_renderer;

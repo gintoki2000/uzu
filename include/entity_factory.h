@@ -98,6 +98,6 @@ make_ice_arrow(Ecs* ecs, ecs_entity_t shooter, Vec2 position, Vec2 direction, u1
 ecs_entity_t make_arrow(Ecs* ecs, ecs_entity_t shooter, Vec2 position, Vec2 speed, u16 mask);
 
 // npcs
-ecs_entity_t make_npc_nova(Ecs* ecs, Vec2 position, u16 conversation_id);
+ecs_entity_t make_npc_brian(Ecs* ecs, Vec2 position, u16 conversation_id);
 
 #endif // ENTITY_FACTORY_H

@@ -5,8 +5,8 @@
 #include "bttask.h"
 #include "components.h"
 #include "constances.h"
-#include "entity_utils.h"
 #include "ecs/ecs.h"
+#include "entity_utils.h"
 #include "resources.h"
 
 ecs_entity_t make_anime_sword(Ecs* registry, u16 mask)
@@ -1079,7 +1079,7 @@ ecs_entity_t make_fx_ice_hit(Ecs* registry, Vec2 position)
   return entity;
 }
 
-ecs_entity_t make_npc_nova(Ecs* registry, Vec2 position, u16 conversation_id)
+ecs_entity_t make_npc_brian(Ecs* registry, Vec2 position, u16 conversation_id)
 {
   ecs_entity_t  entity = ecs_create(registry);
   HitBox*       hitbox;
@@ -1089,7 +1089,7 @@ ecs_entity_t make_npc_nova(Ecs* registry, Vec2 position, u16 conversation_id)
 
   ecs_set(registry, entity, TRANSFORM, &(Transform){ .position = position });
   ecs_set(registry, entity, DIALOGUE, &(Dialogue){ conversation_id });
-  ecs_set(registry, entity, NAME, &(Name){ .value = "nova" });
+  ecs_set(registry, entity, NAME, &(Name){ .value = "brian" });
   ecs_set(registry,
           entity,
           ATTACK_MASK,
@@ -1110,9 +1110,8 @@ ecs_entity_t make_npc_nova(Ecs* registry, Vec2 position, u16 conversation_id)
   hitbox->anchor.x  = 6;
   hitbox->anchor.y  = 19;
 
-  interactable               = ecs_add(registry, entity, INTERACTABLE);
-  interactable->num_commands = 1;
-  interactable->commands[0]  = TEXT_COMMAND_TALK;
+  interactable = ecs_add(registry, entity, INTERACTABLE);
+  interactable_init(interactable, (const char*[]){ TEXT_COMMAND_TALK, NULL });
 
   animator        = ecs_add(registry, entity, ANIMATOR);
   animator->anims = g_anims_elite_knight;

@@ -155,3 +155,14 @@ void script_fini(Script* script)
   action_delete(script->action);
   script->action = NULL;
 }
+
+void interactable_init(Interactable* i, const char* const* cmds)
+{
+  i->num_commands = 0;
+  while (*cmds)
+  {
+    ASSERT(i->num_commands < INTERACTABLE_MAX_COMMANDS);
+    i->commands[i->num_commands++] = *cmds;
+    ++cmds;
+  }
+}

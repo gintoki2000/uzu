@@ -300,4 +300,9 @@ INLINE bool aabb_contains(const AABB* a, const AABB* b)
   return result;
 }
 
+INLINE int rand_range(int min, int max)
+{
+  return rand() % (max - min) + min;
+}
+
 #endif // COMMON_H

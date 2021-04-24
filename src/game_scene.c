@@ -1,5 +1,6 @@
 #include "game_scene.h"
 #include "SDL_mixer.h"
+#include "camera_shaker.h"
 #include "components.h"
 #include "config.h"
 #include "constances.h"
@@ -327,6 +328,7 @@ static void update_game_logic(void)
 
 static void render_game_world(void)
 {
+  camera_shaker_update();
   sprite_renderer_begin();
   map_draw();
   RUN_SYSTEM(rendering_system);
@@ -338,6 +340,7 @@ static void render_game_world(void)
   RUN_SYSTEM(hub_rendering_system);
   RUN_SYSTEM(dialogue_system);
   RUN_SYSTEM(merchant_system);
+  camera_shaker_postupdate();
 }
 
 static Vec2 get_spawn_localtion(ecs_entity_t ladder)

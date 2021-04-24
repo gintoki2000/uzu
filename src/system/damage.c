@@ -1,5 +1,6 @@
 #include "components.h"
 #include "resources.h"
+#include "camera_shaker.h"
 #include "system/event_messaging_sys.h"
 #include "system/game_logic.h"
 #include "toolbox/toolbox.h"
@@ -41,6 +42,7 @@ static void on_projectile_hit(SDL_UNUSED void* arg, const MSG_ProjectileHit* eve
                       .impact_time = attributes->impact_time,
                       .zforce      = attributes->impact_force_z,
                   });
+    begin_sake_camera(4, 6);
     if (attributes->destroy_when_hit)
     {
       ecs_add(g_ecs, event->projectile, DESTROYED_TAG);

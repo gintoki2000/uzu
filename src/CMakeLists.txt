@@ -43,6 +43,7 @@ set(SOURCE_FILES
   src/action/express_emotion.c
   src/action/vanish.c
   src/game_event.c
+  src/camera_shaker.c
   ${BEHAVIOR_NODE_SOURCE_FILES}
   ${ECS_SOURCE_FILES}
   ${ENGINE_SOURCE_FILES}

@@ -23,7 +23,7 @@ static u32 _prev_button_state;
 #define KEY_HANDLE_FN_STACK_MAX 10
 
 static InputState _state_stack[KEY_HANDLE_FN_STACK_MAX];
-static u32        _stack_cnt;
+static u32        _stack_size;
 
 void input_init()
 {
@@ -48,9 +48,9 @@ void input_update()
   update_mouse_state();
 
   InputState current_state;
-  if (_stack_cnt > 0)
+  if (_stack_size > 0)
   {
-    current_state = _state_stack[_stack_cnt - 1];
+    current_state = _state_stack[_stack_size - 1];
     current_state.fn(current_state.data);
   }
 }
@@ -68,14 +68,14 @@ SDL_bool button_just_pressed(u16 button)
 
 void input_push_state(InputState input_state)
 {
-  if (_stack_cnt < KEY_HANDLE_FN_STACK_MAX)
-    _state_stack[_stack_cnt++] = input_state;
+  ASSERT(_stack_size < KEY_HANDLE_FN_STACK_MAX);
+  _state_stack[_stack_size++] = input_state;
 }
 
 void input_pop_state()
 {
-  if (_stack_cnt > 0)
-    _stack_cnt--;
+  if (_stack_size > 0)
+    _stack_size--;
 }
 
 SDL_Scancode button_to_scancode(u16 button)

@@ -29,7 +29,6 @@ static BOOL update(void* _self, SDL_UNUSED ecs_entity_t target)
 }
 
 static ActionVtbl _express_emotion_action_vtbl = {
-  .size    = sizeof(ExpressEmotionAction),
   .start   = start,
   .end     = action_default_end_func,
   .update  = update,
@@ -38,7 +37,7 @@ static ActionVtbl _express_emotion_action_vtbl = {
 
 Action* express_emotion_action_new(int emoji, int time)
 {
-  ExpressEmotionAction* obj = action_alloc(&_express_emotion_action_vtbl);
+  ExpressEmotionAction* obj = action_alloc(ExpressEmotionAction, &_express_emotion_action_vtbl);
 
   obj->emoji    = emoji;
   obj->finished = FALSE;

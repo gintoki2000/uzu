@@ -8,8 +8,8 @@ typedef struct Emitter Emitter;
 Signal* signal_new();
 void    signal_destroy(Signal* self);
 void    signal_connect(Signal* self, Callback callback);
-void    signal_disconnect(Signal* self, void (*fn)());
-void    signal_disconnect_ex(Signal* self, void* instance, void (*fn)());
+BOOL    signal_disconnect(Signal* self, void (*fn)());
+BOOL    signal_disconnect_ex(Signal* self, void* instance, void (*fn)());
 void    signal_emit(Signal* self, const void* data);
 
 Emitter* emitter_new(u32 num_singals);

@@ -4,9 +4,10 @@
 typedef enum
 {
   EVT_BRIAN_FIRST_ENCOUNTER,
+  EVT_BRIAN_RECUSE,
 } GameEventCode;
 
-#define SAVE_AND_LOAD_FN(file_name)                                                                \
+#define GAME_EVENT(file_name)                                                                \
   static void init_default_data(void);                                                             \
   static void write_data(void)                                                                     \
   {                                                                                                \

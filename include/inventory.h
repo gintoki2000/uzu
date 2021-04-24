@@ -2,9 +2,9 @@
 #define INVENTORY_H
 #include "global.h"
 void inventory_init();
-BOOL add_to_inv(ItemTypeId type_id, u8 quality);
-BOOL has_item(ItemTypeId type_id);
-u8   get_item_count(ItemTypeId type_id);
+BOOL  add_item_to_inventory(ItemTypeId type_id, u8 quality);
+BOOL  has_item_in_inventory(ItemTypeId type_id);
+u8    get_item_count_in_inventory(ItemTypeId type_id);
 Item* get_item(ItemTypeId type_id);
 void inventory_display(void);
 void inventory_close(void);

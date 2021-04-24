@@ -31,7 +31,7 @@ static void open_chest(ecs_entity_t entity)
     UI_MsgBoxWIcon_Entry entries[chest->num_slots];
     for (int i = 0; i < chest->num_slots; ++i)
     {
-      add_to_inv(chest->items[i].type_id, chest->items[i].num_items);
+      add_item_to_inventory(chest->items[i].type_id, chest->items[i].num_items);
       SDL_strlcpy(entries[i].text,
                   g_item_types[chest->items[i].type_id].name,
                   UI_MSGBOX_W_ICON_MAX_TEXT_LEN);

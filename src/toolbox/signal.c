@@ -47,8 +47,19 @@ void signal_destroy(Signal* sig)
   }
 }
 
+static BOOL signal_contains(Signal* self, Callback callback)
+{
+  Callback* slots = self->slots;
+  for (int i = self->cnt - 1; i >= 0; --i)
+    if (callback.user_data == slots[i].user_data && callback.func == slots[i].func)
+      return TRUE;
+  return FALSE;
+}
+
 void signal_connect(Signal* self, Callback callback)
 {
+  if (signal_contains(self, callback))
+    return;
   if (self->cnt == self->cap)
   {
     self->cap *= 2;
@@ -57,22 +68,28 @@ void signal_connect(Signal* self, Callback callback)
   self->slots[self->cnt++] = callback;
 }
 
-void signal_disconnect(Signal* self, void (*fn)())
+BOOL signal_disconnect(Signal* self, void (*func)())
 {
+  Callback* slots = self->slots;
   for (int i = self->cnt - 1; i >= 0; --i)
-    while (i < self->cnt && self->cnt > 0 && self->slots[i].func == fn)
-      self->slots[i] = self->slots[--self->cnt];
+    if (slots[i].user_data == NULL && slots[i].func == func)
+    {
+      slots[i] = slots[--self->cnt];
+      return TRUE;
+    }
+  return FALSE;
 }
 
-void signal_disconnect_ex(Signal* self, void* instance, void (*fn)())
+BOOL signal_disconnect_ex(Signal* self, void* instance, void (*func)())
 {
-  BOOL func_matched;
+  Callback* slots = self->slots;
   for (int i = self->cnt - 1; i >= 0; --i)
-  {
-    func_matched = fn != NULL ? fn == self->slots[i].func : TRUE;
-    while (i < self->cnt && self->cnt > 0 && self->slots[i].user_data == instance && func_matched)
-      self->slots[i] = self->slots[--self->cnt];
-  }
+    if (instance == slots[i].user_data && func == slots[i].func)
+    {
+      slots[i] = slots[--self->cnt];
+      return TRUE;
+    }
+  return FALSE;
 }
 
 void signal_emit(Signal* self, const void* data)
@@ -124,20 +141,20 @@ void emitter_delete(Emitter* self)
 
 void emitter_connect(Emitter* self, int sig, Callback callback)
 {
-  signal_connect(self->signals + sig, callback);
+  signal_connect(&self->signals[sig], callback);
 }
 
-void emitter_disconnect(Emitter* self, int sig, void (*fn)())
+void emitter_disconnect(Emitter* self, int sig, void (*func)())
 {
-  signal_disconnect(self->signals + sig, fn);
+  signal_disconnect(&self->signals[sig], func);
 }
 
 void emitter_emit(Emitter* self, int sig, const void* data)
 {
-  signal_emit(self->signals + sig, data);
+  signal_emit(&self->signals[sig], data);
 }
 
-void emitter_disconnect_ex(Emitter* self, int sig, void* instance, void (*fn)())
+void emitter_disconnect_ex(Emitter* self, int sig, void* instance, void (*func)())
 {
-  signal_disconnect_ex(&self->signals[sig], instance, fn);
+  signal_disconnect_ex(&self->signals[sig], instance, func);
 }

@@ -224,7 +224,7 @@ void inventory_init()
 
 #define item_icon(__itemptr) (g_item_types[(__itemptr)->type_id].icon)
 
-BOOL add_to_inv(ItemTypeId type_id, u8 quality)
+BOOL add_item_to_inventory(ItemTypeId type_id, u8 quality)
 {
   ItemCategory cat   = g_item_types[type_id].category;
   Item*        items = _items[cat];
@@ -255,7 +255,7 @@ BOOL add_to_inv(ItemTypeId type_id, u8 quality)
   return FALSE;
 }
 
-BOOL has_item(ItemTypeId type_id)
+BOOL has_item_in_inventory(ItemTypeId type_id)
 {
   return find_item(type_id) != -1;
 }
@@ -267,7 +267,7 @@ Item* get_item(ItemTypeId type_id)
   return index != -1 ? &_items[category][index] : NULL;
 }
 
-u8 get_item_count(ItemTypeId type_id)
+u8 get_item_count_in_inventory(ItemTypeId type_id)
 {
   const Item* item = get_item(type_id);
   return item ? item->num_items : 0;

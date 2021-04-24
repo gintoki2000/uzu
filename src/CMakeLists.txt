@@ -41,6 +41,7 @@ set(SOURCE_FILES
   src/action/walk.c
   src/action/talk.c
   src/action/express_emotion.c
+  src/action/vanish.c
   src/game_event.c
   ${BEHAVIOR_NODE_SOURCE_FILES}
   ${ECS_SOURCE_FILES}

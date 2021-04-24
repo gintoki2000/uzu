@@ -17,15 +17,20 @@ static void on_conversation_finished(TalkAction* self, const MSG_ConversationFin
     self->finished = TRUE;
 }
 
+static void cleanup(void* _self)
+{
+  ems_disconnect_ex(MSG_CONVERSATION_FINISHED, _self, on_conversation_finished);
+}
+
 static void start(void* _self, ecs_entity_t target)
 {
-  display_dialogue(CONVERSATION_NOVA_2A_1, target);
+  display_dialogue(((TalkAction*)_self)->conversation_id, target);
   ems_connect(MSG_CONVERSATION_FINISHED, CALLBACK_1(_self, on_conversation_finished));
 }
 
 static void end(void* _self, SDL_UNUSED ecs_entity_t target)
 {
-  ems_disconnect_ex(MSG_CONVERSATION_FINISHED, _self, on_conversation_finished);
+  cleanup(_self);
 }
 
 static BOOL update(void* _self, SDL_UNUSED ecs_entity_t target)
@@ -34,17 +39,16 @@ static BOOL update(void* _self, SDL_UNUSED ecs_entity_t target)
 }
 
 static ActionVtbl _talk_action_vtbl = {
-  .size    = sizeof(TalkAction),
   .start   = start,
   .end     = end,
   .update  = update,
-  .cleanup = action_default_cleanup_func,
+  .cleanup = cleanup,
 };
 
 Action* talk_action_new(u16 conversation_id)
 {
   // alloc
-  TalkAction* action = action_alloc(&_talk_action_vtbl);
+  TalkAction* action = action_alloc(TalkAction, &_talk_action_vtbl);
 
   // init
   action->conversation_id = conversation_id;

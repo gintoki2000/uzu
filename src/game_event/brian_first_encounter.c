@@ -17,16 +17,15 @@ static struct
 static Vec2 _brian_position = { 47 * 16, 7 * 16 };
 extern Ecs* g_ecs;
 
-SAVE_AND_LOAD_FN("event.brian_initial_encounter")
+GAME_EVENT("event.brian_initial_encounter")
 
-static void ProcessingState_on_level_loaded(void* arg, const MSG_LevelLoaded* msg);
-static void ProcessingState_on_conversation_finihsed(void*                           arg,
-                                                     const MSG_ConversationFinished* msg);
-static void SetupProcessingState();
+static void processing();
+static void PROCESSING_on_level_loaded(void* arg, const MSG_LevelLoaded* msg);
+static void PROCESSING_on_conversation_finished(void* arg, const MSG_ConversationFinished* msg);
 
 // begin logic section
-static void ProcessingState_on_conversation_finihsed(SDL_UNUSED void*                arg,
-                                                     const MSG_ConversationFinished* msg)
+static void PROCESSING_on_conversation_finished(SDL_UNUSED void*                arg,
+                                                const MSG_ConversationFinished* msg)
 {
   if (msg->id == CON_BRIAN_FIRST_ENCOUNTER)
   {
@@ -37,22 +36,22 @@ static void ProcessingState_on_conversation_finihsed(SDL_UNUSED void*           
     else
       ems_broadcast(MSG_EVENT_FINISHED,
                     &(MSG_EventFinished){ EVT_BRIAN_FIRST_ENCOUNTER, "denine" });
-    ems_disconnect(MSG_CONVERSATION_FINISHED, ProcessingState_on_conversation_finihsed);
-    ems_disconnect(MSG_LEVEL_LOADED, ProcessingState_on_level_loaded);
+    ems_disconnect(MSG_CONVERSATION_FINISHED, PROCESSING_on_conversation_finished);
+    ems_disconnect(MSG_LEVEL_LOADED, PROCESSING_on_level_loaded);
   }
 }
-static void ProcessingState_on_level_loaded(SDL_UNUSED void* arg, const MSG_LevelLoaded* msg)
+static void PROCESSING_on_level_loaded(SDL_UNUSED void* arg, const MSG_LevelLoaded* msg)
 {
   if (!SDL_strcmp(msg->level_name, "demon_ruin"))
   {
     make_npc_brian(g_ecs, _brian_position, CON_BRIAN_FIRST_ENCOUNTER);
-    ems_connect(MSG_CONVERSATION_FINISHED, CALLBACK_2(ProcessingState_on_conversation_finihsed));
+    ems_connect(MSG_CONVERSATION_FINISHED, CALLBACK_2(PROCESSING_on_conversation_finished));
   }
 }
 
-static void SetupProcessingState()
+static void processing()
 {
-  ems_connect(MSG_LEVEL_LOADED, CALLBACK_2(ProcessingState_on_level_loaded));
+  ems_connect(MSG_LEVEL_LOADED, CALLBACK_2(PROCESSING_on_level_loaded));
 }
 // end logic section
 
@@ -65,7 +64,7 @@ void brian_first_encounter_init()
 {
   load_data();
   if (_save.state == PROCESSING)
-    SetupProcessingState();
+    processing();
 }
 
 void brian_first_encounter_fini()

@@ -1,9 +1,9 @@
 #include "action.h"
 #include "config.h"
 
-void* action_alloc(const ActionVtbl* type)
+void* _action_alloc(size_t size, const ActionVtbl* type)
 {
-  Action* action = SDL_malloc(type->size);
+  Action* action = SDL_malloc(size);
   action->vtbl   = type;
   return action;
 }
@@ -69,14 +69,16 @@ void composite_action_add(CompositeAction* self, Action* action)
   ptr_array_add(self->children, action);
 }
 #include <stdarg.h>
-void composite_action_addn(CompositeAction* self, int n, ...)
+void composite_action_addn(CompositeAction* self, ...)
 {
-  va_list actions;
-  va_start(actions, n);
-  for (int i = 0; i < n; ++i)
+  va_list args;
+  Action* action;
+  va_start(args, self);
+  while ((action = va_arg(args, Action*)) != NULL)
   {
-    ptr_array_add(self->children, va_arg(actions, Action*));
+    ptr_array_add(self->children, action);
   }
+  va_end(args);
 }
 //==============================================================//
 //  parallel action section                                     //
@@ -132,15 +134,15 @@ static BOOL parallel_action_update(void* _self, ecs_entity_t target)
   return finished;
 }
 
-static ActionVtbl _parallel_action_vtbl = { .size    = sizeof(ParallelAction),
-                                            .start   = parallel_action_start,
+static ActionVtbl _parallel_action_vtbl = { .start   = parallel_action_start,
                                             .end     = parallel_action_end,
                                             .update  = parallel_action_update,
                                             .cleanup = composite_action_cleanup };
 
-Action* parallel_action_new(void)
+CompositeAction* parallel_action_new(void)
 {
-  return (Action*)parallel_action_init(action_alloc(&_parallel_action_vtbl));
+  return (CompositeAction*)parallel_action_init(
+      action_alloc(ParallelAction, &_parallel_action_vtbl));
 }
 
 //==============================================================//
@@ -205,13 +207,13 @@ static BOOL sequence_action_update(void* _self, ecs_entity_t target)
   return FALSE;
 }
 
-static ActionVtbl _sequence_action_vtbl = { .size    = sizeof(SequenceAction),
-                                            .start   = sequence_action_start,
+static ActionVtbl _sequence_action_vtbl = { .start   = sequence_action_start,
                                             .end     = sequence_action_end,
                                             .update  = sequence_action_update,
                                             .cleanup = composite_action_cleanup };
 
-Action* sequence_action_new(void)
+CompositeAction* sequence_action_new(void)
 {
-  return (Action*)sequence_action_init(action_alloc(&_sequence_action_vtbl));
+  return (CompositeAction*)sequence_action_init(
+      action_alloc(SequenceAction, &_sequence_action_vtbl));
 }

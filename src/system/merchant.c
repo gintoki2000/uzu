@@ -183,6 +183,6 @@ static void on_quality_selected(pointer_t arg, u32 value)
   if (payload->available > 0)
   {
     payload->available -= value;
-    add_to_inv(payload->type_id, value);
+    add_item_to_inventory(payload->type_id, value);
   }
 }

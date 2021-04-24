@@ -31,10 +31,6 @@
 </data>
  </layer>
  <objectgroup name="entities">
-  <object id="5" type="Chort" x="45.5" y="129.5" width="16" height="16"/>
-  <object id="6" type="Chort" x="64.5" y="226.5" width="16" height="16"/>
-  <object id="7" type="Chort" x="71.5" y="24.5" width="16" height="16"/>
-  <object id="8" type="Chort" x="86" y="100" width="16" height="16"/>
   <object id="12" name="central" type="Ladder" x="48" y="1.5" width="64" height="16">
    <properties>
     <property name="dest" value="corridor"/>
@@ -50,36 +46,7 @@
    </properties>
   </object>
  </objectgroup>
- <layer name="back-wall" width="10" height="25">
-  <data encoding="csv">
-0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0
-</data>
- </layer>
- <layer name="front-wall" width="10" height="25">
+ <layer name="wall" width="10" height="25">
   <data encoding="csv">
 0,0,57,0,0,0,0,58,0,0,
 0,0,57,0,0,0,0,58,0,0,

@@ -43,10 +43,10 @@ static void display_responses(void)
 static void end_conversation(const char* res)
 {
   ui_dialogue_set_visible(FALSE);
+  input_pop_state();
   ems_broadcast(
       MSG_CONVERSATION_FINISHED,
       &(MSG_ConversationFinished){ .npc = _npc, .response = res, .id = _conversation_id });
-  input_pop_state();
 }
 
 static void on_text_selected(SDL_UNUSED void* arg, const char* text)

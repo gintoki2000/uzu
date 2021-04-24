@@ -19,11 +19,15 @@ static const FC_Effect _text_effect      = { .alignment = FC_ALIGN_CENTER,
 static const COLOR     _background_color = { 0x00, 0x00, 0x00, 0x90 };
 static const COLOR     _border_color     = { 0xff, 0xff, 0xff, 0x80 };
 
+static Callback _close_hook;
+
 static void close()
 {
   input_pop_state();
   _ticks   = -1;
   _visible = FALSE;
+  INVOKE_EVENT(_close_hook, NULL);
+  _close_hook = (Callback){ 0 };
 }
 static void process_input(SDL_UNUSED void* arg)
 {
@@ -43,10 +47,15 @@ void ui_msgbox_display(const char* msg)
 
 void ui_msgbox_display_timed(const char* msg, s32 ticks)
 {
-  strcpy(_msg, msg);
+  SDL_strlcpy(_msg, msg, 511);
   _ticks   = ticks;
   _visible = TRUE;
   input_push_state(INPUT_STATE_INST_1(process_input));
+}
+
+void ui_msgbox_close_hook(Callback callback)
+{
+  _close_hook = callback;
 }
 
 void ui_msgbox_draw()

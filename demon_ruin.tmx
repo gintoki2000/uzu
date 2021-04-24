@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="1.0.3" orientation="orthogonal" renderorder="right-down" width="80" height="60" tilewidth="16" tileheight="16" nextobjectid="34">
+<map version="1.0" tiledversion="1.0.3" orientation="orthogonal" renderorder="right-down" width="80" height="60" tilewidth="16" tileheight="16" nextobjectid="35">
  <tileset firstgid="1" source="res/untitled.tsx"/>
  <layer name="floor" width="80" height="60">
   <data encoding="csv">
@@ -189,5 +189,12 @@
   <object id="30" name="boss room" type="BossRoom" x="882" y="548" width="231" height="330"/>
   <object id="32" name="Imp" type="Imp" x="155" y="611" width="16" height="16"/>
   <object id="33" name="Imp" type="Imp" x="723" y="558" width="16" height="16"/>
+  <object id="34" name="corridor" type="Ladder" x="882" y="3" width="60" height="12">
+   <properties>
+    <property name="dest" value="demon_ruin"/>
+    <property name="direction" value="down"/>
+    <property name="level" value="corridor"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>

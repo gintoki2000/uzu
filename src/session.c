@@ -52,8 +52,8 @@ void new_game(u16 starting_job)
   g_session.weapon   = _starting_weapon_tbl[starting_job];
   g_session.spell    = g_initial_spell[starting_job];
 
-  add_to_inv(g_initial_item1_tbl[starting_job], 1);
-  add_to_inv(g_initial_item2_tbl[starting_job], 1);
+  add_item_to_inventory(g_initial_item1_tbl[starting_job], 1);
+  add_item_to_inventory(g_initial_item2_tbl[starting_job], 1);
 
   strcpy(g_session.level, "demon_ruin");
 }

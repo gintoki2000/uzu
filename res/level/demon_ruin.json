@@ -394,7 +394,7 @@
                  "properties":
                     {
                      "dest":"demon_ruin",
-                     "direction":"up",
+                     "direction":"down",
                      "level":"corridor"
                     },
                  "propertytypes":
@@ -406,9 +406,9 @@
                  "rotation":0,
                  "type":"Ladder",
                  "visible":true,
-                 "width":58,
-                 "x":884,
-                 "y":21
+                 "width":60,
+                 "x":882,
+                 "y":3
                 }],
          "opacity":1,
          "type":"objectgroup",

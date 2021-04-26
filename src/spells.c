@@ -77,7 +77,7 @@ static void cast_ice_arrow(Ecs* ecs, ecs_entity_t caster, ecs_entity_t weapon)
   attack_mask      = ecs_get(ecs, caster, ATTACK_MASK);
   facing_direction = ecs_get(ecs, caster, FACING_DIRECTION);
 
-  Vec2 speed = vec2_mul(facing_direction->value, 120.f);
+  Vec2 speed = vec2_mul(facing_direction->value, 250.f);
 
   attributes = ecs_get(ecs, weapon, WEAPON_ATTRIBUTES);
 

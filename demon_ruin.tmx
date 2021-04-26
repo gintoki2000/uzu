@@ -156,7 +156,7 @@
   </object>
   <object id="12" type="Chest" x="996" y="341" width="16" height="16">
    <properties>
-    <property name="items" value="[{&quot;type&quot;:&quot;FireBallScroll&quot;, &quot;quality&quot;:1}]"/>
+    <property name="items" value="[{&quot;type&quot;:&quot;IceArrowScroll&quot;, &quot;quality&quot;:1}]"/>
    </properties>
   </object>
   <object id="13" type="Chest" x="753" y="558" width="16" height="16">

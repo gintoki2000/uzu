@@ -58,7 +58,9 @@ static void __abort(NODE* self, Ecs* registry, ecs_entity_t entity)
 
 static BTStatus __exec(NODE* self, Ecs* registry, ecs_entity_t entity)
 {
-  AttackTarget* attack_target;
+  AttackTarget*     attack_target;
+  WeaponAttributes* weapon_attributes;
+  Hand*             hand;
 
   if (self->is_running)
   {
@@ -66,11 +68,13 @@ static BTStatus __exec(NODE* self, Ecs* registry, ecs_entity_t entity)
   }
   else if ((attack_target = ecs_get(registry, entity, ATTACK_TARGET)) != NULL)
   {
-    self->is_running = TRUE;
+    hand              = ecs_get(registry, entity, HAND);
+    weapon_attributes = ecs_get(registry, hand->weapon, WEAPON_ATTRIBUTES);
+    self->is_running  = TRUE;
     ecs_set(registry,
             entity,
             FOLLOWING_TARGET,
-            &(FollowingTarget){ attack_target->value, .radius = self->distance });
+            &(FollowingTarget){ attack_target->value, .radius = weapon_attributes->range });
     return BT_STATUS_RUNNING;
   }
   return BT_STATUS_FAILURE;

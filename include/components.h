@@ -127,6 +127,7 @@ typedef struct WeaponAttributes
   s32  atk;
   u16  type_id;
   BOOL rotate_hand;
+  u32  range;
 } WeaponAttributes;
 
 /*Weapon skills*/
@@ -440,6 +441,7 @@ enum EmojiType
   EMOJI_QUESTION,
   EMOJI_BANG,
   EMOJI_SILENT,
+  EMOJI_HEART,
   NUM_EMOJIES,
 };
 

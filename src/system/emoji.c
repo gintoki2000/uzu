@@ -10,6 +10,7 @@ static Sprite _sprite_tbl[NUM_EMOJIES] = {
   { TEX_EMOJI_QUESTION, { 0, 0, 20, 19 } },
   { TEX_EMOJI_BANG, { 0, 0, 20, 19 } },
   { TEX_EMOJI_SILENT, { 0, 0, 20, 19 } },
+  { TEX_EMOJI_HEART, { 0, 0, 20, 19 } },
 };
 
 void emoji_system(void)

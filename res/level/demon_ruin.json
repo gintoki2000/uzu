@@ -152,7 +152,7 @@
                  "name":"",
                  "properties":
                     {
-                     "items":"[{\"type\":\"FireBallScroll\", \"quality\":1}]"
+                     "items":"[{\"type\":\"IceArrowScroll\", \"quality\":1}]"
                     },
                  "propertytypes":
                     {

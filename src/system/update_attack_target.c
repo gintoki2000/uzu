@@ -38,8 +38,10 @@ void update_attack_target_system(void)
   {
     if ((attack_target = ecs_get(g_ecs, entities[i], ATTACK_TARGET)))
     {
-      target_position = get_entity_position(g_ecs, attack_target->value);
-      if (vec2_dist(target_position, aggro_area[i].position) > aggro_area[i].radius)
+      if (!ecs_is_valid(g_ecs, attack_target->value) ||
+          vec2_dist(get_entity_position(g_ecs, attack_target->value), aggro_area[i].position) >
+              aggro_area[i].radius)
+
       {
         ecs_rmv(g_ecs, entities[i], ATTACK_TARGET);
       }

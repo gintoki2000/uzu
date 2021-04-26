@@ -160,7 +160,7 @@ static Action* create_action_sequence()
 {
   CompositeAction* group1 = parallel_action_new();
   composite_action_add(group1, talk_action_new(CON_BRIAN_RESCUE_3));
-  composite_action_add(group1, express_emotion_action_new(EMOJI_BANG, 60));
+  composite_action_add(group1, express_emotion_action_new(EMOJI_HEART, 180));
 
   CompositeAction* seq = sequence_action_new();
   composite_action_add(seq, ACTION(group1));

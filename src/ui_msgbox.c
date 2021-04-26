@@ -32,12 +32,8 @@ static void close()
 static void process_input(SDL_UNUSED void* arg)
 {
   if (_ticks < 0)
-  {
     if (button_just_pressed(BUTTON_INTERACT) | button_just_pressed(BUTTON_CANCEL))
-    {
       close();
-    }
-  }
 }
 
 void ui_msgbox_display(const char* msg)

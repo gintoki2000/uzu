@@ -7,6 +7,7 @@
 #include "constances.h"
 #include "ecs/ecs.h"
 #include "entity_utils.h"
+#include "global.h"
 #include "resources.h"
 
 ecs_entity_t make_anime_sword(Ecs* registry, u16 mask)
@@ -363,12 +364,16 @@ ecs_entity_t make_chort(Ecs* registry, Vec2 position)
 
   controller = ecs_add(registry, entity, CONTROLLER);
 
-  hand                 = ecs_add(registry, entity, HAND);
-  hand->weapon         = ECS_NULL_ENT;
-  hand->attach_point.x = 16 / 2;
-  hand->attach_point.y = -6;
+  hand                   = ecs_add(registry, entity, HAND);
+  hand->weapon           = ECS_NULL_ENT;
+  hand->attach_point.x   = 5;
+  hand->attach_point.y   = 0;
+  hand->original_point.x = 0;
+  hand->original_point.y = -7;
 
-  ecs_entity_t weapon = make_spear(registry, BIT(CATEGORY_PLAYER));
+  static u16 weapons[] = { WEAPON_BOW, WEAPON_CLEAVER, WEAPON_SPEAR };
+
+  ecs_entity_t weapon = g_make_weapon_fn_tbl[weapons[rand() % 3]](registry, BIT(CATEGORY_PLAYER));
 
   equip(registry, entity, weapon);
 
@@ -421,6 +426,7 @@ ecs_entity_t make_cleaver(Ecs* registry, u16 mask)
   attrs          = ecs_add(registry, entity, WEAPON_ATTRIBUTES);
   attrs->atk     = 2;
   attrs->type_id = WEAPON_CLEAVER;
+  attrs->range   = 32;
 
   sklswing            = ecs_add(registry, entity, WEAPON_SWING_ATTACK);
   sklswing->on_action = CHARACTER_ACTION_REGULAR_ATK;
@@ -704,8 +710,9 @@ ecs_entity_t make_spear(Ecs* registry, u16 mask)
   thust            = ecs_add(registry, entity, WEAPON_THUST_ATTACK);
   thust->on_action = CHARACTER_ACTION_REGULAR_ATK;
 
-  attrs      = ecs_add(registry, entity, WEAPON_ATTRIBUTES);
-  attrs->atk = 1;
+  attrs        = ecs_add(registry, entity, WEAPON_ATTRIBUTES);
+  attrs->atk   = 1;
+  attrs->range = 38;
 
   return entity;
 }
@@ -1184,6 +1191,7 @@ ecs_entity_t make_bow(Ecs* registry, u16 mask)
   attrs->atk         = 2;
   attrs->type_id     = WEAPON_BOW;
   attrs->rotate_hand = TRUE;
+  attrs->range       = 16 * 5;
 
   ecs_add(registry, entity, HOLDER);
 

@@ -65,6 +65,7 @@ typedef enum ComponentId
   TRIGGER,
   SCRIPT,
   EMOJI,
+  HAND_ANIMATION,
   NUM_COMPONENTS
 } ComponentId;
 
@@ -114,29 +115,48 @@ typedef struct Controller
   BOOL in_action;
 } Controller;
 
-typedef struct Equipment
+typedef struct Hand
 {
   ecs_entity_t weapon;
-  Vec2         attach_point;
   Vec2         original_point;
-  Vec2         adjustment;
+  double       angle;
+  float        length;
 } Hand;
+
+typedef struct HandAnimKeyFrame
+{
+  int    duration;
+  double angle;
+  Vec2   original;
+  float  length;
+} HandAnimKeyFrame;
+
+typedef struct HandAnimation
+{
+  const HandAnimKeyFrame* keyframes;
+  Callback                frame_callback;
+  Callback                finished_callback;
+  BOOL                    relative;
+  float                   initial_length;
+  Vec2                    initial_point;
+  double                  initial_angle;
+  int                     current_duration;
+  int                     current_index;
+} HandAnimation;
 
 typedef struct WeaponAttributes
 {
-  s32  atk;
-  u16  type_id;
-  BOOL rotate_hand;
-  u32  range;
+  s32    atk;
+  u16    type_id;
+  u32    range;
+  double base_angle;
 } WeaponAttributes;
 
 /*Weapon skills*/
 typedef struct WeaponSwingAttack
 {
   CharacterAction on_action;
-  u16             timer;
-  u16             state;
-  u32             range;
+  u32             wide;
 } WeaponSwingAttack;
 
 typedef struct WeaponChargeAttack

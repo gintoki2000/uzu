@@ -3,64 +3,119 @@
 
 extern Ecs* g_ecs;
 
-void equipment_system()
+void weapon_transform_system()
 {
-  ecs_entity_t*     entities;
-  ecs_size_t        count;
-  Hand*             hand;
-  FacingDirection*  facing_diection;
-  float             horizontal_axis;
-  Visual*           weapon_visual;
-  Transform*        weapon_transfrom;
-  Transform*        self_transform;
-  Vec2              weapon_position;
-  WeaponAttributes* weapon_attrs;
-  float             x, y, s, c, theta;
+  ecs_entity_t* entities;
+  ecs_size_t    count;
+  Hand*         hand;
+  // owner components
+  Transform*       transform;
+  FacingDirection* fdir;
 
+  // weapon components
+  WeaponAttributes* weapon_attributes;
+  Transform*        weapon_transform;
+  Visual*           weapon_visual;
+
+  Vec2 weapon_position;
+  Vec2 attachment_point;
+
+  double s, c, a;
   ecs_raw(g_ecs, HAND, &entities, (void**)&hand, &count);
   for (int i = 0; i < count; ++i)
   {
-    if (hand[i].weapon != ECS_NULL_ENT)
+    if (hand[i].weapon == ECS_NULL_ENT)
+      continue;
+    transform = ecs_get(g_ecs, entities[i], TRANSFORM);
+    fdir      = ecs_get(g_ecs, entities[i], FACING_DIRECTION);
+
+    weapon_attributes = ecs_get(g_ecs, hand[i].weapon, WEAPON_ATTRIBUTES);
+    weapon_transform  = ecs_get(g_ecs, hand[i].weapon, TRANSFORM);
+    weapon_visual     = ecs_get(g_ecs, hand[i].weapon, VISUAL);
+
+    weapon_position  = vec2_add(transform->position, hand->original_point);
+    a                = hand[i].angle * DEG_TO_RAD;
+    s                = SDL_sin(a);
+    c                = SDL_cos(a);
+    attachment_point = vec2_mul((Vec2){ c, s }, hand[i].length);
+
+    weapon_position = vec2_add(weapon_position, attachment_point);
+
+    weapon_transform->position = weapon_position;
+    weapon_transform->rotation = hand[i].angle + signf(c) * weapon_attributes->base_angle;
+    weapon_visual->flip        = fdir->value.x > 0.f ? SDL_FLIP_NONE : SDL_FLIP_VERTICAL;
+  }
+}
+
+static BOOL next_kframe(HandAnimation* anim)
+{
+  ++anim->current_index;
+  if (anim->keyframes[anim->current_index].duration == -1)
+    return FALSE;
+  anim->current_duration = anim->keyframes[anim->current_index].duration;
+  return TRUE;
+}
+
+void hand_animation_system(void)
+{
+  ecs_entity_t*           entities;
+  ecs_size_t              cnt;
+  HandAnimation*          hand_anim;
+  Hand*                   hand;
+  const HandAnimKeyFrame* kf;
+  FacingDirection*        fdir;
+
+  BOOL not_started;
+  BOOL just_finished_kframe;
+  ecs_raw(g_ecs, HAND_ANIMATION, &entities, (void**)&hand_anim, &cnt);
+  for (int i = cnt - 1; i >= 0; --i)
+  {
+    not_started          = hand_anim[i].current_index == -1;
+    just_finished_kframe = hand_anim[i].current_duration > 0 && !(--hand_anim[i].current_duration);
+    if (not_started || just_finished_kframe)
     {
-      facing_diection  = ecs_get(g_ecs, entities[i], FACING_DIRECTION);
-      self_transform   = ecs_get(g_ecs, entities[i], TRANSFORM);
-      weapon_visual    = ecs_get(g_ecs, hand[i].weapon, VISUAL);
-      weapon_transfrom = ecs_get(g_ecs, hand[i].weapon, TRANSFORM);
-      weapon_attrs     = ecs_get(g_ecs, hand[i].weapon, WEAPON_ATTRIBUTES);
-
-      horizontal_axis = signf(facing_diection->value.x);
-
-      if (weapon_attrs->rotate_hand)
+      if (next_kframe(&hand_anim[i]))
       {
-        theta             = SDL_atan2f(facing_diection->value.y, facing_diection->value.x);
-        x                 = hand[i].attach_point.x + hand[i].adjustment.x;
-        y                 = hand[i].attach_point.y + hand[i].adjustment.y;
-        s                 = facing_diection->value.y;
-        c                 = facing_diection->value.x;
-        weapon_position.x = x * c - y * s;
-        weapon_position.y = x * s + y * c;
-        weapon_position.x += hand[i].original_point.x;
-        weapon_position.y += hand[i].original_point.y;
-        weapon_position.x += self_transform->position.x;
-        weapon_position.y += self_transform->position.y - self_transform->z;
+        hand = ecs_get(g_ecs, entities[i], HAND);
+        fdir = ecs_get(g_ecs, entities[i], FACING_DIRECTION);
 
-        weapon_transfrom->position = weapon_position;
-        weapon_transfrom->rotation = theta * 57.2957795f;
+        INVOKE_EVENT(hand_anim[i].frame_callback, entities[i], hand_anim[i].current_index);
+        kf                   = hand_anim[i].keyframes + hand_anim[i].current_index;
+        hand->angle          = hand_anim[i].initial_angle + kf->angle * signf(fdir->value.x);
+        hand->length         = hand_anim[i].initial_length + kf->length;
+        hand->original_point = vec2_add(hand_anim[i].initial_point, kf->original);
       }
       else
       {
-        weapon_position.x = self_transform->position.x;
-        weapon_position.y = self_transform->position.y - self_transform->z;
-
-        weapon_position.x += hand[i].original_point.x;
-        weapon_position.y += hand[i].original_point.y;
-
-        weapon_position.x += horizontal_axis * (hand[i].attach_point.x + hand[i].adjustment.x);
-        weapon_position.y += hand[i].attach_point.y + hand[i].adjustment.y;
-
-        weapon_transfrom->position = weapon_position;
-        weapon_visual->flip        = horizontal_axis > 0.f ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
+        INVOKE_EVENT(hand_anim[i].finished_callback, entities[i]);
+        ecs_rmv(g_ecs, entities[i], HAND_ANIMATION);
       }
     }
   }
+}
+
+void hand_system(void)
+{
+  ecs_entity_t*     entities;
+  ecs_size_t        cnt;
+  Hand*             hand;
+  FacingDirection*  fdir;
+  WeaponAttributes* attrs;
+
+  ecs_raw(g_ecs, HAND, &entities, (void**)&hand, &cnt);
+  for (int i = 0; i < cnt; ++i)
+  {
+    if (ecs_has(g_ecs, entities[i], HAND_ANIMATION))
+      continue;
+    fdir          = ecs_get(g_ecs, entities[i], FACING_DIRECTION);
+    attrs         = ecs_get(g_ecs, hand[i].weapon, WEAPON_ATTRIBUTES);
+    hand[i].angle = SDL_atan2f(fdir->value.y, fdir->value.x) * 57.2957795;
+  }
+}
+
+void equipment_system()
+{
+  hand_system();
+  hand_animation_system();
+  weapon_transform_system();
 }

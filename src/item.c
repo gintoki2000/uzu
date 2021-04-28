@@ -157,13 +157,13 @@ static void healing_item_use_callback(const void* data, Ecs* ecs, ecs_entity_t e
   }
 }
 
-static void scroll_use_callback(const void* data, Ecs* ecs, ecs_entity_t entity)
+static void scroll_use_callback(const void* _data, Ecs* ecs, ecs_entity_t entity)
 {
-  const ScrollData* scroll_data     = (const ScrollData*)data;
+  const ScrollData* data            = (const ScrollData*)_data;
   AttunementSlot*   attunement_slot = ecs_get(ecs, entity, ATTUNEMENT_SLOT);
   if (attunement_slot != NULL)
   {
-    attunement_slot->spell_id = scroll_data->spell_id;
+    attunement_slot->spell_id = data->spell_id;
   }
 }
 
@@ -174,15 +174,11 @@ static void do_nothing_callback(SDL_UNUSED const void* data,
   ui_msgbox_display("not thing happen");
 }
 
-static void equipment_item_use_callback(const void* data, Ecs* ecs, ecs_entity_t entity)
+static void equipment_item_use_callback(const void* _data, Ecs* ecs, ecs_entity_t entity)
 {
-  const EquipmentItemData* equipment_item_data = (const EquipmentItemData*)data;
-  AttackMask*              attack_mask         = ecs_get(ecs, entity, ATTACK_MASK);
-  if (attack_mask != NULL)
-  {
-    ecs_entity_t weapon =
-        g_make_weapon_fn_tbl[equipment_item_data->weapon_id](ecs, attack_mask->value);
+  const EquipmentItemData* data = (const EquipmentItemData*)_data;
+  ecs_entity_t             weapon;
 
-    equip(ecs, entity, weapon);
-  }
+  weapon = create_weapon(ecs, data->weapon_id);
+  equip(ecs, entity, weapon);
 }

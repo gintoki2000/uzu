@@ -73,6 +73,7 @@ typedef enum
   TEX_EMOJI_QUESTION,
   TEX_EMOJI_SILENT,
   TEX_EMOJI_HEART,
+  TEX_KATANA,
   NUM_TEXS
 } TextureId;
 

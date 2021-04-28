@@ -2,8 +2,8 @@
 #include "entity_factory.h"
 #include "json_helper.h"
 
-ecs_entity_t (*const g_make_weapon_fn_tbl[NUM_WEAPONS])(Ecs*, u16) = {
-  make_spear, make_cleaver, make_golden_sword, make_anime_sword, make_staff, make_bow,
+ecs_entity_t (*const g_make_weapon_fn_tbl[NUM_WEAPONS])(Ecs*) = {
+  make_spear, make_cleaver, make_golden_sword, make_anime_sword, make_staff, make_bow, make_katana,
 };
 
 ecs_entity_t (*const g_make_character_fn_tbl[NUM_JOBS])(Ecs*, Vec2) = {
@@ -46,4 +46,10 @@ void sprite_init(Sprite* s, u16 texture_id)
 {
   s->texture_id = texture_id;
   SDL_QueryTexture(get_texture(texture_id), NULL, NULL, &s->rect.w, &s->rect.h);
+}
+
+ecs_entity_t create_weapon(Ecs* registry, u16 type)
+{
+  ASSERT(type < NUM_WEAPONS);
+  return g_make_weapon_fn_tbl[type](registry);
 }

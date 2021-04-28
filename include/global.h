@@ -191,6 +191,7 @@ typedef enum
   WEAPON_ANIME_SWORD,
   WEAPON_STAFF,
   WEAPON_BOW,
+  WEAPON_KATANA,
   NUM_WEAPONS,
 } WeaponType;
 #define WEAPON_ID_NULL NUM_WEAPONS
@@ -225,7 +226,7 @@ typedef struct Cursor
   SDL_Point hotspot;
 } Cursor;
 
-extern ecs_entity_t (*const g_make_weapon_fn_tbl[NUM_WEAPONS])(Ecs*, u16);
+extern ecs_entity_t (*const g_make_weapon_fn_tbl[NUM_WEAPONS])(Ecs*);
 extern ecs_entity_t (*const g_make_character_fn_tbl[NUM_JOBS])(Ecs*, Vec2);
 extern ecs_entity_t (*const g_make_pickupable_fn_tbl[NUM_ITEM_TYPES])(Ecs*, Vec2 pos);
 extern ecs_entity_t (*const g_make_projectile_fn[])(Ecs*, Vec2 pos, Vec2 dir, u16 mask);
@@ -236,4 +237,5 @@ extern const u16      g_pickupable_to_item_type_id_tbl[];
 
 Conversation* conversation_init(Conversation* self);
 void          conversation_fini(Conversation* self);
+ecs_entity_t create_weapon(Ecs* registry, u16 type);
 #endif // GLOBAL_H

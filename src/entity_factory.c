@@ -10,7 +10,7 @@
 #include "global.h"
 #include "resources.h"
 
-ecs_entity_t make_anime_sword(Ecs* registry, u16 mask)
+ecs_entity_t make_anime_sword(Ecs* registry)
 {
 
   ecs_entity_t entity;
@@ -35,7 +35,6 @@ ecs_entity_t make_anime_sword(Ecs* registry, u16 mask)
 
   sklswing            = ecs_add(registry, entity, WEAPON_SWING_ATTACK);
   sklswing->on_action = CHARACTER_ACTION_REGULAR_ATK;
-  sklswing->range     = 40;
 
   ecs_add(registry, entity, HOLDER);
 
@@ -78,10 +77,9 @@ ecs_entity_t make_character_base(Ecs* registry, const NewCharacterParams* params
 
   hand                   = ecs_add(registry, entity, HAND);
   hand->weapon           = ECS_NULL_ENT;
-  hand->attach_point.x   = 8;
-  hand->attach_point.y   = 0;
   hand->original_point.x = 0;
   hand->original_point.y = -7;
+  hand->length           = 6;
 
   controller = ecs_add(registry, entity, CONTROLLER);
 
@@ -366,14 +364,13 @@ ecs_entity_t make_chort(Ecs* registry, Vec2 position)
 
   hand                   = ecs_add(registry, entity, HAND);
   hand->weapon           = ECS_NULL_ENT;
-  hand->attach_point.x   = 5;
-  hand->attach_point.y   = 0;
   hand->original_point.x = 0;
   hand->original_point.y = -7;
+  hand->angle            = 40;
 
   static u16 weapons[] = { WEAPON_BOW, WEAPON_CLEAVER, WEAPON_SPEAR };
 
-  ecs_entity_t weapon = g_make_weapon_fn_tbl[weapons[rand() % 3]](registry, BIT(CATEGORY_PLAYER));
+  ecs_entity_t weapon = g_make_weapon_fn_tbl[weapons[rand() % 3]](registry);
 
   equip(registry, entity, weapon);
 
@@ -402,7 +399,7 @@ ecs_entity_t make_axe(Ecs* registry)
   return axe;
 }
 
-ecs_entity_t make_cleaver(Ecs* registry, u16 mask)
+ecs_entity_t make_cleaver(Ecs* registry)
 {
   ecs_entity_t entity;
 
@@ -420,8 +417,41 @@ ecs_entity_t make_cleaver(Ecs* registry, u16 mask)
 
   visual = ecs_add(registry, entity, VISUAL);
   sprite_init(&visual->sprite, TEX_CLEAVER);
-  visual->anchor.x = visual->sprite.rect.w / 2;
-  visual->anchor.y = visual->sprite.rect.h;
+  visual->anchor.x = 4;
+  visual->anchor.y = 4;
+
+  attrs          = ecs_add(registry, entity, WEAPON_ATTRIBUTES);
+  attrs->atk     = 2;
+  attrs->type_id = WEAPON_CLEAVER;
+  attrs->range   = 15;
+
+  sklswing            = ecs_add(registry, entity, WEAPON_SWING_ATTACK);
+  sklswing->on_action = CHARACTER_ACTION_REGULAR_ATK;
+  sklswing->wide      = 32;
+
+  ecs_add(registry, entity, HOLDER);
+
+  return entity;
+}
+
+ecs_entity_t make_katana(Ecs* registry)
+{
+
+  ecs_entity_t entity;
+
+  entity = ecs_create(registry);
+
+  Transform*         transform;
+  Visual*            visual;
+  WeaponAttributes*  attrs;
+  WeaponSwingAttack* sklswing;
+
+  transform = ecs_add(registry, entity, TRANSFORM);
+
+  visual = ecs_add(registry, entity, VISUAL);
+  sprite_init(&visual->sprite, TEX_KATANA);
+  visual->anchor.x = 3;
+  visual->anchor.y = 3;
 
   attrs          = ecs_add(registry, entity, WEAPON_ATTRIBUTES);
   attrs->atk     = 2;
@@ -430,14 +460,13 @@ ecs_entity_t make_cleaver(Ecs* registry, u16 mask)
 
   sklswing            = ecs_add(registry, entity, WEAPON_SWING_ATTACK);
   sklswing->on_action = CHARACTER_ACTION_REGULAR_ATK;
-  sklswing->range     = 20;
 
   ecs_add(registry, entity, HOLDER);
 
   return entity;
 }
 
-ecs_entity_t make_golden_sword(Ecs* registry, u16 mask)
+ecs_entity_t make_golden_sword(Ecs* registry)
 {
   ecs_entity_t entity;
 
@@ -462,7 +491,6 @@ ecs_entity_t make_golden_sword(Ecs* registry, u16 mask)
 
   sklswing            = ecs_add(registry, entity, WEAPON_SWING_ATTACK);
   sklswing->on_action = CHARACTER_ACTION_REGULAR_ATK;
-  sklswing->range     = 100;
 
   wpskl_thunder_storm            = ecs_add(registry, entity, WEAPON_THUNDER_STORM_RELEASE);
   wpskl_thunder_storm->on_action = CHARACTER_ACTION_SPECIAL_ATK;
@@ -689,7 +717,7 @@ ecs_entity_t make_chest(Ecs* registry, const NewChestParams* params)
   return entity;
 }
 
-ecs_entity_t make_spear(Ecs* registry, u16 mask)
+ecs_entity_t make_spear(Ecs* registry)
 {
   ecs_entity_t entity;
 
@@ -792,7 +820,7 @@ ecs_entity_t make_fx_blood_loss(Ecs* registry, Vec2 position)
   return entity;
 }
 
-ecs_entity_t make_staff(Ecs* registry, u16 mask)
+ecs_entity_t make_staff(Ecs* registry)
 {
   ecs_entity_t entity = ecs_create(registry);
 
@@ -805,13 +833,12 @@ ecs_entity_t make_staff(Ecs* registry, u16 mask)
 
   visual = ecs_add(registry, entity, VISUAL);
   sprite_init(&visual->sprite, (TEX_RED_STAFF));
-  visual->anchor.x = visual->sprite.rect.w / 2;
-  visual->anchor.y = visual->sprite.rect.h / 2 + 4;
+  visual->anchor.x = 9;
+  visual->anchor.y = 4;
 
-  attrs              = ecs_add(registry, entity, WEAPON_ATTRIBUTES);
-  attrs->atk         = 1;
-  attrs->type_id     = WEAPON_STAFF;
-  attrs->rotate_hand = FALSE;
+  attrs          = ecs_add(registry, entity, WEAPON_ATTRIBUTES);
+  attrs->atk     = 1;
+  attrs->type_id = WEAPON_STAFF;
 
   castable = ecs_add(registry, entity, WEAPON_CAST);
 
@@ -1129,7 +1156,7 @@ ecs_entity_t make_npc_brian(Ecs* registry, Vec2 position, u16 conversation_id)
 
   ecs_add(registry, entity, CONTROLLER);
 
-  ecs_set(registry, entity, HAND, &(Hand){ .weapon = ECS_NULL_ENT, .attach_point = { 8, -9 } });
+  ecs_set(registry, entity, HAND, &(Hand){ .weapon = ECS_NULL_ENT });
 
   ecs_add(registry, entity, ENABLE_TILE_COLLISION_TAG);
   ecs_set(registry, entity, MOVE_SPEED, &(MoveSpeed){ 50 });
@@ -1170,7 +1197,7 @@ ecs_entity_t make_key_1_1(Ecs* registry, Vec2 pos, u8 quality)
   return make_static_pickupable_entity(registry, TEX_KEY, PICKUPABLE_KEY_1_1, pos, quality);
 }
 
-ecs_entity_t make_bow(Ecs* registry, u16 mask)
+ecs_entity_t make_bow(Ecs* registry)
 {
   ecs_entity_t entity;
 
@@ -1187,11 +1214,10 @@ ecs_entity_t make_bow(Ecs* registry, u16 mask)
   visual->anchor.x = 0;
   visual->anchor.y = visual->sprite.rect.h / 2;
 
-  attrs              = ecs_add(registry, entity, WEAPON_ATTRIBUTES);
-  attrs->atk         = 2;
-  attrs->type_id     = WEAPON_BOW;
-  attrs->rotate_hand = TRUE;
-  attrs->range       = 16 * 5;
+  attrs          = ecs_add(registry, entity, WEAPON_ATTRIBUTES);
+  attrs->atk     = 2;
+  attrs->type_id = WEAPON_BOW;
+  attrs->range   = 16 * 5;
 
   ecs_add(registry, entity, HOLDER);
 

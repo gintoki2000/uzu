@@ -40,9 +40,7 @@ static TASK* __init(TASK* self, u16 weapon_id)
 
 static BTStatus __exec(TASK* self, Ecs* ecs, ecs_entity_t entity)
 {
-  Hand*       hand        = ecs_get(ecs, entity, HAND);
-  AttackMask* attack_mask = ecs_get(ecs, entity, ATTACK_MASK);
-
+  Hand* hand = ecs_get(ecs, entity, HAND);
   if (hand == NULL)
     return BT_STATUS_FAILURE;
   if (hand->weapon != ECS_NULL_ENT)
@@ -55,7 +53,7 @@ static BTStatus __exec(TASK* self, Ecs* ecs, ecs_entity_t entity)
   if (self->weapon_id == WEAPON_ID_NULL)
     return BT_STATUS_FAILURE;
 
-  ecs_entity_t weapon = g_make_weapon_fn_tbl[self->weapon_id](ecs, attack_mask->value);
+  ecs_entity_t weapon = g_make_weapon_fn_tbl[self->weapon_id](ecs);
   equip(ecs, entity, weapon);
 
   return BT_STATUS_SUCCESS;

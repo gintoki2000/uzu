@@ -30,12 +30,13 @@ make_text_particle(Ecs* ecs, const char* text, Vec2 position, Vec2 speed, FONT* 
 ecs_entity_t make_player(Ecs* ecs, ecs_entity_t character, ecs_entity_t weapon);
 
 // weapons
-ecs_entity_t make_spear(Ecs* ecs, u16 mask);
-ecs_entity_t make_cleaver(Ecs* ecs, u16 mask);
-ecs_entity_t make_golden_sword(Ecs* ecs, u16 mask);
-ecs_entity_t make_staff(Ecs* ecs, u16 mask);
-ecs_entity_t make_anime_sword(Ecs* ecs, u16 mask);
-ecs_entity_t make_bow(Ecs* ecs, u16 mask);
+ecs_entity_t make_spear(Ecs* ecs);
+ecs_entity_t make_cleaver(Ecs* ecs);
+ecs_entity_t make_golden_sword(Ecs* ecs);
+ecs_entity_t make_staff(Ecs* ecs);
+ecs_entity_t make_anime_sword(Ecs* ecs);
+ecs_entity_t make_bow(Ecs* ecs);
+ecs_entity_t make_katana(Ecs* ecs);
 
 // chars
 ecs_entity_t make_wizzard(Ecs* ecs, Vec2 position);

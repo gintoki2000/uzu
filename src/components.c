@@ -77,6 +77,7 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
   [ATTACK_TARGET]                = ECS_TYPE_EX(AttackTarget, attack_target_init, NULL, NULL),
   [SCRIPT]                       = ECS_TYPE_EX(Script, NULL, script_fini, NULL),
   [EMOJI]                        = ECS_TYPE(Emoji),
+  [HAND_ANIMATION]               = ECS_TYPE(HandAnimation),
 };
 
 void brain_fini(Brain* brain)

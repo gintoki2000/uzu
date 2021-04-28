@@ -148,7 +148,8 @@ void set_spell(Ecs* ecs, ecs_entity_t entity, u16 spell_id)
 }
 u16 get_spell(Ecs* ecs, ecs_entity_t entity)
 {
-  return ((AttunementSlot*)ecs_get(ecs, entity, ATTUNEMENT_SLOT))->spell_id;
+  AttunementSlot* comp = ecs_get(ecs, entity, ATTUNEMENT_SLOT);
+  return comp ? comp->spell_id : SPELL_ID_NULL;
 }
 u16 get_weapon_type_id(Ecs* ecs, ecs_entity_t weapon)
 {
@@ -166,4 +167,34 @@ u16 get_equiped_weapon_type_id(Ecs* ecs, ecs_entity_t holder)
 void set_entity_conversation(Ecs* ecs, ecs_entity_t entity, u16 conversation_id)
 {
   ecs_set(ecs, entity, DIALOGUE, &(Dialogue){ conversation_id });
+}
+
+void animate_entity_hand(Ecs*                    registry,
+                         ecs_entity_t            entity,
+                         const HandAnimKeyFrame* kframes,
+                         SDL_bool                realtive_current,
+                         Callback                finished_callback,
+                         Callback                kframe_callback)
+{
+  Hand*          hand   = ecs_get(registry, entity, HAND);
+  HandAnimation* ha     = ecs_add(registry, entity, HAND_ANIMATION);
+  ha->current_index     = -1;
+  ha->initial_angle     = hand->angle;
+  ha->initial_point     = hand->original_point;
+  ha->initial_length    = hand->length;
+  ha->keyframes         = kframes;
+  ha->relative          = realtive_current;
+  ha->finished_callback = finished_callback;
+  ha->frame_callback    = kframe_callback;
+}
+
+BOOL request_action(Ecs* registry, ecs_entity_t entity, u16 action)
+{
+  Controller* controller;
+  if ((controller = ecs_get(registry, entity, CONTROLLER)) == NULL)
+    return FALSE;
+  if (controller->in_action)
+    return FALSE;
+  controller->action = action;
+  return TRUE;
 }

@@ -76,6 +76,7 @@ static const char*  _texture_files[NUM_TEXS] = {
   [TEX_EMOJI_QUESTION]       = "res/emoji/question.png",
   [TEX_EMOJI_SILENT]         = "res/emoji/silent.png",
   [TEX_EMOJI_HEART]          = "res/emoji/heart.png",
+  [TEX_KATANA]               = "res/weapon_katana.png",
 };
 
 static Mix_Music*  _bg_musics[NUM_BG_MUSICS];

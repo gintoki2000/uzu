@@ -72,15 +72,14 @@ static void spawn_player(Vec2 position)
 {
   ecs_entity_t player;
   ecs_entity_t weapon;
-  ecs_entity_t (*make_weapon_fn)(Ecs*, u16);
+  ecs_entity_t (*make_weapon_fn)(Ecs*);
   ecs_entity_t (*make_character_fn)(Ecs*, Vec2);
-  u16 mask = BIT(CATEGORY_ENEMY) | BIT(CATEGORY_INTERACABLE);
 
   make_weapon_fn    = g_make_weapon_fn_tbl[g_session.weapon];
   make_character_fn = g_make_character_fn_tbl[g_session.job];
 
   player = make_character_fn(g_ecs, position);
-  weapon = make_weapon_fn(g_ecs, mask);
+  weapon = make_weapon_fn(g_ecs);
 
   make_player(g_ecs, player, weapon);
 

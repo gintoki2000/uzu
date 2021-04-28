@@ -63,7 +63,7 @@ void health_system()
 
   for (int i = cnt - 1; i >= 0; --i)
   {
-    if (--invulnerables[i].remaining == 0)
+    if (invulnerables[i].remaining > 0 && --invulnerables[i].remaining == 0)
       ecs_rmv(g_ecs, entities[i], INVULNERABLE);
   }
 }

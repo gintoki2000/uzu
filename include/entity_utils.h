@@ -1,5 +1,6 @@
 #ifndef UTILS
 #define UTILS
+#include "components.h"
 #include <ecs/ecs.h>
 ecs_entity_t get_player(Ecs* ecs);
 Vec2         get_player_position(Ecs* ecs);
@@ -21,8 +22,11 @@ float        get_entity_vz(Ecs* ecs, ecs_entity_t entity);
 u16          get_entity_mana_points(Ecs* ecs, ecs_entity_t entity);
 void         set_spell(Ecs* ecs, ecs_entity_t entity, u16 spell_id);
 u16          get_spell(Ecs* ecs, ecs_entity_t entity);
-u16          get_weapon_type_id(Ecs* ecs, ecs_entity_t weapon);
-ecs_entity_t get_equiped_weapon(Ecs* ecs, ecs_entity_t holder);
 u16          get_equiped_weapon_type_id(Ecs* ecs, ecs_entity_t holder);
-
+void         animate_entity_hand(Ecs*                    registry,
+                                 ecs_entity_t            entity,
+                                 const HandAnimKeyFrame* kframes,
+                                 BOOL                    realtive_current,
+                                 Callback                finished_callback,
+                                 Callback                kframe_callback);
 #endif // UTILS

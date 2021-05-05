@@ -62,26 +62,22 @@ static BOOL _paused;
 static BOOL _player_died;
 
 #if DEBUG
-static BOOL _db_tile_colliders;
-static BOOL _db_hitbox;
-static BOOL _db_position;
-static BOOL _db_rtree;
+static BOOL _draw_tile_colliders;
+static BOOL _draw_hitbox;
+static BOOL _draw_position;
+static BOOL _draw_rtree;
 #endif
 
 static void spawn_player(Vec2 position)
 {
   ecs_entity_t player;
-  ecs_entity_t weapon;
-  ecs_entity_t (*make_weapon_fn)(Ecs*);
   ecs_entity_t (*make_character_fn)(Ecs*, Vec2);
 
-  make_weapon_fn    = g_make_weapon_fn_tbl[g_session.weapon];
   make_character_fn = g_make_character_fn_tbl[g_session.job];
 
   player = make_character_fn(g_ecs, position);
-  weapon = make_weapon_fn(g_ecs);
 
-  make_player(g_ecs, player, weapon);
+  make_player(g_ecs, player, make_weapon(g_ecs, g_session.weapon));
 
   ett_attune_spell(g_ecs, player, g_session.spell);
 }
@@ -166,13 +162,13 @@ static void on_update()
 {
 #if DEBUG
   if (key_just_pressed(SDL_SCANCODE_H))
-    _db_hitbox = !_db_hitbox;
+    _draw_hitbox = !_draw_hitbox;
   if (key_just_pressed(SDL_SCANCODE_J))
-    _db_position = !_db_position;
+    _draw_position = !_draw_position;
   if (key_just_pressed(SDL_SCANCODE_K))
-    _db_tile_colliders = !_db_tile_colliders;
+    _draw_tile_colliders = !_draw_tile_colliders;
   if (key_just_pressed(SDL_SCANCODE_L))
-    _db_rtree = !_db_rtree;
+    _draw_rtree = !_draw_rtree;
 #endif
 
   if (_has_next_level)
@@ -193,13 +189,13 @@ static void on_update()
     render_ui();
 
 #if DEBUG
-    if (_db_hitbox)
+    if (_draw_hitbox)
       hitbox_rendering_system_update();
-    if (_db_position)
+    if (_draw_position)
       position_rendering_system_update();
-    if (_db_tile_colliders)
+    if (_draw_tile_colliders)
       draw_map_colliders();
-    if (_db_rtree)
+    if (_draw_rtree)
       collision_system_render_debug();
 #endif
 

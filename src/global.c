@@ -48,7 +48,7 @@ void sprite_init(Sprite* s, u16 texture_id)
   SDL_QueryTexture(get_texture(texture_id), NULL, NULL, &s->rect.w, &s->rect.h);
 }
 
-ecs_entity_t create_weapon(Ecs* registry, u16 type)
+ecs_entity_t make_weapon(Ecs* registry, u16 type)
 {
   ASSERT(type < NUM_WEAPONS);
   return g_make_weapon_fn_tbl[type](registry);

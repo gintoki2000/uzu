@@ -250,5 +250,6 @@ extern const u16      g_pickupable_to_item_type_id_tbl[];
 
 Conversation* conversation_init(Conversation* self);
 void          conversation_fini(Conversation* self);
-ecs_entity_t  create_weapon(Ecs* registry, u16 type);
+ecs_entity_t  make_weapon(Ecs* registry, u16 type);
+ecs_entity_t  make_character(Ecs* registry, u16 job);
 #endif // GLOBAL_H

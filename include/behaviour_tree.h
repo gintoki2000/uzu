@@ -13,48 +13,65 @@ typedef enum
 
 typedef struct BTNode BTNode;
 
-typedef BTStatus (*bt_exec_fn_t)(BTNode*, Ecs*, ecs_entity_t);
-typedef void (*bt_abort_fn_t)(BTNode*, Ecs* ecs, ecs_entity_t);
-typedef void (*bt_finish_fn_t)(BTNode*, Ecs* ecs, ecs_entity_t, BOOL succeed);
+typedef BTStatus (*BTExecuteFunc)(BTNode*, Ecs*, ecs_entity_t);
+typedef void (*BTAbortFunc)(BTNode*, Ecs* ecs, ecs_entity_t);
+typedef void (*BTFinishFunc)(BTNode*, Ecs* ecs, ecs_entity_t, BOOL succeed);
+typedef destroy_fn_t BTFinalizeFunc;
 
 typedef struct BTNodeVtbl
 {
-  const struct BTNodeVtbl* parent;
-  destroy_fn_t             fini;
-  bt_exec_fn_t             exec;
-  bt_abort_fn_t            abort;
-  bt_finish_fn_t           finish;
+  destroy_fn_t  fini;
+  BTExecuteFunc exec;
+  BTAbortFunc   abort;
+  BTFinishFunc  finish;
 } BTNodeVtbl;
 
-#define BT_VTBL_INST_FN(__TName, __tname)                                                          \
-  const BTNodeVtbl* __tname##_vtbl_inst()                                                          \
+#define BT_PRIVATE_NODE(T)                                                                         \
+  static void              VtblInit(T##Vtbl* vtbl);                                                \
+  static const BTNodeVtbl* VtblInst()                                                              \
   {                                                                                                \
-    static __TName##Vtbl vtbl;                                                                     \
-    static BOOL          initialized = FALSE;                                                      \
-    extern void          __tname##_vtbl_init(__TName##Vtbl*);                                      \
+    static T##Vtbl vtbl;                                                                           \
+    static BOOL    initialized = FALSE;                                                            \
     if (!initialized)                                                                              \
     {                                                                                              \
-      __tname##_vtbl_init(&vtbl);                                                                  \
+      VtblInit(&vtbl);                                                                             \
       initialized = TRUE;                                                                          \
     }                                                                                              \
     return (BTNodeVtbl*)&vtbl;                                                                     \
+  }                                                                                                \
+  INLINE T* Alloc()                                                                                \
+  {                                                                                                \
+    T* self             = SDL_malloc(sizeof(T));                                                   \
+    BT_NODE(self)->vtbl = VtblInst();                                                              \
+    return self;                                                                                   \
   }
 
-#define BT_STATIC_VTBL_INST_FN(__TName, __tname)                                                   \
-  static const BTNodeVtbl* __tname##_vtbl_inst()                                                   \
+#define BT_PUBLIC_NODE_DECLARE(T, t)                                                               \
+  void              t##_vtbl_init(T##Vtbl* vtbl);                                                  \
+  const BTNodeVtbl* t##_vtbl_inst();                                                               \
+  T*                t##_alloc();
+
+#define BT_PUBLIC_NODE_IMPLEMENT(T, t)                                                             \
+  void              t##_vtbl_init(T##Vtbl* vtbl);                                                  \
+  const BTNodeVtbl* t##_vtbl_inst()                                                                \
   {                                                                                                \
-    static __TName##Vtbl vtbl;                                                                     \
-    static BOOL          initialized = FALSE;                                                      \
+    static T##Vtbl vtbl;                                                                           \
+    static BOOL    initialized = FALSE;                                                            \
     if (!initialized)                                                                              \
     {                                                                                              \
-      __tname##_vtbl_init(&vtbl);                                                                  \
+      t##_vtbl_init(&vtbl);                                                                        \
       initialized = TRUE;                                                                          \
     }                                                                                              \
     return (BTNodeVtbl*)&vtbl;                                                                     \
+  }                                                                                                \
+  T* t##_alloc()                                                                                   \
+  {                                                                                                \
+    T* ret             = SDL_malloc(sizeof(T));                                                    \
+    BT_NODE(ret)->vtbl = t##_vtbl_inst();                                                          \
+    return ret;                                                                                    \
   }
 
-const BTNodeVtbl* bt_node_vtbl_inst();
-void              bt_node_vtbl_init(BTNodeVtbl* vtbl);
+void bt_node_vtbl_init(BTNodeVtbl* vtbl);
 
 struct BTNode
 {
@@ -64,172 +81,107 @@ struct BTNode
 
 #define BT_EXTEND_NODE(__base) __base __parent_inst;
 #define BT_EXTEND_VTBL(__bvtbl) __bvtbl __parent_vtbl;
-#define BT_NODE(__node) ((BTNode*)__node)
-#define BT_GET_VTBL(__node) (BT_NODE(__node)->vtbl)
+#define BT_NODE(self) ((BTNode*)self)
+#define BT_GET_VTBL(self) (BT_NODE(self)->vtbl)
 
 /**
  * execute this node
  */
-#define bt_node_vc_exec(__node, __ecs, __entity)                                                   \
-  (BT_NODE(__node)->vtbl->exec(BT_NODE(__node), __ecs, __entity))
+#define bt_node_exec(self, registry, entity)                                                       \
+  (BT_NODE(self)->vtbl->exec(BT_NODE(self), registry, entity))
 
 /**
  * abort this node
  */
-#define bt_node_vc_abort(__node, __ecs, __entity)                                                  \
-  (BT_NODE(__node)->vtbl->abort(BT_NODE(__node), __ecs, __entity))
+#define bt_node_abort(self, registry, entity)                                                      \
+  (BT_NODE(self)->vtbl->abort(BT_NODE(self), registry, entity))
 
 /**
  * called when this node is finished
  */
-#define bt_node_vc_finish(__node, __ecs, __entity, __finish_status)                                \
-  (BT_NODE(__node)->vtbl->finish(BT_NODE(__node), __ecs, __entity, __finish_status))
-
-#define BT_ALLOC_FN(__TName, __tname)                                                              \
-  static __TName* __tname##_alloc()                                                                \
-  {                                                                                                \
-    __TName* ret       = malloc(sizeof(__TName));                                                  \
-    BT_NODE(ret)->vtbl = __tname##_vtbl_inst();                                                    \
-    return ret;                                                                                    \
-  }
+#define bt_node_finish(self, registry, entity, succeed)                                            \
+  (BT_NODE(self)->vtbl->finish(BT_NODE(self), registry, entity, succeed))
 
 void    bt_node_del(BTNode* node);
 BTNode* bt_node_init(BTNode* self);
-void    bt_node_fini(BTNode* self);
-void    bt_node_abort(BTNode* self, Ecs*, ecs_entity_t);
-void    bt_node_finish(BTNode* self, Ecs* ecs, ecs_entity_t entity, BOOL succeed);
+void    bt_node_real_fini(BTNode* self);
+void    bt_node_real_abort(BTNode* self, Ecs*, ecs_entity_t);
+void    bt_node_real_finish(BTNode* self, Ecs* ecs, ecs_entity_t entity, BOOL succeed);
 
-typedef struct
-{
-  BT_EXTEND_NODE(BTNode)
-  BTNode* child;
-} BTRoot;
-
-void     bt_root_vtbl_init(BTNodeVtbl* vtbl);
-BTRoot*  bt_root_new();
-void     bt_root_fini(BTRoot* self);
-BTStatus bt_root_exec(BTRoot* self, Ecs* ecs, ecs_entity_t entity);
-void     bt_root_set_child(BTRoot* self, BTNode* node);
+typedef struct _BTRoot BTRoot;
+BTRoot*                bt_root_new(BTNode* child);
 
 /*==COMPOSITE==*/
 
-typedef struct bt_Selector
+typedef struct _BTCompositeNode
 {
-  BT_EXTEND_NODE(BTNode)
+  BTNode    _base;
   PtrArray* children;
-  s32       curr;
-} BTSelector;
+} BTCompositeNode;
 
-const BTNodeVtbl* bt_selector_vtbl_inst();
-void              bt_selector_vtbl_init(BTNodeVtbl* vtbl);
-
-BTSelector* bt_selector_new();
-BTSelector* bt_selector_init(BTSelector* self);
-void        bt_selector_fini(BTSelector* self);
-void        bt_selector_abort(BTSelector* self, Ecs* ecs, ecs_entity_t entity);
-void        bt_selector_finish(BTSelector* self, Ecs* ecs, ecs_entity_t entity, BOOL succeed);
-BTStatus    bt_selector_exec(BTSelector* self, Ecs* ecs, ecs_entity_t entity);
-void        bt_selector_add(BTSelector* self, BTNode* node);
-
-typedef struct
+typedef struct _BTCompositeNodeVtbl
 {
-  BT_EXTEND_NODE(BTNode)
-  PtrArray* children;
-  s32       curr;
-} BTSequence;
+  BTNodeVtbl _base;
+} BTCompositeNodeVtbl;
+#define BT_COMPOSITE_NODE(ptr) ((BTCompositeNode*)ptr)
 
-const BTNodeVtbl* bt_sequence_vtbl_inst();
-void              bt_sequence_vtbl_init(BTNodeVtbl* vtbl);
-BTSequence*       bt_sequence_new();
-BTSequence*       bt_sequence_init(BTSequence* self);
-void              bt_sequence_fini(BTSequence* self);
-void              bt_sequence_finish(BTSequence* self, Ecs* ecs, ecs_entity_t entity, BOOL succeed);
-void              bt_sequence_abort(BTSequence* self, Ecs* ecs, ecs_entity_t entity);
-BTStatus          bt_sequence_exec(BTSequence* self, Ecs* ecs, ecs_entity_t entity);
-void              bt_sequence_add(BTSequence* self, BTNode* node);
+BT_PUBLIC_NODE_DECLARE(BTCompositeNode, bt_composite_node)
+BTCompositeNode* bt_composite_node_init(BTCompositeNode* self);
+void             bt_composite_node_fini(BTCompositeNode* self);
+void             bt_composite_node_add(BTCompositeNode* self, BTNode* node);
+BTNode*          bt_composite_node_child_at(BTCompositeNode* self, int index);
+
+BTCompositeNode* bt_selector_new();
+BTCompositeNode* bt_sequence_new();
 
 /*==DECORATOR==*/
 typedef struct
 {
-  BT_EXTEND_NODE(BTNode)
+  BTNode  _base;
   BTNode* child;
   BOOL    is_child_running;
 } BTDecorator;
 
 typedef struct
 {
-  BT_EXTEND_VTBL(BTNodeVtbl)
+  BTNodeVtbl _base;
 } BTDecoratorVtbl;
 
-const BTNodeVtbl* bt_decorator_vtbl_inst();
-void              bt_decorator_vtbl_init(BTDecoratorVtbl* vtbl);
-BTDecorator*      bt_decorator_init(BTDecorator* self);
-void              bt_decorator_fini(BTDecorator* self);
-void              bt_decorator_abort(BTDecorator* self, Ecs* ecs, ecs_entity_t entity);
-void              bt_decorator_set_child(BTDecorator* self, BTNode* node);
-BTNode*           bt_decorator_steal_child(BTDecorator* self);
-void              bt_decorator_del_child(BTDecorator* self);
+BT_PUBLIC_NODE_DECLARE(BTDecorator, bt_decorator)
+#define BT_DECORATOR(ptr) ((BTDecorator*)ptr)
 
-typedef struct
-{
-  BT_EXTEND_NODE(BTDecorator)
-  int original_times;
-  int times;
-} BTRepeater;
+BTDecorator* bt_decorator_init(BTDecorator* self);
+void         bt_decorator_fini(BTDecorator* self);
+void         bt_decorator_abort(BTDecorator* self, Ecs* ecs, ecs_entity_t entity);
+void         bt_decorator_set_child(BTDecorator* self, BTNode* node);
+BTNode*      bt_decorator_steal_child(BTDecorator* self);
 
-typedef struct
-{
-  BT_EXTEND_VTBL(BTDecoratorVtbl)
-} BTRepeaterVtbl;
-
-const BTNodeVtbl* bt_repeater_vtbl_inst();
-void              bt_repeater_vtbl_init(BTRepeaterVtbl* vtbl);
-BTRepeater*       bt_repeater_new(int times);
-void              bt_repeater_finish(BTRepeater* self, Ecs* ecs, ecs_entity_t entity, BOOL succeed);
-void              bt_repeater_abort(BTRepeater* self, Ecs* ecs, ecs_entity_t entity);
-BTStatus          bt_repeater_exec(BTRepeater* self, Ecs* ecs, ecs_entity_t entity);
-
-typedef struct
-{
-  BT_EXTEND_NODE(BTDecorator)
-} BTInverter;
-
-typedef struct
-{
-  BT_EXTEND_VTBL(BTDecoratorVtbl)
-} BTInverterVtbl;
-
-const BTNodeVtbl* bt_inverter_vtbl_inst();
-void              bt_inverter_vtbl_init(BTInverterVtbl* vtbl);
-BTInverter*       bt_inverter_new();
-void              bt_inverter_abort(BTInverter* self, Ecs* ecs, ecs_entity_t entity);
-BTStatus          bt_inverter_exec(BTInverter* self, Ecs* ecs, ecs_entity_t entity);
+BTDecorator* bt_repeater_new(int times);
+BTDecorator* bt_inverter_new();
 
 typedef struct BTCondition BTCondition;
 typedef BOOL (*bt_pred_fn_t)(BTCondition* self, Ecs* ecs, ecs_entity_t entity);
 
 struct BTCondition
 {
-  BT_EXTEND_NODE(BTDecorator)
-  BOOL is_child_running;
-  BOOL abort_if_fail;
-  BOOL invert_result;
+  BTDecorator _base;
+  BOOL        is_child_running;
+  BOOL        abort_if_fail;
+  BOOL        invert_result;
 };
 
 typedef struct
 {
-  BT_EXTEND_VTBL(BTNodeVtbl)
+  BTNodeVtbl   _base;
   bt_pred_fn_t pred;
 } BTConditionVtbl;
 
-#define BT_CONDITION(__con) ((bt_Condition*)__con)
-#define BT_CONDITION_VTBL(__vtbl) ((BTConditionVtbl*)__vtbl)
-#define bt_condition_vc_pred(__self, __ecs, __entity)                                              \
-  BT_CONDITION_VTBL(BT_GET_VTBL(__self))->pred(__self, __ecs, __entity)
+#define BT_CONDITION(ptr) ((bt_Condition*)ptr)
+#define BT_CONDITION_VTBL(ptr) ((BTConditionVtbl*)ptr)
+#define bt_condition_pred(self, registry, entity)                                                  \
+  BT_CONDITION_VTBL(BT_GET_VTBL(self))->pred(self, registry, entity)
 
-const BTNodeVtbl* bt_condition_vtbl_inst();
-void              bt_condition_vtbl_init(BTConditionVtbl* vtbl);
-BTCondition*      bt_condition_init(BTCondition* self, BOOL abort_if_fail, BOOL invert_result);
-BTStatus          bt_condition_exec(BTCondition* self, Ecs* ecs, ecs_entity_t entity);
+BT_PUBLIC_NODE_DECLARE(BTCondition, bt_condition)
+BTCondition* bt_condition_init(BTCondition* self, BOOL abort_if_fail, BOOL invert_result);
 
 #endif // BEHAVIOUR_TREE_H

@@ -174,6 +174,6 @@ static void equipment_item_use_callback(const void* _data, Ecs* ecs, ecs_entity_
   const EquipmentItemData* data = (const EquipmentItemData*)_data;
   ecs_entity_t             weapon;
 
-  weapon = create_weapon(ecs, data->weapon_id);
+  weapon = make_weapon(ecs, data->weapon_id);
   ett_equip_weapon(ecs, entity, weapon);
 }

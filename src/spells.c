@@ -13,21 +13,17 @@ struct __HomieFire
     int remaining;
     int cooldown;
 };
-static BOOL homie_fire_process(Ecs* registry, ecs_entity_t caster, ecs_entity_t weapon);
-static void homie_fire_cast(Ecs* registry, ecs_entity_t caster, ecs_entity_t weapon);
 
-#define SPELL_ICON(n) { TEX_ICON_##n, { 0, 0, 16, 16} }
 static void* get_spell_state(Ecs* registry, ecs_entity_t weapon)
 {
   WeaponCast* component = ecs_get(registry, weapon, WEAPON_CAST);
   return (void*)component->state;
 }
-
+#define SPELL_ICON(n) { TEX_ICON_##n, { 0, 0, 16, 16} }
 const Spell g_spell_tbl[NUM_SPELLS] = {
   /*Name               CastFunc              ProcFunc              Cost  Cooldown  Icon                  */
   { "ice arrow",       ice_arrow_cast,       default_process_func, 1,    15,       SPELL_ICON(ICE_ARROW) },
   { "fire ball",       fire_ball_cast,       default_process_func, 1,    10,       SPELL_ICON(FIRE_BALL) },
-  { "homie fire ball", homie_fire_cast,      homie_fire_process,   3,    15,       SPELL_ICON(FIRE_BALL) },
 };
 
 #define PLAY_SOUND(id) Mix_PlayChannel(-1, get_sfx(id), 0)
@@ -79,37 +75,6 @@ static void ice_arrow_cast(Ecs* registry, ecs_entity_t caster, ecs_entity_t SDL_
   PLAY_SOUND(SFX_ICE_SHOOT);
 }
 
-
-#define HOMIE_FIRE_COOLDOWN_TIME 10
-#define HOMIE_FIRE_SPEED 200
-
-static BOOL homie_fire_process(Ecs* registry, ecs_entity_t caster, ecs_entity_t weapon)
-{
-  struct __HomieFire* self = get_spell_state(registry, weapon);
-  Vec2 position;
-  Vec2 facing_direction;
-  Vec2 projectile_speed;
-  u16 attack_mask;
-  if (self->remaining > 0 && self->cooldown > 0 && !(--self->cooldown))
-  {
-    self->cooldown = HOMIE_FIRE_COOLDOWN_TIME;
-    self->remaining -= 1;
-
-    attack_mask      = ett_get_atk_mask(registry, caster);
-    position         = ett_get_position(registry, caster);
-    facing_direction = ett_get_facing_direction(registry, caster);
-    projectile_speed = vec2_mul(facing_direction, HOMIE_FIRE_SPEED); 
-    make_fire_ball(registry, caster, position, projectile_speed, attack_mask);
-  }
-  return self->remaining == 0;
-}
-
-static void homie_fire_cast(Ecs* registry, SDL_UNUSED ecs_entity_t caster, ecs_entity_t weapon)
-{
-    struct __HomieFire* self = get_spell_state(registry, weapon);
-    self->remaining = 3;
-    self->cooldown = 1;
-}
 
 static BOOL default_process_func(SDL_UNUSED Ecs*         registry, 
                                  SDL_UNUSED ecs_entity_t caster  , 

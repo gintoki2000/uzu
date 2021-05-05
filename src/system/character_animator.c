@@ -39,7 +39,7 @@ void character_controller_system()
         (facing_direction = ecs_get(g_ecs, entities[i], FACING_DIRECTION)))
     {
 
-      if (ecs_has(g_ecs, entities[i], INVULNERABLE) || ecs_has(g_ecs, entities[i], PARALYZED))
+      if (ecs_has(g_ecs, entities[i], INVULNERABLE) || ecs_has(g_ecs, entities[i], STAGGER))
       {
         play_animation(animator, ANIM_STATE_HIT);
         return;

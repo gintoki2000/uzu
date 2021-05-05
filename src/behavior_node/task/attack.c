@@ -68,7 +68,7 @@ static BTStatus __exec(NODE* self, Ecs* ecs, ecs_entity_t entity)
   if (!self->is_running)
   {
     hand = ecs_get(ecs, entity, HAND);
-    if (controller->in_action || ecs_has(ecs, entity, PARALYZED) || !has_attack_target ||
+    if (controller->in_action || ecs_has(ecs, entity, STAGGER) || !has_attack_target ||
         hand->weapon == ECS_NULL_ENT)
       return BT_STATUS_FAILURE;
 

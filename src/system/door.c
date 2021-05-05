@@ -32,7 +32,7 @@ static void on_command_selected(SDL_UNUSED void* arg, const MSG_CommandSelected*
     interactable = ecs_get(g_ecs, event->entity, INTERACTABLE);
     if (strcmp(event->cmd, TEXT_COMMAND_OPEN) == 0)
     {
-      if (attrs->required_key == DOOR_NO_REQUIRED_KEY || has_item_in_inventory(attrs->required_key))
+      if (attrs->required_key == DOOR_NO_REQUIRED_KEY || inv_has(attrs->required_key))
       {
         visual->sprite.rect       = RECT_DOOR_OPEN;
         attrs->state              = DOOR_STATE_OPEN;

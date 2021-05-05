@@ -18,7 +18,7 @@ static Vec2 get_mouse_position(void)
 
 static void update_player_facing_direction(void)
 {
-  ecs_entity_t     player = get_player(g_ecs);
+  ecs_entity_t     player = scn_get_player(g_ecs);
   Vec2             mouse_position;
   Vec2             player_position;
   FacingDirection* facing_direction;
@@ -31,7 +31,7 @@ static void update_player_facing_direction(void)
       mouse_position                      = get_mouse_position();
       mouse_position.x += g_viewport.x;
       mouse_position.y += g_viewport.y;
-      player_position = get_entity_position(g_ecs, player);
+      player_position                     = ett_get_position(g_ecs, player);
       facing_direction->value             = vec2_unit(vec2_sub(mouse_position, player_position));
     }
   }

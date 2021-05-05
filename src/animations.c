@@ -5,7 +5,7 @@ const Animation g_anims_knight_m[] = {
   {
       .mode           = ANIM_PLAY_MODE_LOOP,
       .frame_duration = 8,
-      .texture_id     = TEX_KNIGHT,
+      .texture_id     = TEX_JOB_KNIGHT,
       .offset_x       = 16,
       .offset_y       = 0,
       .sprite_width   = 16,
@@ -15,7 +15,7 @@ const Animation g_anims_knight_m[] = {
   {
       .mode           = ANIM_PLAY_MODE_LOOP,
       .frame_duration = 4,
-      .texture_id     = TEX_KNIGHT,
+      .texture_id     = TEX_JOB_KNIGHT,
       .offset_x       = 80,
       .offset_y       = 0,
       .sprite_width   = 16,
@@ -25,7 +25,7 @@ const Animation g_anims_knight_m[] = {
   {
       .mode           = ANIM_PLAY_MODE_NORMAL,
       .frame_duration = 5,
-      .texture_id     = TEX_KNIGHT,
+      .texture_id     = TEX_JOB_KNIGHT,
       .offset_x       = 0,
       .offset_y       = 0,
       .sprite_width   = 16,
@@ -35,7 +35,7 @@ const Animation g_anims_knight_m[] = {
   {
       .mode           = ANIM_PLAY_MODE_NORMAL,
       .frame_duration = 5,
-      .texture_id     = TEX_KNIGHT,
+      .texture_id     = TEX_JOB_KNIGHT,
       .offset_x       = 96,
       .offset_y       = 0,
       .sprite_width   = 16,
@@ -48,7 +48,7 @@ const Animation g_anims_wizzard_m[] = {
   {
       .mode           = ANIM_PLAY_MODE_LOOP,
       .frame_duration = 8,
-      .texture_id     = TEX_WIZZARD,
+      .texture_id     = TEX_JOB_WIZZARD,
       .offset_x       = 16,
       .offset_y       = 0,
       .sprite_width   = 16,
@@ -58,7 +58,7 @@ const Animation g_anims_wizzard_m[] = {
   {
       .mode           = ANIM_PLAY_MODE_LOOP,
       .frame_duration = 4,
-      .texture_id     = TEX_WIZZARD,
+      .texture_id     = TEX_JOB_WIZZARD,
       .offset_x       = 80,
       .offset_y       = 0,
       .sprite_width   = 16,
@@ -68,7 +68,7 @@ const Animation g_anims_wizzard_m[] = {
   {
       .mode           = ANIM_PLAY_MODE_NORMAL,
       .frame_duration = 5,
-      .texture_id     = TEX_WIZZARD,
+      .texture_id     = TEX_JOB_WIZZARD,
       .offset_x       = 0,
       .offset_y       = 0,
       .sprite_width   = 16,
@@ -78,7 +78,7 @@ const Animation g_anims_wizzard_m[] = {
   {
       .mode           = ANIM_PLAY_MODE_NORMAL,
       .frame_duration = 5,
-      .texture_id     = TEX_WIZZARD,
+      .texture_id     = TEX_JOB_WIZZARD,
       .offset_x       = 96,
       .offset_y       = 0,
       .sprite_width   = 16,
@@ -90,7 +90,7 @@ const Animation g_anims_lizzard_m[] = {
   {
       .mode           = ANIM_PLAY_MODE_LOOP,
       .frame_duration = 8,
-      .texture_id     = TEX_LIZZARD,
+      .texture_id     = TEX_JOB_LIZZARD,
       .offset_x       = 16,
       .offset_y       = 0,
       .sprite_width   = 16,
@@ -100,7 +100,7 @@ const Animation g_anims_lizzard_m[] = {
   {
       .mode           = ANIM_PLAY_MODE_LOOP,
       .frame_duration = 4,
-      .texture_id     = TEX_LIZZARD,
+      .texture_id     = TEX_JOB_LIZZARD,
       .offset_x       = 80,
       .offset_y       = 0,
       .sprite_width   = 16,
@@ -110,7 +110,7 @@ const Animation g_anims_lizzard_m[] = {
   {
       .mode           = ANIM_PLAY_MODE_NORMAL,
       .frame_duration = 5,
-      .texture_id     = TEX_LIZZARD,
+      .texture_id     = TEX_JOB_LIZZARD,
       .offset_x       = 0,
       .offset_y       = 0,
       .sprite_width   = 16,
@@ -120,7 +120,7 @@ const Animation g_anims_lizzard_m[] = {
   {
       .mode           = ANIM_PLAY_MODE_NORMAL,
       .frame_duration = 5,
-      .texture_id     = TEX_LIZZARD,
+      .texture_id     = TEX_JOB_LIZZARD,
       .offset_x       = 96,
       .offset_y       = 0,
       .sprite_width   = 16,
@@ -133,7 +133,7 @@ const Animation g_anims_elf_m[] = {
   {
       .mode           = ANIM_PLAY_MODE_LOOP,
       .frame_duration = 8,
-      .texture_id     = TEX_ELF,
+      .texture_id     = TEX_JOB_ELF,
       .offset_x       = 16,
       .offset_y       = 0,
       .sprite_width   = 16,
@@ -143,7 +143,7 @@ const Animation g_anims_elf_m[] = {
   {
       .mode           = ANIM_PLAY_MODE_LOOP,
       .frame_duration = 4,
-      .texture_id     = TEX_ELF,
+      .texture_id     = TEX_JOB_ELF,
       .offset_x       = 80,
       .offset_y       = 0,
       .sprite_width   = 16,
@@ -153,7 +153,7 @@ const Animation g_anims_elf_m[] = {
   {
       .mode           = ANIM_PLAY_MODE_NORMAL,
       .frame_duration = 5,
-      .texture_id     = TEX_ELF,
+      .texture_id     = TEX_JOB_ELF,
       .offset_x       = 0,
       .offset_y       = 0,
       .sprite_width   = 16,
@@ -163,7 +163,7 @@ const Animation g_anims_elf_m[] = {
   {
       .mode           = ANIM_PLAY_MODE_NORMAL,
       .frame_duration = 5,
-      .texture_id     = TEX_ELF,
+      .texture_id     = TEX_JOB_ELF,
       .offset_x       = 96,
       .offset_y       = 0,
       .sprite_width   = 16,
@@ -176,7 +176,7 @@ const Animation g_anims_chort[] = {
   {
       .mode           = ANIM_PLAY_MODE_LOOP,
       .frame_duration = 8,
-      .texture_id     = TEX_CHORT,
+      .texture_id     = TEX_MON_CHORT,
       .offset_x       = 0,
       .offset_y       = 0,
       .sprite_width   = 16,
@@ -186,7 +186,7 @@ const Animation g_anims_chort[] = {
   {
       .mode           = ANIM_PLAY_MODE_LOOP,
       .frame_duration = 6,
-      .texture_id     = TEX_CHORT,
+      .texture_id     = TEX_MON_CHORT,
       .offset_x       = 16 * 4,
       .offset_y       = 0,
       .sprite_width   = 16,
@@ -196,7 +196,7 @@ const Animation g_anims_chort[] = {
   {
       .mode           = ANIM_PLAY_MODE_NORMAL,
       .frame_duration = 10,
-      .texture_id     = TEX_CHORT,
+      .texture_id     = TEX_MON_CHORT,
       .offset_x       = 0,
       .offset_y       = 0,
       .sprite_width   = 16,
@@ -206,7 +206,7 @@ const Animation g_anims_chort[] = {
   {
       .mode           = ANIM_PLAY_MODE_NORMAL,
       .frame_duration = 5,
-      .texture_id     = TEX_CHORT,
+      .texture_id     = TEX_MON_CHORT,
       .offset_x       = 80,
       .offset_y       = 0,
       .sprite_width   = 16,
@@ -219,7 +219,7 @@ const Animation g_anims_wogol[] = {
   {
       .mode           = ANIM_PLAY_MODE_LOOP,
       .frame_duration = 8,
-      .texture_id     = TEX_WOGOL,
+      .texture_id     = TEX_MON_WOGOL,
       .offset_x       = 0,
       .offset_y       = 0,
       .sprite_width   = 16,
@@ -229,7 +229,7 @@ const Animation g_anims_wogol[] = {
   {
       .mode           = ANIM_PLAY_MODE_LOOP,
       .frame_duration = 5,
-      .texture_id     = TEX_WOGOL,
+      .texture_id     = TEX_MON_WOGOL,
       .offset_x       = 48,
       .offset_y       = 0,
       .sprite_width   = 16,
@@ -239,7 +239,7 @@ const Animation g_anims_wogol[] = {
   {
       .mode           = ANIM_PLAY_MODE_NORMAL,
       .frame_duration = 10,
-      .texture_id     = TEX_WOGOL,
+      .texture_id     = TEX_MON_WOGOL,
       .offset_x       = 0,
       .offset_y       = 0,
       .sprite_width   = 16,
@@ -249,7 +249,7 @@ const Animation g_anims_wogol[] = {
   {
       .mode           = ANIM_PLAY_MODE_NORMAL,
       .frame_duration = 5,
-      .texture_id     = TEX_WOGOL,
+      .texture_id     = TEX_MON_WOGOL,
       .offset_x       = 80,
       .offset_y       = 0,
       .sprite_width   = 16,
@@ -262,7 +262,7 @@ const Animation g_anims_imp[] = {
   {
       .mode           = ANIM_PLAY_MODE_LOOP,
       .frame_duration = 8,
-      .texture_id     = TEX_IMP,
+      .texture_id     = TEX_MON_IMP,
       .offset_x       = 0,
       .offset_y       = 0,
       .sprite_width   = 16,
@@ -272,7 +272,7 @@ const Animation g_anims_imp[] = {
   {
       .mode           = ANIM_PLAY_MODE_LOOP,
       .frame_duration = 5,
-      .texture_id     = TEX_IMP,
+      .texture_id     = TEX_MON_IMP,
       .offset_x       = 48,
       .offset_y       = 0,
       .sprite_width   = 16,
@@ -282,7 +282,7 @@ const Animation g_anims_imp[] = {
   {
       .mode           = ANIM_PLAY_MODE_NORMAL,
       .frame_duration = 10,
-      .texture_id     = TEX_IMP,
+      .texture_id     = TEX_MON_IMP,
       .offset_x       = 0,
       .offset_y       = 0,
       .sprite_width   = 16,
@@ -292,7 +292,7 @@ const Animation g_anims_imp[] = {
   {
       .mode           = ANIM_PLAY_MODE_NORMAL,
       .frame_duration = 5,
-      .texture_id     = TEX_IMP,
+      .texture_id     = TEX_MON_IMP,
       .offset_x       = 80,
       .offset_y       = 0,
       .sprite_width   = 16,
@@ -305,7 +305,7 @@ const Animation g_anims_huge_demon[] = {
   {
       .mode           = ANIM_PLAY_MODE_LOOP,
       .frame_duration = 8,
-      .texture_id     = TEX_BIG_DEMON,
+      .texture_id     = TEX_MON_BIG_DEMON,
       .offset_x       = 0,
       .offset_y       = 0,
       .sprite_width   = 32,
@@ -315,7 +315,7 @@ const Animation g_anims_huge_demon[] = {
   {
       .mode           = ANIM_PLAY_MODE_LOOP,
       .frame_duration = 5,
-      .texture_id     = TEX_BIG_DEMON,
+      .texture_id     = TEX_MON_BIG_DEMON,
       .offset_x       = 32 * 3,
       .offset_y       = 0,
       .sprite_width   = 32,
@@ -325,7 +325,7 @@ const Animation g_anims_huge_demon[] = {
   {
       .mode           = ANIM_PLAY_MODE_NORMAL,
       .frame_duration = 10,
-      .texture_id     = TEX_BIG_DEMON,
+      .texture_id     = TEX_MON_BIG_DEMON,
       .offset_x       = 0,
       .offset_y       = 0,
       .sprite_width   = 32,
@@ -335,7 +335,7 @@ const Animation g_anims_huge_demon[] = {
   {
       .mode           = ANIM_PLAY_MODE_NORMAL,
       .frame_duration = 5,
-      .texture_id     = TEX_BIG_DEMON,
+      .texture_id     = TEX_MON_BIG_DEMON,
       .offset_x       = 32 * 5,
       .offset_y       = 0,
       .sprite_width   = 32,
@@ -347,7 +347,7 @@ const Animation g_anims_huge_demon[] = {
 const Animation g_anim_fire_cast = {
   .mode           = ANIM_PLAY_MODE_NORMAL,
   .frame_duration = 1,
-  .texture_id     = TEX_EFFECT_FIRE_CAST,
+  .texture_id     = TEX_FX_FIRE_CAST,
   .offset_x       = 0,
   .offset_y       = 0,
   .sprite_width   = 96,
@@ -358,7 +358,7 @@ const Animation g_anim_fire_cast = {
 const Animation g_anim_ice_cast = {
   .mode           = ANIM_PLAY_MODE_NORMAL,
   .frame_duration = 1,
-  .texture_id     = TEX_EFFECT_ICE_CAST,
+  .texture_id     = TEX_FX_ICE_CAST,
   .offset_x       = 0,
   .offset_y       = 0,
   .sprite_width   = 96,
@@ -391,7 +391,7 @@ const Animation g_anim_fire_ball = {
 const Animation g_anim_fire_hit = {
   .mode           = ANIM_PLAY_MODE_NORMAL,
   .frame_duration = 1,
-  .texture_id     = TEX_EFFECT_FIRE_HIT,
+  .texture_id     = TEX_FX_FIRE_HIT,
   .offset_x       = 0,
   .offset_y       = 0,
   .sprite_width   = 64,
@@ -402,7 +402,7 @@ const Animation g_anim_fire_hit = {
 const Animation g_anim_ice_hit = {
   .mode           = ANIM_PLAY_MODE_NORMAL,
   .frame_duration = 1,
-  .texture_id     = TEX_EFFECT_ICE_HIT,
+  .texture_id     = TEX_FX_ICE_HIT,
   .offset_x       = 0,
   .offset_y       = 0,
   .sprite_width   = 96,
@@ -413,7 +413,7 @@ const Animation g_anim_ice_hit = {
 const Animation g_anim_blood_loss_1 = {
   .mode           = ANIM_PLAY_MODE_NORMAL,
   .frame_duration = 1,
-  .texture_id     = TEX_EFFECT_BLOOD_1,
+  .texture_id     = TEX_FX_BLOOD_1,
   .offset_x       = 0,
   .offset_y       = 0,
   .sprite_width   = 100,
@@ -424,7 +424,7 @@ const Animation g_anim_blood_loss_1 = {
 const Animation g_anim_blood_loss_2 = {
   .mode           = ANIM_PLAY_MODE_NORMAL,
   .frame_duration = 1,
-  .texture_id     = TEX_EFFECT_BLOOD_2,
+  .texture_id     = TEX_FX_BLOOD_2,
   .offset_x       = 0,
   .offset_y       = 0,
   .sprite_width   = 100,
@@ -481,7 +481,7 @@ const Animation g_anim_coin = {
   .sprite_width   = 8,
   .sprite_height  = 8,
   .count          = 4,
-  .texture_id     = TEX_COIN,
+  .texture_id     = TEX_ITEM_COIN,
 };
 
 const Animation g_anim_slash = {
@@ -490,5 +490,5 @@ const Animation g_anim_slash = {
   .sprite_width   = 48,
   .sprite_height  = 48,
   .count          = 10,
-  .texture_id     = TEX_EFFECT_SLASH,
+  .texture_id     = TEX_FX_SLASH,
 };

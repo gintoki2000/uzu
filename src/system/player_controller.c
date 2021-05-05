@@ -55,7 +55,7 @@ static BOOL
 __callback_query_closest_interactable(struct CBPlayerInputProcess_QueryClosestInteracableArgs* args,
                                       ecs_entity_t                                             e)
 {
-  Vec2  entity_position = get_entity_position(g_ecs, e);
+  Vec2  entity_position = ett_get_position(g_ecs, e);
   float dist            = vec2_dist(args->player_position, entity_position);
   if (dist < args->closest_distance && ecs_has(g_ecs, e, INTERACTABLE))
   {
@@ -74,7 +74,7 @@ static void find_interacable_entity()
 
     struct CBPlayerInputProcess_QueryClosestInteracableArgs cbargs;
 
-    player_pos = get_player_position(g_ecs);
+    player_pos = snn_get_player_position(g_ecs);
     rect.x     = player_pos.x - INTERACTABLE_DISTANCE / 2;
     rect.y     = player_pos.y - INTERACTABLE_DISTANCE / 2;
     rect.w     = INTERACTABLE_DISTANCE;
@@ -91,8 +91,8 @@ static void find_interacable_entity()
   {
     Vec2 player_pos, ientity_pos;
 
-    player_pos  = get_player_position(g_ecs);
-    ientity_pos = get_entity_position(g_ecs, g_curr_iteractable_entity);
+    player_pos  = snn_get_player_position(g_ecs);
+    ientity_pos = ett_get_position(g_ecs, g_curr_iteractable_entity);
 
     if (vec2_dist(player_pos, ientity_pos) > INTERACTABLE_DISTANCE ||
         !ecs_has(g_ecs, g_curr_iteractable_entity, INTERACTABLE))
@@ -119,7 +119,7 @@ void player_process_input(SDL_UNUSED void* arg)
   ecs_entity_t player;
   Controller*  controller;
 
-  if ((player = get_player(g_ecs)) == ECS_NULL_ENT)
+  if ((player = scn_get_player(g_ecs)) == ECS_NULL_ENT)
     return;
   if (ecs_has(g_ecs, player, SCRIPT))
     return;

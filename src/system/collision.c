@@ -18,9 +18,7 @@ static void on_hitbox_remove(SDL_UNUSED void* arg, const EcsComponentEvent* even
 {
   HitBox* hitbox = event->component;
   if (hitbox->proxy_id != RTREE_NULL_NODE)
-  {
     rtree_destroy_proxy(_rtree, hitbox->proxy_id);
-  }
 }
 
 INLINE RECT* calculate_bounding_rect(RECT* r, const HitBox* hitbox, const Transform* transform)
@@ -194,7 +192,7 @@ static void narrow_phase(Ecs* ecs)
 void collision_system_init()
 {
   _rtree = rtree_new();
-  ecs_connect(g_ecs, ECS_EVT_RMV_COMP, HITBOX, CALLBACK_2(on_hitbox_remove));
+  signal_connect(ecs_on_destruct(g_ecs, HITBOX), CALLBACK_2(on_hitbox_remove));
 }
 
 void collision_system_fini()

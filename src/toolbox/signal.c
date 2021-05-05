@@ -3,32 +3,24 @@
 
 #define SIGNAL_DEFAULT_CAPACITY 16
 
-struct Signal
-{
-  int       cap;
-  int       cnt;
-  Callback* slots;
-  BOOL      is_emiting;
-};
-
 struct Emitter
 {
   u32     num_singals;
   Signal* signals;
 };
 
-static Signal* signal_init(Signal* sig)
+Signal* signal_init(Signal* self)
 {
-  sig->cnt        = 0;
-  sig->cap        = SIGNAL_DEFAULT_CAPACITY;
-  sig->slots      = calloc(SIGNAL_DEFAULT_CAPACITY, sizeof(Callback));
-  sig->is_emiting = FALSE;
-  return sig;
+  self->cnt        = 0;
+  self->cap        = SIGNAL_DEFAULT_CAPACITY;
+  self->slots      = SDL_calloc(SIGNAL_DEFAULT_CAPACITY, sizeof(Callback));
+  self->is_emiting = FALSE;
+  return self;
 }
 
-static void signal_fini(Signal* sig)
+void signal_fini(Signal* sig)
 {
-  free(sig->slots);
+  SDL_free(sig->slots);
 }
 
 Signal* signal_new()
@@ -43,7 +35,7 @@ void signal_destroy(Signal* sig)
   if (sig)
   {
     signal_fini(sig);
-    free(sig);
+    SDL_free(sig);
   }
 }
 
@@ -63,7 +55,7 @@ void signal_connect(Signal* self, Callback callback)
   if (self->cnt == self->cap)
   {
     self->cap *= 2;
-    self->slots = realloc(self->slots, self->cap * sizeof(Callback));
+    self->slots = SDL_realloc(self->slots, self->cap * sizeof(Callback));
   }
   self->slots[self->cnt++] = callback;
 }
@@ -106,7 +98,7 @@ void signal_emit(Signal* self, const void* data)
 static Emitter* emitter_init(Emitter* self, u32 num_singals)
 {
   self->num_singals = num_singals;
-  self->signals     = calloc(num_singals, sizeof(Signal));
+  self->signals     = SDL_calloc(num_singals, sizeof(Signal));
   for (u32 i = 0; i < num_singals; ++i)
   {
     signal_init(&self->signals[i]);
@@ -120,7 +112,7 @@ static void emitter_fini(Emitter* self)
   {
     signal_fini(self->signals + i);
   }
-  free(self->signals);
+  SDL_free(self->signals);
 }
 
 Emitter* emitter_new(u32 num_singals)
@@ -135,7 +127,7 @@ void emitter_delete(Emitter* self)
   if (self)
   {
     emitter_fini(self);
-    free(self);
+    SDL_free(self);
   }
 }
 

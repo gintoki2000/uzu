@@ -1,4 +1,5 @@
 #include "components.h"
+#include "config.h"
 #include "system/game_logic.h"
 
 extern Ecs* g_ecs;
@@ -42,7 +43,7 @@ void weapon_transform_system()
     weapon_position = vec2_add(weapon_position, attachment_point);
 
     weapon_transform->position = weapon_position;
-    weapon_transform->rotation = hand[i].angle + signf(c) * weapon_attributes->base_angle;
+    weapon_transform->rotation = hand[i].angle;
     weapon_visual->flip        = fdir->value.x > 0.f ? SDL_FLIP_NONE : SDL_FLIP_VERTICAL;
   }
 }
@@ -66,13 +67,14 @@ void hand_animation_system(void)
   FacingDirection*        fdir;
 
   BOOL not_started;
-  BOOL just_finished_kframe;
+  BOOL just_finished_current_frame;
   ecs_raw(g_ecs, HAND_ANIMATION, &entities, (void**)&hand_anim, &cnt);
   for (int i = cnt - 1; i >= 0; --i)
   {
-    not_started          = hand_anim[i].current_index == -1;
-    just_finished_kframe = hand_anim[i].current_duration > 0 && !(--hand_anim[i].current_duration);
-    if (not_started || just_finished_kframe)
+    not_started = hand_anim[i].current_index == -1;
+    just_finished_current_frame =
+        hand_anim[i].current_duration > 0 && !(--hand_anim[i].current_duration);
+    if (not_started || just_finished_current_frame)
     {
       if (next_kframe(&hand_anim[i]))
       {
@@ -88,6 +90,8 @@ void hand_animation_system(void)
       else
       {
         INVOKE_EVENT(hand_anim[i].finished_callback, entities[i]);
+        hand         = ecs_get(g_ecs, entities[i], HAND);
+        hand->length = hand_anim[i].initial_length;
         ecs_rmv(g_ecs, entities[i], HAND_ANIMATION);
       }
     }
@@ -107,9 +111,23 @@ void hand_system(void)
   {
     if (ecs_has(g_ecs, entities[i], HAND_ANIMATION))
       continue;
+    if (hand[i].weapon == ECS_NULL_ENT)
+      continue;
     fdir          = ecs_get(g_ecs, entities[i], FACING_DIRECTION);
     attrs         = ecs_get(g_ecs, hand[i].weapon, WEAPON_ATTRIBUTES);
-    hand[i].angle = SDL_atan2f(fdir->value.y, fdir->value.x) * 57.2957795;
+    hand[i].angle = SDL_atan2f(fdir->value.y, fdir->value.x) * RAD_TO_DEG;
+
+    /*
+    if (hand[i].angle < -65.f && hand[i].angle > -115)
+    {
+      hand[i].angle = hand[i].angle > -90.f ? -65.f : -115.f;
+    }
+    */
+
+#if 0
+    if (ecs_has(g_ecs, entities[i], PLAYER_TAG))
+      printf("angle: %lf\n", hand[i].angle);
+#endif
   }
 }
 

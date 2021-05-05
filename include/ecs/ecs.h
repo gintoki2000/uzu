@@ -16,7 +16,8 @@ typedef struct Ecs
   ecs_size_t    type_cnt;
   EcsType*      types;
   EcsPool**     pools;
-  Emitter*      emitter[ECS_NUM_EVENTS];
+  Signal*       on_construct;
+  Signal*       on_destruct;
   ecs_entity_t* entities;
   ecs_size_t    cnt;
   ecs_size_t    size;
@@ -31,11 +32,19 @@ typedef struct EcsFilter
   ecs_size_t        ecnt;
 } EcsFilter;
 
+typedef struct EcsSystem
+{
+  const ecs_size_t* signature;
+  const ecs_size_t* exclude;
+  void (*process)(void*, Ecs*, ecs_entity_t, void**);
+  void* arg;
+} EcsSystem;
+
 typedef struct EcsComponentEvent
 {
   ecs_entity_t entity;
   void*        component;
-} EcsComponentEvent;
+} EcsComponentEvent, EcsComponentAdded, EcsComponentRemoved;
 
 Ecs* ecs_new(const EcsType* types, ecs_size_t cnt);
 void ecs_del(Ecs* ecs);
@@ -65,12 +74,12 @@ void ecs_raw(Ecs*           self,
              void**         components_ptr,
              ecs_size_t*    cnt_ptr);
 
-INLINE BOOL ecs_is_valid(Ecs* self, ecs_entity_t entity)
+INLINE BOOL  ecs_is_valid(Ecs* self, ecs_entity_t entity)
 {
   ecs_size_t idx = ECS_ENT_IDX(entity);
   return (idx < self->size) && (self->entities[idx] == entity);
 }
 
-void ecs_connect(Ecs* self, int event, ecs_size_t type_id, Callback cb);
-void ecs_disconnect(Ecs* self, int event, ecs_size_t type_id, void(*fn)());
+Signal* ecs_on_construct(Ecs* self, ecs_size_t type_id);
+Signal* ecs_on_destruct(Ecs* self, ecs_size_t type_id);
 #endif // WORLD_H

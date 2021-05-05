@@ -38,7 +38,7 @@ void action_system(void)
     if (ACTION_UPDATE(scripts[i].action, entities[i]))
     {
       ACTION_END(scripts[i].action, entities[i]);
-      INVOKE_EVENT(scripts[i].finished_callback, &scripts[i]);
+      INVOKE_EVENT(scripts[i].cb_finished, &scripts[i]);
       ecs_rmv(g_ecs, entities[i], SCRIPT);
     }
   }
@@ -46,5 +46,5 @@ void action_system(void)
 
 void action_system_init(void)
 {
-  ecs_connect(g_ecs, ECS_EVT_ADD_COMP, SCRIPT, CALLBACK_2(on_script_added));
+  signal_connect(ecs_on_construct(g_ecs, SCRIPT), CALLBACK_2(on_script_added));
 }

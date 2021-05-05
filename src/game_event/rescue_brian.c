@@ -61,7 +61,7 @@ static void INACTIVE_on_event_finished(SDL_UNUSED void* arg, const MSG_EventFini
     if (!SDL_strcmp(msg->status, "accept"))
     {
       _save.state        = PROCESSING;
-      ecs_entity_t brian = find_entity(g_ecs, "brian");
+      ecs_entity_t brian = scn_find(g_ecs, "brian");
       if (brian != ECS_NULL_ENT)
         ecs_set(g_ecs, brian, DIALOGUE, &(Dialogue){ CON_BRIAN_RESCUE_1 });
       processing();
@@ -124,7 +124,7 @@ static void PROCESSING_on_entity_died(SDL_UNUSED void* arg, const MSG_EntityDied
 
 static void PICKUP_on_msgbox_close(SDL_UNUSED void* arg, SDL_UNUSED const void* msg)
 {
-  ecs_entity_t brian = find_entity(g_ecs, "brian");
+  ecs_entity_t brian = scn_find(g_ecs, "brian");
   ASSERT(brian != ECS_NULL_ENT);
   ecs_set(g_ecs, brian, SCRIPT, &(Script){ create_action_sequence(), { 0 } });
 }
@@ -136,10 +136,10 @@ static void PICKUP_on_converastion_finished(SDL_UNUSED void*                arg,
   {
     if (!SDL_strcmp(msg->response, "Give him some recovery medicine"))
     {
-      Item* item = get_item(ITEM_TYPE_RED_FLASK);
-      if (item->num_items >= 3)
+      Item* item = inv_get_item(ITEM_TYPE_RED_FLASK);
+      if (item->quality >= 3)
       {
-        item->num_items -= 3;
+        item->quality -= 3;
         ui_msgbox_display("give to brian x3 red flasks");
         ui_msgbox_close_hook(CALLBACK_2(PICKUP_on_msgbox_close));
         _save.state = FINHISHED;

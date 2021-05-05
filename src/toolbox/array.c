@@ -36,7 +36,7 @@ void* _array_addn(Array* self, u32 n)
   	ncap = self->cap;
   	while (ncap < n)
     	ncap *= 2;
-  	array_encap(self, ncap);
+        array_reserve(self, ncap);
   }
   s8* ret = _array_at(self, self->cnt);
   self->cnt += n;
@@ -62,7 +62,7 @@ u32 array_qrmv(Array *self, u32 idx)
 	return self->cnt--;
 }
 
-void array_encap(Array* self, u32 new_cap)
+void array_reserve(Array* self, u32 new_cap)
 {
 	if (new_cap <= self->cap)
 		return;

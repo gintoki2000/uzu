@@ -24,9 +24,7 @@ extern const Animation g_anim_slash;
 
 extern const Animation g_anim_coin;
 
-
 extern const Animation g_anim_ice_arrow;
 extern const Animation g_anim_fire_ball;
-
 
 #endif //ANIMATIONS_H

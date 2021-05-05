@@ -22,7 +22,7 @@ void interactable_rendering_system()
 {
   if (g_curr_iteractable_entity != ECS_NULL_ENT)
   {
-    Vec2 position = get_entity_position(g_ecs, g_curr_iteractable_entity);
+    Vec2 position = ett_get_position(g_ecs, g_curr_iteractable_entity);
 
     SDL_RenderCopy(g_renderer,
                    get_texture(TEX_PONITER_DOWN),

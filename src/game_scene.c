@@ -38,8 +38,8 @@
 #include "system/debug/draw_target.h"
 #include "system/event_messaging_sys.h"
 
-static void on_player_hit_ladder(pointer_t arg, const MSG_HitLadder* event);
-static void on_entity_died(pointer_t arg, const MSG_EntityDied* event);
+static void on_player_hit_ladder(void* arg, const MSG_HitLadder* event);
+static void on_entity_died(void* arg, const MSG_EntityDied* event);
 static void unload_current_level(void);
 static void update_ui(void);
 static void render_ui(void);
@@ -83,9 +83,7 @@ static void spawn_player(Vec2 position)
 
   make_player(g_ecs, player, weapon);
 
-  set_entity_hit_points(g_ecs, player, g_session.hp);
-  set_entity_mana_points(g_ecs, player, g_session.mp);
-  set_spell(g_ecs, player, g_session.spell);
+  ett_attune_spell(g_ecs, player, g_session.spell);
 }
 static void on_load()
 {
@@ -109,6 +107,9 @@ static void on_load()
   effect_system_init();
   update_attack_target_system_init();
   action_system_init();
+  stats_system_init();
+  stagger_system_init();
+  status_effect_system_init();
 
   // init ui
   ui_dialogue_init();
@@ -164,24 +165,16 @@ static void on_event(const SDL_UNUSED SDL_Event* evt)
 static void on_update()
 {
 #if DEBUG
-  static BOOL  db_pressed_h, db_pressed_j, db_pressed_k, db_pressed_l;
-  const Uint8* keystate = SDL_GetKeyboardState(NULL);
-
-  if (!db_pressed_h && keystate[SDL_SCANCODE_H])
+  if (key_just_pressed(SDL_SCANCODE_H))
     _db_hitbox = !_db_hitbox;
-  if (!db_pressed_j && keystate[SDL_SCANCODE_J])
+  if (key_just_pressed(SDL_SCANCODE_J))
     _db_position = !_db_position;
-  if (!db_pressed_k && keystate[SDL_SCANCODE_K])
+  if (key_just_pressed(SDL_SCANCODE_K))
     _db_tile_colliders = !_db_tile_colliders;
-  if (!db_pressed_l && keystate[SDL_SCANCODE_L])
+  if (key_just_pressed(SDL_SCANCODE_L))
     _db_rtree = !_db_rtree;
-
-  db_pressed_h = keystate[SDL_SCANCODE_H];
-  db_pressed_j = keystate[SDL_SCANCODE_J];
-  db_pressed_k = keystate[SDL_SCANCODE_K];
-  db_pressed_l = keystate[SDL_SCANCODE_L];
-
 #endif
+
   if (_has_next_level)
   {
     unload_current_level();
@@ -200,16 +193,14 @@ static void on_update()
     render_ui();
 
 #if DEBUG
-#define _(c, ...)                                                                                  \
-  if (c)                                                                                           \
-  {                                                                                                \
-    __VA_ARGS__                                                                                    \
-  }
-    _(_db_hitbox, { hitbox_rendering_system_update(); });
-    _(_db_position, { position_rendering_system_update(); });
-    _(_db_tile_colliders, { draw_map_colliders(); });
-    _(_db_rtree, { collision_system_render_debug(); });
-#undef _
+    if (_db_hitbox)
+      hitbox_rendering_system_update();
+    if (_db_position)
+      position_rendering_system_update();
+    if (_db_tile_colliders)
+      draw_map_colliders();
+    if (_db_rtree)
+      collision_system_render_debug();
 #endif
 
     // late update
@@ -218,15 +209,15 @@ static void on_update()
   }
 }
 
-static void on_player_hit_ladder(SDL_UNUSED pointer_t arg, const MSG_HitLadder* event)
+static void on_player_hit_ladder(SDL_UNUSED void* arg, const MSG_HitLadder* event)
 {
   LadderAttributes* attrs = ecs_get(g_ecs, event->ladder, LADDER_ATTRIBUTES);
-  strcpy(_next_level, attrs->level);
-  strcpy(_spwan_location, attrs->dest);
+  SDL_strlcpy(_next_level, attrs->level, sizeof(_next_level) - 1);
+  SDL_strlcpy(_spwan_location, attrs->dest, sizeof(_spwan_location) - 1);
   _has_next_level = TRUE;
 }
 
-static void on_entity_died(SDL_UNUSED pointer_t arg, SDL_UNUSED const MSG_EntityDied* event)
+static void on_entity_died(SDL_UNUSED void* arg, const MSG_EntityDied* event)
 {
   if (ecs_has(g_ecs, event->entity, PLAYER_TAG))
     _player_died = TRUE;
@@ -245,10 +236,8 @@ static Mix_Music* music_from_level_name(const char* level_name)
     { 0 },
   };
   for (int i = 0; lut[i].level_name != NULL; ++i)
-  {
     if (STREQ(level_name, lut[i].level_name))
       return get_bg_mus(lut[i].mus_id);
-  }
   return NULL;
 }
 
@@ -261,13 +250,10 @@ static void music_player_on_level_loaded(SDL_UNUSED void* arg, const MSG_LevelLo
 
 static void unload_current_level()
 {
-  // TODO: copy dữ liệu của player sang ecs registry tạm
   ems_broadcast(MSG_LEVEL_UNLOADED, &(MSG_LevelUnloaded){ g_session.level });
-  ecs_entity_t player = get_player(g_ecs);
-  g_session.hp        = get_entity_hit_points(g_ecs, player);
-  g_session.mp        = get_entity_mana_points(g_ecs, player);
-  g_session.spell     = get_spell(g_ecs, player);
-  g_session.weapon    = get_equiped_weapon_type_id(g_ecs, player);
+  ecs_entity_t player = scn_get_player(g_ecs);
+  g_session.spell     = ett_get_attuned_spell_type(g_ecs, player);
+  g_session.weapon    = ett_get_equiped_weapon_type(g_ecs, player);
   ecs_clear(g_ecs);
   map_clear();
 }
@@ -275,11 +261,13 @@ static void unload_current_level()
 void game_scene_pause()
 {
   _paused = TRUE;
+  ems_broadcast(MSG_GAME_PAUSED, NULL);
 }
 
 void game_scene_resume()
 {
   _paused = FALSE;
+  ems_broadcast(MSG_GAME_RESUMED, NULL);
 }
 static void update_ui()
 {
@@ -300,6 +288,7 @@ static void render_ui()
 }
 static void update_game_logic(void)
 {
+  RUN_SYSTEM(stats_system);
   RUN_SYSTEM(motion_system);
   RUN_SYSTEM(tile_collision_system);
   RUN_SYSTEM(collision_system);
@@ -310,11 +299,11 @@ static void update_game_logic(void)
   RUN_SYSTEM(health_system);
   RUN_SYSTEM(camera_system);
   RUN_SYSTEM(following_system);
-  RUN_SYSTEM(paralyzing_system);
-  RUN_SYSTEM(self_destruction_system);
+  RUN_SYSTEM(stagger_system);
   RUN_SYSTEM(update_attack_target_system);
   RUN_SYSTEM(update_facing_direction_system);
   RUN_SYSTEM(action_system);
+  RUN_SYSTEM(status_effect_system);
 
   (map_update_animated_cells());
 
@@ -339,6 +328,7 @@ static void render_game_world(void)
   RUN_SYSTEM(hub_rendering_system);
   RUN_SYSTEM(dialogue_system);
   RUN_SYSTEM(merchant_system);
+  RUN_SYSTEM(status_effect_rendering_system);
   camera_shaker_postupdate();
 }
 
@@ -346,7 +336,7 @@ static Vec2 get_spawn_localtion(ecs_entity_t ladder)
 {
   LadderAttributes* attrs    = ecs_get(g_ecs, ladder, LADDER_ATTRIBUTES);
   HitBox*           hixbox   = ecs_get(g_ecs, ladder, HITBOX);
-  Vec2              position = get_entity_position(g_ecs, ladder);
+  Vec2              position = ett_get_position(g_ecs, ladder);
   switch (attrs->exit_direction)
   {
   case UP:
@@ -374,7 +364,7 @@ static void next_level(void)
   Vec2         spawn_localtion;
   load_level(_next_level);
 
-  if ((ladder = find_ladder(g_ecs, _spwan_location)) != ECS_NULL_ENT)
+  if ((ladder = scn_find_portal(g_ecs, _spwan_location)) != ECS_NULL_ENT)
   {
     spawn_localtion = get_spawn_localtion(ladder);
     spawn_player(spawn_localtion);

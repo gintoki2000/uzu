@@ -4,7 +4,6 @@
 #include "ecs/ecs.h"
 #include "toolbox/toolbox.h"
 
-
 typedef enum
 {
   NONE,
@@ -76,6 +75,8 @@ typedef struct SpriteSheet
   u16 count;
 } SpriteSheet;
 
+Sprite sprite_sheet_at(const SpriteSheet* sheet, int index);
+
 typedef struct Animation
 {
   u16 frame_duration;
@@ -87,6 +88,8 @@ typedef struct Animation
   u16 sprite_height;
   u16 count;
 } Animation;
+
+Sprite animation_keyframe(const Animation* animation, u16 elapsed);
 
 typedef struct
 {
@@ -122,7 +125,7 @@ typedef enum
   PICKUPABLE_COIN,
   PICKUPABLE_KEY_1_1,
   NUM_PICKUPABLE_TYPES,
-} PickupableId;
+} PickupableType;
 #define PICKUPABLE_ID_NULL NUM_PICKUPABLE_TYPES
 
 typedef enum
@@ -147,8 +150,8 @@ typedef struct ItemType
 
 typedef struct Item
 {
-  ItemTypeId type_id;
-  u8         num_items;
+  ItemTypeId type;
+  u8         quality;
 } Item;
 
 #define ITEM_PAYLOAD_INFINTE -1
@@ -169,6 +172,7 @@ typedef enum
 {
   SPELL_ICE_ARROW,
   SPELL_FIRE_BALL,
+  SPELL_HOMIE_FIRE,
   NUM_SPELLS
 } SpellType;
 #define SPELL_ID_NULL NUM_SPELLS
@@ -176,10 +180,10 @@ typedef enum
 typedef struct Spell
 {
   const char* name;
-  void (*cast)(Ecs* ecs, ecs_entity_t caster, ecs_entity_t weapon);
+  void (*cast)(Ecs*, ecs_entity_t, ecs_entity_t);
+  BOOL (*process)(Ecs*, ecs_entity_t, ecs_entity_t);
   u16  cost;
   u16  cast_spd;
-  u16  casting_effect;
   Icon icon;
 } Spell;
 
@@ -226,6 +230,15 @@ typedef struct Cursor
   SDL_Point hotspot;
 } Cursor;
 
+enum StatusEffectType
+{
+  STATUS_EFFECT_FREEZED,
+  STATUS_EFFECT_POISONED,
+  STATUS_EFFECT_PARALYZED,
+  STATUS_EFFECT_BURNED,
+  NUM_STATUS_EFFECT,
+};
+
 extern ecs_entity_t (*const g_make_weapon_fn_tbl[NUM_WEAPONS])(Ecs*);
 extern ecs_entity_t (*const g_make_character_fn_tbl[NUM_JOBS])(Ecs*, Vec2);
 extern ecs_entity_t (*const g_make_pickupable_fn_tbl[NUM_ITEM_TYPES])(Ecs*, Vec2 pos);
@@ -237,5 +250,5 @@ extern const u16      g_pickupable_to_item_type_id_tbl[];
 
 Conversation* conversation_init(Conversation* self);
 void          conversation_fini(Conversation* self);
-ecs_entity_t create_weapon(Ecs* registry, u16 type);
+ecs_entity_t  create_weapon(Ecs* registry, u16 type);
 #endif // GLOBAL_H

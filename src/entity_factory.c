@@ -25,7 +25,7 @@ ecs_entity_t make_anime_sword(Ecs* registry)
   transform = ecs_add(registry, entity, TRANSFORM);
 
   visual = ecs_add(registry, entity, VISUAL);
-  sprite_init(&visual->sprite, TEX_ANIME_SWORD);
+  sprite_init(&visual->sprite, TEX_WPN_ANIME_SWORD);
   visual->anchor.x = visual->sprite.rect.w / 2;
   visual->anchor.y = visual->sprite.rect.h + 4;
 
@@ -48,23 +48,22 @@ typedef struct NewCharacterParams
 {
   Vec2             position;
   const Animation* animations;
-  u16              hit_points;
-  u16              mana_points;
-} NewCharacterParams;
+  u16              vitality;
+  u16              intelligent;
+  u16              strength;
+  u16              agility;
+} MakeCharacterParams;
 
-ecs_entity_t make_character_base(Ecs* registry, const NewCharacterParams* params)
+ecs_entity_t make_character_base(Ecs* registry, const MakeCharacterParams* params)
 {
   ecs_entity_t entity;
 
   /*components */
-  Transform*  transform;
-  Visual*     visual;
-  Hand*       hand;
-  Controller* controller;
-  Animator*   animator;
-  HitBox*     hitbox;
-  Motion*     motion;
-  Health*     heath;
+  Transform* transform;
+  Visual*    visual;
+  Hand*      hand;
+  HitBox*    hitbox;
+  Motion*    motion;
 
   entity = ecs_create(registry);
 
@@ -81,104 +80,103 @@ ecs_entity_t make_character_base(Ecs* registry, const NewCharacterParams* params
   hand->original_point.y = -7;
   hand->length           = 6;
 
-  controller = ecs_add(registry, entity, CONTROLLER);
+  ecs_add(registry, entity, CONTROLLER);
+  ecs_set(registry,
+          entity,
+          STATS,
+          &(Stats){
+              .vitality    = { .base = params->vitality },
+              .intelligent = { .base = params->intelligent },
+              .strength    = { .base = params->strength },
+              .agility     = { .base = params->agility },
+          });
 
-  animator               = ecs_add(registry, entity, ANIMATOR);
-  animator->current_anim = ANIM_STATE_IDLE;
-  animator->elapsed      = 0;
-  animator->anims        = params->animations;
+  ecs_set(registry, entity, ANIMATOR, &(Animator){ .anims = params->animations });
 
   hitbox           = ecs_add(registry, entity, HITBOX);
   hitbox->size     = VEC2(6.f, 10.f);
   hitbox->anchor   = VEC2(3.f, 10.f);
   hitbox->proxy_id = RTREE_NULL_NODE;
 
-  motion                = ecs_add(registry, entity, MOTION);
-  heath                 = ecs_add(registry, entity, HEALTH);
-  heath->hit_points     = params->hit_points;
-  heath->max_hit_points = params->hit_points;
+  motion = ecs_add(registry, entity, MOTION);
 
   ecs_add(registry, entity, ENABLE_TILE_COLLISION_TAG);
   ecs_add(registry, entity, CHARACTER_ANIMATOR_TAG);
 
-  ecs_set(registry,
-          entity,
-          MANA_POOL,
-          &(ManaPool){
-              params->mana_points,
-              params->mana_points,
-          });
-
-  ecs_set(registry, entity, MOVE_SPEED, &(MoveSpeed){ 120 });
   ecs_add(registry, entity, FACING_DIRECTION);
   return entity;
 }
-extern const u16 g_initial_hp_tbl[];
-extern const u16 g_initial_mp_tbl[];
 
 ecs_entity_t make_knight(Ecs* registry, Vec2 position)
 {
-  NewCharacterParams params;
+  MakeCharacterParams params;
   params.position    = position;
   params.animations  = g_anims_knight_m;
-  params.hit_points  = g_initial_hp_tbl[JOB_KNIGHT];
-  params.mana_points = g_initial_mp_tbl[JOB_KNIGHT];
+  params.vitality    = 10;
+  params.intelligent = 5;
+  params.strength    = 5;
+  params.agility     = 10;
   return make_character_base(registry, &params);
 }
 
 ecs_entity_t make_elf(Ecs* registry, Vec2 position)
 {
-  NewCharacterParams params;
+  MakeCharacterParams params;
   params.position    = position;
   params.animations  = g_anims_elf_m;
-  params.hit_points  = g_initial_hp_tbl[JOB_ELF];
-  params.mana_points = g_initial_mp_tbl[JOB_ELF];
+  params.vitality    = 10;
+  params.intelligent = 5;
+  params.strength    = 5;
+  params.agility     = 10;
   return make_character_base(registry, &params);
 }
 
 ecs_entity_t make_wizzard(Ecs* registry, Vec2 position)
 {
-  NewCharacterParams params;
+  MakeCharacterParams params;
   params.position    = position;
   params.animations  = g_anims_wizzard_m;
-  params.hit_points  = g_initial_hp_tbl[JOB_WIZZARD];
-  params.mana_points = g_initial_mp_tbl[JOB_WIZZARD];
+  params.vitality    = 20;
+  params.intelligent = 30;
+  params.strength    = 5;
+  params.agility     = 10;
   return make_character_base(registry, &params);
 }
 
 ecs_entity_t make_lizzard(Ecs* registry, Vec2 position)
 {
-  NewCharacterParams params;
+  MakeCharacterParams params;
   params.position    = position;
   params.animations  = g_anims_lizzard_m;
-  params.hit_points  = g_initial_hp_tbl[JOB_DRAGON];
-  params.mana_points = g_initial_mp_tbl[JOB_DRAGON];
+  params.vitality    = 10;
+  params.intelligent = 5;
+  params.strength    = 5;
+  params.agility     = 10;
   return make_character_base(registry, &params);
 }
 
-typedef struct NewMonsterParams
+typedef struct MakeMonsterParams
 {
   Vec2             position;
   const Animation* anims;
-  u16              hit_points;
   Vec2             size;
-} NewMonsterParams;
+  u16              vitality;
+  u16              intelligent;
+  u16              agility;
+  u16              strength;
+} MakeMonParams;
 
-static const Vec2 s_big_size  = { 20.f, 20.f };
-static const Vec2 _small_size = { 10.f, 12.f };
+static const Vec2 _mon_big_size   = { 20.f, 20.f };
+static const Vec2 _mon_small_size = { 10.f, 12.f };
 
-ecs_entity_t make_monster_base(Ecs* registry, const NewMonsterParams* params)
+ecs_entity_t make_monster_base(Ecs* registry, const MakeMonParams* params)
 {
   ecs_entity_t entity;
 
   /*components */
   Transform* transform;
   Visual*    visual;
-  Animator*  animator;
   HitBox*    hitbox;
-  Health*    heath;
-  HealthBar* health_bar;
-  Motion*    motion;
 
   const int sprite_width  = params->anims[0].sprite_width;
   const int sprite_height = params->anims[0].sprite_height;
@@ -190,37 +188,41 @@ ecs_entity_t make_monster_base(Ecs* registry, const NewMonsterParams* params)
 
   visual = ecs_add(registry, entity, VISUAL);
 
-  visual->anchor.x = params->anims[0].sprite_width / 2;
-  visual->anchor.y = params->anims[0].sprite_height;
+  visual->anchor.x = sprite_width / 2;
+  visual->anchor.y = sprite_height;
 
-  animator               = ecs_add(registry, entity, ANIMATOR);
-  animator->current_anim = ANIM_STATE_RUN;
-  animator->elapsed      = 0;
-  animator->anims        = params->anims;
+  ecs_set(registry, entity, ANIMATOR, &(Animator){ .anims = params->anims });
 
   hitbox            = ecs_add(registry, entity, HITBOX);
   hitbox->size      = params->size;
   hitbox->anchor    = VEC2(params->size.x / 2.f, params->size.y);
-  hitbox->proxy_id  = RTREE_NULL_NODE;
   hitbox->mask_bits = BIT(CATEGORY_WEAPON) | BIT(CATEGORY_PROJECTILE);
   hitbox->category  = CATEGORY_ENEMY;
 
   ecs_add(registry, entity, ENEMY_TAG);
 
-  heath                 = ecs_add(registry, entity, HEALTH);
-  heath->max_hit_points = params->hit_points;
-  heath->hit_points     = params->hit_points;
+  ecs_set(registry,
+          entity,
+          HEAL_BAR,
+          &(HealthBar){
+              .len    = sprite_width,
+              .anchor = { sprite_width / 2, sprite_height },
+              .color  = { 0x42, 0xde, 0x23, 0xd0 },
+          });
 
-  health_bar         = ecs_add(registry, entity, HEAL_BAR);
-  health_bar->len    = params->anims[0].sprite_width;
-  health_bar->anchor = (SDL_Point){ sprite_width / 2, sprite_height };
-  health_bar->color  = (SDL_Color){ 0x42, 0xde, 0x23, 0xd0 };
+  ecs_set(registry,
+          entity,
+          STATS,
+          &(Stats){
+              .vitality    = { .base = params->vitality },
+              .intelligent = { .base = params->intelligent },
+              .strength    = { .base = params->strength },
+              .agility     = { .base = params->agility },
+          });
 
-  motion = ecs_add(registry, entity, MOTION);
-
+  ecs_add(registry, entity, MOTION);
   ecs_add(registry, entity, ENABLE_TILE_COLLISION_TAG);
   ecs_add(registry, entity, CHARACTER_ANIMATOR_TAG);
-  ecs_set(registry, entity, MOVE_SPEED, &(MoveSpeed){ 50 });
   ecs_add(registry, entity, FACING_DIRECTION);
   ecs_set(registry, entity, ATTACK_MASK, &(AttackMask){ BIT(CATEGORY_PLAYER) });
   return entity;
@@ -228,30 +230,37 @@ ecs_entity_t make_monster_base(Ecs* registry, const NewMonsterParams* params)
 
 ecs_entity_t make_huge_demon(Ecs* registry, Vec2 position)
 {
-  return make_monster_base(registry,
-                           &(NewMonsterParams){ position, g_anims_huge_demon, 30, s_big_size });
+  MakeMonParams params = { 0 };
+  params.agility       = 10;
+  params.vitality      = 30;
+  params.anims         = g_anims_huge_demon;
+  params.position      = position;
+  params.size          = _mon_big_size;
+  return make_monster_base(registry, &params);
 }
 
 ecs_entity_t make_imp(Ecs* registry, Vec2 position)
 {
-  ecs_entity_t entity = make_monster_base(registry,
-                                          &(NewMonsterParams){ .position   = position,
-                                                               .anims      = g_anims_imp,
-                                                               .hit_points = 5,
-                                                               .size       = _small_size });
-  ecs_set(registry,
-          entity,
-          SELF_DESTRUCTION,
-          &(SelfDestruction){ .range = 16, .target = ECS_NULL_ENT });
-
-  ecs_set(registry, entity, AGGRO_AREA, &(AggroArea){ .position = position, .radius = 150.f });
+  MakeMonParams params = { 0 };
+  params.agility       = 10;
+  params.vitality      = 6;
+  params.anims         = g_anims_imp;
+  params.position      = position;
+  params.size          = _mon_small_size;
+  ecs_entity_t entity  = make_monster_base(registry, &params);
   return entity;
 }
 
 ecs_entity_t make_wogol(Ecs* registry, Vec2 position)
 {
-  return make_monster_base(registry,
-                           &(NewMonsterParams){ position, g_anims_wogol, 5, _small_size });
+  MakeMonParams params = { 0 };
+  params.agility       = 10;
+  params.vitality      = 6;
+  params.anims         = g_anims_wogol;
+  params.position      = position;
+  params.size          = _mon_small_size;
+  ecs_entity_t entity  = make_monster_base(registry, &params);
+  return entity;
 }
 
 struct AnimatedPickupableEntityParams
@@ -332,11 +341,15 @@ static BTNode* create_chort_behavior_tree(void)
 
 ecs_entity_t make_chort(Ecs* registry, Vec2 position)
 {
-  ecs_entity_t entity =
-      make_monster_base(registry, &(NewMonsterParams){ position, g_anims_chort, 5, _small_size });
+  MakeMonParams params = { 0 };
+  params.agility       = 7;
+  params.vitality      = 30;
+  params.anims         = g_anims_chort;
+  params.position      = position;
+  params.size          = _mon_small_size;
+  ecs_entity_t entity  = make_monster_base(registry, &params);
 
   /*components */
-  Drop*       drop;
   Hand*       hand;
   Controller* controller;
   AggroArea*  spot;
@@ -345,20 +358,15 @@ ecs_entity_t make_chort(Ecs* registry, Vec2 position)
   spot->radius   = TILE_SIZE * 7;
   spot->position = position;
 
-  drop          = ecs_add(registry, entity, DROP);
-  drop->type[0] = PICKUPABLE_RED_FLASK;
-  drop->type[1] = PICKUPABLE_BLUE_FLASK;
-  drop->type[2] = PICKUPABLE_COIN;
-
-  drop->rate[0] = 70;
-  drop->rate[1] = 60;
-  drop->rate[2] = 100;
-
-  drop->quality[0] = 1;
-  drop->quality[1] = 1;
-  drop->quality[2] = 1;
-
-  drop->cnt = 3;
+  ecs_set(registry,
+          entity,
+          DROP,
+          &(Drop){
+              .type    = { PICKUPABLE_RED_FLASK, PICKUPABLE_BLUE_FLASK, PICKUPABLE_COIN },
+              .rate    = { 60, 60, 100 },
+              .quality = { 1, 1, 1 },
+              .cnt     = 3,
+          });
 
   controller = ecs_add(registry, entity, CONTROLLER);
 
@@ -372,7 +380,7 @@ ecs_entity_t make_chort(Ecs* registry, Vec2 position)
 
   ecs_entity_t weapon = g_make_weapon_fn_tbl[weapons[rand() % 3]](registry);
 
-  equip(registry, entity, weapon);
+  ett_equip_weapon(registry, entity, weapon);
 
   ecs_set(registry, entity, BRAIN, &(Brain){ create_chort_behavior_tree() });
 
@@ -392,7 +400,7 @@ ecs_entity_t make_axe(Ecs* registry)
   transform = ecs_add(registry, axe, TRANSFORM);
 
   visual = ecs_add(registry, axe, VISUAL);
-  sprite_init(&visual->sprite, TEX_AXE);
+  sprite_init(&visual->sprite, TEX_WPN_AXE);
   visual->anchor.x = visual->sprite.rect.w / 2;
   visual->anchor.y = visual->sprite.rect.h;
 
@@ -406,7 +414,7 @@ ecs_entity_t make_cleaver(Ecs* registry)
   TEXTURE* texture;
 
   entity  = ecs_create(registry);
-  texture = get_texture(TEX_CLEAVER);
+  texture = get_texture(TEX_WPN_CLEAVER);
 
   Transform*         transform;
   Visual*            visual;
@@ -416,7 +424,7 @@ ecs_entity_t make_cleaver(Ecs* registry)
   transform = ecs_add(registry, entity, TRANSFORM);
 
   visual = ecs_add(registry, entity, VISUAL);
-  sprite_init(&visual->sprite, TEX_CLEAVER);
+  sprite_init(&visual->sprite, TEX_WPN_CLEAVER);
   visual->anchor.x = 4;
   visual->anchor.y = 4;
 
@@ -449,7 +457,7 @@ ecs_entity_t make_katana(Ecs* registry)
   transform = ecs_add(registry, entity, TRANSFORM);
 
   visual = ecs_add(registry, entity, VISUAL);
-  sprite_init(&visual->sprite, TEX_KATANA);
+  sprite_init(&visual->sprite, TEX_WPN_KATANA);
   visual->anchor.x = 3;
   visual->anchor.y = 3;
 
@@ -481,7 +489,7 @@ ecs_entity_t make_golden_sword(Ecs* registry)
   transform = ecs_add(registry, entity, TRANSFORM);
 
   visual = ecs_add(registry, entity, VISUAL);
-  sprite_init(&visual->sprite, TEX_GOLDEN_SWORD);
+  sprite_init(&visual->sprite, TEX_WPN_GOLDEN_SWORD);
   visual->anchor.x = visual->sprite.rect.w / 2;
   visual->anchor.y = visual->sprite.rect.h;
 
@@ -505,7 +513,7 @@ ecs_entity_t make_golden_sword(Ecs* registry)
 ecs_entity_t make_big_red_flask(Ecs* registry, Vec2 position, u8 quality)
 {
   return make_static_pickupable_entity(registry,
-                                       TEX_FLASK_RED_BIG,
+                                       TEX_ITEM_FLASK_RED_BIG,
                                        PICKUPABLE_BIG_RED_FLASK,
                                        position,
                                        quality);
@@ -514,7 +522,7 @@ ecs_entity_t make_big_red_flask(Ecs* registry, Vec2 position, u8 quality)
 ecs_entity_t make_red_flask(Ecs* registry, Vec2 position, u8 quality)
 {
   return make_static_pickupable_entity(registry,
-                                       TEX_FLASK_RED,
+                                       TEX_ITEM_FLASK_RED,
                                        PICKUPABLE_RED_FLASK,
                                        position,
                                        quality);
@@ -523,7 +531,7 @@ ecs_entity_t make_red_flask(Ecs* registry, Vec2 position, u8 quality)
 ecs_entity_t make_blue_flask(Ecs* registry, Vec2 position, u8 quality)
 {
   return make_static_pickupable_entity(registry,
-                                       TEX_BLUE_FLASK,
+                                       TEX_ITEM_BLUE_FLASK,
                                        PICKUPABLE_BLUE_FLASK,
                                        position,
                                        quality);
@@ -575,7 +583,7 @@ ecs_entity_t make_player(Ecs* registry, ecs_entity_t character, ecs_entity_t wea
 
   HitBox* hitbox = ecs_get(registry, character, HITBOX);
 
-  equip(registry, character, weapon);
+  ett_equip_weapon(registry, character, weapon);
 
   hitbox->category  = CATEGORY_PLAYER;
   hitbox->mask_bits = BIT(CATEGORY_ITEM) | BIT(CATEGORY_WEAPON) | BIT(CATEGORY_PROJECTILE) |
@@ -598,7 +606,7 @@ make_thunder(SDL_UNUSED Ecs* registry, SDL_UNUSED Vec2 position, SDL_UNUSED u16 
   return ECS_NULL_ENT;
 }
 
-ecs_entity_t make_ladder(Ecs* registry, const NewLadderParams* params)
+ecs_entity_t make_portal(Ecs* registry, const MakePortalParams* params)
 {
   ecs_entity_t entity;
 
@@ -678,15 +686,15 @@ ecs_entity_t make_fx_item_picked_up(Ecs* registry, Vec2 position, const char* it
                             (COLOR){ 122, 196, 10, 255 });
 }
 
-ecs_entity_t make_chest(Ecs* registry, const NewChestParams* params)
+ecs_entity_t make_chest(Ecs* registry, const MakeChestParams* params)
 {
   ecs_entity_t entity;
 
-  Chest*        chest;
-  Visual*       visual;
-  Interactable* interactable;
-  HitBox*       hitbox;
-  Transform*    transform;
+  ChestAttributes* chest;
+  Visual*          visual;
+  Interactable*    interactable;
+  HitBox*          hitbox;
+  Transform*       transform;
 
   entity                    = ecs_create(registry);
   visual                    = ecs_add(registry, entity, VISUAL);
@@ -729,7 +737,7 @@ ecs_entity_t make_spear(Ecs* registry)
   entity = ecs_create(registry);
 
   visual = ecs_add(registry, entity, VISUAL);
-  sprite_init(&visual->sprite, TEX_SPEAR);
+  sprite_init(&visual->sprite, TEX_WPN_SPEAR);
   visual->anchor.x = visual->sprite.rect.w / 2;
   visual->anchor.y = 3;
 
@@ -827,12 +835,12 @@ ecs_entity_t make_staff(Ecs* registry)
   Transform*        transform;
   Visual*           visual;
   WeaponAttributes* attrs;
-  Castable*         castable;
+  WeaponCast*       castable;
 
   transform = ecs_add(registry, entity, TRANSFORM);
 
   visual = ecs_add(registry, entity, VISUAL);
-  sprite_init(&visual->sprite, (TEX_RED_STAFF));
+  sprite_init(&visual->sprite, (TEX_WPN_RED_STAFF));
   visual->anchor.x = 9;
   visual->anchor.y = 4;
 
@@ -1032,7 +1040,7 @@ ecs_entity_t make_fx_cast_fire(Ecs* registry, Vec2 position)
   return entity;
 }
 
-ecs_entity_t make_fx_slash(Ecs* registry, Vec2 position, SDL_RendererFlip flip)
+ecs_entity_t make_fx_slash(Ecs* registry, Vec2 position, double rot, SDL_RendererFlip flip)
 {
   ecs_entity_t entity;
 
@@ -1053,6 +1061,7 @@ ecs_entity_t make_fx_slash(Ecs* registry, Vec2 position, SDL_RendererFlip flip)
   ecs_set(registry, entity, ANIMATOR, &(Animator){ .anims = &g_anim_slash });
   transform           = ecs_add(registry, entity, TRANSFORM);
   transform->position = position;
+  transform->rotation = rot;
 
   life_span            = ecs_add(registry, entity, LIFE_SPAN);
   life_span->remaining = 10;
@@ -1115,11 +1124,8 @@ ecs_entity_t make_fx_ice_hit(Ecs* registry, Vec2 position)
 
 ecs_entity_t make_npc_brian(Ecs* registry, Vec2 position, u16 conversation_id)
 {
-  ecs_entity_t  entity = ecs_create(registry);
-  HitBox*       hitbox;
-  Interactable* interactable;
-  Animator*     animator;
-  Visual*       visual;
+  ecs_entity_t entity = ecs_create(registry);
+  HitBox*      hitbox;
 
   ecs_set(registry, entity, TRANSFORM, &(Transform){ .position = position });
   ecs_set(registry, entity, DIALOGUE, &(Dialogue){ conversation_id });
@@ -1128,13 +1134,17 @@ ecs_entity_t make_npc_brian(Ecs* registry, Vec2 position, u16 conversation_id)
           entity,
           ATTACK_MASK,
           &(AttackMask){ BIT(CATEGORY_PLAYER) | BIT(CATEGORY_ENEMY) });
-  ecs_set(registry, entity, HEALTH, &(Health){ 15, 15 });
+  /*
   ecs_set(registry,
           entity,
           HEAL_BAR,
-          &(HealthBar){ .color = { 0x03, 0xb6, 0xfc, 0xff }, .len = 20, .anchor = { 6, 23 } });
+          &(HealthBar){
+              .color  = { 0x03, 0xb6, 0xfc, 0xff },
+              .len    = 20,
+              .anchor = { 6, 23 },
+          });
+  */
   ecs_set(registry, entity, MOTION, &(Motion){ 0 });
-  ecs_add(registry, entity, CHARACTER_ANIMATOR_TAG);
 
   hitbox            = ecs_add(registry, entity, HITBOX);
   hitbox->category  = CATEGORY_INTERACABLE;
@@ -1144,22 +1154,33 @@ ecs_entity_t make_npc_brian(Ecs* registry, Vec2 position, u16 conversation_id)
   hitbox->anchor.x  = 6;
   hitbox->anchor.y  = 19;
 
-  interactable = ecs_add(registry, entity, INTERACTABLE);
-  interactable_init(interactable, (const char*[]){ TEXT_COMMAND_TALK, NULL });
+  interactable_init(ecs_add(registry, entity, INTERACTABLE),
+                    (const char*[]){ TEXT_COMMAND_TALK, NULL });
 
-  animator        = ecs_add(registry, entity, ANIMATOR);
-  animator->anims = g_anims_elite_knight;
+  ecs_set(registry,
+          entity,
+          ANIMATOR,
+          &(Animator){
+              .anims = g_anims_elite_knight,
+          });
 
-  visual           = ecs_add(registry, entity, VISUAL);
-  visual->anchor.x = 16;
-  visual->anchor.y = 32;
+  ecs_set(registry,
+          entity,
+          VISUAL,
+          &(Visual){
+              .anchor = { 16, 32 },
+              .color  = { 0xff, 0xff, 0xff, 0xff },
+          });
 
+  ecs_set(registry,
+          entity,
+          HAND,
+          &(Hand){
+              .weapon = ECS_NULL_ENT,
+          });
   ecs_add(registry, entity, CONTROLLER);
-
-  ecs_set(registry, entity, HAND, &(Hand){ .weapon = ECS_NULL_ENT });
-
   ecs_add(registry, entity, ENABLE_TILE_COLLISION_TAG);
-  ecs_set(registry, entity, MOVE_SPEED, &(MoveSpeed){ 50 });
+  ecs_add(registry, entity, CHARACTER_ANIMATOR_TAG);
   return entity;
 }
 
@@ -1183,18 +1204,18 @@ ecs_entity_t make_trigger(Ecs* registry, Vec2 pos, Vec2 size, u16 mask)
 
 ecs_entity_t make_coin(Ecs* registry, Vec2 position, u8 quality)
 {
-  make_animated_pickupable_entity(registry,
-                                  &(struct AnimatedPickupableEntityParams){
-                                      .id        = PICKUPABLE_COIN,
-                                      .quality   = quality,
-                                      .position  = position,
-                                      .animation = &g_anim_coin,
-                                  });
+  return make_animated_pickupable_entity(registry,
+                                         &(struct AnimatedPickupableEntityParams){
+                                             .id        = PICKUPABLE_COIN,
+                                             .quality   = quality,
+                                             .position  = position,
+                                             .animation = &g_anim_coin,
+                                         });
 }
 
 ecs_entity_t make_key_1_1(Ecs* registry, Vec2 pos, u8 quality)
 {
-  return make_static_pickupable_entity(registry, TEX_KEY, PICKUPABLE_KEY_1_1, pos, quality);
+  return make_static_pickupable_entity(registry, TEX_ITEM_KEY, PICKUPABLE_KEY_1_1, pos, quality);
 }
 
 ecs_entity_t make_bow(Ecs* registry)
@@ -1210,7 +1231,7 @@ ecs_entity_t make_bow(Ecs* registry)
   transform = ecs_add(registry, entity, TRANSFORM);
 
   visual = ecs_add(registry, entity, VISUAL);
-  sprite_init(&visual->sprite, TEX_BOW);
+  sprite_init(&visual->sprite, TEX_WPN_BOW);
   visual->anchor.x = 0;
   visual->anchor.y = visual->sprite.rect.h / 2;
 

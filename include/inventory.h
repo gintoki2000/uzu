@@ -1,11 +1,12 @@
 #ifndef INVENTORY_H
 #define INVENTORY_H
 #include "global.h"
+BOOL  inv_add_item(ItemTypeId type, u8 quality);
+BOOL  inv_has_item(ItemTypeId type);
+u8    inv_item_count(ItemTypeId type);
+Item* inv_get_item(ItemTypeId type);
+
 void inventory_init();
-BOOL  add_item_to_inventory(ItemTypeId type_id, u8 quality);
-BOOL  has_item_in_inventory(ItemTypeId type_id);
-u8    get_item_count_in_inventory(ItemTypeId type_id);
-Item* get_item(ItemTypeId type_id);
 void inventory_display(void);
 void inventory_close(void);
 void inventory_draw(void);

@@ -67,8 +67,8 @@ static void parse_item(Item* item, json_object* json)
 
   item_name       = JV(json, string, "type"   );
   num_items       = JV(json, int   , "quality");
-  item->type_id   = item_id_from_string(item_name);
-  item->num_items = num_items;
+  item->type      = item_id_from_string(item_name);
+  item->quality   = num_items;
 }
 
 static void parse_item_list(Item items[5], u16* num_items, const char* input)
@@ -242,7 +242,7 @@ static void parse_huge_demon(Ecs* registry, const EntityProperties* props)
 }
 static void parse_chest(Ecs* registry, const EntityProperties* props)
 {
-  NewChestParams chest_params;
+  MakeChestParams chest_params;
   chest_params.position = real_position(props->position, props->size);
   chest_params.id       = props->id;
   chest_params.state    = CHEST_STATE_CLOSE;
@@ -277,7 +277,7 @@ static void parse_ladder(Ecs* registry, const EntityProperties* props)
   const char* direction;
 
   direction = json_object_object_get_as_string(props->properties, "direction");
-  NewLadderParams params;
+  MakePortalParams params;
   params.level     = json_object_object_get_as_string(props->properties, "level");
   params.dest      = json_object_object_get_as_string(props->properties, "dest");
   params.name      = props->name;
@@ -285,7 +285,7 @@ static void parse_ladder(Ecs* registry, const EntityProperties* props)
   params.size      = props->size;
   params.direction = direction_from_string(direction);
 
-  make_ladder(registry, &params);
+  make_portal(registry, &params);
 }
 
 static void parse_chort(Ecs* registry, const EntityProperties* params)

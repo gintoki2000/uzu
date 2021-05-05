@@ -9,21 +9,21 @@ typedef struct Array
   u32 el_size;
 } Array;
 
-#define array_new(_T) (_array_new(sizeof(_T)))
+#define array_new(T) (_array_new(sizeof(T)))
 Array* _array_new(u32 el_size);
 void   array_del(Array* arr);
 
-Array* array_init(Array* _self, u32 el_size);
-void   array_fini(Array* _self);
+Array* array_init(Array* self, u32 el_size);
+void   array_fini(Array* self);
 
-void* _array_addn(Array* _self, u32 n);
-#define array_add(_T, _self, _el) ((*(_T*)_array_addn(_self, 1)) = _el)
+void* _array_addn(Array* self, u32 n);
+#define array_add(T, self, el) ((*(T*)_array_addn(self, 1)) = el)
 
-u32 array_rmv(Array* _self, u32 idx);
-u32 array_qrmv(Array* _self, u32 idx);
+u32 array_rmv(Array* self, u32 idx);
+u32 array_qrmv(Array* self, u32 idx);
 
-#define array_at(_T, _self, _idx) ((_T*)_array_at(_self, _idx))
-void* _array_at(Array* _self, u32 idx);
+#define array_at(T, self, idx) ((T*)_array_at(self, idx))
+void* _array_at(Array* self, u32 idx);
 
-void array_encap(Array* _self, u32 new_cap);
+void array_reserve(Array* self, u32 new_cap);
 #endif // ARRAY_H

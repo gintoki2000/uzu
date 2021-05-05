@@ -17,7 +17,7 @@ static void destroy_offscreen_entities()
 
   for (int i = cnt - 1; i >= 0; --i)
   {
-    position = get_entity_position(g_ecs, entities[i]);
+    position = ett_get_position(g_ecs, entities[i]);
 
     if (!SDL_PointInRect(&(POINT){ position.x, position.y }, &g_viewport))
     {

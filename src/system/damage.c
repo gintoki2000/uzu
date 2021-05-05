@@ -1,9 +1,10 @@
+#include "camera_shaker.h"
 #include "components.h"
 #include "resources.h"
-#include "camera_shaker.h"
 #include "system/event_messaging_sys.h"
 #include "system/game_logic.h"
 #include "toolbox/toolbox.h"
+#include "entity_utils.h"
 
 extern Ecs* g_ecs;
 
@@ -20,7 +21,6 @@ static void on_hit_trap(SDL_UNUSED void* arg, const MSG_EntityHitTrap* event)
                                    .dealer      = ECS_NULL_ENT,
                                    .receiver    = event->entity,
                                    .type        = DAMAGE_TYPE_THUST,
-                                   .impact      = TRUE,
                                    .impact_time = 10,
                                    .force       = force,
                                    .zforce      = TRAP_IMPACT_FORCE_Z });
@@ -37,11 +37,11 @@ static void on_projectile_hit(SDL_UNUSED void* arg, const MSG_ProjectileHit* eve
                       .dealer      = attributes->shooter,
                       .receiver    = event->entity,
                       .type        = attributes->damage_type,
-                      .impact      = attributes->impact,
                       .force       = attributes->impact_force,
                       .impact_time = attributes->impact_time,
                       .zforce      = attributes->impact_force_z,
                   });
+    ett_apply_status_effect(g_ecs, event->entity, STATUS_EFFECT_FREEZED, 240);
     begin_sake_camera(4, 6);
     if (attributes->destroy_when_hit)
     {

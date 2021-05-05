@@ -44,7 +44,7 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
   [WEAPON_CHARGE_ATTACK]         = ECS_TYPE(WeaponChargeAttack),
   [DROP]                         = ECS_TYPE(Drop),
   [INVULNERABLE]                 = ECS_TYPE(Invulnerable),
-  [PARALYZED]                    = ECS_TYPE(Paralyzed),
+  [STAGGER]                      = ECS_TYPE(Stagger),
   [CAMERA_TARGET_TAG]            = ECS_TYPE(CameraTargetTag),
   [BRAIN]                        = ECS_TYPE_EX(Brain, NULL, brain_fini, NULL),
   [DESTINATION]                  = ECS_TYPE(Destination),
@@ -59,17 +59,16 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
   [DIALOGUE]                     = { .size = sizeof(Dialogue) },
   [PICKUPABLE_ATTRIBUTES]        = { .size = sizeof(PickupableAttributes) },
   [MERCHANT]                     = { .size = sizeof(Merchant) },
-  [CHEST]                        = ECS_TYPE(Chest),
+  [CHEST]                        = ECS_TYPE(ChestAttributes),
   [ATTUNEMENT_SLOT]              = ECS_TYPE(AttunementSlot),
-  [WEAPON_CAST]                  = ECS_TYPE(Castable),
-  [MANA_POOL]                    = ECS_TYPE(ManaPool),
+  [WEAPON_CAST]                  = ECS_TYPE(WeaponCast),
+  [MANA]                         = ECS_TYPE(Mana),
   [WEAPON_THUST_ATTACK]          = ECS_TYPE(WeaponThustAttack),
   [DOOR_ATTRIBUTES]              = ECS_TYPE(DoorAttributes),
   [REMOVE_IF_OFFSCREEN]          = ECS_TYPE(RemoveIfOffScreen),
   [PROJECTILE_ATTRIBUTES]        = ECS_TYPE(ProjectileAttributes),
   [HOLDER]                       = ECS_TYPE_EX(Holder, holder_init, NULL, NULL),
   [ATTACK_MASK]                  = ECS_TYPE(AttackMask),
-  [SELF_DESTRUCTION]             = ECS_TYPE(SelfDestruction),
   [ATTACKER]                     = ECS_TYPE(Attacker),
   [WEAPON_SHOOT]                 = ECS_TYPE(WeaponShoot),
   [MOVE_SPEED]                   = ECS_TYPE(MoveSpeed),
@@ -78,6 +77,13 @@ const EcsType g_comp_types[NUM_COMPONENTS] = {
   [SCRIPT]                       = ECS_TYPE_EX(Script, NULL, script_fini, NULL),
   [EMOJI]                        = ECS_TYPE(Emoji),
   [HAND_ANIMATION]               = ECS_TYPE(HandAnimation),
+  [STATS]                        = ECS_TYPE(Stats),
+  [AGILITY_CHANGED]              = ECS_TYPE(AgilityChanged),
+  [INTELLIGENT_CHANGED]          = ECS_TYPE(IntelligentChanged),
+  [STRENGTH_CHANGED]             = ECS_TYPE(StrengthChanged),
+  [VITALITY_CHANGED]             = ECS_TYPE(VITALITY_CHANGED),
+  [UNABLE_TO_MOVE]               = ECS_TYPE(UnableToMove),
+  [STATUS_EFFECT]                = ECS_TYPE(StatusEffect),
 };
 
 void brain_fini(Brain* brain)
@@ -160,9 +166,8 @@ void script_fini(Script* script)
 void interactable_init(Interactable* i, const char* const* cmds)
 {
   i->num_commands = 0;
-  while (*cmds)
+  while (*cmds && i->num_commands < INTERACTABLE_MAX_COMMANDS)
   {
-    ASSERT(i->num_commands < INTERACTABLE_MAX_COMMANDS);
     i->commands[i->num_commands++] = *cmds;
     ++cmds;
   }

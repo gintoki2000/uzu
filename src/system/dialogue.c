@@ -77,7 +77,7 @@ static void on_command_selected(SDL_UNUSED void* arg, const MSG_CommandSelected*
 {
   if (!SDL_strcmp(msg->cmd, TEXT_COMMAND_TALK) && ecs_has(g_ecs, msg->entity, DIALOGUE))
   {
-    display_dialogue(get_entity_conversation(g_ecs, msg->entity), msg->entity);
+    display_dialogue(ett_get_conversation(g_ecs, msg->entity), msg->entity);
   }
 }
 

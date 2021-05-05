@@ -3,36 +3,37 @@
 #include "global.h"
 #include "resources.h"
 
-static void cast_fire_ball(Ecs* ecs, ecs_entity_t caster, ecs_entity_t weapon);
-static void cast_ice_arrow(Ecs* ecs, ecs_entity_t caster, ecs_entity_t weapon);
+static void fire_ball_cast(Ecs* registry, ecs_entity_t caster, ecs_entity_t weapon);
+static void ice_arrow_cast(Ecs* registry, ecs_entity_t caster, ecs_entity_t weapon);
 
-#define ICON_ICE_ARROW                                                                             \
-  {                                                                                                \
-    TEX_ICON_ICE_ARROW,                                                                            \
-    {                                                                                              \
-      0, 0, 16, 16                                                                                 \
-    }                                                                                              \
-  }
-#define ICON_FIRE_BALL                                                                             \
-  {                                                                                                \
-    TEX_ICON_FIRE_BALL,                                                                            \
-    {                                                                                              \
-      0, 0, 16, 16                                                                                 \
-    }                                                                                              \
-  }
+static BOOL default_process_func(Ecs* registry, ecs_entity_t caster, ecs_entity_t weapon);
+
+struct __HomieFire
+{
+    int remaining;
+    int cooldown;
+};
+static BOOL homie_fire_process(Ecs* registry, ecs_entity_t caster, ecs_entity_t weapon);
+static void homie_fire_cast(Ecs* registry, ecs_entity_t caster, ecs_entity_t weapon);
+
+#define SPELL_ICON(n) { TEX_ICON_##n, { 0, 0, 16, 16} }
+static void* get_spell_state(Ecs* registry, ecs_entity_t weapon)
+{
+  WeaponCast* component = ecs_get(registry, weapon, WEAPON_CAST);
+  return (void*)component->state;
+}
 
 const Spell g_spell_tbl[NUM_SPELLS] = {
-  { "ice arrow", cast_ice_arrow, 1, 15, CAST_EFFECT_ICE, ICON_ICE_ARROW },
-  { "fire ball", cast_fire_ball, 1, 10, CAST_EFFECT_FIRE, ICON_FIRE_BALL },
+  /*Name               CastFunc              ProcFunc              Cost  Cooldown  Icon                  */
+  { "ice arrow",       ice_arrow_cast,       default_process_func, 1,    15,       SPELL_ICON(ICE_ARROW) },
+  { "fire ball",       fire_ball_cast,       default_process_func, 1,    10,       SPELL_ICON(FIRE_BALL) },
+  { "homie fire ball", homie_fire_cast,      homie_fire_process,   3,    15,       SPELL_ICON(FIRE_BALL) },
 };
 
-ecs_entity_t (*const g_make_cast_effect_fn_tbl[NUM_CAST_EFFECTS])(Ecs* ecs, Vec2 pos) = {
-  [CAST_EFFECT_ICE]  = make_fx_cast_ice,
-  [CAST_EFFECT_FIRE] = make_fx_cast_fire,
-};
+#define PLAY_SOUND(id) Mix_PlayChannel(-1, get_sfx(id), 0)
 
-#define play_sound(__sound_id) Mix_PlayChannel(-1, get_sfx(__sound_id), 0)
 
+/*
 static Vec2 vec2_rot(Vec2 v, float angle)
 {
   float s = SDL_sinf(angle);
@@ -42,48 +43,77 @@ static Vec2 vec2_rot(Vec2 v, float angle)
   o.y = s * v.x + c * v.y;
   return o;
 }
+*/
 
-static void cast_fire_ball(Ecs* ecs, SDL_UNUSED ecs_entity_t caster, ecs_entity_t weapon)
+static void fire_ball_cast(Ecs* registry, ecs_entity_t caster, SDL_UNUSED ecs_entity_t weapon)
 {
-  WeaponAttributes* attributes;
-  Transform*        transform;
-  AttackMask*       attack_mask;
-  FacingDirection*  facing_direction;
+  Vec2  position;
+  u16   attack_mask;
+  Vec2  facing_direction;
+  Vec2  projectile_speed; 
 
-  transform        = ecs_get(ecs, weapon, TRANSFORM);
-  attack_mask      = ecs_get(ecs, caster, ATTACK_MASK);
-  facing_direction = ecs_get(ecs, caster, FACING_DIRECTION);
+  position         = ett_get_position(registry, caster);
+  attack_mask      = ett_get_atk_mask(registry, caster);
+  facing_direction = ett_get_facing_direction(registry, caster);
 
-  Vec2 speed1 = vec2_mul(facing_direction->value, 120.f);
-  Vec2 speed2 = vec2_rot(speed1, -0.5235987756f);
-  Vec2 speed3 = vec2_rot(speed1, 0.5235987756f);
-
-  attributes = ecs_get(ecs, weapon, WEAPON_ATTRIBUTES);
-
-  make_fire_ball(ecs, caster, transform->position, speed1, attack_mask->value);
-  make_fire_ball(ecs, caster, transform->position, speed2, attack_mask->value);
-  make_fire_ball(ecs, caster, transform->position, speed3, attack_mask->value);
-  play_sound(SFX_FIRE_BALL_LAUCH);
+  projectile_speed = vec2_mul(facing_direction, 250.f);
+  make_fire_ball(registry, caster, position, projectile_speed, attack_mask);
+  PLAY_SOUND(SFX_FIRE_BALL_LAUCH);
 }
 
-static void cast_ice_arrow(Ecs* ecs, ecs_entity_t caster, ecs_entity_t weapon)
+static void ice_arrow_cast(Ecs* registry, ecs_entity_t caster, ecs_entity_t SDL_UNUSED weapon)
 {
-  WeaponAttributes* attributes;
-  Transform*        transform;
-  AttackMask*       attack_mask;
-  FacingDirection*  facing_direction;
+  Vec2  position;
+  u16   attack_mask;
+  Vec2  facing_direction;
+  Vec2  projectile_speed; 
 
-  transform        = ecs_get(ecs, weapon, TRANSFORM);
-  attack_mask      = ecs_get(ecs, caster, ATTACK_MASK);
-  facing_direction = ecs_get(ecs, caster, FACING_DIRECTION);
+  position         = ett_get_position(registry, caster);
+  attack_mask      = ett_get_atk_mask(registry, caster);
+  facing_direction = ett_get_facing_direction(registry, caster);
 
-  Vec2 speed = vec2_mul(facing_direction->value, 250.f);
+  projectile_speed = vec2_mul(facing_direction, 250.f);
 
-  attributes = ecs_get(ecs, weapon, WEAPON_ATTRIBUTES);
+  make_ice_arrow(registry, caster, position, projectile_speed, attack_mask);
 
-  make_ice_arrow(ecs, caster, transform->position, speed, attack_mask->value);
-
-  play_sound(SFX_ICE_SHOOT);
+  PLAY_SOUND(SFX_ICE_SHOOT);
 }
 
-#undef play_sound
+
+#define HOMIE_FIRE_COOLDOWN_TIME 10
+#define HOMIE_FIRE_SPEED 200
+
+static BOOL homie_fire_process(Ecs* registry, ecs_entity_t caster, ecs_entity_t weapon)
+{
+  struct __HomieFire* self = get_spell_state(registry, weapon);
+  Vec2 position;
+  Vec2 facing_direction;
+  Vec2 projectile_speed;
+  u16 attack_mask;
+  if (self->remaining > 0 && self->cooldown > 0 && !(--self->cooldown))
+  {
+    self->cooldown = HOMIE_FIRE_COOLDOWN_TIME;
+    self->remaining -= 1;
+
+    attack_mask      = ett_get_atk_mask(registry, caster);
+    position         = ett_get_position(registry, caster);
+    facing_direction = ett_get_facing_direction(registry, caster);
+    projectile_speed = vec2_mul(facing_direction, HOMIE_FIRE_SPEED); 
+    make_fire_ball(registry, caster, position, projectile_speed, attack_mask);
+  }
+  return self->remaining == 0;
+}
+
+static void homie_fire_cast(Ecs* registry, SDL_UNUSED ecs_entity_t caster, ecs_entity_t weapon)
+{
+    struct __HomieFire* self = get_spell_state(registry, weapon);
+    self->remaining = 3;
+    self->cooldown = 1;
+}
+
+static BOOL default_process_func(SDL_UNUSED Ecs*         registry, 
+                                 SDL_UNUSED ecs_entity_t caster  , 
+                                 SDL_UNUSED ecs_entity_t weapon  )
+{
+  return TRUE;
+}

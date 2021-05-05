@@ -30,6 +30,8 @@ enum
   MSG_HIT_TRIGGER,
   MSG_ITEM_PICKED_UP,
   MSG_COIN_PICKED_UP,
+  MSG_GAME_PAUSED,
+  MSG_GAME_RESUMED,
   NUM_MSGS,
 };
 
@@ -62,7 +64,6 @@ typedef struct
   ecs_entity_t receiver;
   int          damage;
   int          type;
-  BOOL         impact;
   u16          impact_time;
   Vec2         force;
   float        zforce;

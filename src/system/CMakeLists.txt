@@ -25,7 +25,6 @@ set(SYSTEM_SOURCE_FILES
   src/system/motion.c
   src/system/pickup.c
   src/system/player_controller.c
-  src/system/self_destruction.c
   src/system/sprite_rendering.c
   src/system/stagger.c
   src/system/text_rendering.c
@@ -34,6 +33,8 @@ set(SYSTEM_SOURCE_FILES
   src/system/update_facing_direction.c
   src/system/action.c
   src/system/emoji.c
+  src/system/stats.c
+  src/system/status_effect.c
 
   #weapon skill systems
   src/system/weapon_skill/charge.c

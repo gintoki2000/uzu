@@ -25,15 +25,10 @@ BOOL      ptr_array_rmv(PtrArray* self, pointer_t p);
 void      ptr_array_rmv_idx(PtrArray* self, s32 idx);
 void      ptr_array_qrmv(PtrArray* self, s32 idx);
 
-int  ptr_array_idx_of(PtrArray* self, pointer_t p);
+int  ptr_array_index_of(PtrArray* self, pointer_t p);
 BOOL ptr_array_contains(PtrArray* self, pointer_t p);
-
 void ptr_array_reserve(PtrArray* self, s32 n);
-void ptr_array_shink_to_fit(PtrArray* self);
-
 void ptr_array_sort(PtrArray* self, __compar_fn_t comp);
-void ptr_array_foreach(PtrArray* self, consume_fn_t consume_fn, pointer_t user_data);
-
 void ptr_array_clear(PtrArray* self);
 
 #define ptr_array_storage(__T, __self) ((__T**)(__self)->storage)

@@ -29,7 +29,7 @@ typedef enum ComponentId
   DROP,
   PICKUPABLE_ATTRIBUTES,
   INVULNERABLE,
-  PARALYZED,
+  STAGGER,
   ENEMY_TAG,
   PLAYER_TAG,
   CAMERA_TARGET_TAG,
@@ -52,13 +52,12 @@ typedef enum ComponentId
   CHEST,
   ATTUNEMENT_SLOT,
   WEAPON_CAST,
-  MANA_POOL,
+  MANA,
   DOOR_ATTRIBUTES,
   HOLDER,
   ATTACK_MASK,
   REMOVE_IF_OFFSCREEN,
   ATTACKER,
-  SELF_DESTRUCTION,
   MOVE_SPEED,
   FACING_DIRECTION,
   ATTACK_TARGET,
@@ -66,6 +65,15 @@ typedef enum ComponentId
   SCRIPT,
   EMOJI,
   HAND_ANIMATION,
+  STATS,
+  AGILITY_CHANGED,
+  VITALITY_CHANGED,
+  INTELLIGENT_CHANGED,
+  STRENGTH_CHANGED,
+  DEFENSE,
+  ATTACK_POWER,
+  STATUS_EFFECT,
+  UNABLE_TO_MOVE,
   NUM_COMPONENTS
 } ComponentId;
 
@@ -144,12 +152,17 @@ typedef struct HandAnimation
   int                     current_index;
 } HandAnimation;
 
+enum
+{
+  WPN_CAT_MEELLE,
+  WPN_CAT_RANGED,
+};
 typedef struct WeaponAttributes
 {
-  s32    atk;
-  u16    type_id;
-  u32    range;
-  double base_angle;
+  s32 atk;
+  u16 type_id;
+  u16 category;
+  u32 range;
 } WeaponAttributes;
 
 /*Weapon skills*/
@@ -192,8 +205,10 @@ typedef struct WeaponShoot
 
 typedef struct WeaponCast
 {
-  int timer;
-} Castable;
+  int  cooldown_timer;
+  BOOL processing;
+  u8   state[32];
+} WeaponCast;
 
 /*entity tags*/
 typedef int PlayerTag;
@@ -235,7 +250,7 @@ typedef enum DoorState
 
 #define DOOR_NO_REQUIRED_KEY -1
 #define DOOR_REQUIRED_SPECIAL_CONDITION -2
-typedef struct DoorInfo
+typedef struct DoorAttributes
 {
   s16 required_key;
   u16 state;
@@ -243,7 +258,7 @@ typedef struct DoorInfo
 
 typedef struct PickupableAttributes
 {
-  u16 id; /**/
+  u16 id;
   u16 sfx;
   u8  quality;
 } PickupableAttributes;
@@ -289,12 +304,12 @@ typedef struct Drop
 //************^^status^^******************//
 typedef struct
 {
-  int remaining;
-} Paralyzed;
+  int duration;
+} Stagger;
 
 typedef struct
 {
-  int remaining;
+  int duration;
 } Invulnerable;
 //<======================================>//
 
@@ -374,7 +389,7 @@ typedef struct
   u16  num_slots;
   u16  state;
   u32  id;
-} Chest;
+} ChestAttributes;
 
 typedef struct
 {
@@ -393,7 +408,6 @@ typedef struct AttackMask
   u16 value;
 } AttackMask;
 
-// dùng để track ai tấn công entity
 typedef struct Attacker
 {
   ecs_entity_t value;
@@ -404,56 +418,58 @@ typedef struct AttackTarget
   ecs_entity_t value;
 } AttackTarget;
 
-typedef struct SelfDestruction
-{
-  u32          range;
-  ecs_entity_t target;
-} SelfDestruction;
-
 typedef struct Stat
 {
-  int base;
-  int modifier[3]; // self-buff/weapon/hmm
+  u8 base;
+  s8 modifier[3];
 } Stat;
 
 typedef struct Stats
 {
-  Stat vitality;    // health
-  Stat strenght;    // physical damage
-  Stat intelligent; // mp & magic damage
+  Stat vitality;
+  Stat strength;
+  Stat intelligent;
+  Stat agility;
 } Stats;
 
-// Combat attributes
+// events
+typedef int AgilityChanged, VitalityChanged, IntelligentChanged, StrengthChanged;
+
 typedef struct MoveSpeed
 {
   int value;
 } MoveSpeed;
 
-typedef struct ManaPool
+typedef struct Mana
 {
-  u16 mana_points;
-  u16 max_mana_points;
-} ManaPool;
+  u16 current;
+  u16 max;
+} Mana;
 
 typedef struct Health
 {
-  s32 hit_points;
-  s32 max_hit_points;
+  u16 current;
+  u16 max;
 } Health;
 
 typedef struct Defense
 {
-  u16 physical;
-  u16 magical;
-  u16 fire;
-  u16 ice;
-  u16 lightning;
+  u8 physical;
+  u8 fire;
+  u8 ice;
+  u8 lightning;
 } Defense;
+
+typedef struct
+{
+  u8 physical;
+  u8 magical;
+} AttackPower;
 
 typedef struct Script
 {
   Action*  action;
-  Callback finished_callback;
+  Callback cb_finished;
 } Script;
 
 enum EmojiType
@@ -468,9 +484,22 @@ enum EmojiType
 typedef struct Emoji
 {
   int      id;
-  int      time;
-  Callback time_out_callback;
+  int      duration;
+  Callback cb_time_out;
 } Emoji;
+
+typedef struct StatusEffect
+{
+  u16 type;
+  u16 duration;
+  u16 elapsed;
+  u8  state[16];
+} StatusEffect;
+
+typedef struct UnableToMove
+{
+  u16 count;
+} UnableToMove;
 
 void ladder_attrs_init(LadderAttributes* sw, const char* level, const char* dest, u16 direction);
 void name_init(Name* name, const char* value);

@@ -20,6 +20,9 @@ static u32 _prev_mouse_state;
 static u32 _curr_button_state;
 static u32 _prev_button_state;
 
+static u8 _curr_key_state[SDL_NUM_SCANCODES] = { 0 };
+static u8 _prev_key_state[SDL_NUM_SCANCODES] = { 0 };
+
 #define KEY_HANDLE_FN_STACK_MAX 10
 
 static InputState _state_stack[KEY_HANDLE_FN_STACK_MAX];
@@ -27,6 +30,12 @@ static u32        _stack_size;
 
 void input_init()
 {
+}
+
+static void update_key_state(void)
+{
+  SDL_memcpy(_prev_key_state, _curr_key_state, sizeof(_prev_key_state));
+  SDL_memcpy(_curr_key_state, SDL_GetKeyboardState(NULL), sizeof(_curr_key_state));
 }
 
 static void update_button_state(void)
@@ -37,13 +46,12 @@ static void update_button_state(void)
   _curr_button_state = 0;
 
   for (int i = 0; i < NUM_BUTTONS; ++i)
-  {
     _curr_button_state |= (keyboard_state[_key_to_scancode_tbl[i]] & 1) << i;
-  }
 }
 
 void input_update()
 {
+  update_key_state();
   update_button_state();
   update_mouse_state();
 
@@ -99,4 +107,24 @@ BOOL mouse_button_just_pressed(u16 mouse_button)
 BOOL mouse_button_pressed(u16 mouse_button)
 {
   return _curr_mouse_state & SDL_BUTTON(mouse_button);
+}
+
+BOOL key_just_pressed(SDL_Scancode scancode)
+{
+  return _curr_key_state[scancode] && !_prev_key_state[scancode];
+}
+
+BOOL key_just_released(SDL_Scancode scancode)
+{
+  return !_curr_key_state[scancode] && _prev_key_state[scancode];
+}
+
+BOOL key_pressed(SDL_Scancode scancode)
+{
+  return _curr_key_state[scancode];
+}
+
+BOOL key_released(SDL_Scancode scancode)
+{
+  return !_curr_key_state[scancode];
 }

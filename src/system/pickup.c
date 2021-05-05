@@ -37,7 +37,7 @@ item_handler(ecs_entity_t entity, const PickupableAttributes* attrs, const Vec2 
   u16 item_type_id = g_pickupable_to_item_type_id_tbl[attrs->id];
   if (item_type_id != ITEM_TYPE_ID_NULL)
   {
-    if (add_item_to_inventory(item_type_id, attrs->quality))
+    if (inv_add_item(item_type_id, attrs->quality))
     {
       ems_broadcast(MSG_ITEM_PICKED_UP,
                     &(MSG_ItemPickedUp){ .pickupable_entity = entity,

@@ -22,7 +22,8 @@ static void apply_controller_input(void)
   ecs_raw(g_ecs, CONTROLLER, &entities, (void**)&controllers, &cnt);
   for (int i = 0; i < cnt; ++i)
   {
-    if (!ecs_has(g_ecs, entities[i], PARALYZED) && (motion = ecs_get(g_ecs, entities[i], MOTION)) &&
+    if (!ecs_has(g_ecs, entities[i], UNABLE_TO_MOVE) &&
+        (motion = ecs_get(g_ecs, entities[i], MOTION)) &&
         (move_speed = ecs_get(g_ecs, entities[i], MOVE_SPEED)))
     {
       motion->vel = vec2_mul(controllers[i].desired_direction, (float)move_speed->value);

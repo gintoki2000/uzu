@@ -14,7 +14,7 @@ static void on_deal_damage(void* arg, const MSG_DealDamage* event)
   if ((health = ecs_get(g_ecs, event->receiver, HEALTH)) != NULL &&
       !ecs_has(g_ecs, event->receiver, INVULNERABLE))
   {
-    health->hit_points -= event->damage;
+    health->current -= min(event->damage, health->current);
     ems_broadcast(MSG_GET_DAMAGED,
                   &(MSG_GetDamaged){
                       .dealer  = event->dealer,
@@ -25,23 +25,19 @@ static void on_deal_damage(void* arg, const MSG_DealDamage* event)
     ecs_set(g_ecs, event->receiver, INVULNERABLE, &(Invulnerable){ event->impact_time });
 
     if (event->dealer != ECS_NULL_ENT)
-    {
       ecs_set(g_ecs, event->receiver, ATTACKER, &(Attacker){ event->dealer });
-    }
 
     if (event->impact_time > 0 && (motion = ecs_get(g_ecs, event->receiver, MOTION)))
     {
       motion->acc.x += event->force.x;
       motion->acc.y += event->force.y;
       motion->vz = event->zforce;
-      if (!ecs_has(g_ecs, event->receiver, PARALYZED))
-      {
-        ecs_set(g_ecs, event->receiver, PARALYZED, &(Paralyzed){ event->impact_time });
-      }
+      if (!ecs_has(g_ecs, event->receiver, STAGGER))
+        ecs_set(g_ecs, event->receiver, STAGGER, &(Stagger){ event->impact_time });
     }
-    if (health->hit_points <= 0)
+    if (health->current <= 0)
     {
-      health->hit_points = 0;
+      health->current = 0;
       ems_broadcast(MSG_ENTITY_DIED, &(MSG_EntityDied){ event->receiver });
       ecs_add(g_ecs, event->receiver, DESTROYED_TAG);
     }
@@ -63,7 +59,7 @@ void health_system()
 
   for (int i = cnt - 1; i >= 0; --i)
   {
-    if (invulnerables[i].remaining > 0 && --invulnerables[i].remaining == 0)
+    if (invulnerables[i].duration > 0 && --invulnerables[i].duration == 0)
       ecs_rmv(g_ecs, entities[i], INVULNERABLE);
   }
 }

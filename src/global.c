@@ -53,3 +53,18 @@ ecs_entity_t create_weapon(Ecs* registry, u16 type)
   ASSERT(type < NUM_WEAPONS);
   return g_make_weapon_fn_tbl[type](registry);
 }
+
+Sprite animation_keyframe(const Animation* animation, u16 elapsed)
+{
+  Sprite current_key_frame;
+  int    idx;
+  idx = elapsed / animation->frame_duration;
+  idx = idx % animation->count;
+
+  current_key_frame.texture_id = animation->texture_id;
+  current_key_frame.rect.x     = animation->offset_x + animation->sprite_width * idx;
+  current_key_frame.rect.y     = animation->offset_y;
+  current_key_frame.rect.w     = animation->sprite_width;
+  current_key_frame.rect.h     = animation->sprite_height;
+  return current_key_frame;
+}

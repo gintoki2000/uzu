@@ -54,7 +54,7 @@ static BTStatus __exec(TASK* self, Ecs* ecs, ecs_entity_t entity)
     return BT_STATUS_FAILURE;
 
   ecs_entity_t weapon = g_make_weapon_fn_tbl[self->weapon_id](ecs);
-  equip(ecs, entity, weapon);
+  ett_equip_weapon(ecs, entity, weapon);
 
   return BT_STATUS_SUCCESS;
 }

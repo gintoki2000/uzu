@@ -51,7 +51,7 @@ static void draw_spell_icon(ecs_entity_t player);
 void hub_rendering_system()
 {
   ecs_entity_t player;
-  if ((player = get_player(g_ecs)) != ECS_NULL_ENT)
+  if ((player = scn_get_player(g_ecs)) != ECS_NULL_ENT)
   {
     draw_player_health_bar(player);
     draw_player_mana_bar(player);
@@ -129,41 +129,26 @@ static void draw_player_health_bar(ecs_entity_t player)
     params.position_y     = HUD_HEALTH_BAR_POSITION_Y;
     params.active_color   = blood_active;
     params.inactive_color = blood_inactive;
-    params.length         = health->max_hit_points;
-    params.points         = health->hit_points;
+    params.length         = health->max;
+    params.points         = health->current;
     draw_bar(&params);
   }
 }
 
 static void draw_player_mana_bar(ecs_entity_t player)
 {
-  ManaPool* mana_pool;
+  Mana* mana;
 
-  if ((mana_pool = ecs_get(g_ecs, player, MANA_POOL)))
+  if ((mana = ecs_get(g_ecs, player, MANA)))
   {
     DrawBarParams params;
     params.position_x     = HUD_MANA_BAR_POSITION_X;
     params.position_y     = HUD_MANA_BAR_POSITION_Y;
     params.active_color   = mana_active;
     params.inactive_color = mana_inactive;
-    params.length         = mana_pool->max_mana_points;
-    params.points         = mana_pool->mana_points;
+    params.length         = mana->max;
+    params.points         = mana->current;
     draw_bar(&params);
-  }
-}
-
-static void draw_spell_name(ecs_entity_t player)
-{
-  AttunementSlot* slot = ecs_get(g_ecs, player, ATTUNEMENT_SLOT);
-  if (slot != NULL && slot->spell_id != SPELL_ID_NULL)
-  {
-    const Spell* spell = &g_spell_tbl[slot->spell_id];
-    FC_Draw(get_font(FONT_DAMAGE_INDICATOR),
-            g_renderer,
-            SPELL_NAME_POSITION_X,
-            SPELL_NAME_POSITION_Y,
-            "%s",
-            spell->name);
   }
 }
 

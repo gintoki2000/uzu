@@ -25,9 +25,9 @@ void emoji_system(void)
   for (int i = cnt - 1; i >= 0; --i)
   {
     ASSERT(emoji[i].id >= 0 && emoji[i].id < NUM_EMOJIES && "invalid emoji id");
-    if (emoji[i].time != -1 && (emoji[i].time--) == 0)
+    if (emoji[i].duration != -1 && (emoji[i].duration--) == 0)
     {
-      INVOKE_EVENT(emoji[i].time_out_callback, NULL);
+      INVOKE_EVENT(emoji[i].cb_time_out, NULL);
       ecs_rmv(g_ecs, entities[i], EMOJI);
       continue;
     }

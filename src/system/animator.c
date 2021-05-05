@@ -12,9 +12,9 @@ void animator_system(void)
   Visual*       visual;
   ecs_size_t    cnt;
 
-  const Animation* curr;
-  int              idx;
-  RECT             rect;
+  const Animation*         curr;
+  int                      idx;
+  RECT                     rect;
 
   ecs_raw(g_ecs, ANIMATOR, &entities, (void**)&animator, &cnt);
 

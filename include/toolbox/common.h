@@ -71,6 +71,7 @@ typedef struct
 #define INLINE static inline
 
 #define DEG_TO_RAD 0.0174532925
+#define RAD_TO_DEG 57.2957795
 
 #define MAX(__a, __b)                                                                              \
   ({                                                                                               \

@@ -46,7 +46,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
           .category    = ITEM_CATEGORY_CONSUMABLE,
           .use      = healing_item_use_callback,
           .data = &k_healing_item_data_red_flask,
-          .icon      = {.texture_id = TEX_FLASK_RED, .rect = {0, 0, 16, 16}},
+          .icon      = {.texture_id = TEX_ITEM_FLASK_RED, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_BIG_RED_FLASK] =
       {
@@ -56,7 +56,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
           .category    = ITEM_CATEGORY_CONSUMABLE,
           .use      = healing_item_use_callback,
           .data = &k_healing_item_data_big_red_flask,
-          .icon      = {.texture_id = TEX_FLASK_RED_BIG, .rect = {0, 0, 16, 16}},
+          .icon      = {.texture_id = TEX_ITEM_FLASK_RED_BIG, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_BLUE_FLASK] =
       {
@@ -66,7 +66,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
           .category    = ITEM_CATEGORY_CONSUMABLE,
           .use      = healing_item_use_callback,
           .data = &k_healing_item_data_blue_flask,
-          .icon      = {.texture_id =  TEX_BLUE_FLASK, .rect = {0, 0, 16, 16}},
+          .icon      = {.texture_id =  TEX_ITEM_BLUE_FLASK, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_SCROLL_ICE_ARROW] = 
       {
@@ -96,7 +96,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
           .category  = ITEM_CATEGORY_KEY,
           .use = do_nothing_callback,
           .data = NULL,
-          .icon = {.texture_id = TEX_KEY, .rect = {0, 0, 16, 16}},
+          .icon = {.texture_id = TEX_ITEM_KEY, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_ANIME_SWORD] =
       {
@@ -106,7 +106,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
           .category  = ITEM_CATEGORY_EQUIPMENT,
           .use = equipment_item_use_callback,
           .data = &k_equipemt_item_data_anime_sword,
-          .icon = {.texture_id = TEX_KEY, .rect = {0, 0, 16, 16}},
+          .icon = {.texture_id = TEX_ICON_CLEAVER, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_SPEAR] =
       {
@@ -144,17 +144,12 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
 static void healing_item_use_callback(const void* data, Ecs* ecs, ecs_entity_t entity)
 {
   const HealingItemData* healing_item_data = (const HealingItemData*)data;
-  ManaPool*              mana_pool         = ecs_get(ecs, entity, MANA_POOL);
+  Mana*                  mana              = ecs_get(ecs, entity, MANA);
   Health*                health            = ecs_get(ecs, entity, HEALTH);
   if (health != NULL)
-  {
-    health->hit_points = min(health->max_hit_points, health->hit_points + healing_item_data->hp);
-  }
-  if (mana_pool != NULL)
-  {
-    mana_pool->mana_points =
-        min(mana_pool->max_mana_points, mana_pool->mana_points + healing_item_data->mp);
-  }
+    health->current = min(health->max, health->current + healing_item_data->hp);
+  if (mana != NULL)
+    mana->current = min(mana->max, mana->current + healing_item_data->mp);
 }
 
 static void scroll_use_callback(const void* _data, Ecs* ecs, ecs_entity_t entity)
@@ -180,5 +175,5 @@ static void equipment_item_use_callback(const void* _data, Ecs* ecs, ecs_entity_
   ecs_entity_t             weapon;
 
   weapon = create_weapon(ecs, data->weapon_id);
-  equip(ecs, entity, weapon);
+  ett_equip_weapon(ecs, entity, weapon);
 }

@@ -14,7 +14,7 @@ ecs_entity_t make_static_pickupable_entity(Ecs* ecs,
 ecs_entity_t make_thunder_storm(Ecs* ecs, Vec2 center);
 ecs_entity_t make_thunder(Ecs* ecs, Vec2 position, u16 mask_bits);
 
-typedef struct NewLadderParams
+typedef struct
 {
   const char* name;
   const char* level;
@@ -22,8 +22,8 @@ typedef struct NewLadderParams
   Vec2        position;
   Vec2        size;
   u16         direction;
-} NewLadderParams;
-ecs_entity_t make_ladder(Ecs* ecs, const NewLadderParams* params);
+} MakePortalParams;
+ecs_entity_t make_portal(Ecs* ecs, const MakePortalParams* params);
 ecs_entity_t
 make_text_particle(Ecs* ecs, const char* text, Vec2 position, Vec2 speed, FONT* font, COLOR color);
 
@@ -58,17 +58,23 @@ ecs_entity_t make_wogol(Ecs* ecs, Vec2 position);
 ecs_entity_t make_imp(Ecs* ecs, Vec2 position);
 
 // misc
-typedef struct NewChestParams
+typedef struct MakeChestParams
 {
   Vec2 position;
   Item items[CHEST_MAX_ITEMS];
   u16  num_slots;
   u16  state;
   u32  id;
-} NewChestParams;
+} MakeChestParams;
+
+typedef struct
+{
+  Vec2 position;
+  u16  required_key;
+} MakeDoorParams;
 
 ecs_entity_t make_door(Ecs* ecs, Vec2 position);
-ecs_entity_t make_chest(Ecs* ecs, const NewChestParams* params);
+ecs_entity_t make_chest(Ecs* ecs, const MakeChestParams* params);
 ecs_entity_t make_trigger(Ecs* ecs, Vec2 position, Vec2 size, u16 mask);
 
 // effects
@@ -79,16 +85,16 @@ ecs_entity_t make_fx_cast_ice(Ecs* ecs, Vec2 position);
 ecs_entity_t make_fx_cast_fire(Ecs* ecs, Vec2 position);
 ecs_entity_t make_fx_ice_hit(Ecs* ecs, Vec2 position);
 ecs_entity_t make_fx_fire_hit(Ecs* ecs, Vec2 position);
-ecs_entity_t make_fx_slash(Ecs* ecs, Vec2 position, SDL_RendererFlip flip);
+ecs_entity_t make_fx_slash(Ecs* ecs, Vec2 position, double rot, SDL_RendererFlip flip);
 ecs_entity_t make_fx_fire_bust(Ecs* ecs, Vec2 position);
 
-typedef struct NewProjectileParams
+typedef struct MakeProjectileParams
 {
   ecs_entity_t shooter;
   Vec2         position;
   Vec2         direction;
   u16          mask;
-} NewProjectileParams;
+} MakeProjectileParams;
 // projectiles
 ecs_entity_t
 make_fire_ball(Ecs* ecs, ecs_entity_t shooter, Vec2 position, Vec2 direction, u16 mask);

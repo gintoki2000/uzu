@@ -1,6 +1,6 @@
 #include "entity_utils.h"
 #include "components.h"
-ecs_entity_t get_player(Ecs* ecs)
+ecs_entity_t scn_get_player(Ecs* ecs)
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;
@@ -8,39 +8,29 @@ ecs_entity_t get_player(Ecs* ecs)
   return cnt > 0 ? entities[0] : ECS_NULL_ENT;
 }
 
-Vec2 get_player_position(Ecs* ecs)
+Vec2 snn_get_player_position(Ecs* ecs)
 {
-  return get_entity_position(ecs, get_player(ecs));
+  return ett_get_position(ecs, scn_get_player(ecs));
 }
 
-Vec2 get_entity_position(Ecs* ecs, ecs_entity_t entity)
+Vec2 ett_get_position(Ecs* ecs, ecs_entity_t entity)
 {
   return ((Transform*)ecs_get(ecs, entity, TRANSFORM))->position;
 }
 
-BOOL set_entity_position(Ecs* ecs, ecs_entity_t entity, Vec2 pos)
+void ett_set_position(Ecs* ecs, ecs_entity_t entity, Vec2 pos)
 {
-  Transform* transform;
-  if ((transform = ecs_get(ecs, entity, TRANSFORM)))
-  {
-    transform->position = pos;
-    return TRUE;
-  }
-  return FALSE;
+  Transform* transform = ecs_get(ecs, entity, TRANSFORM);
+  transform->position  = pos;
 }
 
-BOOL set_entity_velocity(Ecs* ecs, ecs_entity_t entity, Vec2 vel)
+void ett_set_velocity(Ecs* ecs, ecs_entity_t entity, Vec2 vel)
 {
-  Motion* motion;
-  if ((motion = ecs_get(ecs, entity, MOTION)))
-  {
-    motion->vel = vel;
-    return TRUE;
-  }
-  return FALSE;
+  Motion* motion = ecs_get(ecs, entity, MOTION);
+  motion->vel    = vel;
 }
 
-ecs_entity_t find_ladder(Ecs* ecs, const char* _name)
+ecs_entity_t scn_find_portal(Ecs* ecs, const char* _name)
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;
@@ -62,24 +52,26 @@ ecs_entity_t find_ladder(Ecs* ecs, const char* _name)
   return ECS_NULL_ENT;
 }
 
-BOOL equip(Ecs* ecs, ecs_entity_t entity, ecs_entity_t weapon)
+void ett_equip_weapon(Ecs* ecs, ecs_entity_t entity, ecs_entity_t weapon)
 {
   Hand* equipment;
 
-  if (entity == ECS_NULL_ENT || weapon == ECS_NULL_ENT)
-    return FALSE;
-
+  ASSERT(entity != ECS_NULL_ENT && weapon != ECS_NULL_ENT);
   equipment = ecs_get(ecs, entity, HAND);
 
   ecs_set(ecs, weapon, HOLDER, &(Holder){ .value = entity });
   if (equipment->weapon != ECS_NULL_ENT)
     ecs_add(ecs, equipment->weapon, DESTROYED_TAG);
   equipment->weapon = weapon;
-
-  return TRUE;
 }
 
-ecs_entity_t find_entity(Ecs* ecs, const char* name)
+ecs_entity_t ett_get_equiped_weapon(Ecs* ecs, ecs_entity_t entity)
+{
+  Hand* hand = ecs_get(ecs, entity, HAND);
+  return hand != NULL ? hand->weapon : ECS_NULL_ENT;
+}
+
+ecs_entity_t scn_find(Ecs* ecs, const char* name)
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;
@@ -87,94 +79,92 @@ ecs_entity_t find_entity(Ecs* ecs, const char* name)
 
   ecs_raw(ecs, NAME, &entities, (pointer_t*)&names, &cnt);
   for (int i = 0; i < cnt; ++i)
-  {
-    if (strcmp(names[i].value, name) == 0)
-    {
+    if (!SDL_strcmp(names[i].value, name))
       return entities[i];
-    }
-  }
   return ECS_NULL_ENT;
 }
 
-float get_distance_between_two_entities(Ecs* ecs, ecs_entity_t e1, ecs_entity_t e2)
+float ett_dist(Ecs* ecs, ecs_entity_t e1, ecs_entity_t e2)
 {
   Vec2 p1, p2;
-  p1 = get_entity_position(ecs, e1);
-  p2 = get_entity_position(ecs, e2);
+  p1 = ett_get_position(ecs, e1);
+  p2 = ett_get_position(ecs, e2);
   return vec2_mag(vec2_sub(p1, p2));
 }
 
-void set_entity_hit_points(Ecs* ecs, ecs_entity_t entity, u16 hit_points)
+void ett_set_hp(Ecs* ecs, ecs_entity_t entity, u16 hit_points)
 {
-  ((Health*)ecs_get(ecs, entity, HEALTH))->hit_points = hit_points;
+  ((Health*)ecs_get(ecs, entity, HEALTH))->current = hit_points;
 }
 
-u16 get_entity_hit_points(Ecs* ecs, ecs_entity_t entity)
+u16 ett_get_hp(Ecs* ecs, ecs_entity_t entity)
 {
-  return ((Health*)ecs_get(ecs, entity, HEALTH))->hit_points;
+  return ((Health*)ecs_get(ecs, entity, HEALTH))->current;
 }
 
-u16 get_entity_conversation(Ecs* ecs, ecs_entity_t entity)
+u16 ett_get_conversation(Ecs* ecs, ecs_entity_t entity)
 {
   return ((Dialogue*)ecs_get(ecs, entity, DIALOGUE))->conversation_id;
 }
 
-const char* get_entity_name(Ecs* ecs, ecs_entity_t entity)
+const char* ett_get_name(Ecs* ecs, ecs_entity_t entity)
 {
   return ((Name*)ecs_get(ecs, entity, NAME))->value;
 }
 
-Vec2 get_entity_velocity(Ecs* ecs, ecs_entity_t entity)
+Vec2 ett_get_velocity(Ecs* ecs, ecs_entity_t entity)
 {
   return ((Motion*)ecs_get(ecs, entity, MOTION))->vel;
 }
 
-float get_entity_vz(Ecs* ecs, ecs_entity_t entity)
+u16 ett_get_mp(Ecs* ecs, ecs_entity_t entity)
 {
-  return ((Motion*)ecs_get(ecs, entity, MOTION))->vz;
-}
-u16 get_entity_mana_points(Ecs* ecs, ecs_entity_t entity)
-{
-  return ((ManaPool*)ecs_get(ecs, entity, MANA_POOL))->mana_points;
+  return ((Mana*)ecs_get(ecs, entity, MANA))->current;
 }
 
-void set_entity_mana_points(Ecs* ecs, ecs_entity_t entity, u16 mana_points)
+void ett_set_mp(Ecs* ecs, ecs_entity_t entity, u16 current)
 {
-  ((ManaPool*)ecs_get(ecs, entity, MANA_POOL))->mana_points = mana_points;
+  ((Mana*)ecs_get(ecs, entity, MANA))->current = current;
 }
-void set_spell(Ecs* ecs, ecs_entity_t entity, u16 spell_id)
+void ett_attune_spell(Ecs* ecs, ecs_entity_t entity, u16 spell_id)
 {
-  ((AttunementSlot*)ecs_get(ecs, entity, ATTUNEMENT_SLOT))->spell_id = spell_id;
+  ecs_set(ecs, entity, ATTUNEMENT_SLOT, &(AttunementSlot){ spell_id });
 }
-u16 get_spell(Ecs* ecs, ecs_entity_t entity)
+u16 ett_get_attuned_spell_type(Ecs* ecs, ecs_entity_t entity)
 {
   AttunementSlot* comp = ecs_get(ecs, entity, ATTUNEMENT_SLOT);
   return comp ? comp->spell_id : SPELL_ID_NULL;
 }
-u16 get_weapon_type_id(Ecs* ecs, ecs_entity_t weapon)
+
+const Spell* ett_get_attuned_spell(Ecs* registry, ecs_entity_t entity)
+{
+  u16 id = ett_get_attuned_spell_type(registry, entity);
+  return id != SPELL_ID_NULL ? &g_spell_tbl[id] : NULL;
+}
+u16 wpn_get_type(Ecs* ecs, ecs_entity_t weapon)
 {
   return ((const WeaponAttributes*)ecs_get(ecs, weapon, WEAPON_ATTRIBUTES))->type_id;
 }
-ecs_entity_t get_equiped_weapon(Ecs* ecs, ecs_entity_t holder)
+ecs_entity_t get_equiped_weapon(Ecs* registry, ecs_entity_t holder)
 {
-  return ((const Hand*)ecs_get(ecs, holder, HAND))->weapon;
+  return ((const Hand*)ecs_get(registry, holder, HAND))->weapon;
 }
-u16 get_equiped_weapon_type_id(Ecs* ecs, ecs_entity_t holder)
+u16 ett_get_equiped_weapon_type(Ecs* ecs, ecs_entity_t holder)
 {
-  return get_weapon_type_id(ecs, get_equiped_weapon(ecs, holder));
+  return wpn_get_type(ecs, get_equiped_weapon(ecs, holder));
 }
 
-void set_entity_conversation(Ecs* ecs, ecs_entity_t entity, u16 conversation_id)
+void ett_set_conversation(Ecs* ecs, ecs_entity_t entity, u16 conversation_id)
 {
   ecs_set(ecs, entity, DIALOGUE, &(Dialogue){ conversation_id });
 }
 
-void animate_entity_hand(Ecs*                    registry,
-                         ecs_entity_t            entity,
-                         const HandAnimKeyFrame* kframes,
-                         SDL_bool                realtive_current,
-                         Callback                finished_callback,
-                         Callback                kframe_callback)
+void ett_animate_hand(Ecs*                    registry,
+                      ecs_entity_t            entity,
+                      const HandAnimKeyFrame* kframes,
+                      SDL_bool                realtive_current,
+                      Callback                finished_callback,
+                      Callback                kframe_callback)
 {
   Hand*          hand   = ecs_get(registry, entity, HAND);
   HandAnimation* ha     = ecs_add(registry, entity, HAND_ANIMATION);
@@ -188,13 +178,36 @@ void animate_entity_hand(Ecs*                    registry,
   ha->frame_callback    = kframe_callback;
 }
 
-BOOL request_action(Ecs* registry, ecs_entity_t entity, u16 action)
+Vec2 ett_get_facing_direction(Ecs* registry, ecs_entity_t entity)
 {
-  Controller* controller;
-  if ((controller = ecs_get(registry, entity, CONTROLLER)) == NULL)
-    return FALSE;
-  if (controller->in_action)
-    return FALSE;
-  controller->action = action;
-  return TRUE;
+  return ((FacingDirection*)ecs_get(registry, entity, FACING_DIRECTION))->value;
+}
+
+u16 ett_get_atk_mask(Ecs* registry, ecs_entity_t entity)
+{
+  return ((AttackMask*)ecs_get(registry, entity, ATTACK_MASK))->value;
+}
+
+ecs_entity_t wpn_get_holder(Ecs* registry, ecs_entity_t weapon)
+{
+  return ((Holder*)ecs_get(registry, weapon, HOLDER))->value;
+}
+void ett_unable_to_move_push(Ecs* registry, ecs_entity_t entity)
+{
+  UnableToMove* unable_to_move = ecs_get(registry, entity, UNABLE_TO_MOVE);
+  if (unable_to_move)
+    ++unable_to_move->count;
+  else
+    ecs_set(registry, entity, UNABLE_TO_MOVE, &(UnableToMove){ 1 });
+}
+void ett_unable_to_move_pop(Ecs* registry, ecs_entity_t entity)
+{
+  UnableToMove* unable_to_move = ecs_get(registry, entity, UNABLE_TO_MOVE);
+  if (unable_to_move && --unable_to_move->count == 0)
+    ecs_rmv(registry, entity, UNABLE_TO_MOVE);
+}
+void ett_apply_status_effect(Ecs* registry, ecs_entity_t entity, u16 type, u16 duration)
+{
+  if (!ecs_has(registry, entity, STATUS_EFFECT))
+    ecs_set(registry, entity, STATUS_EFFECT, &(StatusEffect){ .type = type, .duration = duration });
 }

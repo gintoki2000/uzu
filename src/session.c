@@ -1,5 +1,6 @@
 #include "session.h"
 
+#include "SDL.h"
 #include "constances.h"
 #include "global.h"
 #include "inventory.h"
@@ -12,10 +13,6 @@ static u16 _starting_weapon_tbl[] = {
   WEAPON_STAFF,
   WEAPON_BOW,
 };
-
-const u16 g_initial_hp_tbl[] = { 15, 13, 8, 10 };
-
-const u16 g_initial_mp_tbl[] = { 5, 6, 12, 6 };
 
 u16 g_initial_item1_tbl[] = {
   ITEM_TYPE_CLEAVER,
@@ -44,16 +41,13 @@ const u16 g_initial_spell[] = {
 void new_game(u16 starting_job)
 {
   g_session.job      = starting_job;
-  g_session.hp       = g_initial_hp_tbl[starting_job];
-  g_session.mp       = g_initial_mp_tbl[starting_job];
   g_session.new_game = TRUE;
   g_session.pos.x    = STARTING_POSITION_X;
   g_session.pos.y    = STARTING_POSITION_Y;
   g_session.weapon   = _starting_weapon_tbl[starting_job];
   g_session.spell    = g_initial_spell[starting_job];
 
-  add_item_to_inventory(g_initial_item1_tbl[starting_job], 1);
-  add_item_to_inventory(g_initial_item2_tbl[starting_job], 1);
-
-  strcpy(g_session.level, "demon_ruin");
+  inv_add_item(g_initial_item1_tbl[starting_job], 1);
+  inv_add_item(g_initial_item2_tbl[starting_job], 1);
+  SDL_strlcpy(g_session.level, "demon_ruin", 255);
 }

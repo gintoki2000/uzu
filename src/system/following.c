@@ -29,7 +29,7 @@ void following_system(void)
     if ((transform = ecs_get(g_ecs, entities[i], TRANSFORM)) &&
         (controller = ecs_get(g_ecs, entities[i], CONTROLLER)))
     {
-      target_pos = get_entity_position(g_ecs, target[i].entity);
+      target_pos = ett_get_position(g_ecs, target[i].entity);
       desired    = vec2_sub(target_pos, transform->position);
 
       d       = vec2_mag2(desired);

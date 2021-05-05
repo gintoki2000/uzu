@@ -72,7 +72,7 @@ pointer_t ptr_array_add(PtrArray* self, pointer_t p)
 
 BOOL ptr_array_rmv(PtrArray* self, pointer_t p)
 {
-  int idx = ptr_array_idx_of(self, p);
+  int idx = ptr_array_index_of(self, p);
   if (idx != -1)
   {
     ptr_array_rmv_idx(self, idx);
@@ -105,7 +105,7 @@ void ptr_array_qrmv(PtrArray* self, s32 idx)
   self->cnt--;
 }
 
-int ptr_array_idx_of(PtrArray* self, pointer_t p)
+int ptr_array_index_of(PtrArray* self, pointer_t p)
 {
   int        cnt = self->cnt;
   pointer_t* a   = self->storage;
@@ -117,7 +117,7 @@ int ptr_array_idx_of(PtrArray* self, pointer_t p)
 
 BOOL ptr_array_contains(PtrArray* self, pointer_t p)
 {
-  return ptr_array_idx_of(self, p) != -1;
+  return ptr_array_index_of(self, p) != -1;
 }
 
 void ptr_array_reserve(PtrArray* self, s32 n)

@@ -6,13 +6,16 @@ struct Session
 {
   u16  job;
   u16  weapon;
-  u16  hp;
-  u16  mp;
   u16  new_game;
   u16  spell;
   u16  coins;
   Vec2 pos;
   char level[256];
+
+  u8 vitality;
+  u8 strength;
+  u8 intelligent;
+  u8 agility;
 };
 
 extern struct Session g_session;

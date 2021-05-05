@@ -6,20 +6,9 @@ extern SDL_Rect      g_viewport;
 extern SDL_Renderer* g_renderer;
 extern Ecs*          g_ecs;
 
-void health_bar_rendering_system(ecs_entity_t     entity,
-                                 const Transform* transform,
-                                 const Health*    health,
-                                 const HealthBar* health_bar)
-{
-  (void)entity;
-  (void)transform;
-  (void)health;
-  (void)health_bar;
-}
 
 void healthbar_rendering_system()
 {
-  health_bar_rendering_system(0, 0, 0, 0);
   ecs_entity_t* entities;
   ecs_size_t    cnt;
 
@@ -36,9 +25,9 @@ void healthbar_rendering_system()
   {
     transform = ecs_get(g_ecs, entities[i], TRANSFORM);
     health    = ecs_get(g_ecs, entities[i], HEALTH);
-    if (health->hit_points == health->max_hit_points)
+    if (health->current == health->max)
       continue;
-    p = (float)health->hit_points / (float)health->max_hit_points;
+    p = (float)health->current / (float)health->max;
 
     border.x = transform->position.x - health_bar[i].anchor.x - g_viewport.x;
     border.y = transform->position.y - health_bar[i].anchor.y - g_viewport.y;

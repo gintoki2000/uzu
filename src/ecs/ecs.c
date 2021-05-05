@@ -70,8 +70,13 @@ Ecs* ecs_init(Ecs* self, const EcsType* types, ecs_size_t cnt)
     self->entities[i] = ECS_ENT(i + 1, 0);
 
   self->entities[ECS_DEFAULT_SIZE - 1] = ECS_ENT(ECS_NULL_IDX, 0);
-  self->emitter[ECS_EVT_ADD_COMP]      = emitter_new(cnt);
-  self->emitter[ECS_EVT_RMV_COMP]      = emitter_new(cnt);
+  self->on_construct                   = SDL_calloc(cnt, sizeof(Signal));
+  self->on_destruct                    = SDL_calloc(cnt, sizeof(Signal));
+  for (int i = 0; i < cnt; ++i)
+  {
+    signal_init(&self->on_construct[i]);
+    signal_init(&self->on_destruct[i]);
+  }
   return self;
 }
 
@@ -88,8 +93,14 @@ void ecs_fini(Ecs* self)
   SDL_free(self->pools);
   SDL_free(self->types);
   SDL_free(self->entities);
-  for (int i = 0; i < ECS_NUM_EVENTS; ++i)
-    emitter_delete(self->emitter[i]);
+
+  for (int i = 0; i < self->type_cnt; ++i)
+  {
+    signal_fini(&self->on_construct[i]);
+    signal_fini(&self->on_destruct[i]);
+  }
+  SDL_free(self->on_construct);
+  SDL_free(self->on_destruct);
 }
 
 ecs_entity_t ecs_create(Ecs* self)
@@ -100,7 +111,7 @@ ecs_entity_t ecs_create(Ecs* self)
   if (self->destroyed_index == ECS_NULL_IDX)
   {
     self->size *= 2;
-    self->entities = realloc(self->entities, self->size * sizeof(ecs_entity_t));
+    self->entities = SDL_realloc(self->entities, self->size * sizeof(ecs_entity_t));
     for (int i = self->cnt; i < self->size - 1; ++i)
     {
       self->entities[i] = ECS_ENT(i + 1, 0);
@@ -146,9 +157,8 @@ void* ecs_add(Ecs* self, ecs_entity_t entity, ecs_size_t type_id)
 
   component = ecs_pool_add(self->pools[type_id], entity);
   construct(&self->types[type_id], component);
-  emitter_emit(self->emitter[ECS_EVT_ADD_COMP],
-               type_id,
-               &(EcsComponentEvent){ .entity = entity, .component = component });
+  signal_emit(&self->on_construct[type_id],
+              &(EcsComponentEvent){ .entity = entity, .component = component });
   return component;
 }
 
@@ -160,9 +170,8 @@ void ecs_rmv(Ecs* self, ecs_entity_t entity, ecs_size_t type_id)
 
   if ((component = ecs_pool_get(self->pools[type_id], entity)) != NULL)
   {
-    emitter_emit(self->emitter[ECS_EVT_RMV_COMP],
-                 type_id,
-                 &(EcsComponentEvent){ .entity = entity, .component = component });
+    signal_emit(&self->on_destruct[type_id],
+                &(EcsComponentEvent){ .entity = entity, .component = component });
     destruct(&self->types[type_id], component);
     ecs_pool_rmv(self->pools[type_id], entity);
   }
@@ -184,7 +193,7 @@ void ecs_rmv_all(Ecs* self, ecs_entity_t entity)
     {
       event.component = component;
       event.entity    = entity;
-      emitter_emit(self->emitter[ECS_EVT_RMV_COMP], i, &event);
+      signal_emit(&self->on_destruct[i], &event);
       destruct(&types[i], component);
       ecs_pool_rmv(pools[i], entity);
     }
@@ -256,28 +265,13 @@ void* ecs_set(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const void* da
   {
     raw = ecs_pool_add(self->pools[type_id], entity);
     copy(&self->types[type_id], raw, data);
-    emitter_emit(self->emitter[ECS_EVT_ADD_COMP],
-                 type_id,
-                 &(EcsComponentEvent){ .entity = entity, .component = raw });
+    signal_emit(&self->on_construct[type_id],
+                &(EcsComponentEvent){ .entity = entity, .component = raw });
   }
   return raw;
 }
 
-void ecs_connect(Ecs* self, int event, ecs_size_t type_id, Callback cb)
-{
-  ASSERT_VALID_EVENT_ID(event);
-  ASSERT_VALID_TYPE_ID(self, type_id);
-  emitter_connect(self->emitter[event], type_id, cb);
-}
-
-void ecs_disconnect(Ecs* self, int event, ecs_size_t type_id, void (*fn)())
-{
-  ASSERT_VALID_EVENT_ID(event);
-  ASSERT_VALID_TYPE_ID(self, type_id);
-  emitter_disconnect(self->emitter[event], type_id, fn);
-}
-
-void ecs_fill(Ecs* self, ecs_entity_t entity, const ecs_size_t* types, ecs_size_t cnt, void** arr)
+void ecs_fill(Ecs* self, ecs_entity_t entity, const ecs_size_t* types, ecs_size_t cnt, void* arr[])
 {
   ASSERT_VALID_ENTITY(self, entity);
   for (int i = 0; i < cnt; ++i)
@@ -302,9 +296,8 @@ ecs_entity_t ecs_cpy(Ecs* dst_registry, Ecs* src_registry, ecs_entity_t src_enti
     {
       cpy_data = ecs_pool_add(dst_registry->pools[itype_id], clone_entity);
       copy(&dst_registry->types[itype_id], cpy_data, src_data);
-      emitter_emit(dst_registry->emitter[ECS_EVT_ADD_COMP],
-                   itype_id,
-                   &(EcsComponentEvent){ .entity = clone_entity, .component = cpy_data });
+      signal_emit(&dst_registry->on_construct[itype_id],
+                  &(EcsComponentEvent){ .entity = clone_entity, .component = cpy_data });
     }
   }
 
@@ -357,4 +350,16 @@ void ecs_each_ex(Ecs* self, const EcsFilter* filter, Callback callback)
         fn(callback.user_data, entities[iett], components);
     }
   }
+}
+
+Signal* ecs_on_construct(Ecs* self, ecs_size_t type)
+{
+  ASSERT_MSG(type < self->type_cnt, "invalid component type");
+  return &self->on_construct[type];
+}
+
+Signal* ecs_on_destruct(Ecs* self, ecs_size_t type)
+{
+  ASSERT_MSG(type < self->type_cnt, "invalid component type");
+  return &self->on_destruct[type];
 }

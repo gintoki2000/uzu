@@ -46,8 +46,12 @@ void         input_pop_state(void);
 BOOL         button_pressed(u16 button);
 BOOL         button_just_pressed(u16 button);
 SDL_Scancode button_to_scancode(u16 button);
-void update_mouse_state(void);
-BOOL mouse_button_just_pressed(u16 button);
-BOOL mouse_button_pressed(u16 button);
-BOOL mouse_button_repeated(u16 button);
+void         update_mouse_state(void);
+BOOL         mouse_button_just_pressed(u16 button);
+BOOL         mouse_button_pressed(u16 button);
+BOOL         mouse_button_repeated(u16 button);
+BOOL         key_pressed(SDL_Scancode scancode);
+BOOL         key_just_pressed(SDL_Scancode scancode);
+BOOL         key_released(SDL_Scancode scancode);
+BOOL         key_just_released(SDL_Scancode scancode);
 #endif

@@ -1,4 +1,4 @@
-#include "behaviour_tree.h"
+#include "behavior_tree.h"
 #include "components.h"
 #include "ecs/ecs.h"
 #include "system/game_logic.h"
@@ -14,6 +14,5 @@ void ai_system(void)
   ecs_raw(g_ecs, BRAIN, &entities, (void**)&ai_agent, &cnt);
   for (int i = 0; i < cnt; ++i)
   {
-    bt_node_vc_exec(ai_agent[i].root, g_ecs, entities[i]);
   }
 }

@@ -25,12 +25,21 @@ void         ett_attune_spell(Ecs* ecs, ecs_entity_t entity, u16 spell_id);
 u16          ett_get_attuned_spell_type(Ecs* ecs, ecs_entity_t entity);
 ecs_entity_t ett_get_equiped_weapon(Ecs* ecs, ecs_entity_t entity);
 u16          ett_get_equiped_weapon_type(Ecs* ecs, ecs_entity_t holder);
-void         ett_animate_hand(Ecs*                    registry,
-                              ecs_entity_t            entity,
-                              const HandAnimKeyFrame* kframes,
-                              BOOL                    realtive_current,
-                              Callback                finished_callback,
-                              Callback                kframe_callback);
+
+typedef struct HandAnimParams
+{
+  const HandAnimKeyFrame* keyframes;
+  BOOL                    realtiveCurrentState;
+  Callback                cbFinished;
+  Callback                cbFrame;
+} HandAnimParams;
+
+#define HAND_ANIM_PARAM_INIT                                                                       \
+  {                                                                                                \
+    .realtiveCurrentState = TRUE                                                                   \
+  }
+
+void         ett_animate_hand(Ecs* registry, ecs_entity_t entity, const HandAnimParams* params);
 Vec2         ett_get_facing_direction(Ecs* registry, ecs_entity_t entity);
 u16          ett_get_atk_mask(Ecs* registry, ecs_entity_t entity);
 const Spell* ett_get_attuned_spell(Ecs* registry, ecs_entity_t entity);

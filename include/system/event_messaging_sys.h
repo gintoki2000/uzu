@@ -39,24 +39,24 @@ typedef struct
 {
   ecs_entity_t e1;
   ecs_entity_t e2;
-} MSG_Collision;
+} OverlapMsg;
 
 typedef struct
 {
   ecs_entity_t entity;
-} MSG_EntityDied;
+} EntityDiedMsg;
 
 typedef struct
 {
   ecs_entity_t weapon;
   ecs_entity_t entity;
-} MSG_WeaponHit;
+} WeaponHitMsg;
 
 typedef struct
 {
   ecs_entity_t projectile;
   ecs_entity_t entity;
-} MSG_ProjectileHit;
+} ProjectileHitMsg;
 
 typedef struct
 {
@@ -67,19 +67,19 @@ typedef struct
   u16          impact_time;
   Vec2         force;
   float        zforce;
-} MSG_DealDamage;
+} InflictDamageMsg;
 
 typedef struct
 {
   ecs_entity_t entity;
-} MSG_LifeSpanFinished;
+} LifeSpanFinishedMsg;
 
 typedef struct
 {
   ecs_entity_t entity;
   s32          row;
   s32          col;
-} MSG_TileCollision;
+} TileCollisionMsg;
 
 typedef struct
 {
@@ -87,40 +87,40 @@ typedef struct
   ecs_entity_t damagee;
   int          damage;
   int          type;
-} MSG_GetDamaged;
+} GetDamagedMsg;
 
 typedef struct MSG_HitPickupableEntity
 {
   ecs_entity_t player;
   ecs_entity_t pickupable_entity;
-} MSG_HitPickupableEntity;
+} HitPickupableEntityMsg;
 
 typedef struct
 {
   int          row, col;
   ecs_entity_t entity;
-} MSG_EntityHitTrap;
+} EntityHitTrapMsg;
 
 typedef struct
 {
-  ecs_entity_t ladder;
-} MSG_HitLadder;
-
-typedef struct
-{
-  ecs_entity_t entity;
-} MSG_BeginInteraction;
+  ecs_entity_t portal;
+} EnterPortalMsg;
 
 typedef struct
 {
   ecs_entity_t entity;
-} MSG_EndInteraction;
+} BeginInteractionMsg;
+
+typedef struct
+{
+  ecs_entity_t entity;
+} EndInteractionMsg;
 
 typedef struct
 {
   ecs_entity_t entity;
   const char*  cmd;
-} MSG_CommandSelected;
+} CommandSelectedMsg;
 
 typedef struct
 {
@@ -133,42 +133,42 @@ typedef struct
 {
   int         code;
   const char* status;
-} MSG_EventFinished;
+} EventFinishedMsg;
 
 typedef struct
 {
   const char* level_name;
-} MSG_LevelLoaded;
+} LevelLoadedMsg;
 
 typedef struct
 {
   const char* level_name;
-} MSG_LevelUnloaded;
+} LevelUnloadedMsg;
 
 typedef struct
 {
   ecs_entity_t entity;
   ecs_entity_t door;
-} MSG_HitDoor;
+} HitDoorMsg;
 
 typedef struct
 {
   ecs_entity_t entity;
   ecs_entity_t trigger;
-} MSG_HitTrigger;
+} HitTriggerMsg;
 
 typedef struct
 {
   ecs_entity_t pickupable_entity;
   u16          item_type_id;
   Vec2         position;
-} MSG_ItemPickedUp;
+} ItemPickedUpMsg;
 
 typedef struct
 {
   u16  amount;
   Vec2 position;
-} MSG_CoinPickedUp;
+} CoinPickedUpMsg;
 
 void ems_init();
 void ems_fini();

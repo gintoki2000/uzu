@@ -1,52 +1,60 @@
-#include "behaviour_tree.h"
+#include "behavior_tree/base.h"
 
 typedef struct _BTRoot
 {
   BTNode  _base;
   BTNode* child;
+  BOOL    isChildRunning;
 } BTRoot;
 
-typedef struct _BTRootVtbl
-{
-  BTNodeVtbl _base;
-} BTRootVtbl;
+typedef BTNode BTRootVtbl;
 
-BT_PRIVATE_NODE(BTRoot)
-
-static BTRoot* Init(BTRoot* self, BTNode* child)
+static BTRoot* initialize(BTRoot* self, BTNode* child)
 {
   bt_node_init((BTNode*)self);
-  self->child = child;
+  self->child          = child;
+  self->isChildRunning = FALSE;
   return self;
 }
 
-static void Finalize(BTRoot* self)
+static void finalize(BTRoot* self)
 {
   bt_node_del(self->child);
 }
 
-static BTStatus Execute(BTRoot* self, Ecs* ecs, ecs_entity_t entity)
+static BTStatus on_tick(BTRoot* self, const BTUpdateContext* ctx)
 {
-  BTStatus finish_status = bt_node_exec(self->child, ecs, entity);
-  if (finish_status != BT_STATUS_RUNNING)
-    bt_node_finish(self->child, ecs, entity, finish_status == BT_STATUS_SUCCESS);
+  if (!self->isChildRunning)
+  {
+    bt_node_start(self->child, ctx);
+    self->isChildRunning = TRUE;
+  }
+  if (bt_node_tick(self->child, ctx) != BT_STATUS_RUNNING)
+  {
+    self->isChildRunning = FALSE;
+    bt_node_finish(self->child, ctx);
+  }
   return BT_STATUS_RUNNING;
 }
 
-static void Abort(BTRoot* self, Ecs* registry, ecs_entity_t entity)
+static void on_finish(BTRoot* self, const BTUpdateContext* ctx)
 {
-  bt_node_abort(self->child, registry, entity);
+  if (self->isChildRunning)
+  {
+    bt_node_finish(self->child, ctx);
+    self->isChildRunning = FALSE;
+  }
 }
 
-static void VtblInit(BTRootVtbl* vtbl)
-{
-  bt_node_vtbl_init((BTNodeVtbl*)vtbl);
-  ((BTNodeVtbl*)vtbl)->exec  = (BTExecuteFunc)Execute;
-  ((BTNodeVtbl*)vtbl)->fini  = (BTFinalizeFunc)Finalize;
-  ((BTNodeVtbl*)vtbl)->abort = (BTAbortFunc)Abort;
-}
+BT_VTBL_INITIALIZER(BTRoot, BTNode, bt_node, {
+  ((BTNodeVtbl*)vtbl)->fini   = (BTFinalizeFunc)finalize;
+  ((BTNodeVtbl*)vtbl)->finish = (BTOnFinishFunc)on_finish;
+  ((BTNodeVtbl*)vtbl)->tick   = (BTOnTickFunc)on_tick;
+})
+
+BT_INST_ALLOC_FN(BTRoot, root)
 
 BTRoot* bt_root_new(BTNode* child)
 {
-  return Init(Alloc(), child);
+  return initialize(root_alloc(), child);
 }

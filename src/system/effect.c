@@ -11,9 +11,9 @@
 extern Ecs* g_ecs;
 
 //<----------------------------event callback---------------------->//
-static void on_item_picked_up(void* arg, const MSG_ItemPickedUp* event);
-static void on_get_damaged(void* arg, const MSG_GetDamaged* event);
-static void on_coin_picked_up(void* arg, const MSG_CoinPickedUp* event);
+static void on_item_picked_up(void* arg, const ItemPickedUpMsg* event);
+static void on_get_damaged(void* arg, const GetDamagedMsg* event);
+static void on_coin_picked_up(void* arg, const CoinPickedUpMsg* event);
 //==================================================================//
 
 void effect_system_init()
@@ -23,10 +23,10 @@ void effect_system_init()
   ems_connect(MSG_COIN_PICKED_UP, CALLBACK_2(on_coin_picked_up));
 }
 
-static void on_item_picked_up(SDL_UNUSED void* arg, const MSG_ItemPickedUp* event)
+static void on_item_picked_up(SDL_UNUSED void* arg, const ItemPickedUpMsg* event)
 {
   PickupableAttributes* attrs = ecs_get(g_ecs, event->pickupable_entity, PICKUPABLE_ATTRIBUTES);
-  u16                   item_type_id = g_pickupable_to_item_type_id_tbl[attrs->id];
+  u16                   item_type_id = gPickupableToItemTypeIdTbl[attrs->id];
   if (attrs->sfx != SFX_ID_NULL)
     Mix_PlayChannel(-1, get_sfx(attrs->sfx), 0);
   if (item_type_id != ITEM_TYPE_ID_NULL)
@@ -48,7 +48,7 @@ static u16 s_hit_sfx_tbl[] = {
 
 extern RECT g_viewport;
 
-static void on_get_damaged(void* arg, const MSG_GetDamaged* event)
+static void on_get_damaged(void* arg, const GetDamagedMsg* event)
 {
   (void)arg;
   Transform* transform;
@@ -86,7 +86,7 @@ static void on_get_damaged(void* arg, const MSG_GetDamaged* event)
   }
 }
 
-static void on_coin_picked_up(void* arg, const MSG_CoinPickedUp* event)
+static void on_coin_picked_up(void* arg, const CoinPickedUpMsg* event)
 {
   Mix_PlayChannel(-1, get_sfx(SFX_COIN), 0);
 }

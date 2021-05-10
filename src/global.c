@@ -2,18 +2,18 @@
 #include "entity_factory.h"
 #include "json_helper.h"
 
-ecs_entity_t (*const g_make_weapon_fn_tbl[NUM_WEAPONS])(Ecs*) = {
+ecs_entity_t (*const gMakeWeaponFnTbl[NUM_WEAPONS])(Ecs*) = {
   make_spear, make_cleaver, make_golden_sword, make_anime_sword, make_staff, make_bow, make_katana,
 };
 
-ecs_entity_t (*const g_make_character_fn_tbl[NUM_JOBS])(Ecs*, Vec2) = {
+ecs_entity_t (*const gMakeCharacterFnTbl[NUM_JOBS])(Ecs*, Vec2) = {
   make_knight,
   make_lizzard,
   make_wizzard,
   make_elf,
 };
 
-const u16 g_pickupable_to_item_type_id_tbl[] = {
+const u16 gPickupableToItemTypeIdTbl[] = {
   [PICKUPABLE_RED_FLASK]     = ITEM_TYPE_RED_FLASK,
   [PICKUPABLE_BIG_RED_FLASK] = ITEM_TYPE_BIG_RED_FLASK,
   [PICKUPABLE_BLUE_FLASK]    = ITEM_TYPE_BLUE_FLASK,
@@ -51,7 +51,7 @@ void sprite_init(Sprite* s, u16 texture_id)
 ecs_entity_t make_weapon(Ecs* registry, u16 type)
 {
   ASSERT(type < NUM_WEAPONS);
-  return g_make_weapon_fn_tbl[type](registry);
+  return gMakeWeaponFnTbl[type](registry);
 }
 
 Sprite animation_keyframe(const Animation* animation, u16 elapsed)

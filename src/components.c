@@ -2,11 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define ECS_TYPE(__T)                                                                              \
+#define COMPONENT_DESC(__T)                                                                        \
   {                                                                                                \
     .size = sizeof(__T)                                                                            \
   }
-#define ECS_TYPE_EX(__T, __init_fn, __fini_fn, __cpy_fn)                                           \
+#define COMPONENT_DESC_EX(__T, __init_fn, __fini_fn, __cpy_fn)                                     \
   {                                                                                                \
     .size = sizeof(__T), .init_fn = (ecs_comp_init_fn_t)__init_fn,                                 \
     .fini_fn = (ecs_comp_fini_fn_t)__fini_fn, .cpy_fn = (ecs_comp_cpy_fn_t)__cpy_fn,               \
@@ -24,66 +24,67 @@ static void script_fini(Script* script);
 void delete_action(void* action);
 
 const EcsType g_comp_types[NUM_COMPONENTS] = {
-  [VISUAL]                       = ECS_TYPE_EX(Visual, visual_init, NULL, NULL),
-  [TRANSFORM]                    = ECS_TYPE_EX(Transform, transform_init, NULL, NULL),
-  [ANIMATOR]                     = ECS_TYPE(Animator),
-  [PLAYER_TAG]                   = ECS_TYPE(PlayerTag),
-  [CONTROLLER]                   = ECS_TYPE(Controller),
-  [HAND]                         = ECS_TYPE(Hand),
-  [HEALTH]                       = ECS_TYPE(Health),
-  [HITBOX]                       = ECS_TYPE_EX(HitBox, hitbox_init, NULL, NULL),
-  [ENEMY_TAG]                    = ECS_TYPE(PlayerTag),
-  [ENABLE_TILE_COLLISION_TAG]    = ECS_TYPE(EnableTileCollisionTag),
-  [CHARACTER_ANIMATOR_TAG]       = ECS_TYPE(CharacterAnimatorTag),
-  [HEAL_BAR]                     = ECS_TYPE(HealthBar),
-  [LIFE_SPAN]                    = ECS_TYPE(LifeSpan),
-  [MOTION]                       = ECS_TYPE(Motion),
-  [DESTROYED_TAG]                = ECS_TYPE(DestroyedTag),
-  [WEAPON_ATTRIBUTES]            = ECS_TYPE(WeaponAttributes),
-  [WEAPON_SWING_ATTACK]          = ECS_TYPE(WeaponSwingAttack),
-  [WEAPON_CHARGE_ATTACK]         = ECS_TYPE(WeaponChargeAttack),
-  [DROP]                         = ECS_TYPE(Drop),
-  [INVULNERABLE]                 = ECS_TYPE(Invulnerable),
-  [STAGGER]                      = ECS_TYPE(Stagger),
-  [CAMERA_TARGET_TAG]            = ECS_TYPE(CameraTargetTag),
-  [BRAIN]                        = ECS_TYPE_EX(Brain, NULL, brain_fini, NULL),
-  [DESTINATION]                  = ECS_TYPE(Destination),
-  [PATH]                         = ECS_TYPE(Path),
-  [FOLLOWING_TARGET]             = ECS_TYPE(FollowingTarget),
-  [AGGRO_AREA]                   = ECS_TYPE(AggroArea),
-  [WEAPON_THUNDER_STORM_RELEASE] = ECS_TYPE(WeaponThunderStormRelease),
-  [LADDER_ATTRIBUTES]            = ECS_TYPE(LadderAttributes),
-  [NAME]                         = ECS_TYPE(Name),
-  [TEXT]                         = ECS_TYPE(Text),
-  [INTERACTABLE]                 = { .size = sizeof(Interactable) },
-  [DIALOGUE]                     = { .size = sizeof(Dialogue) },
-  [PICKUPABLE_ATTRIBUTES]        = { .size = sizeof(PickupableAttributes) },
-  [MERCHANT]                     = { .size = sizeof(Merchant) },
-  [CHEST]                        = ECS_TYPE(ChestAttributes),
-  [ATTUNEMENT_SLOT]              = ECS_TYPE(AttunementSlot),
-  [WEAPON_CAST]                  = ECS_TYPE(WeaponCast),
-  [MANA]                         = ECS_TYPE(Mana),
-  [WEAPON_THUST_ATTACK]          = ECS_TYPE(WeaponThustAttack),
-  [DOOR_ATTRIBUTES]              = ECS_TYPE(DoorAttributes),
-  [REMOVE_IF_OFFSCREEN]          = ECS_TYPE(RemoveIfOffScreen),
-  [PROJECTILE_ATTRIBUTES]        = ECS_TYPE(ProjectileAttributes),
-  [HOLDER]                       = ECS_TYPE_EX(Holder, holder_init, NULL, NULL),
-  [ATTACK_MASK]                  = ECS_TYPE(AttackMask),
-  [ATTACKER]                     = ECS_TYPE(Attacker),
-  [WEAPON_SHOOT]                 = ECS_TYPE(WeaponShoot),
-  [MOVE_SPEED]                   = ECS_TYPE(MoveSpeed),
-  [FACING_DIRECTION]             = ECS_TYPE_EX(FacingDirection, facing_direction_init, NULL, NULL),
-  [ATTACK_TARGET]                = ECS_TYPE_EX(AttackTarget, attack_target_init, NULL, NULL),
-  [SCRIPT]                       = ECS_TYPE_EX(Script, NULL, script_fini, NULL),
-  [EMOJI]                        = ECS_TYPE(Emoji),
-  [HAND_ANIMATION]               = ECS_TYPE(HandAnimation),
-  [STATS]                        = ECS_TYPE(Stats),
-  [AGILITY_CHANGED]              = ECS_TYPE(AgilityChanged),
-  [INTELLIGENT_CHANGED]          = ECS_TYPE(IntelligentChanged),
-  [STRENGTH_CHANGED]             = ECS_TYPE(StrengthChanged),
-  [VITALITY_CHANGED]             = ECS_TYPE(VITALITY_CHANGED),
-  [UNABLE_TO_MOVE]               = ECS_TYPE(UnableToMove),
-  [STATUS_EFFECT]                = ECS_TYPE(StatusEffect),
+  [AGGRO_AREA]                = COMPONENT_DESC(AggroArea),
+  [AGILITY_CHANGED]           = COMPONENT_DESC(AgilityChanged),
+  [ANIMATOR]                  = COMPONENT_DESC(Animator),
+  [ATTACKER]                  = COMPONENT_DESC(Attacker),
+  [ATTACK_COMMAND]            = COMPONENT_DESC(AttackCommand),
+  [ATTACK_MASK]               = COMPONENT_DESC(AttackMask),
+  [ATTACK_TARGET]             = COMPONENT_DESC_EX(AttackTarget, attack_target_init, NULL, NULL),
+  [ATTUNEMENT_SLOT]           = COMPONENT_DESC(AttunementSlot),
+  [BRAIN]                     = COMPONENT_DESC_EX(Brain, NULL, brain_fini, NULL),
+  [CAMERA_TARGET_TAG]         = COMPONENT_DESC(CameraTargetTag),
+  [CHARACTER_ANIMATOR_TAG]    = COMPONENT_DESC(CharacterAnimatorTag),
+  [CHEST]                     = COMPONENT_DESC(ChestAttributes),
+  [DESIRED_DIRECTION]         = COMPONENT_DESC(DesiredDirection),
+  [DESTROYED_TAG]             = COMPONENT_DESC(DestroyedTag),
+  [DIALOGUE]                  = { .size = sizeof(Dialogue) },
+  [DOOR_ATTRIBUTES]           = COMPONENT_DESC(DoorAttributes),
+  [DROP]                      = COMPONENT_DESC(Drop),
+  [EMOJI]                     = COMPONENT_DESC(Emoji),
+  [ENABLE_TILE_COLLISION_TAG] = COMPONENT_DESC(EnableTileCollisionTag),
+  [ENEMY_TAG]                 = COMPONENT_DESC(PlayerTag),
+  [FACING_DIRECTION]      = COMPONENT_DESC_EX(FacingDirection, facing_direction_init, NULL, NULL),
+  [FOLLOWING_TARGET]      = COMPONENT_DESC(FollowingTarget),
+  [HAND]                  = COMPONENT_DESC(Hand),
+  [HAND_ANIMATION]        = COMPONENT_DESC(HandAnimation),
+  [HEALTH]                = COMPONENT_DESC(Health),
+  [HEAL_BAR]              = COMPONENT_DESC(HealthBar),
+  [HITBOX]                = COMPONENT_DESC_EX(HitBox, hitbox_init, NULL, NULL),
+  [HOLDER]                = COMPONENT_DESC_EX(Holder, holder_init, NULL, NULL),
+  [INTELLIGENT_CHANGED]   = COMPONENT_DESC(IntelligentChanged),
+  [INTERACTABLE]          = { .size = sizeof(Interactable) },
+  [INVULNERABLE]          = COMPONENT_DESC(Invulnerable),
+  [LADDER_ATTRIBUTES]     = COMPONENT_DESC(PortalAttributes),
+  [LIFE_SPAN]             = COMPONENT_DESC(LifeSpan),
+  [MANA]                  = COMPONENT_DESC(Mana),
+  [MERCHANT]              = { .size = sizeof(Merchant) },
+  [MOTION]                = COMPONENT_DESC(Motion),
+  [MOVE_SPEED]            = COMPONENT_DESC(MoveSpeed),
+  [NAME]                  = COMPONENT_DESC(Name),
+  [PATH]                  = COMPONENT_DESC(Path),
+  [PICKUPABLE_ATTRIBUTES] = { .size = sizeof(PickupableAttributes) },
+  [PLAYER_TAG]            = COMPONENT_DESC(PlayerTag),
+  [PROJECTILE_ATTRIBUTES] = COMPONENT_DESC(ProjectileAttributes),
+  [REMOVE_IF_OFFSCREEN]   = COMPONENT_DESC(RemoveIfOffScreen),
+  [SCRIPT]                = COMPONENT_DESC_EX(Script, NULL, script_fini, NULL),
+  [STAGGER]               = COMPONENT_DESC(Stagger),
+  [STATS]                 = COMPONENT_DESC(Stats),
+  [STATUS_EFFECT]         = COMPONENT_DESC(StatusEffect),
+  [STRENGTH_CHANGED]      = COMPONENT_DESC(StrengthChanged),
+  [TEXT]                  = COMPONENT_DESC(Text),
+  [TRANSFORM]             = COMPONENT_DESC_EX(Transform, transform_init, NULL, NULL),
+  [UNABLE_TO_MOVE]        = COMPONENT_DESC(UnableToMove),
+  [VISUAL]                = COMPONENT_DESC_EX(Visual, visual_init, NULL, NULL),
+  [VITALITY_CHANGED]      = COMPONENT_DESC(VitalityChanged),
+  [WALK_DIRECTLY_TOWARD]  = COMPONENT_DESC(WalkDirectlyToward),
+  [WEAPON_ATTRIBUTES]     = COMPONENT_DESC(WeaponAttributes),
+  [WEAPON_CAST]           = COMPONENT_DESC(WeaponCast),
+  [WEAPON_CHARGE_ATTACK]  = COMPONENT_DESC(WeaponChargeAttack),
+  [WEAPON_SHOOT]          = COMPONENT_DESC(WeaponShoot),
+  [WEAPON_SWING_ATTACK]   = COMPONENT_DESC(WeaponSwingAttack),
+  [WEAPON_THUNDER_STORM_RELEASE] = COMPONENT_DESC(WeaponThunderStormRelease),
+  [WEAPON_THUST_ATTACK]          = COMPONENT_DESC(WeaponThustAttack),
 };
 
 void brain_fini(Brain* brain)
@@ -94,19 +95,19 @@ void brain_fini(Brain* brain)
 
 void hitbox_init(HitBox* h)
 {
-  h->proxy_id  = RTREE_NULL_NODE;
+  h->proxyId   = RTREE_NULL_NODE;
   h->anchor    = (Vec2){ 0 };
   h->category  = 0;
   h->size      = (Vec2){ 16.f, 16.f };
-  h->mask_bits = 0xffff;
+  h->mask      = 0xffff;
 }
 
-void ladder_attrs_init(LadderAttributes* attrs, const char* level, const char* dest, u16 direction)
+void portal_attrs_init(PortalAttributes* attrs, const char* level, const char* dest, u16 direction)
 {
   ASSERT(level != NULL && dest != NULL);
   SDL_strlcpy(attrs->level, level, LADDER_ATTRS_MAX_LEVEL_NAME_LEN);
   SDL_strlcpy(attrs->dest, dest, LADDER_ATTRS_MAX_DEST_LEN);
-  attrs->exit_direction = direction;
+  attrs->exitDirection = direction;
 }
 
 void name_init(Name* name, const char* value)
@@ -141,7 +142,7 @@ static void holder_init(Holder* holder)
 
 static void transform_init(Transform* t)
 {
-  t->prev_position = t->position = (Vec2){ 0 };
+  t->lastPosition = t->position  = (Vec2){ 0 };
   t->rotation                    = 0.0;
   t->z                           = 0.f;
 }
@@ -165,10 +166,10 @@ void script_fini(Script* script)
 
 void interactable_init(Interactable* i, const char* const* cmds)
 {
-  i->num_commands = 0;
-  while (*cmds && i->num_commands < INTERACTABLE_MAX_COMMANDS)
+  i->numCommands = 0;
+  while (*cmds && i->numCommands < INTERACTABLE_MAX_COMMANDS)
   {
-    i->commands[i->num_commands++] = *cmds;
+    i->commands[i->numCommands++] = *cmds;
     ++cmds;
   }
 }

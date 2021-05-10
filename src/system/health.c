@@ -6,7 +6,7 @@
 
 extern Ecs* g_ecs;
 
-static void on_deal_damage(void* arg, const MSG_DealDamage* event)
+static void on_deal_damage(void* arg, const InflictDamageMsg* event)
 {
   (void)arg;
   Health* health;
@@ -16,7 +16,7 @@ static void on_deal_damage(void* arg, const MSG_DealDamage* event)
   {
     health->current -= min(event->damage, health->current);
     ems_broadcast(MSG_GET_DAMAGED,
-                  &(MSG_GetDamaged){
+                  &(GetDamagedMsg){
                       .dealer  = event->dealer,
                       .damagee = event->receiver,
                       .damage  = event->damage,
@@ -38,7 +38,7 @@ static void on_deal_damage(void* arg, const MSG_DealDamage* event)
     if (health->current <= 0)
     {
       health->current = 0;
-      ems_broadcast(MSG_ENTITY_DIED, &(MSG_EntityDied){ event->receiver });
+      ems_broadcast(MSG_ENTITY_DIED, &(EntityDiedMsg){ event->receiver });
       ecs_add(g_ecs, event->receiver, DESTROYED_TAG);
     }
   }

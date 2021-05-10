@@ -10,8 +10,8 @@
 extern Ecs* g_ecs;
 
 //<-------------------event callbacks---------------------->//
-static void on_command_selected(void* arg, const MSG_CommandSelected* event);
-static void on_entity_collied_door(void* arg, const MSG_HitDoor* event);
+static void on_command_selected(void* arg, const CommandSelectedMsg* event);
+static void on_entity_collied_door(void* arg, const HitDoorMsg* event);
 //==========================================================//
 
 void door_system_init()
@@ -20,7 +20,7 @@ void door_system_init()
   ems_connect(MSG_HIT_DOOR, CALLBACK_2(on_entity_collied_door));
 }
 
-static void on_command_selected(SDL_UNUSED void* arg, const MSG_CommandSelected* event)
+static void on_command_selected(SDL_UNUSED void* arg, const CommandSelectedMsg* event)
 {
   DoorAttributes* attrs;
   Visual*         visual;
@@ -32,7 +32,7 @@ static void on_command_selected(SDL_UNUSED void* arg, const MSG_CommandSelected*
     interactable = ecs_get(g_ecs, event->entity, INTERACTABLE);
     if (strcmp(event->cmd, TEXT_COMMAND_OPEN) == 0)
     {
-      if (attrs->required_key == DOOR_NO_REQUIRED_KEY || inv_has(attrs->required_key))
+      if (attrs->requiredKey == DOOR_NO_REQUIRED_KEY || inv_has(attrs->requiredKey))
       {
         visual->sprite.rect       = RECT_DOOR_OPEN;
         attrs->state              = DOOR_STATE_OPEN;
@@ -52,7 +52,7 @@ static void on_command_selected(SDL_UNUSED void* arg, const MSG_CommandSelected*
   }
 }
 
-static void on_entity_collied_door(SDL_UNUSED void* arg, const MSG_HitDoor* event)
+static void on_entity_collied_door(SDL_UNUSED void* arg, const HitDoorMsg* event)
 {
 
   DoorAttributes* door_info;
@@ -83,6 +83,6 @@ static void on_entity_collied_door(SDL_UNUSED void* arg, const MSG_HitDoor* even
   dr.h = dh->size.y;
   if (SDL_HasIntersection(&er, &dr))
   {
-    etx->position = etx->prev_position;
+    etx->position = etx->lastPosition;
   }
 }

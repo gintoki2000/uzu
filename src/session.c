@@ -5,7 +5,7 @@
 #include "global.h"
 #include "inventory.h"
 
-struct Session g_session;
+struct Session gSession;
 
 static u16 _starting_weapon_tbl[] = {
   WEAPON_CLEAVER,
@@ -40,14 +40,14 @@ const u16 g_initial_spell[] = {
 
 void new_game(u16 starting_job)
 {
-  g_session.job      = starting_job;
-  g_session.new_game = TRUE;
-  g_session.pos.x    = STARTING_POSITION_X;
-  g_session.pos.y    = STARTING_POSITION_Y;
-  g_session.weapon   = _starting_weapon_tbl[starting_job];
-  g_session.spell    = g_initial_spell[starting_job];
+  gSession.job      = starting_job;
+  gSession.new_game = TRUE;
+  gSession.pos.x    = STARTING_POSITION_X;
+  gSession.pos.y    = STARTING_POSITION_Y;
+  gSession.weapon   = _starting_weapon_tbl[starting_job];
+  gSession.spell    = g_initial_spell[starting_job];
 
   inv_add_item(g_initial_item1_tbl[starting_job], 1);
   inv_add_item(g_initial_item2_tbl[starting_job], 1);
-  SDL_strlcpy(g_session.level, "demon_ruin", 255);
+  SDL_strlcpy(gSession.level, "demon_ruin", 255);
 }

@@ -18,7 +18,7 @@ struct Session
   u8 agility;
 };
 
-extern struct Session g_session;
+extern struct Session gSession;
 
 void new_game(u16 starting_class);
 void save_game_data();

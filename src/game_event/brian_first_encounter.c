@@ -20,7 +20,7 @@ extern Ecs* g_ecs;
 GAME_EVENT("event.brian_initial_encounter")
 
 static void processing();
-static void PROCESSING_on_level_loaded(void* arg, const MSG_LevelLoaded* msg);
+static void PROCESSING_on_level_loaded(void* arg, const LevelLoadedMsg* msg);
 static void PROCESSING_on_conversation_finished(void* arg, const MSG_ConversationFinished* msg);
 
 // begin logic section
@@ -31,16 +31,14 @@ static void PROCESSING_on_conversation_finished(SDL_UNUSED void*                
   {
     _save.state = FINISHED;
     if (!SDL_strcmp(msg->response, "accept his request"))
-      ems_broadcast(MSG_EVENT_FINISHED,
-                    &(MSG_EventFinished){ EVT_BRIAN_FIRST_ENCOUNTER, "accept" });
+      ems_broadcast(MSG_EVENT_FINISHED, &(EventFinishedMsg){ EVT_BRIAN_FIRST_ENCOUNTER, "accept" });
     else
-      ems_broadcast(MSG_EVENT_FINISHED,
-                    &(MSG_EventFinished){ EVT_BRIAN_FIRST_ENCOUNTER, "denine" });
+      ems_broadcast(MSG_EVENT_FINISHED, &(EventFinishedMsg){ EVT_BRIAN_FIRST_ENCOUNTER, "denine" });
     ems_disconnect(MSG_CONVERSATION_FINISHED, PROCESSING_on_conversation_finished);
     ems_disconnect(MSG_LEVEL_LOADED, PROCESSING_on_level_loaded);
   }
 }
-static void PROCESSING_on_level_loaded(SDL_UNUSED void* arg, const MSG_LevelLoaded* msg)
+static void PROCESSING_on_level_loaded(SDL_UNUSED void* arg, const LevelLoadedMsg* msg)
 {
   if (!SDL_strcmp(msg->level_name, "demon_ruin"))
   {

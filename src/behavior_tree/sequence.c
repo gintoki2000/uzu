@@ -1,84 +1,85 @@
-#include "behaviour_tree.h"
+#include "behavior_tree/base.h"
 
-typedef struct
+BT_INST_DECL(Sequence, BTCompositeNode, {
+  int     activeChildIndex;
+  BOOL    lastChildExecutionCompleted;
+  BTNode* activeChild;
+})
+
+BT_VTBL_DECL_EMPTY(Sequence, BTCompositeNode)
+BT_INST_ALLOC_FN(Sequence, sequence)
+
+#define super BT_COMPOSITE_NODE(self)
+
+static Sequence* initialize(Sequence* self)
 {
-  BTCompositeNode _base;
-  int             curr;
-} BTSequence;
-
-typedef struct _BTSequenceVtbl
-{
-  BTCompositeNodeVtbl _base;
-} BTSequenceVtbl;
-
-static BTSequence* Init(BTSequence* self);
-static void        Abort(BTSequence* self, Ecs* registry, ecs_entity_t entity);
-static BTStatus    Execute(BTSequence* self, Ecs* registry, ecs_entity_t entity);
-static void        Finish(BTSequence* self, Ecs* registry, ecs_entity_t entity, BOOL succeed);
-
-BT_PRIVATE_NODE(BTSequence)
-
-#define SUPER BT_COMPOSITE_NODE(self)
-
-static void VtblInit(BTSequenceVtbl* vtbl)
-{
-  bt_composite_node_vtbl_init((BTCompositeNodeVtbl*)vtbl);
-  ((BTNodeVtbl*)vtbl)->abort  = (BTAbortFunc)Abort;
-  ((BTNodeVtbl*)vtbl)->exec   = (BTExecuteFunc)Execute;
-  ((BTNodeVtbl*)vtbl)->finish = (BTFinishFunc)Finish;
-}
-
-BTCompositeNode* bt_sequence_new()
-{
-  return BT_COMPOSITE_NODE(Init(Alloc()));
-}
-
-static BTSequence* Init(BTSequence* self)
-{
-  bt_node_init((BTNode*)self);
-  self->curr = 0;
+  bt_composite_node_fini(super);
+  self->activeChildIndex            = -1;
+  self->activeChild                 = NULL;
+  self->lastChildExecutionCompleted = TRUE;
   return self;
 }
 
-static void Abort(BTSequence* self, Ecs* registry, ecs_entity_t entity)
+static void on_start(Sequence* self, const BTUpdateContext* ctx)
 {
-  if (SUPER->children->cnt > 0)
-    bt_node_abort(bt_composite_node_child_at(SUPER, self->curr), registry, entity);
-  self->curr = 0;
+  self->activeChildIndex            = 0;
+  self->lastChildExecutionCompleted = FALSE;
+  self->activeChild                 = bt_composite_node_child_at(super, 0);
+  bt_node_start(self->activeChild, ctx);
 }
 
-static BOOL NextChild(BTSequence* self)
+static BOOL next_child(Sequence* self)
 {
-  if (self->curr < SUPER->children->cnt - 1)
+  if (self->activeChildIndex < super->children->cnt - 1)
   {
-    self->curr++;
+    self->activeChildIndex++;
+    self->activeChild = bt_composite_node_child_at(super, self->activeChildIndex);
     return TRUE;
   }
+  self->activeChild = NULL;
   return FALSE;
 }
 
-static BTStatus Execute(BTSequence* self, Ecs* registry, ecs_entity_t entity)
+static BTStatus on_tick(Sequence* self, const BTUpdateContext* ctx)
 {
-  BTNode* current_node = bt_composite_node_child_at(SUPER, self->curr);
-  switch (bt_node_exec(current_node, registry, entity))
+  if (self->lastChildExecutionCompleted)
+  {
+    bt_node_start(self->activeChild, ctx);
+    self->lastChildExecutionCompleted = FALSE;
+  }
+  switch (bt_node_tick(self->activeChild, ctx))
   {
   case BT_STATUS_RUNNING:
     return BT_STATUS_RUNNING;
     break;
   case BT_STATUS_SUCCESS:
-    bt_node_finish(current_node, registry, entity, TRUE);
-    return NextChild(self) ? BT_STATUS_RUNNING : BT_STATUS_SUCCESS;
+    bt_node_finish(self->activeChild, ctx);
+    self->lastChildExecutionCompleted = TRUE;
+    return next_child(self) ? BT_STATUS_RUNNING : BT_STATUS_SUCCESS;
     break;
   case BT_STATUS_FAILURE:
-    bt_node_finish(current_node, registry, entity, FALSE);
+    bt_node_finish(self->activeChild, ctx);
+    self->lastChildExecutionCompleted = TRUE;
     return BT_STATUS_FAILURE;
   }
 }
 
-static void Finish(BTSequence* self,
-                   SDL_UNUSED Ecs*         registry,
-                   SDL_UNUSED ecs_entity_t entity,
-                   SDL_UNUSED BOOL         succeed)
+static void on_finish(Sequence* self, const BTUpdateContext* ctx)
 {
-  self->curr = 0;
+  if (self->activeChild != NULL && !self->lastChildExecutionCompleted)
+    bt_node_finish(self->activeChild, ctx);
+  self->activeChildIndex            = -1;
+  self->activeChild                 = NULL;
+  self->lastChildExecutionCompleted = TRUE;
+}
+
+BT_VTBL_INITIALIZER(Sequence, BTCompositeNode, bt_composite_node, {
+  ((BTNodeVtbl*)vtbl)->tick   = (BTOnTickFunc)on_tick;
+  ((BTNodeVtbl*)vtbl)->start  = (BTOnStartFunc)on_start;
+  ((BTNodeVtbl*)vtbl)->finish = (BTOnFinishFunc)on_finish;
+})
+
+BTCompositeNode* bt_sequence_new()
+{
+  return BT_COMPOSITE_NODE(initialize(sequence_alloc()));
 }

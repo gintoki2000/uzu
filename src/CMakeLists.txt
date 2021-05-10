@@ -1,4 +1,4 @@
-include(src/behavior_node/CMakeLists.txt)
+include(src/behavior_tree/CMakeLists.txt)
 include(src/system/CMakeLists.txt)
 include(src/ecs/CMakeLists.txt)
 include(src/engine/CMakeLists.txt)

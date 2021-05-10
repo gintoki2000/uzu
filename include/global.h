@@ -13,13 +13,6 @@ typedef enum
   RIGHT
 } Direction;
 
-typedef enum
-{
-  CHARACTER_ACTION_NONE,
-  CHARACTER_ACTION_REGULAR_ATK,
-  CHARACTER_ACTION_SPECIAL_ATK,
-} CharacterAction;
-
 enum
 {
   CATEGORY_PLAYER,      // 0
@@ -239,17 +232,15 @@ enum StatusEffectType
   NUM_STATUS_EFFECT,
 };
 
-extern ecs_entity_t (*const g_make_weapon_fn_tbl[NUM_WEAPONS])(Ecs*);
-extern ecs_entity_t (*const g_make_character_fn_tbl[NUM_JOBS])(Ecs*, Vec2);
-extern ecs_entity_t (*const g_make_pickupable_fn_tbl[NUM_ITEM_TYPES])(Ecs*, Vec2 pos);
-extern ecs_entity_t (*const g_make_projectile_fn[])(Ecs*, Vec2 pos, Vec2 dir, u16 mask);
-extern ecs_entity_t (*const g_make_cast_effect_fn_tbl[NUM_CAST_EFFECTS])(Ecs* ecs, Vec2 pos);
+extern ecs_entity_t (*const gMakeWeaponFnTbl[NUM_WEAPONS])(Ecs*);
+extern ecs_entity_t (*const gMakeCharacterFnTbl[NUM_JOBS])(Ecs*, Vec2);
+extern ecs_entity_t (*const gMakePickupableFnTbl[NUM_ITEM_TYPES])(Ecs*, Vec2 pos);
+extern ecs_entity_t (*const gMakeProjectileFn[])(Ecs*, Vec2 pos, Vec2 dir, u16 mask);
+extern ecs_entity_t (*const gMakeCastEffectFnTbl[NUM_CAST_EFFECTS])(Ecs* ecs, Vec2 pos);
 extern const ItemType g_item_types[NUM_ITEM_TYPES];
-extern const Spell    g_spell_tbl[NUM_SPELLS];
-extern const u16      g_pickupable_to_item_type_id_tbl[];
+extern const Spell    gSpellTbl[NUM_SPELLS];
+extern const u16      gPickupableToItemTypeIdTbl[];
 
 Conversation* conversation_init(Conversation* self);
 void          conversation_fini(Conversation* self);
-ecs_entity_t  make_weapon(Ecs* registry, u16 type);
-ecs_entity_t  make_character(Ecs* registry, u16 job);
 #endif // GLOBAL_H

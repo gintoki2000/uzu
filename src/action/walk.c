@@ -4,28 +4,33 @@ typedef struct WalkAction
 {
   Action parent_instance;
   Vec2   destination;
+  BOOL   completed;
 } WalkAction;
 
 extern Ecs* g_ecs;
 
-static BOOL update(void* _self, ecs_entity_t target)
+static void walk_directly_toward_completed_callback(WalkAction* self, SDL_UNUSED BOOL result)
+{
+  self->completed = TRUE;
+}
+
+static void start(void* _self, ecs_entity_t target)
 {
   WalkAction* self = _self;
-  Controller* controller;
-  Transform*  transform;
-  Vec2        relative_position;
+  ASSERT(!ecs_has(g_ecs, target, WALK_DIRECTLY_TOWARD));
+  ecs_set(g_ecs,
+          target,
+          WALK_DIRECTLY_TOWARD,
+          &(WalkDirectlyToward){
+              .destination = self->destination,
+              .cbCompleted = CALLBACK_1(self, walk_directly_toward_completed_callback),
+          });
+}
 
-  controller = ecs_get(g_ecs, target, CONTROLLER);
-  transform  = ecs_get(g_ecs, target, TRANSFORM);
-  ASSERT_MSG(controller != NULL && transform != NULL,
-             "require Transform & Controller components to perform walk action");
-  relative_position = vec2_sub(self->destination, transform->position);
-  if (vec2_mag2(relative_position) > 8.f)
-  {
-    controller->desired_direction = vec2_unit(relative_position);
-    return FALSE;
-  }
-  return TRUE;
+static BOOL update(void* _self, SDL_UNUSED ecs_entity_t target)
+{
+  WalkAction* self = _self;
+  return self->completed;
 }
 
 static void end(void* _self, ecs_entity_t target)
@@ -36,7 +41,7 @@ static void end(void* _self, ecs_entity_t target)
 }
 
 static ActionVtbl _walk_action_vtbl = {
-  .start   = action_default_start_func,
+  .start   = start,
   .end     = end,
   .update  = update,
   .cleanup = action_default_cleanup_func,

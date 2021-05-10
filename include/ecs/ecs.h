@@ -32,14 +32,6 @@ typedef struct EcsFilter
   ecs_size_t        ecnt;
 } EcsFilter;
 
-typedef struct EcsSystem
-{
-  const ecs_size_t* signature;
-  const ecs_size_t* exclude;
-  void (*process)(void*, Ecs*, ecs_entity_t, void**);
-  void* arg;
-} EcsSystem;
-
 typedef struct EcsComponentEvent
 {
   ecs_entity_t entity;

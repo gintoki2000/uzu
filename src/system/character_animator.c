@@ -5,16 +5,16 @@ extern Ecs* g_ecs;
 
 static void play_animation(Animator* animator, u16 new_anim_state)
 {
-  if (animator->current_anim != new_anim_state)
+  if (animator->currentAnimation != new_anim_state)
   {
-    animator->current_anim = new_anim_state;
+    animator->currentAnimation = new_anim_state;
     animator->elapsed      = 0;
   }
 }
 
 static void force_play_animation(Animator* animator, u16 new_anim_state)
 {
-  animator->current_anim = new_anim_state;
+  animator->currentAnimation = new_anim_state;
   animator->elapsed      = 0;
 }
 

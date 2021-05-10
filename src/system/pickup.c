@@ -20,7 +20,7 @@ static void (*const handler_tbl[])(ecs_entity_t, const PickupableAttributes*, co
   [PICKUPABLE_COIN] = coin_handler,
 };
 
-static void on_hit_pickupable_entity(SDL_UNUSED void* arg, const MSG_HitPickupableEntity* msg)
+static void on_hit_pickupable_entity(SDL_UNUSED void* arg, const HitPickupableEntityMsg* msg)
 {
   PickupableAttributes* attrs     = ecs_get(g_ecs, msg->pickupable_entity, PICKUPABLE_ATTRIBUTES);
   Transform*            transform = ecs_get(g_ecs, msg->pickupable_entity, TRANSFORM);
@@ -34,15 +34,15 @@ static void on_hit_pickupable_entity(SDL_UNUSED void* arg, const MSG_HitPickupab
 static void
 item_handler(ecs_entity_t entity, const PickupableAttributes* attrs, const Vec2 position)
 {
-  u16 item_type_id = g_pickupable_to_item_type_id_tbl[attrs->id];
+  u16 item_type_id = gPickupableToItemTypeIdTbl[attrs->id];
   if (item_type_id != ITEM_TYPE_ID_NULL)
   {
     if (inv_add_item(item_type_id, attrs->quality))
     {
       ems_broadcast(MSG_ITEM_PICKED_UP,
-                    &(MSG_ItemPickedUp){ .pickupable_entity = entity,
-                                         .item_type_id      = item_type_id,
-                                         .position          = position });
+                    &(ItemPickedUpMsg){ .pickupable_entity = entity,
+                                        .item_type_id      = item_type_id,
+                                        .position          = position });
       ecs_add(g_ecs, entity, DESTROYED_TAG);
     }
   }
@@ -51,8 +51,8 @@ item_handler(ecs_entity_t entity, const PickupableAttributes* attrs, const Vec2 
 static void
 coin_handler(ecs_entity_t entity, const PickupableAttributes* attrs, const Vec2 position)
 {
-  g_session.coins += attrs->quality;
-  ems_broadcast(MSG_COIN_PICKED_UP, &(MSG_CoinPickedUp){ attrs->quality, position });
+  gSession.coins += attrs->quality;
+  ems_broadcast(MSG_COIN_PICKED_UP, &(CoinPickedUpMsg){ attrs->quality, position });
   ecs_add(g_ecs, entity, DESTROYED_TAG);
 }
 void pickup_system_init()

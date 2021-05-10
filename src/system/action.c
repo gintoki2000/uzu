@@ -38,7 +38,7 @@ void action_system(void)
     if (ACTION_UPDATE(scripts[i].action, entities[i]))
     {
       ACTION_END(scripts[i].action, entities[i]);
-      INVOKE_EVENT(scripts[i].cb_finished, &scripts[i]);
+      INVOKE_EVENT(scripts[i].cbFinished, &scripts[i]);
       ecs_rmv(g_ecs, entities[i], SCRIPT);
     }
   }

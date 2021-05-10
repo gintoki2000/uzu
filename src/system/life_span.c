@@ -15,7 +15,7 @@ void life_span_system()
   {
     if (--life_span[i].remaining == 0)
     {
-      ems_broadcast(MSG_LIFE_SPAN_FINISHED, &(MSG_LifeSpanFinished){ entities[i] });
+      ems_broadcast(MSG_LIFE_SPAN_FINISHED, &(LifeSpanFinishedMsg){ entities[i] });
       ecs_destroy(g_ecs, entities[i]);
     }
   }

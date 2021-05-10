@@ -38,16 +38,20 @@
 #include "system/debug/draw_target.h"
 #include "system/event_messaging_sys.h"
 
-static void on_player_hit_ladder(void* arg, const MSG_HitLadder* event);
-static void on_entity_died(void* arg, const MSG_EntityDied* event);
+#include "entity_factory.h"
+
+static void on_player_enter_portal(void* arg, const EnterPortalMsg* event);
+static void on_entity_died(void* arg, const EntityDiedMsg* event);
 static void unload_current_level(void);
 static void update_ui(void);
 static void render_ui(void);
 static void update_game_logic(void);
 static void render_game_world(void);
-static void next_level(void);
+static void load_pending_level(void);
 
-static void music_player_on_level_loaded(void* arg, const MSG_LevelLoaded* event);
+void request_load_level(const char* level, const char* destination_portal);
+
+static void music_player_on_level_loaded(void* arg, const LevelLoadedMsg* event);
 
 extern EcsType g_comp_types[];
 
@@ -56,8 +60,8 @@ DEFINE_SCENE(game);
 Ecs* g_ecs;
 
 static BOOL _has_next_level;
-static char _next_level[LADDER_ATTRS_MAX_LEVEL_NAME_LEN + 1];
-static char _spwan_location[LADDER_ATTRS_MAX_DEST_LEN + 1];
+static char _pending_level[LADDER_ATTRS_MAX_LEVEL_NAME_LEN + 1];
+static char _target_portal[LADDER_ATTRS_MAX_DEST_LEN + 1];
 static BOOL _paused;
 static BOOL _player_died;
 
@@ -73,14 +77,31 @@ static void spawn_player(Vec2 position)
   ecs_entity_t player;
   ecs_entity_t (*make_character_fn)(Ecs*, Vec2);
 
-  make_character_fn = g_make_character_fn_tbl[g_session.job];
+  make_character_fn = gMakeCharacterFnTbl[gSession.job];
 
-  player = make_character_fn(g_ecs, position);
+  player = make_character(g_ecs, gSession.job, position);
+  player = make_player(g_ecs, player);
 
-  make_player(g_ecs, player, make_weapon(g_ecs, g_session.weapon));
-
-  ett_attune_spell(g_ecs, player, g_session.spell);
+  ett_equip_weapon(g_ecs, player, make_weapon(g_ecs, gSession.weapon));
+  ett_attune_spell(g_ecs, player, gSession.spell);
 }
+
+static void remove_unprocessed_attack_commands(void)
+{
+  ecs_entity_t*  entities;
+  ecs_size_t     cnt;
+  AttackCommand* attackCommand;
+  ecs_raw(g_ecs, ATTACK_COMMAND, &entities, (void**)&attackCommand, &cnt);
+  for (int i = cnt - 1; i >= 0; --i)
+  {
+    if (!attackCommand[i].processing)
+    {
+      INVOKE_EVENT(attackCommand[i].cbCompleted, FALSE);
+      ecs_rmv(g_ecs, entities[i], ATTACK_COMMAND);
+    }
+  }
+}
+
 static void on_load()
 {
   extern Cursor g_cursor_cross;
@@ -114,32 +135,16 @@ static void on_load()
 
   inventory_init();
 
-  ems_connect(MSG_HIT_LADDER, CALLBACK_2(on_player_hit_ladder));
+  ems_connect(MSG_HIT_LADDER, CALLBACK_2(on_player_enter_portal));
   ems_connect(MSG_ENTITY_DIED, CALLBACK_2(on_entity_died));
   ems_connect(MSG_LEVEL_LOADED, CALLBACK_2(music_player_on_level_loaded));
 
   input_push_state(INPUT_STATE_INST_1(player_process_input));
 
-  if (g_session.new_game)
-  {
-    if (load_level(g_session.level) != LOAD_LEVEL_OK)
-    {
-      engine_stop();
-      INFO("Fail to load file\n");
-      return;
-    }
-    ems_broadcast(MSG_NEW_GAME, NULL);
-    ems_broadcast(MSG_LEVEL_LOADED, &(MSG_LevelLoaded){ g_session.level });
-    spawn_player(g_session.pos);
-    g_session.new_game = FALSE;
-  }
-  else
-  {
-    inventory_load();
-    load_level(g_session.level);
-    ems_broadcast(MSG_LEVEL_LOADED, &(MSG_LevelLoaded){ g_session.level });
-    spawn_player(g_session.pos);
-  }
+  inventory_load();
+  load_level(gSession.level);
+  ems_broadcast(MSG_LEVEL_LOADED, &(LevelLoadedMsg){ gSession.level });
+  spawn_player(gSession.pos);
 }
 
 static void on_unload()
@@ -174,7 +179,7 @@ static void on_update()
   if (_has_next_level)
   {
     unload_current_level();
-    next_level();
+    load_pending_level();
   }
   else
   {
@@ -200,20 +205,26 @@ static void on_update()
 #endif
 
     // late update
+    remove_unprocessed_attack_commands();
     late_destroying_system();
     life_span_system();
   }
 }
 
-static void on_player_hit_ladder(SDL_UNUSED void* arg, const MSG_HitLadder* event)
+static void on_player_enter_portal(SDL_UNUSED void* arg, const EnterPortalMsg* event)
 {
-  LadderAttributes* attrs = ecs_get(g_ecs, event->ladder, LADDER_ATTRIBUTES);
-  SDL_strlcpy(_next_level, attrs->level, sizeof(_next_level) - 1);
-  SDL_strlcpy(_spwan_location, attrs->dest, sizeof(_spwan_location) - 1);
+  PortalAttributes* portalAttributes = ecs_get(g_ecs, event->portal, LADDER_ATTRIBUTES);
+  request_load_level(portalAttributes->level, portalAttributes->dest);
+}
+
+void request_load_level(const char* level, const char* portalAttributes)
+{
+  SDL_strlcpy(_pending_level, level, sizeof(_pending_level) - 1);
+  SDL_strlcpy(_target_portal, portalAttributes, sizeof(_target_portal) - 1);
   _has_next_level = TRUE;
 }
 
-static void on_entity_died(SDL_UNUSED void* arg, const MSG_EntityDied* event)
+static void on_entity_died(SDL_UNUSED void* arg, const EntityDiedMsg* event)
 {
   if (ecs_has(g_ecs, event->entity, PLAYER_TAG))
     _player_died = TRUE;
@@ -237,7 +248,7 @@ static Mix_Music* music_from_level_name(const char* level_name)
   return NULL;
 }
 
-static void music_player_on_level_loaded(SDL_UNUSED void* arg, const MSG_LevelLoaded* event)
+static void music_player_on_level_loaded(SDL_UNUSED void* arg, const LevelLoadedMsg* event)
 {
   Mix_Music* mus = music_from_level_name(event->level_name);
   if (mus != NULL)
@@ -246,10 +257,10 @@ static void music_player_on_level_loaded(SDL_UNUSED void* arg, const MSG_LevelLo
 
 static void unload_current_level()
 {
-  ems_broadcast(MSG_LEVEL_UNLOADED, &(MSG_LevelUnloaded){ g_session.level });
+  ems_broadcast(MSG_LEVEL_UNLOADED, &(LevelUnloadedMsg){ gSession.level });
   ecs_entity_t player = scn_get_player(g_ecs);
-  g_session.spell     = ett_get_attuned_spell_type(g_ecs, player);
-  g_session.weapon    = ett_get_equiped_weapon_type(g_ecs, player);
+  gSession.spell      = ett_get_attuned_spell_type(g_ecs, player);
+  gSession.weapon     = ett_get_equiped_weapon_type(g_ecs, player);
   ecs_clear(g_ecs);
   map_clear();
 }
@@ -328,12 +339,12 @@ static void render_game_world(void)
   camera_shaker_postupdate();
 }
 
-static Vec2 get_spawn_localtion(ecs_entity_t ladder)
+static Vec2 get_spawn_localtion(ecs_entity_t portal)
 {
-  LadderAttributes* attrs    = ecs_get(g_ecs, ladder, LADDER_ATTRIBUTES);
-  HitBox*           hixbox   = ecs_get(g_ecs, ladder, HITBOX);
-  Vec2              position = ett_get_position(g_ecs, ladder);
-  switch (attrs->exit_direction)
+  PortalAttributes* portalAttributes = ecs_get(g_ecs, portal, LADDER_ATTRIBUTES);
+  HitBox*           hixbox           = ecs_get(g_ecs, portal, HITBOX);
+  Vec2              position         = ett_get_position(g_ecs, portal);
+  switch (portalAttributes->exitDirection)
   {
   case UP:
     position.x += hixbox->size.x / 2.f;
@@ -354,19 +365,19 @@ static Vec2 get_spawn_localtion(ecs_entity_t ladder)
   return position;
 }
 
-static void next_level(void)
+static void load_pending_level(void)
 {
-  ecs_entity_t ladder;
+  ecs_entity_t portal;
   Vec2         spawn_localtion;
-  load_level(_next_level);
+  load_level(_pending_level);
 
-  if ((ladder = scn_find_portal(g_ecs, _spwan_location)) != ECS_NULL_ENT)
+  if ((portal = scn_find_portal(g_ecs, _target_portal)) != ECS_NULL_ENT)
   {
-    spawn_localtion = get_spawn_localtion(ladder);
+    spawn_localtion = get_spawn_localtion(portal);
     spawn_player(spawn_localtion);
   }
-  SDL_strlcpy(g_session.level, _next_level, 255);
-  ems_broadcast(MSG_LEVEL_LOADED, &(MSG_LevelLoaded){ _next_level });
+  SDL_strlcpy(gSession.level, _pending_level, 255);
+  ems_broadcast(MSG_LEVEL_LOADED, &(LevelLoadedMsg){ _pending_level });
 
   _has_next_level = FALSE;
 }

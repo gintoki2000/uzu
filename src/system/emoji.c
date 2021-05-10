@@ -27,7 +27,7 @@ void emoji_system(void)
     ASSERT(emoji[i].id >= 0 && emoji[i].id < NUM_EMOJIES && "invalid emoji id");
     if (emoji[i].duration != -1 && (emoji[i].duration--) == 0)
     {
-      INVOKE_EVENT(emoji[i].cb_time_out, NULL);
+      INVOKE_EVENT(emoji[i].cbTimeOut, NULL);
       ecs_rmv(g_ecs, entities[i], EMOJI);
       continue;
     }

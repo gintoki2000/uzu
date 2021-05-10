@@ -158,7 +158,7 @@ static void scroll_use_callback(const void* _data, Ecs* ecs, ecs_entity_t entity
   AttunementSlot*   attunement_slot = ecs_get(ecs, entity, ATTUNEMENT_SLOT);
   if (attunement_slot != NULL)
   {
-    attunement_slot->spell_id = data->spell_id;
+    attunement_slot->spellId = data->spell_id;
   }
 }
 

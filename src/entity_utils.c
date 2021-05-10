@@ -35,20 +35,13 @@ ecs_entity_t scn_find_portal(Ecs* ecs, const char* _name)
   ecs_entity_t* entities;
   ecs_size_t    cnt;
 
-  LadderAttributes* switchers;
+  PortalAttributes* portal_attributes;
   Name*             name;
 
-  ecs_raw(ecs, LADDER_ATTRIBUTES, &entities, (pointer_t*)&switchers, &cnt);
+  ecs_raw(ecs, LADDER_ATTRIBUTES, &entities, (pointer_t*)&portal_attributes, &cnt);
   for (int i = 0; i < cnt; ++i)
-  {
-    if ((name = ecs_get(ecs, entities[i], NAME)))
-    {
-      if (strcmp(_name, name->value) == 0)
-      {
-        return entities[i];
-      }
-    }
-  }
+    if ((name = ecs_get(ecs, entities[i], NAME)) && !SDL_strcmp(_name, name->value))
+      return entities[i];
   return ECS_NULL_ENT;
 }
 
@@ -133,17 +126,17 @@ void ett_attune_spell(Ecs* ecs, ecs_entity_t entity, u16 spell_id)
 u16 ett_get_attuned_spell_type(Ecs* ecs, ecs_entity_t entity)
 {
   AttunementSlot* comp = ecs_get(ecs, entity, ATTUNEMENT_SLOT);
-  return comp ? comp->spell_id : SPELL_ID_NULL;
+  return comp ? comp->spellId : SPELL_ID_NULL;
 }
 
 const Spell* ett_get_attuned_spell(Ecs* registry, ecs_entity_t entity)
 {
   u16 id = ett_get_attuned_spell_type(registry, entity);
-  return id != SPELL_ID_NULL ? &g_spell_tbl[id] : NULL;
+  return id != SPELL_ID_NULL ? &gSpellTbl[id] : NULL;
 }
 u16 wpn_get_type(Ecs* ecs, ecs_entity_t weapon)
 {
-  return ((const WeaponAttributes*)ecs_get(ecs, weapon, WEAPON_ATTRIBUTES))->type_id;
+  return ((const WeaponAttributes*)ecs_get(ecs, weapon, WEAPON_ATTRIBUTES))->typeId;
 }
 ecs_entity_t get_equiped_weapon(Ecs* registry, ecs_entity_t holder)
 {
@@ -159,23 +152,18 @@ void ett_set_conversation(Ecs* ecs, ecs_entity_t entity, u16 conversation_id)
   ecs_set(ecs, entity, DIALOGUE, &(Dialogue){ conversation_id });
 }
 
-void ett_animate_hand(Ecs*                    registry,
-                      ecs_entity_t            entity,
-                      const HandAnimKeyFrame* kframes,
-                      SDL_bool                realtive_current,
-                      Callback                finished_callback,
-                      Callback                kframe_callback)
+void ett_animate_hand(Ecs* registry, ecs_entity_t entity, const HandAnimParams* params)
 {
   Hand*          hand   = ecs_get(registry, entity, HAND);
   HandAnimation* ha     = ecs_add(registry, entity, HAND_ANIMATION);
-  ha->current_index     = -1;
-  ha->initial_angle     = hand->angle;
-  ha->initial_point     = hand->original_point;
-  ha->initial_length    = hand->length;
-  ha->keyframes         = kframes;
-  ha->relative          = realtive_current;
-  ha->finished_callback = finished_callback;
-  ha->frame_callback    = kframe_callback;
+  ha->currentIndex         = -1;
+  ha->initialAngle         = hand->angle;
+  ha->initialOriginalPoint = hand->originalPoint;
+  ha->initialLength     = hand->length;
+  ha->keyframes         = params->keyframes;
+  ha->relative          = params->realtiveCurrentState;
+  ha->cbCompleted       = params->cbFinished;
+  ha->cbFrame           = params->cbFrame;
 }
 
 Vec2 ett_get_facing_direction(Ecs* registry, ecs_entity_t entity)

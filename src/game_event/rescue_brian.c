@@ -38,10 +38,10 @@ GAME_EVENT("event.brian_rescue")
 static void processing();
 static void inactive();
 static void pickup();
-static void INACTIVE_on_event_finished(void* arg, const MSG_EventFinished* msg);
-static void PROCESSING_on_level_loaded(void* arg, const MSG_LevelLoaded* msg);
-static void PROCESSING_on_entity_died(void* arg, const MSG_EntityDied* msg);
-static void PICKUP_on_level_loaded(void* arg, const MSG_LevelLoaded* msg);
+static void INACTIVE_on_event_finished(void* arg, const EventFinishedMsg* msg);
+static void PROCESSING_on_level_loaded(void* arg, const LevelLoadedMsg* msg);
+static void PROCESSING_on_entity_died(void* arg, const EntityDiedMsg* msg);
+static void PICKUP_on_level_loaded(void* arg, const LevelLoadedMsg* msg);
 static void PICKUP_on_converastion_finished(void* arg, const MSG_ConversationFinished* msg);
 static void PICKUP_on_msgbox_close(void* arg, const void* msg);
 
@@ -54,7 +54,7 @@ static void init_default_data()
   SDL_memset4(_save.alive, TRUE, NUM_ENEMIES);
 }
 
-static void INACTIVE_on_event_finished(SDL_UNUSED void* arg, const MSG_EventFinished* msg)
+static void INACTIVE_on_event_finished(SDL_UNUSED void* arg, const EventFinishedMsg* msg)
 {
   if (msg->code == EVT_BRIAN_FIRST_ENCOUNTER)
   {
@@ -74,7 +74,7 @@ static void INACTIVE_on_event_finished(SDL_UNUSED void* arg, const MSG_EventFini
   }
 }
 
-static void PROCESSING_on_level_loaded(SDL_UNUSED void* arg, const MSG_LevelLoaded* msg)
+static void PROCESSING_on_level_loaded(SDL_UNUSED void* arg, const LevelLoadedMsg* msg)
 {
   if (!SDL_strcmp(msg->level_name, "corridor"))
   {
@@ -91,7 +91,7 @@ static void PROCESSING_on_level_loaded(SDL_UNUSED void* arg, const MSG_LevelLoad
   }
 }
 
-static void PICKUP_on_level_loaded(SDL_UNUSED void* arg, const MSG_LevelLoaded* msg)
+static void PICKUP_on_level_loaded(SDL_UNUSED void* arg, const LevelLoadedMsg* msg)
 {
   if (!SDL_strcmp(msg->level_name, "demon_ruin"))
   {
@@ -100,9 +100,9 @@ static void PICKUP_on_level_loaded(SDL_UNUSED void* arg, const MSG_LevelLoaded* 
   }
 }
 
-static void PROCESSING_on_entity_died(SDL_UNUSED void* arg, const MSG_EntityDied* msg)
+static void PROCESSING_on_entity_died(SDL_UNUSED void* arg, const EntityDiedMsg* msg)
 {
-  if (!SDL_strcmp(g_session.level, "corridor"))
+  if (!SDL_strcmp(gSession.level, "corridor"))
   {
     for (int i = 0; i < NUM_ENEMIES; ++i)
     {
@@ -143,12 +143,12 @@ static void PICKUP_on_converastion_finished(SDL_UNUSED void*                arg,
         ui_msgbox_display("give to brian x3 red flasks");
         ui_msgbox_close_hook(CALLBACK_2(PICKUP_on_msgbox_close));
         _save.state = FINHISHED;
-        ems_broadcast(MSG_EVENT_FINISHED, &(MSG_EventFinished){ EVT_BRIAN_RECUSE, "accept" });
+        ems_broadcast(MSG_EVENT_FINISHED, &(EventFinishedMsg){ EVT_BRIAN_RECUSE, "accept" });
       }
     }
     else
     {
-      ems_broadcast(MSG_EVENT_FINISHED, &(MSG_EventFinished){ EVT_BRIAN_RECUSE, "denie" });
+      ems_broadcast(MSG_EVENT_FINISHED, &(EventFinishedMsg){ EVT_BRIAN_RECUSE, "denie" });
     }
     _save.state = FINHISHED;
     ems_disconnect(MSG_LEVEL_LOADED, PROCESSING_on_level_loaded);

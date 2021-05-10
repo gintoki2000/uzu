@@ -2,6 +2,11 @@
 #define ACTION_H
 #include "global.h"
 
+typedef void (*ActionStartFunc)(void*, ecs_entity_t);
+typedef void (*ActionEndFunc)(void*, ecs_entity_t);
+typedef void (*ActionCleanupFunc)(void*);
+typedef BOOL (*ActionTickFunc)(void*, ecs_entity_t);
+
 typedef struct ActionVtbl
 {
   void (*start)(void* self, ecs_entity_t target);

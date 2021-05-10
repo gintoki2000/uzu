@@ -12,38 +12,38 @@ static const Vec2 _trap_impact_force = { 100.f, 0.f };
 
 #define TRAP_IMPACT_FORCE_Z 60.f
 
-static void on_hit_trap(SDL_UNUSED void* arg, const MSG_EntityHitTrap* event)
+static void on_hit_trap(SDL_UNUSED void* arg, const EntityHitTrapMsg* event)
 {
   const FacingDirection* facing_direction = ecs_get(g_ecs, event->entity, FACING_DIRECTION);
   Vec2                   force = vec2_mul(_trap_impact_force, signf(facing_direction->value.x));
   ems_broadcast(MSG_DEAL_DAMAGE,
-                &(MSG_DealDamage){ .damage      = 1,
-                                   .dealer      = ECS_NULL_ENT,
-                                   .receiver    = event->entity,
-                                   .type        = DAMAGE_TYPE_THUST,
-                                   .impact_time = 10,
-                                   .force       = force,
-                                   .zforce      = TRAP_IMPACT_FORCE_Z });
+                &(InflictDamageMsg){ .damage      = 1,
+                                     .dealer      = ECS_NULL_ENT,
+                                     .receiver    = event->entity,
+                                     .type        = DAMAGE_TYPE_THUST,
+                                     .impact_time = 10,
+                                     .force       = force,
+                                     .zforce      = TRAP_IMPACT_FORCE_Z });
 }
 
-static void on_projectile_hit(SDL_UNUSED void* arg, const MSG_ProjectileHit* event)
+static void on_projectile_hit(SDL_UNUSED void* arg, const ProjectileHitMsg* event)
 {
   ProjectileAttributes* attributes;
   if ((attributes = ecs_get(g_ecs, event->projectile, PROJECTILE_ATTRIBUTES)) != NULL)
   {
     ems_broadcast(MSG_DEAL_DAMAGE,
-                  &(MSG_DealDamage){
+                  &(InflictDamageMsg){
                       .damage      = attributes->damage,
                       .dealer      = attributes->shooter,
                       .receiver    = event->entity,
-                      .type        = attributes->damage_type,
-                      .force       = attributes->impact_force,
-                      .impact_time = attributes->impact_time,
-                      .zforce      = attributes->impact_force_z,
+                      .type        = attributes->damageType,
+                      .force       = attributes->impactForce,
+                      .impact_time = attributes->impactTime,
+                      .zforce      = attributes->impactForceZ,
                   });
     ett_apply_status_effect(g_ecs, event->entity, STATUS_EFFECT_FREEZED, 240);
     begin_sake_camera(4, 6);
-    if (attributes->destroy_when_hit)
+    if (attributes->destroyWhenHit)
     {
       ecs_add(g_ecs, event->projectile, DESTROYED_TAG);
     }

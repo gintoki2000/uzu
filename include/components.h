@@ -2,78 +2,81 @@
 #define COMPONENTS_H
 #include "SDL_FontCache.h"
 #include "action.h"
-#include "behaviour_tree.h"
+#include "behavior_tree.h"
 #include "global.h"
 #include "path_finder.h"
 #include "toolbox/toolbox.h"
 
 typedef enum ComponentId
 {
-  TRANSFORM,
-  VISUAL,
-  MOTION,
-  ANIMATOR,
-  CONTROLLER,
-  HAND,
-  HEALTH,
-  HITBOX,
-  HEAL_BAR,
-  LIFE_SPAN,
-  DESTROYED_TAG,
-  WEAPON_SWING_ATTACK,
-  WEAPON_CHARGE_ATTACK,
-  WEAPON_THUST_ATTACK,
-  WEAPON_THUNDER_STORM_RELEASE,
-  WEAPON_SHOOT,
-  WEAPON_ATTRIBUTES,
-  DROP,
-  PICKUPABLE_ATTRIBUTES,
-  INVULNERABLE,
-  STAGGER,
-  ENEMY_TAG,
-  PLAYER_TAG,
-  CAMERA_TARGET_TAG,
-  ENABLE_TILE_COLLISION_TAG,
-  CHARACTER_ANIMATOR_TAG,
-  BOSS_ROOM,
-  PROJECTILE_ATTRIBUTES,
-  DOOR_TAG,
-  BRAIN,
-  DESTINATION,
-  PATH,
-  FOLLOWING_TARGET,
   AGGRO_AREA,
-  LADDER_ATTRIBUTES,
-  NAME,
-  INTERACTABLE,
-  TEXT,
-  DIALOGUE,
-  MERCHANT,
-  CHEST,
-  ATTUNEMENT_SLOT,
-  WEAPON_CAST,
-  MANA,
-  DOOR_ATTRIBUTES,
-  HOLDER,
-  ATTACK_MASK,
-  REMOVE_IF_OFFSCREEN,
-  ATTACKER,
-  MOVE_SPEED,
-  FACING_DIRECTION,
-  ATTACK_TARGET,
-  TRIGGER,
-  SCRIPT,
-  EMOJI,
-  HAND_ANIMATION,
-  STATS,
   AGILITY_CHANGED,
-  VITALITY_CHANGED,
-  INTELLIGENT_CHANGED,
-  STRENGTH_CHANGED,
-  DEFENSE,
+  ANIMATOR,
+  ATTACKER,
+  ATTACK_COMMAND,
+  ATTACK_MASK,
   ATTACK_POWER,
+  ATTACK_TARGET,
+  ATTUNEMENT_SLOT,
+  BLACKBOARD,
+  BOSS_ROOM,
+  BRAIN,
+  CAMERA_TARGET_TAG,
+  CHARACTER_ANIMATOR_TAG,
+  CHEST,
+  DEFENSE,
+  DESIRED_DIRECTION,
+  DESTROYED_TAG,
+  DIALOGUE,
+  DOOR_ATTRIBUTES,
+  DOOR_TAG,
+  DROP,
+  EMOJI,
+  ENABLE_TILE_COLLISION_TAG,
+  ENEMY_TAG,
+  FACING_DIRECTION,
+  FOLLOWING_TARGET,
+  HAND,
+  HAND_ANIMATION,
+  HEALTH,
+  HEAL_BAR,
+  HITBOX,
+  HOLDER,
+  INTELLIGENT_CHANGED,
+  INTERACTABLE,
+  INVULNERABLE,
+  LADDER_ATTRIBUTES,
+  LIFE_SPAN,
+  MANA,
+  MERCHANT,
+  MOTION,
+  MOVE_SPEED,
+  NAME,
+  PATH,
+  PICKUPABLE_ATTRIBUTES,
+  PLAYER_TAG,
+  PROJECTILE_ATTRIBUTES,
+  REMOVE_IF_OFFSCREEN,
+  SCRIPT,
+  STAGGER,
+  STATS,
   STATUS_EFFECT,
+  STRENGTH_CHANGED,
+  TEXT,
+  TRANSFORM,
+  TRIGGER,
   UNABLE_TO_MOVE,
+  VISUAL,
+  VITALITY_CHANGED,
+  WALK_DIRECTLY_TOWARD,
+  WEAPON_ATTRIBUTES,
+  WEAPON_CAST,
+  WEAPON_CHARGE_ATTACK,
+  WEAPON_SHOOT,
+  WEAPON_SWING_ATTACK,
+  WEAPON_THUNDER_STORM_RELEASE,
+  WEAPON_THUST_ATTACK,
+  INITIAL_POSITION,
   NUM_COMPONENTS
 } ComponentId;
 
@@ -81,7 +84,6 @@ typedef struct Motion
 {
   Vec2  vel;
   Vec2  acc;
-  float max_force;
   float friction;
   float vz;
   float gravity_scale;
@@ -90,7 +92,7 @@ typedef struct Motion
 
 typedef struct Transform
 {
-  Vec2   prev_position;
+  Vec2   lastPosition;
   Vec2   position;
   double rotation;
   float  z;
@@ -116,17 +118,20 @@ typedef struct Spot
   float radius;
 } AggroArea;
 
-typedef struct Controller
+typedef struct
 {
-  Vec2 desired_direction;
-  u16  action;
-  BOOL in_action;
-} Controller;
+  float value;
+} DeaggroRadius;
+
+typedef struct
+{
+  float value;
+} AggroRadius;
 
 typedef struct Hand
 {
   ecs_entity_t weapon;
-  Vec2         original_point;
+  Vec2         originalPoint;
   double       angle;
   float        length;
 } Hand;
@@ -142,14 +147,14 @@ typedef struct HandAnimKeyFrame
 typedef struct HandAnimation
 {
   const HandAnimKeyFrame* keyframes;
-  Callback                frame_callback;
-  Callback                finished_callback;
+  Callback                cbFrame;
+  Callback                cbCompleted;
   BOOL                    relative;
-  float                   initial_length;
-  Vec2                    initial_point;
-  double                  initial_angle;
-  int                     current_duration;
-  int                     current_index;
+  float                   initialLength;
+  Vec2                    initialOriginalPoint;
+  double                  initialAngle;
+  int                     currentDuration;
+  int                     currentIndex;
 } HandAnimation;
 
 enum
@@ -157,47 +162,46 @@ enum
   WPN_CAT_MEELLE,
   WPN_CAT_RANGED,
 };
+
+typedef struct WeaponRange
+{
+  int min;
+  int max;
+} WeaponRange;
+
 typedef struct WeaponAttributes
 {
-  s32 atk;
-  u16 type_id;
-  u16 category;
-  u32 range;
+  s32         atk;
+  u16         typeId;
+  u16         category;
+  WeaponRange range;
 } WeaponAttributes;
 
 /*Weapon skills*/
 typedef struct WeaponSwingAttack
 {
-  CharacterAction on_action;
-  u32             wide;
+  u32 code;
+  u32 wide;
 } WeaponSwingAttack;
 
 typedef struct WeaponChargeAttack
 {
-  u16  on_action;
-  u16  timer;
-  BOOL is_active;
+  u32 code;
 } WeaponChargeAttack;
 
 typedef struct WeaponThustAttack
 {
-  u16 on_action;
-  u16 timer;
-  u8  state;
+  u32 code;
 } WeaponThustAttack;
 
 typedef struct WeaponThunderStormRelease
 {
-  u16 on_action;
-  u16 remaining;
-  u16 interval;
-  u16 total;
-  u16 timer;
+  u32 code;
 } WeaponThunderStormRelease;
 
 typedef struct WeaponShoot
 {
-  u16   on_action;
+  u32   code;
   u16   fire_rate;
   u16   timer;
   float projspd;
@@ -205,10 +209,20 @@ typedef struct WeaponShoot
 
 typedef struct WeaponCast
 {
-  int  cooldown_timer;
+  u32  code;
+  u32  cooldownTimer;
   BOOL processing;
   u8   state[32];
 } WeaponCast;
+
+typedef struct AttackCommand
+{
+  u32      code;
+  BOOL     processing;
+  Callback cbCompleted;
+} AttackCommand;
+
+typedef Vec2 DesiredDirection;
 
 /*entity tags*/
 typedef int PlayerTag;
@@ -232,12 +246,12 @@ typedef struct ProjectileAttributes
 {
   int   damage;
   u16   effect;
-  u16   damage_type;
-  BOOL  destroy_when_hit;
+  u16   damageType;
+  BOOL  destroyWhenHit;
   BOOL  impact;
-  Vec2  impact_force;
-  float impact_force_z;
-  u16   impact_time;
+  Vec2  impactForce;
+  float impactForceZ;
+  u16   impactTime;
   u16   sfx;
   u16   shooter;
 } ProjectileAttributes;
@@ -252,7 +266,7 @@ typedef enum DoorState
 #define DOOR_REQUIRED_SPECIAL_CONDITION -2
 typedef struct DoorAttributes
 {
-  s16 required_key;
+  s16 requiredKey;
   u16 state;
 } DoorAttributes;
 
@@ -265,7 +279,7 @@ typedef struct PickupableAttributes
 
 typedef struct
 {
-  u32              current_anim;
+  u32              currentAnimation;
   u16              elapsed;
   const Animation* anims;
 } Animator;
@@ -274,8 +288,8 @@ typedef struct
 {
   Vec2 size;
   Vec2 anchor;
-  int  proxy_id;
-  u16  mask_bits;
+  int  proxyId;
+  u16  mask;
   u16  category;
 } HitBox;
 
@@ -318,7 +332,11 @@ typedef struct
   BTNode* root;
 } Brain;
 
-typedef Vec2 Destination;
+typedef struct WalkDirectlyToward
+{
+  Vec2     destination;
+  Callback cbCompleted;
+} WalkDirectlyToward;
 
 #define PATH_MAX_NUM_NODES 100
 typedef struct Path
@@ -340,8 +358,8 @@ typedef struct
 {
   char level[LADDER_ATTRS_MAX_LEVEL_NAME_LEN + 1]; // level nào cần load
   char dest[LADDER_ATTRS_MAX_DEST_LEN + 1]; // vị trí cầu thang mà player sẽ xuất hiện
-  Direction exit_direction;
-} LadderAttributes;
+  Direction exitDirection;
+} PortalAttributes;
 
 #define NAME_MAX_LEN 15
 typedef struct
@@ -361,7 +379,7 @@ typedef struct
 typedef struct Interatcable
 {
   const char* commands[INTERACTABLE_MAX_COMMANDS];
-  int         num_commands;
+  int         numCommands;
 } Interactable;
 
 typedef struct
@@ -374,7 +392,7 @@ typedef struct
 typedef struct Merchant
 {
   ItemPayload payloads[MERCHANT_MAX_PAYLOADS];
-  u32         num_payloads;
+  u32         numPayloads;
 } Merchant;
 
 #define CHEST_MAX_ITEMS 5
@@ -386,14 +404,14 @@ enum
 typedef struct
 {
   Item items[CHEST_MAX_ITEMS];
-  u16  num_slots;
+  u16  numSlots;
   u16  state;
   u32  id;
 } ChestAttributes;
 
 typedef struct
 {
-  u16 spell_id;
+  u32 spellId;
 } AttunementSlot;
 
 typedef int RemoveIfOffScreen;
@@ -469,7 +487,7 @@ typedef struct
 typedef struct Script
 {
   Action*  action;
-  Callback cb_finished;
+  Callback cbFinished;
 } Script;
 
 enum EmojiType
@@ -485,7 +503,7 @@ typedef struct Emoji
 {
   int      id;
   int      duration;
-  Callback cb_time_out;
+  Callback cbTimeOut;
 } Emoji;
 
 typedef struct StatusEffect
@@ -501,7 +519,9 @@ typedef struct UnableToMove
   u16 count;
 } UnableToMove;
 
-void ladder_attrs_init(LadderAttributes* sw, const char* level, const char* dest, u16 direction);
+typedef Vec2 InitialPosition;
+
+void portal_attrs_init(PortalAttributes* sw, const char* level, const char* dest, u16 direction);
 void name_init(Name* name, const char* value);
 void text_init(Text* text, const char* value, FONT* font, COLOR color);
 void interactable_init(Interactable* i, const char* const cmds[]);

@@ -6,13 +6,8 @@
 #include "toolbox/toolbox.h"
 
 ecs_entity_t make_golden_cross_hit_effect(Ecs* ecs, Vec2 position);
-ecs_entity_t make_static_pickupable_entity(Ecs* ecs,
-                                           u16  texture_id,
-                                           u16  item_type_id,
-                                           Vec2 position,
-                                           u8   quality);
-ecs_entity_t make_thunder_storm(Ecs* ecs, Vec2 center);
-ecs_entity_t make_thunder(Ecs* ecs, Vec2 position, u16 mask_bits);
+ecs_entity_t
+make_static_pickupable_entity(Ecs* ecs, u16 textureId, u16 itemType, Vec2 position, u8 quality);
 
 typedef struct
 {
@@ -27,7 +22,7 @@ ecs_entity_t make_portal(Ecs* ecs, const MakePortalParams* params);
 ecs_entity_t
 make_text_particle(Ecs* ecs, const char* text, Vec2 position, Vec2 speed, FONT* font, COLOR color);
 
-ecs_entity_t make_player(Ecs* ecs, ecs_entity_t character, ecs_entity_t weapon);
+ecs_entity_t make_player(Ecs* ecs, ecs_entity_t baseCharacter);
 
 // weapons
 ecs_entity_t make_spear(Ecs* ecs);
@@ -107,4 +102,6 @@ ecs_entity_t make_arrow(Ecs* ecs, ecs_entity_t shooter, Vec2 position, Vec2 spee
 // npcs
 ecs_entity_t make_npc_brian(Ecs* ecs, Vec2 position, u16 conversation_id);
 
+ecs_entity_t make_weapon(Ecs* registry, u16 type);
+ecs_entity_t make_character(Ecs* registry, u16 job, Vec2 position);
 #endif // ENTITY_FACTORY_H

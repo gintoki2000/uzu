@@ -1,8 +1,6 @@
 #include "entity_factory.h"
 #include "animations.h"
-#include "behaviour_tree.h"
-#include "btcondition.h"
-#include "bttask.h"
+#include "behavior_tree.h"
 #include "components.h"
 #include "constances.h"
 #include "ecs/ecs.h"
@@ -17,24 +15,23 @@ ecs_entity_t make_anime_sword(Ecs* registry)
 
   entity = ecs_create(registry);
 
-  Transform*         transform;
   Visual*            visual;
-  WeaponAttributes*  attrs;
+  WeaponAttributes*  attributes;
   WeaponSwingAttack* sklswing;
 
-  transform = ecs_add(registry, entity, TRANSFORM);
+  ecs_add(registry, entity, TRANSFORM);
 
   visual = ecs_add(registry, entity, VISUAL);
   sprite_init(&visual->sprite, TEX_WPN_ANIME_SWORD);
   visual->anchor.x = visual->sprite.rect.w / 2;
   visual->anchor.y = visual->sprite.rect.h + 4;
 
-  attrs          = ecs_add(registry, entity, WEAPON_ATTRIBUTES);
-  attrs->atk     = 2;
-  attrs->type_id = WEAPON_ANIME_SWORD;
+  attributes         = ecs_add(registry, entity, WEAPON_ATTRIBUTES);
+  attributes->atk    = 2;
+  attributes->typeId = WEAPON_ANIME_SWORD;
 
-  sklswing            = ecs_add(registry, entity, WEAPON_SWING_ATTACK);
-  sklswing->on_action = CHARACTER_ACTION_REGULAR_ATK;
+  sklswing       = ecs_add(registry, entity, WEAPON_SWING_ATTACK);
+  sklswing->code = 0;
 
   ecs_add(registry, entity, HOLDER);
 
@@ -74,13 +71,13 @@ ecs_entity_t make_character_base(Ecs* registry, const MakeCharacterParams* param
   visual->anchor.x = 16 / 2;
   visual->anchor.y = 28;
 
-  hand                   = ecs_add(registry, entity, HAND);
-  hand->weapon           = ECS_NULL_ENT;
-  hand->original_point.x = 0;
-  hand->original_point.y = -7;
-  hand->length           = 6;
+  hand                  = ecs_add(registry, entity, HAND);
+  hand->weapon          = ECS_NULL_ENT;
+  hand->originalPoint.x = 0;
+  hand->originalPoint.y = -7;
+  hand->length          = 6;
 
-  ecs_add(registry, entity, CONTROLLER);
+  ecs_add(registry, entity, DESIRED_DIRECTION);
   ecs_set(registry,
           entity,
           STATS,
@@ -93,10 +90,10 @@ ecs_entity_t make_character_base(Ecs* registry, const MakeCharacterParams* param
 
   ecs_set(registry, entity, ANIMATOR, &(Animator){ .anims = params->animations });
 
-  hitbox           = ecs_add(registry, entity, HITBOX);
-  hitbox->size     = VEC2(6.f, 10.f);
-  hitbox->anchor   = VEC2(3.f, 10.f);
-  hitbox->proxy_id = RTREE_NULL_NODE;
+  hitbox          = ecs_add(registry, entity, HITBOX);
+  hitbox->size    = (Vec2){ 6.f, 10.f };
+  hitbox->anchor  = (Vec2){ 3.f, 10.f };
+  hitbox->proxyId = RTREE_NULL_NODE;
 
   motion = ecs_add(registry, entity, MOTION);
 
@@ -193,11 +190,11 @@ ecs_entity_t make_monster_base(Ecs* registry, const MakeMonParams* params)
 
   ecs_set(registry, entity, ANIMATOR, &(Animator){ .anims = params->anims });
 
-  hitbox            = ecs_add(registry, entity, HITBOX);
-  hitbox->size      = params->size;
-  hitbox->anchor    = VEC2(params->size.x / 2.f, params->size.y);
-  hitbox->mask_bits = BIT(CATEGORY_WEAPON) | BIT(CATEGORY_PROJECTILE);
-  hitbox->category  = CATEGORY_ENEMY;
+  hitbox           = ecs_add(registry, entity, HITBOX);
+  hitbox->size     = params->size;
+  hitbox->anchor   = (Vec2){ params->size.x / 2.f, params->size.y };
+  hitbox->mask     = BIT(CATEGORY_WEAPON) | BIT(CATEGORY_PROJECTILE);
+  hitbox->category = CATEGORY_ENEMY;
 
   ecs_add(registry, entity, ENEMY_TAG);
 
@@ -278,7 +275,7 @@ ecs_entity_t make_animated_pickupable_entity(Ecs*                               
   Visual*               visual;
   Transform*            transform;
   HitBox*               hitbox;
-  PickupableAttributes* attrs;
+  PickupableAttributes* attributes;
   Animator*             animator;
 
   entity = ecs_create(registry);
@@ -292,51 +289,20 @@ ecs_entity_t make_animated_pickupable_entity(Ecs*                               
   transform           = ecs_add(registry, entity, TRANSFORM);
   transform->position = params->position;
 
-  hitbox            = ecs_add(registry, entity, HITBOX);
-  hitbox->size      = (Vec2){ 8.f, 8.f };
-  hitbox->anchor    = (Vec2){ 4.f, 4.f };
-  hitbox->proxy_id  = RTREE_NULL_NODE;
-  hitbox->category  = CATEGORY_ITEM;
-  hitbox->mask_bits = BIT(CATEGORY_PLAYER);
+  hitbox           = ecs_add(registry, entity, HITBOX);
+  hitbox->size     = (Vec2){ 8.f, 8.f };
+  hitbox->anchor   = (Vec2){ 4.f, 4.f };
+  hitbox->proxyId  = RTREE_NULL_NODE;
+  hitbox->category = CATEGORY_ITEM;
+  hitbox->mask     = BIT(CATEGORY_PLAYER);
 
-  attrs          = ecs_add(registry, entity, PICKUPABLE_ATTRIBUTES);
-  attrs->id      = params->id;
-  attrs->sfx     = SFX_COIN;
-  attrs->quality = params->quality;
+  attributes          = ecs_add(registry, entity, PICKUPABLE_ATTRIBUTES);
+  attributes->id      = params->id;
+  attributes->sfx     = SFX_COIN;
+  attributes->quality = params->quality;
 
   ecs_set(registry, entity, MOTION, &(Motion){ .friction = .2f, .bounching = .8f });
   return entity;
-}
-
-static BTNode* create_chort_behavior_tree(void)
-{
-  BTRoot* root;
-
-  BTSelector*                  selector;
-  BTCondition_HasAttackTarget* has_attack_target;
-  BTSequence*                  sequence1;
-  BTTask_Wait*                 wait;
-  BTTask_FollowAttackTarget*   follow_attack_target;
-  BTTask_Attack*               attack;
-
-  root                 = bt_root_new();
-  selector             = bt_selector_new();
-  has_attack_target    = bt_condition_has_attack_target_new(FALSE);
-  sequence1            = bt_sequence_new();
-  wait                 = bt_task_wait_new(30);
-  attack               = bt_task_attack_new();
-  follow_attack_target = bt_task_follow_attack_target_new(16);
-
-  bt_root_set_child(root, (BTNode*)selector);
-
-  bt_selector_add(selector, (BTNode*)has_attack_target);
-
-  bt_decorator_set_child((BTDecorator*)has_attack_target, (BTNode*)sequence1);
-  bt_sequence_add(sequence1, (BTNode*)follow_attack_target);
-  bt_sequence_add(sequence1, (BTNode*)attack);
-  bt_sequence_add(sequence1, (BTNode*)wait);
-
-  return (BTNode*)root;
 }
 
 ecs_entity_t make_chort(Ecs* registry, Vec2 position)
@@ -350,9 +316,8 @@ ecs_entity_t make_chort(Ecs* registry, Vec2 position)
   ecs_entity_t entity  = make_monster_base(registry, &params);
 
   /*components */
-  Hand*       hand;
-  Controller* controller;
-  AggroArea*  spot;
+  Hand*      hand;
+  AggroArea* spot;
 
   spot           = ecs_add(registry, entity, AGGRO_AREA);
   spot->radius   = TILE_SIZE * 7;
@@ -368,21 +333,19 @@ ecs_entity_t make_chort(Ecs* registry, Vec2 position)
               .cnt     = 3,
           });
 
-  controller = ecs_add(registry, entity, CONTROLLER);
+  ecs_set(registry, entity, DESIRED_DIRECTION, &(DesiredDirection){ 0 });
 
-  hand                   = ecs_add(registry, entity, HAND);
-  hand->weapon           = ECS_NULL_ENT;
-  hand->original_point.x = 0;
-  hand->original_point.y = -7;
-  hand->angle            = 40;
+  hand                  = ecs_add(registry, entity, HAND);
+  hand->weapon          = ECS_NULL_ENT;
+  hand->originalPoint.x = 0;
+  hand->originalPoint.y = -7;
+  hand->angle           = 40;
 
   static u16 weapons[] = { WEAPON_BOW, WEAPON_CLEAVER, WEAPON_SPEAR };
 
-  ecs_entity_t weapon = g_make_weapon_fn_tbl[weapons[rand() % 3]](registry);
+  ecs_entity_t weapon = gMakeWeaponFnTbl[weapons[rand() % 3]](registry);
 
   ett_equip_weapon(registry, entity, weapon);
-
-  ecs_set(registry, entity, BRAIN, &(Brain){ create_chort_behavior_tree() });
 
   return entity;
 }
@@ -392,12 +355,11 @@ ecs_entity_t make_axe(Ecs* registry)
   ecs_entity_t axe;
 
   /*component*/
-  Visual*    visual;
-  Transform* transform;
+  Visual* visual;
 
   axe = ecs_create(registry);
 
-  transform = ecs_add(registry, axe, TRANSFORM);
+  ecs_add(registry, axe, TRANSFORM);
 
   visual = ecs_add(registry, axe, VISUAL);
   sprite_init(&visual->sprite, TEX_WPN_AXE);
@@ -416,26 +378,25 @@ ecs_entity_t make_cleaver(Ecs* registry)
   entity  = ecs_create(registry);
   texture = get_texture(TEX_WPN_CLEAVER);
 
-  Transform*         transform;
   Visual*            visual;
-  WeaponAttributes*  attrs;
+  WeaponAttributes*  attributes;
   WeaponSwingAttack* sklswing;
 
-  transform = ecs_add(registry, entity, TRANSFORM);
+  ecs_add(registry, entity, TRANSFORM);
 
   visual = ecs_add(registry, entity, VISUAL);
   sprite_init(&visual->sprite, TEX_WPN_CLEAVER);
   visual->anchor.x = 4;
   visual->anchor.y = 4;
 
-  attrs          = ecs_add(registry, entity, WEAPON_ATTRIBUTES);
-  attrs->atk     = 2;
-  attrs->type_id = WEAPON_CLEAVER;
-  attrs->range   = 15;
+  attributes         = ecs_add(registry, entity, WEAPON_ATTRIBUTES);
+  attributes->atk    = 2;
+  attributes->typeId = WEAPON_CLEAVER;
+  attributes->range  = (WeaponRange){ 10, 15 };
 
-  sklswing            = ecs_add(registry, entity, WEAPON_SWING_ATTACK);
-  sklswing->on_action = CHARACTER_ACTION_REGULAR_ATK;
-  sklswing->wide      = 32;
+  sklswing       = ecs_add(registry, entity, WEAPON_SWING_ATTACK);
+  sklswing->code = 0;
+  sklswing->wide = 32;
 
   ecs_add(registry, entity, HOLDER);
 
@@ -449,25 +410,24 @@ ecs_entity_t make_katana(Ecs* registry)
 
   entity = ecs_create(registry);
 
-  Transform*         transform;
   Visual*            visual;
-  WeaponAttributes*  attrs;
+  WeaponAttributes*  attributes;
   WeaponSwingAttack* sklswing;
 
-  transform = ecs_add(registry, entity, TRANSFORM);
+  ecs_add(registry, entity, TRANSFORM);
 
   visual = ecs_add(registry, entity, VISUAL);
   sprite_init(&visual->sprite, TEX_WPN_KATANA);
   visual->anchor.x = 3;
   visual->anchor.y = 3;
 
-  attrs          = ecs_add(registry, entity, WEAPON_ATTRIBUTES);
-  attrs->atk     = 2;
-  attrs->type_id = WEAPON_CLEAVER;
-  attrs->range   = 32;
+  attributes         = ecs_add(registry, entity, WEAPON_ATTRIBUTES);
+  attributes->atk    = 2;
+  attributes->typeId = WEAPON_CLEAVER;
+  attributes->range  = (WeaponRange){ 0, 32 };
 
-  sklswing            = ecs_add(registry, entity, WEAPON_SWING_ATTACK);
-  sklswing->on_action = CHARACTER_ACTION_REGULAR_ATK;
+  sklswing       = ecs_add(registry, entity, WEAPON_SWING_ATTACK);
+  sklswing->code = 0;
 
   ecs_add(registry, entity, HOLDER);
 
@@ -480,30 +440,23 @@ ecs_entity_t make_golden_sword(Ecs* registry)
 
   entity = ecs_create(registry);
 
-  Transform*                 transform;
-  Visual*                    visual;
-  WeaponAttributes*          attrs;
-  WeaponSwingAttack*         sklswing;
-  WeaponThunderStormRelease* wpskl_thunder_storm;
+  Visual*            visual;
+  WeaponAttributes*  attributes;
+  WeaponSwingAttack* sklswing;
 
-  transform = ecs_add(registry, entity, TRANSFORM);
+  ecs_add(registry, entity, TRANSFORM);
 
   visual = ecs_add(registry, entity, VISUAL);
   sprite_init(&visual->sprite, TEX_WPN_GOLDEN_SWORD);
   visual->anchor.x = visual->sprite.rect.w / 2;
   visual->anchor.y = visual->sprite.rect.h;
 
-  attrs          = ecs_add(registry, entity, WEAPON_ATTRIBUTES);
-  attrs->atk     = 2;
-  attrs->type_id = WEAPON_LAVIS_SWORD;
+  attributes         = ecs_add(registry, entity, WEAPON_ATTRIBUTES);
+  attributes->atk    = 2;
+  attributes->typeId = WEAPON_LAVIS_SWORD;
 
-  sklswing            = ecs_add(registry, entity, WEAPON_SWING_ATTACK);
-  sklswing->on_action = CHARACTER_ACTION_REGULAR_ATK;
-
-  wpskl_thunder_storm            = ecs_add(registry, entity, WEAPON_THUNDER_STORM_RELEASE);
-  wpskl_thunder_storm->on_action = CHARACTER_ACTION_SPECIAL_ATK;
-  wpskl_thunder_storm->interval  = 10;
-  wpskl_thunder_storm->total     = 5;
+  sklswing       = ecs_add(registry, entity, WEAPON_SWING_ATTACK);
+  sklswing->code = 0;
 
   ecs_add(registry, entity, HOLDER);
 
@@ -545,7 +498,7 @@ make_static_pickupable_entity(Ecs* registry, u16 texture_id, u16 id, Vec2 positi
   Visual*               visual;
   Transform*            transform;
   HitBox*               hitbox;
-  PickupableAttributes* attrs;
+  PickupableAttributes* attributes;
 
   entity = ecs_create(registry);
 
@@ -558,39 +511,34 @@ make_static_pickupable_entity(Ecs* registry, u16 texture_id, u16 id, Vec2 positi
   transform           = ecs_add(registry, entity, TRANSFORM);
   transform->position = position;
 
-  hitbox            = ecs_add(registry, entity, HITBOX);
-  hitbox->size      = VEC2(visual->sprite.rect.w, visual->sprite.rect.h);
-  hitbox->anchor    = VEC2(hitbox->size.x / 2.f, hitbox->size.y / 2.f);
-  hitbox->proxy_id  = RTREE_NULL_NODE;
-  hitbox->category  = CATEGORY_ITEM;
-  hitbox->mask_bits = BIT(CATEGORY_PLAYER);
+  hitbox           = ecs_add(registry, entity, HITBOX);
+  hitbox->size     = (Vec2){ visual->sprite.rect.w, visual->sprite.rect.h };
+  hitbox->anchor   = (Vec2){ hitbox->size.x / 2.f, hitbox->size.y / 2.f };
+  hitbox->proxyId  = RTREE_NULL_NODE;
+  hitbox->category = CATEGORY_ITEM;
+  hitbox->mask     = BIT(CATEGORY_PLAYER);
 
-  attrs          = ecs_add(registry, entity, PICKUPABLE_ATTRIBUTES);
-  attrs->id      = id;
-  attrs->sfx     = SFX_INTERACTION;
-  attrs->quality = quality;
+  attributes          = ecs_add(registry, entity, PICKUPABLE_ATTRIBUTES);
+  attributes->id      = id;
+  attributes->sfx     = SFX_INTERACTION;
+  attributes->quality = quality;
 
   ecs_set(registry, entity, MOTION, &(Motion){ .friction = .2f, .bounching = .8f });
   return entity;
 }
 
-ecs_entity_t make_player(Ecs* registry, ecs_entity_t character, ecs_entity_t weapon)
+ecs_entity_t make_player(Ecs* registry, ecs_entity_t character)
 {
   ecs_add(registry, character, PLAYER_TAG);
   ecs_add(registry, character, CAMERA_TARGET_TAG);
 
-  AttunementSlot* attunement_slot;
-
   HitBox* hitbox = ecs_get(registry, character, HITBOX);
 
-  ett_equip_weapon(registry, character, weapon);
+  hitbox->category = CATEGORY_PLAYER;
+  hitbox->mask     = BIT(CATEGORY_ITEM) | BIT(CATEGORY_WEAPON) | BIT(CATEGORY_PROJECTILE) |
+                 BIT(CATEGORY_LADDER) | BIT(CATEGORY_INTERACABLE);
 
-  hitbox->category  = CATEGORY_PLAYER;
-  hitbox->mask_bits = BIT(CATEGORY_ITEM) | BIT(CATEGORY_WEAPON) | BIT(CATEGORY_PROJECTILE) |
-                      BIT(CATEGORY_LADDER) | BIT(CATEGORY_INTERACABLE);
-
-  attunement_slot           = ecs_add(registry, character, ATTUNEMENT_SLOT);
-  attunement_slot->spell_id = SPELL_ID_NULL;
+  ecs_set(registry, character, ATTUNEMENT_SLOT, &(AttunementSlot){ SPELL_ID_NULL });
 
   ecs_set(registry,
           character,
@@ -618,14 +566,14 @@ ecs_entity_t make_portal(Ecs* registry, const MakePortalParams* params)
   transform           = ecs_add(registry, entity, TRANSFORM);
   transform->position = params->position;
 
-  hitbox            = ecs_add(registry, entity, HITBOX);
-  hitbox->size      = params->size;
-  hitbox->mask_bits = BIT(CATEGORY_PLAYER);
-  hitbox->category  = CATEGORY_LADDER;
-  hitbox->anchor.x  = 0;
-  hitbox->anchor.y  = 0;
+  hitbox           = ecs_add(registry, entity, HITBOX);
+  hitbox->size     = params->size;
+  hitbox->mask     = BIT(CATEGORY_PLAYER);
+  hitbox->category = CATEGORY_LADDER;
+  hitbox->anchor.x = 0;
+  hitbox->anchor.y = 0;
 
-  ladder_attrs_init(ecs_add(registry, entity, LADDER_ATTRIBUTES),
+  portal_attrs_init(ecs_add(registry, entity, LADDER_ATTRIBUTES),
                     params->level,
                     params->dest,
                     params->direction);
@@ -671,7 +619,7 @@ ecs_entity_t make_fx_damage_indicator(Ecs* registry, Vec2 position, COLOR color,
   return make_text_particle(registry,
                             strnum,
                             position,
-                            VEC2(0.f, -30.f),
+                            (Vec2){ 0.f, -30.f },
                             get_font(FONT_DAMAGE_INDICATOR),
                             color);
 }
@@ -681,7 +629,7 @@ ecs_entity_t make_fx_item_picked_up(Ecs* registry, Vec2 position, const char* it
   return make_text_particle(registry,
                             item_name,
                             position,
-                            VEC2(0.f, -40.f),
+                            (Vec2){ 0.f, -40.f },
                             get_font(FONT_ITEM_PICKED_UP),
                             (COLOR){ 122, 196, 10, 255 });
 }
@@ -705,19 +653,19 @@ ecs_entity_t make_chest(Ecs* registry, const MakeChestParams* params)
 
   chest = ecs_add(registry, entity, CHEST);
   SDL_memcpy(chest->items, params->items, params->num_slots * sizeof(Item));
-  chest->num_slots = params->num_slots;
-  chest->id        = params->id;
-  chest->state     = params->state;
+  chest->numSlots = params->num_slots;
+  chest->id       = params->id;
+  chest->state    = params->state;
 
-  interactable               = ecs_add(registry, entity, INTERACTABLE);
-  interactable->num_commands = 1;
-  interactable->commands[0]  = TEXT_COMMAND_OPEN;
+  interactable              = ecs_add(registry, entity, INTERACTABLE);
+  interactable->numCommands = 1;
+  interactable->commands[0] = TEXT_COMMAND_OPEN;
 
-  hitbox            = ecs_add(registry, entity, HITBOX);
-  hitbox->size      = (Vec2){ 16, 16 };
-  hitbox->anchor    = (Vec2){ 8.f, 16.f };
-  hitbox->category  = CATEGORY_INTERACABLE;
-  hitbox->mask_bits = 0;
+  hitbox           = ecs_add(registry, entity, HITBOX);
+  hitbox->size     = (Vec2){ 16, 16 };
+  hitbox->anchor   = (Vec2){ 8.f, 16.f };
+  hitbox->category = CATEGORY_INTERACABLE;
+  hitbox->mask     = 0;
 
   transform           = ecs_add(registry, entity, TRANSFORM);
   transform->position = params->position;
@@ -732,7 +680,7 @@ ecs_entity_t make_spear(Ecs* registry)
   Visual*            visual;
   Transform*         transform;
   WeaponThustAttack* thust;
-  WeaponAttributes*  attrs;
+  WeaponAttributes*  attributes;
 
   entity = ecs_create(registry);
 
@@ -743,12 +691,12 @@ ecs_entity_t make_spear(Ecs* registry)
 
   transform = ecs_add(registry, entity, TRANSFORM);
 
-  thust            = ecs_add(registry, entity, WEAPON_THUST_ATTACK);
-  thust->on_action = CHARACTER_ACTION_REGULAR_ATK;
+  thust       = ecs_add(registry, entity, WEAPON_THUST_ATTACK);
+  thust->code = 0;
 
-  attrs        = ecs_add(registry, entity, WEAPON_ATTRIBUTES);
-  attrs->atk   = 1;
-  attrs->range = 38;
+  attributes        = ecs_add(registry, entity, WEAPON_ATTRIBUTES);
+  attributes->atk   = 1;
+  attributes->range = (WeaponRange){ 26, 32 };
 
   return entity;
 }
@@ -774,19 +722,19 @@ ecs_entity_t make_door(Ecs* registry, Vec2 position)
   transform           = ecs_add(registry, entity, TRANSFORM);
   transform->position = position;
 
-  hitbox            = ecs_add(registry, entity, HITBOX);
-  hitbox->size      = (Vec2){ 32, 5 };
-  hitbox->anchor    = (Vec2){ 16, 5 };
-  hitbox->category  = CATEGORY_INTERACABLE;
-  hitbox->mask_bits = BIT(CATEGORY_PLAYER) | BIT(CATEGORY_ENEMY);
+  hitbox           = ecs_add(registry, entity, HITBOX);
+  hitbox->size     = (Vec2){ 32, 5 };
+  hitbox->anchor   = (Vec2){ 16, 5 };
+  hitbox->category = CATEGORY_INTERACABLE;
+  hitbox->mask     = BIT(CATEGORY_PLAYER) | BIT(CATEGORY_ENEMY);
 
-  interactable               = ecs_add(registry, entity, INTERACTABLE);
-  interactable->num_commands = 1;
-  interactable->commands[0]  = TEXT_COMMAND_OPEN;
+  interactable              = ecs_add(registry, entity, INTERACTABLE);
+  interactable->numCommands = 1;
+  interactable->commands[0] = TEXT_COMMAND_OPEN;
 
-  door_info               = ecs_add(registry, entity, DOOR_ATTRIBUTES);
-  door_info->required_key = DOOR_NO_REQUIRED_KEY;
-  door_info->state        = DOOR_STATE_CLOSE;
+  door_info              = ecs_add(registry, entity, DOOR_ATTRIBUTES);
+  door_info->requiredKey = DOOR_NO_REQUIRED_KEY;
+  door_info->state       = DOOR_STATE_CLOSE;
 
   return entity;
 }
@@ -834,7 +782,7 @@ ecs_entity_t make_staff(Ecs* registry)
 
   Transform*        transform;
   Visual*           visual;
-  WeaponAttributes* attrs;
+  WeaponAttributes* attributes;
   WeaponCast*       castable;
 
   transform = ecs_add(registry, entity, TRANSFORM);
@@ -844,9 +792,9 @@ ecs_entity_t make_staff(Ecs* registry)
   visual->anchor.x = 9;
   visual->anchor.y = 4;
 
-  attrs          = ecs_add(registry, entity, WEAPON_ATTRIBUTES);
-  attrs->atk     = 1;
-  attrs->type_id = WEAPON_STAFF;
+  attributes         = ecs_add(registry, entity, WEAPON_ATTRIBUTES);
+  attributes->atk    = 1;
+  attributes->typeId = WEAPON_STAFF;
 
   castable = ecs_add(registry, entity, WEAPON_CAST);
 
@@ -862,7 +810,7 @@ ecs_entity_t make_fire_ball(Ecs* registry, ecs_entity_t shooter, Vec2 pos, Vec2 
   Transform*            transform;
   Motion*               motion;
   HitBox*               hitbox;
-  ProjectileAttributes* attrs;
+  ProjectileAttributes* attributes;
 
   visual           = ecs_add(registry, entity, VISUAL);
   visual->anchor.x = 15;
@@ -876,24 +824,24 @@ ecs_entity_t make_fire_ball(Ecs* registry, ecs_entity_t shooter, Vec2 pos, Vec2 
   motion->vel      = direction;
   motion->friction = 0.f;
 
-  hitbox            = ecs_add(registry, entity, HITBOX);
-  hitbox->size.x    = 26;
-  hitbox->size.y    = 10;
-  hitbox->anchor.x  = 18;
-  hitbox->anchor.y  = 5;
-  hitbox->category  = CATEGORY_PROJECTILE;
-  hitbox->mask_bits = mask;
+  hitbox           = ecs_add(registry, entity, HITBOX);
+  hitbox->size.x   = 26;
+  hitbox->size.y   = 10;
+  hitbox->anchor.x = 18;
+  hitbox->anchor.y = 5;
+  hitbox->category = CATEGORY_PROJECTILE;
+  hitbox->mask     = mask;
 
-  attrs                   = ecs_add(registry, entity, PROJECTILE_ATTRIBUTES);
-  attrs->damage           = 3;
-  attrs->destroy_when_hit = TRUE;
-  attrs->effect           = 0;
-  attrs->damage_type      = DAMAGE_TYPE_FIRE;
-  attrs->impact           = TRUE;
-  attrs->impact_force     = vec2_mul(vec2_unit(direction), 100.f);
-  attrs->impact_time      = 16;
-  attrs->sfx              = SFX_ID_NULL;
-  attrs->shooter          = shooter;
+  attributes                 = ecs_add(registry, entity, PROJECTILE_ATTRIBUTES);
+  attributes->damage         = 3;
+  attributes->destroyWhenHit = TRUE;
+  attributes->effect         = 0;
+  attributes->damageType     = DAMAGE_TYPE_FIRE;
+  attributes->impact         = TRUE;
+  attributes->impactForce    = vec2_mul(vec2_unit(direction), 100.f);
+  attributes->impactTime     = 16;
+  attributes->sfx            = SFX_ID_NULL;
+  attributes->shooter        = shooter;
 
   ecs_add(registry, entity, REMOVE_IF_OFFSCREEN);
 
@@ -911,7 +859,7 @@ make_ice_arrow(Ecs* registry, ecs_entity_t shooter, Vec2 position, Vec2 speed, u
   Transform*            transform;
   Motion*               motion;
   HitBox*               hitbox;
-  ProjectileAttributes* attrs;
+  ProjectileAttributes* attributes;
 
   visual           = ecs_add(registry, entity, VISUAL);
   visual->anchor.x = 15;
@@ -927,24 +875,24 @@ make_ice_arrow(Ecs* registry, ecs_entity_t shooter, Vec2 position, Vec2 speed, u
 
   ecs_set(registry, entity, ANIMATOR, &(Animator){ .anims = &g_anim_ice_arrow });
 
-  hitbox            = ecs_add(registry, entity, HITBOX);
-  hitbox->size.x    = 32;
-  hitbox->size.y    = 15;
-  hitbox->anchor.x  = 16;
-  hitbox->anchor.y  = 7;
-  hitbox->category  = CATEGORY_PROJECTILE;
-  hitbox->mask_bits = mask;
+  hitbox           = ecs_add(registry, entity, HITBOX);
+  hitbox->size.x   = 32;
+  hitbox->size.y   = 15;
+  hitbox->anchor.x = 16;
+  hitbox->anchor.y = 7;
+  hitbox->category = CATEGORY_PROJECTILE;
+  hitbox->mask     = mask;
 
-  attrs                   = ecs_add(registry, entity, PROJECTILE_ATTRIBUTES);
-  attrs->damage           = 3;
-  attrs->destroy_when_hit = TRUE;
-  attrs->effect           = 0;
-  attrs->damage_type      = DAMAGE_TYPE_ICE;
-  attrs->impact           = TRUE;
-  attrs->impact_force     = vec2_mul(vec2_unit(speed), 100.f);
-  attrs->impact_time      = 16;
-  attrs->sfx              = SFX_ID_NULL;
-  attrs->shooter          = shooter;
+  attributes                 = ecs_add(registry, entity, PROJECTILE_ATTRIBUTES);
+  attributes->damage         = 3;
+  attributes->destroyWhenHit = TRUE;
+  attributes->effect         = 0;
+  attributes->damageType     = DAMAGE_TYPE_ICE;
+  attributes->impact         = TRUE;
+  attributes->impactForce    = vec2_mul(vec2_unit(speed), 100.f);
+  attributes->impactTime     = 16;
+  attributes->sfx            = SFX_ID_NULL;
+  attributes->shooter        = shooter;
 
   ecs_add(registry, entity, REMOVE_IF_OFFSCREEN);
 
@@ -959,7 +907,7 @@ ecs_entity_t make_arrow(Ecs* registry, ecs_entity_t shooter, Vec2 position, Vec2
   Transform*            transform;
   Motion*               motion;
   HitBox*               hitbox;
-  ProjectileAttributes* attrs;
+  ProjectileAttributes* attributes;
 
   visual           = ecs_add(registry, entity, VISUAL);
   visual->anchor.x = 17;
@@ -974,24 +922,24 @@ ecs_entity_t make_arrow(Ecs* registry, ecs_entity_t shooter, Vec2 position, Vec2
   motion->vel      = speed;
   motion->friction = 0.f;
 
-  hitbox            = ecs_add(registry, entity, HITBOX);
-  hitbox->size.x    = 24;
-  hitbox->size.y    = 5;
-  hitbox->anchor.x  = 17;
-  hitbox->anchor.y  = 2;
-  hitbox->category  = CATEGORY_PROJECTILE;
-  hitbox->mask_bits = mask;
+  hitbox           = ecs_add(registry, entity, HITBOX);
+  hitbox->size.x   = 24;
+  hitbox->size.y   = 5;
+  hitbox->anchor.x = 17;
+  hitbox->anchor.y = 2;
+  hitbox->category = CATEGORY_PROJECTILE;
+  hitbox->mask     = mask;
 
-  attrs                   = ecs_add(registry, entity, PROJECTILE_ATTRIBUTES);
-  attrs->damage           = 2;
-  attrs->destroy_when_hit = TRUE;
-  attrs->effect           = 0;
-  attrs->damage_type      = DAMAGE_TYPE_THUST;
-  attrs->impact           = TRUE;
-  attrs->impact_force     = vec2_mul(vec2_unit(speed), 100.f);
-  attrs->impact_time      = 16;
-  attrs->sfx              = SFX_ID_NULL;
-  attrs->shooter          = shooter;
+  attributes                 = ecs_add(registry, entity, PROJECTILE_ATTRIBUTES);
+  attributes->damage         = 2;
+  attributes->destroyWhenHit = TRUE;
+  attributes->effect         = 0;
+  attributes->damageType     = DAMAGE_TYPE_THUST;
+  attributes->impact         = TRUE;
+  attributes->impactForce    = vec2_mul(vec2_unit(speed), 100.f);
+  attributes->impactTime     = 16;
+  attributes->sfx            = SFX_ID_NULL;
+  attributes->shooter        = shooter;
 
   ecs_add(registry, entity, REMOVE_IF_OFFSCREEN);
 
@@ -1146,13 +1094,13 @@ ecs_entity_t make_npc_brian(Ecs* registry, Vec2 position, u16 conversation_id)
   */
   ecs_set(registry, entity, MOTION, &(Motion){ 0 });
 
-  hitbox            = ecs_add(registry, entity, HITBOX);
-  hitbox->category  = CATEGORY_INTERACABLE;
-  hitbox->mask_bits = BIT(CATEGORY_PROJECTILE);
-  hitbox->size.x    = 13;
-  hitbox->size.y    = 19;
-  hitbox->anchor.x  = 6;
-  hitbox->anchor.y  = 19;
+  hitbox           = ecs_add(registry, entity, HITBOX);
+  hitbox->category = CATEGORY_INTERACABLE;
+  hitbox->mask     = BIT(CATEGORY_PROJECTILE);
+  hitbox->size.x   = 13;
+  hitbox->size.y   = 19;
+  hitbox->anchor.x = 6;
+  hitbox->anchor.y = 19;
 
   interactable_init(ecs_add(registry, entity, INTERACTABLE),
                     (const char*[]){ TEXT_COMMAND_TALK, NULL });
@@ -1178,7 +1126,7 @@ ecs_entity_t make_npc_brian(Ecs* registry, Vec2 position, u16 conversation_id)
           &(Hand){
               .weapon = ECS_NULL_ENT,
           });
-  ecs_add(registry, entity, CONTROLLER);
+  ecs_add(registry, entity, DESIRED_DIRECTION);
   ecs_add(registry, entity, ENABLE_TILE_COLLISION_TAG);
   ecs_add(registry, entity, CHARACTER_ANIMATOR_TAG);
   return entity;
@@ -1192,10 +1140,10 @@ ecs_entity_t make_trigger(Ecs* registry, Vec2 pos, Vec2 size, u16 mask)
 
   entity = ecs_create(registry);
 
-  hitbox            = ecs_add(registry, entity, HITBOX);
-  hitbox->size      = size;
-  hitbox->mask_bits = mask;
-  hitbox->category  = CATEGORY_TRIGGER;
+  hitbox           = ecs_add(registry, entity, HITBOX);
+  hitbox->size     = size;
+  hitbox->mask     = mask;
+  hitbox->category = CATEGORY_TRIGGER;
 
   ecs_set(registry, entity, TRANSFORM, &(Transform){ .position = pos });
 
@@ -1226,7 +1174,7 @@ ecs_entity_t make_bow(Ecs* registry)
 
   Transform*        transform;
   Visual*           visual;
-  WeaponAttributes* attrs;
+  WeaponAttributes* attributes;
 
   transform = ecs_add(registry, entity, TRANSFORM);
 
@@ -1235,10 +1183,10 @@ ecs_entity_t make_bow(Ecs* registry)
   visual->anchor.x = 0;
   visual->anchor.y = visual->sprite.rect.h / 2;
 
-  attrs          = ecs_add(registry, entity, WEAPON_ATTRIBUTES);
-  attrs->atk     = 2;
-  attrs->type_id = WEAPON_BOW;
-  attrs->range   = 16 * 5;
+  attributes         = ecs_add(registry, entity, WEAPON_ATTRIBUTES);
+  attributes->atk    = 2;
+  attributes->typeId = WEAPON_BOW;
+  attributes->range  = (WeaponRange){ 16 * 3, 16 * 5 };
 
   ecs_add(registry, entity, HOLDER);
 
@@ -1246,10 +1194,16 @@ ecs_entity_t make_bow(Ecs* registry)
           entity,
           WEAPON_SHOOT,
           &(WeaponShoot){
-              .on_action = CHARACTER_ACTION_REGULAR_ATK,
+              .code      = 0,
               .projspd   = 170.f,
               .fire_rate = 20,
           });
 
   return entity;
+}
+
+ecs_entity_t make_character(Ecs* registry, u16 job, Vec2 position)
+{
+  ASSERT_MSG(job < NUM_JOBS, "Invalid job id");
+  return gMakeCharacterFnTbl[job](registry, position);
 }

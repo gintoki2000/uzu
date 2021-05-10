@@ -124,12 +124,11 @@ typedef struct
   int x, y;
 } Vec2i;
 
-#define VEC2(_x, _y) ((Vec2){ .x = (_x), .y = (_y) })
-#define VEC2_ZERO VEC2(0.f, 0.f)
-#define VEC2_UP VEC2(0.f, -1.f)
-#define VEC2_DOWN VEC2(0.f, 1.f)
-#define VEC2_LEFT VEC2(-1.f, 0.f)
-#define VEC2_RIGHT VEC2(1.f, 0.f)
+#define VEC2_ZERO  (Vec2){  0.f,  0.f }
+#define VEC2_UP    (Vec2){  0.f, -1.f }
+#define VEC2_DOWN  (Vec2){  0.f,  1.f }
+#define VEC2_LEFT  (Vec2){ -1.f,  0.f }
+#define VEC2_RIGHT (Vec2){  1.f,  0.f }
 
 typedef struct
 {
@@ -243,7 +242,7 @@ INLINE Vec2 vec2_unit(Vec2 v)
 {
   float len2  = vec2_mag2(v);
   float ivlen = invsqrt(len2);
-  return VEC2(v.x * ivlen, v.y * ivlen);
+  return (Vec2){ v.x * ivlen, v.y * ivlen };
 }
 
 INLINE Vec2 vec2_trunc(Vec2 v, float max_len)

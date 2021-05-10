@@ -31,20 +31,18 @@ static void on_level_unloaded(pointer_t arg, pointer_t event);
 static void on_list_select(SDL_UNUSED pointer_t arg, const char* item)
 {
   ems_broadcast(MSG_COMANND_SELECTED,
-                &(MSG_CommandSelected){
+                &(CommandSelectedMsg){
                     g_curr_iteractable_entity,
                     item,
                 });
 }
 
-static void on_level_unloaded(pointer_t arg, pointer_t event)
+static void on_level_unloaded(SDL_UNUSED pointer_t arg, SDL_UNUSED pointer_t event)
 {
-  (void)arg;
-  (void)event;
   g_curr_iteractable_entity = ECS_NULL_ENT;
 }
 
-struct CBPlayerInputProcess_QueryClosestInteracableArgs
+struct _QueryClosestInteracableEntityArgs
 {
   Vec2         player_position;
   float        closest_distance;
@@ -52,8 +50,8 @@ struct CBPlayerInputProcess_QueryClosestInteracableArgs
 };
 
 static BOOL
-__callback_query_closest_interactable(struct CBPlayerInputProcess_QueryClosestInteracableArgs* args,
-                                      ecs_entity_t                                             e)
+query_closest_interactable_entity_callback(struct _QueryClosestInteracableEntityArgs* args,
+                                           ecs_entity_t                               e)
 {
   Vec2  entity_position = ett_get_position(g_ecs, e);
   float dist            = vec2_dist(args->player_position, entity_position);
@@ -65,14 +63,14 @@ __callback_query_closest_interactable(struct CBPlayerInputProcess_QueryClosestIn
   return TRUE;
 }
 
-static void find_interacable_entity()
+static void update_interactable_entity()
 {
   if (g_curr_iteractable_entity == ECS_NULL_ENT)
   {
     Vec2 player_pos;
     RECT rect;
 
-    struct CBPlayerInputProcess_QueryClosestInteracableArgs cbargs;
+    struct _QueryClosestInteracableEntityArgs cbargs;
 
     player_pos = snn_get_player_position(g_ecs);
     rect.x     = player_pos.x - INTERACTABLE_DISTANCE / 2;
@@ -84,7 +82,9 @@ static void find_interacable_entity()
     cbargs.closest_entity   = ECS_NULL_ENT;
     cbargs.closest_distance = 9999.f;
 
-    collision_box_query(&rect, 0xffff, CALLBACK_1(&cbargs, __callback_query_closest_interactable));
+    collision_box_query(&rect,
+                        0xffff,
+                        CALLBACK_1(&cbargs, query_closest_interactable_entity_callback));
     g_curr_iteractable_entity = cbargs.closest_entity;
   }
   else
@@ -107,59 +107,51 @@ static void begin_interact(ecs_entity_t entity)
   Interactable* interactable = ecs_get(g_ecs, entity, INTERACTABLE);
   if (!interactable)
     return;
-  ui_list_display((const char**)interactable->commands, interactable->num_commands);
+  ui_list_display((const char**)interactable->commands, interactable->numCommands);
   ui_list_set_pos(UI_LIST_POS_CENTER_X, UI_LIST_POS_CENTER_Y);
   ui_list_hook(UI_LIST_ON_SELECT, CALLBACK_2(on_list_select));
-  ems_broadcast(MSG_BEGIN_INTERACTION, &(MSG_BeginInteraction){ entity });
+  ems_broadcast(MSG_BEGIN_INTERACTION, &(BeginInteractionMsg){ entity });
 }
 
 void player_process_input(SDL_UNUSED void* arg)
 {
 
-  ecs_entity_t player;
-  Controller*  controller;
+  ecs_entity_t      player;
+  DesiredDirection* desired_direction;
 
   if ((player = scn_get_player(g_ecs)) == ECS_NULL_ENT)
     return;
   if (ecs_has(g_ecs, player, SCRIPT))
     return;
-  find_interacable_entity();
+  update_interactable_entity();
 
-  controller = ecs_get(g_ecs, player, CONTROLLER);
-
+  desired_direction = ecs_get(g_ecs, player, DESIRED_DIRECTION);
   if (!ecs_has(g_ecs, player, INVULNERABLE))
   {
-
-    controller->desired_direction = VEC2_ZERO;
+    *desired_direction = VEC2_ZERO;
     if (button_pressed(BUTTON_UP))
-    {
-      controller->desired_direction.y -= 1.f;
-    }
+      desired_direction->y -= 1.f;
 
     if (button_pressed(BUTTON_DOWN))
-    {
-      controller->desired_direction.y += 1.f;
-    }
+      desired_direction->y += 1.f;
 
     if (button_pressed(BUTTON_LEFT))
-    {
-      controller->desired_direction.x -= 1.f;
-    }
+      desired_direction->x -= 1.f;
 
     if (button_pressed(BUTTON_RIGHT))
-    {
-      controller->desired_direction.x += 1.f;
-    }
+      desired_direction->x += 1.f;
+
+    *desired_direction = vec2_unit(*desired_direction);
 
     if (button_just_pressed(BUTTON_OPEN_INVENTORY))
     {
       inventory_display();
       return;
     }
-
-    if (mouse_button_just_pressed(SDL_BUTTON_LEFT) && !controller->in_action)
+    if (mouse_button_just_pressed(SDL_BUTTON_LEFT) && !ecs_has(g_ecs, player, ATTACK_COMMAND))
     {
-      controller->action = CHARACTER_ACTION_REGULAR_ATK;
+      printf("attack\n");
+      ecs_set(g_ecs, player, ATTACK_COMMAND, &(AttackCommand){ .code = 0 });
     }
 
     if (button_just_pressed(BUTTON_JUMP))

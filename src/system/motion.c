@@ -15,19 +15,19 @@ static void apply_controller_input(void)
   ecs_entity_t* entities;
   ecs_size_t    cnt;
 
-  Controller*      controllers;
-  const MoveSpeed* move_speed;
-  Motion*          motion;
+  const MoveSpeed*  move_speed;
+  DesiredDirection* desired_direction;
+  Motion*           motion;
 
-  ecs_raw(g_ecs, CONTROLLER, &entities, (void**)&controllers, &cnt);
+  ecs_raw(g_ecs, DESIRED_DIRECTION, &entities, (void**)&desired_direction, &cnt);
   for (int i = 0; i < cnt; ++i)
   {
     if (!ecs_has(g_ecs, entities[i], UNABLE_TO_MOVE) &&
         (motion = ecs_get(g_ecs, entities[i], MOTION)) &&
         (move_speed = ecs_get(g_ecs, entities[i], MOVE_SPEED)))
     {
-      motion->vel = vec2_mul(controllers[i].desired_direction, (float)move_speed->value);
-      controllers[i].desired_direction = (Vec2){ 0 };
+      motion->vel          = vec2_mul(desired_direction[i], (float)move_speed->value);
+      desired_direction[i] = VEC2_ZERO;
     }
   }
 }
@@ -57,7 +57,7 @@ void motion_system()
   {
     transform = ecs_get(g_ecs, entities[i], TRANSFORM);
 
-    transform->prev_position = transform->position;
+    transform->lastPosition = transform->position;
     transform->position.x += motion[i].vel.x * DT;
     transform->position.y += motion[i].vel.y * DT;
 

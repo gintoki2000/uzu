@@ -73,7 +73,7 @@ static BOOL next_sentence(void)
   return FALSE;
 }
 
-static void on_command_selected(SDL_UNUSED void* arg, const MSG_CommandSelected* msg)
+static void on_command_selected(SDL_UNUSED void* arg, const CommandSelectedMsg* msg)
 {
   if (!SDL_strcmp(msg->cmd, TEXT_COMMAND_TALK) && ecs_has(g_ecs, msg->entity, DIALOGUE))
   {

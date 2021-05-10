@@ -17,8 +17,8 @@ extern Ecs*          g_ecs;
 static void on_hitbox_remove(SDL_UNUSED void* arg, const EcsComponentEvent* event)
 {
   HitBox* hitbox = event->component;
-  if (hitbox->proxy_id != RTREE_NULL_NODE)
-    rtree_destroy_proxy(_rtree, hitbox->proxy_id);
+  if (hitbox->proxyId != RTREE_NULL_NODE)
+    rtree_destroy_proxy(_rtree, hitbox->proxyId);
 }
 
 INLINE RECT* calculate_bounding_rect(RECT* r, const HitBox* hitbox, const Transform* transform)
@@ -54,19 +54,19 @@ static void update_proxies(Ecs* ecs)
   for (int i = 0; i < cnt; ++i)
   {
     transform = ecs_get(ecs, entites[i], TRANSFORM);
-    if (hitboxs[i].proxy_id == RTREE_NULL_NODE)
+    if (hitboxs[i].proxyId == RTREE_NULL_NODE)
     {
       get_aabb(&aabb, &hitboxs[i], transform);
-      hitboxs[i].proxy_id = rtree_create_proxy(_rtree, (void*)entites[i], &aabb);
+      hitboxs[i].proxyId = rtree_create_proxy(_rtree, (void*)entites[i], &aabb);
     }
     else
     {
-      dx = transform->position.x - transform->prev_position.x;
-      dy = transform->position.y - transform->prev_position.y;
+      dx = transform->position.x - transform->lastPosition.x;
+      dy = transform->position.y - transform->lastPosition.y;
       if (absf(dx) > EPSILON || absf(dy) > EPSILON)
       {
         get_aabb(&aabb, &hitboxs[i], transform);
-        rtree_move_proxy(_rtree, hitboxs[i].proxy_id, &aabb, VEC2(0, 0));
+        rtree_move_proxy(_rtree, hitboxs[i].proxyId, &aabb, (Vec2){ 0, 0 });
       }
     }
   }
@@ -146,7 +146,7 @@ static void broad_phase(Ecs* ecs)
   {
     transform = ecs_get(ecs, entities[i], TRANSFORM);
     get_aabb(&aabb, &hitbox[i], transform);
-    vars.proxy_id = hitbox[i].proxy_id;
+    vars.proxy_id = hitbox[i].proxyId;
     vars.entity   = entities[i];
     rtree_query(_rtree, &aabb, CALLBACK_1(&vars, cb_broard_phase_query));
   }
@@ -170,8 +170,7 @@ static void narrow_phase(Ecs* ecs)
   {
     hitbox1 = ecs_get(ecs, _pair_buff[i].e1, HITBOX);
     hitbox2 = ecs_get(ecs, _pair_buff[i].e2, HITBOX);
-    if ((BIT(hitbox1->category) & hitbox2->mask_bits) &&
-        (BIT(hitbox2->category) & hitbox1->mask_bits))
+    if ((BIT(hitbox1->category) & hitbox2->mask) && (BIT(hitbox2->category) & hitbox1->mask))
     {
       transform1 = ecs_get(g_ecs, _pair_buff[i].e1, TRANSFORM);
       transform2 = ecs_get(g_ecs, _pair_buff[i].e2, TRANSFORM);
@@ -180,7 +179,7 @@ static void narrow_phase(Ecs* ecs)
       if (SDL_HasIntersection(&r1, &r2))
       {
         ems_broadcast(MSG_COLLISION,
-                      &(MSG_Collision){
+                      &(OverlapMsg){
                           _pair_buff[i].e1,
                           _pair_buff[i].e2,
                       });

@@ -24,7 +24,7 @@ static ecs_entity_t _merchant = ECS_NULL_ENT;
 
 //<-------------------------event callback------------------------>//
 
-static void on_command_selected(pointer_t arg, const MSG_CommandSelected* event);
+static void on_command_selected(pointer_t arg, const CommandSelectedMsg* event);
 static void on_quality_selected(pointer_t arg, u32 value);
 
 //<===============================================================>//
@@ -48,7 +48,7 @@ void merchant_system()
 
   draw_bordered_box(&bg, UI_COLOR_BG, UI_COLOR_BORDER);
 
-  for (u32 i = 0; i < merchant->num_payloads; ++i)
+  for (u32 i = 0; i < merchant->numPayloads; ++i)
   {
     draw_item(&merchant->payloads[i], SHOP_X + 2, SHOP_Y + 2 + i * 17, i == _current);
   }
@@ -118,7 +118,7 @@ static void draw_item(const ItemPayload* payload, s32 x, s32 y, BOOL selected)
   }
 }
 
-static void on_command_selected(pointer_t arg, const MSG_CommandSelected* event)
+static void on_command_selected(pointer_t arg, const CommandSelectedMsg* event)
 {
   (void)arg;
   if (strcmp(event->cmd, "BUY") == 0)
@@ -141,7 +141,7 @@ static void process_input(SDL_UNUSED void* arg)
 
   if (button_just_pressed(BUTTON_DOWN))
   {
-    if (_current < merchant->num_payloads - 1)
+    if (_current < merchant->numPayloads - 1)
     {
       _current++;
     }

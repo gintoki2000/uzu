@@ -21,7 +21,7 @@ void animator_system(void)
   for (int i = 0; i < cnt; ++i)
   {
     visual = ecs_get(g_ecs, entities[i], VISUAL);
-    curr   = &animator[i].anims[animator[i].current_anim];
+    curr   = &animator[i].anims[animator[i].currentAnimation];
 
     idx = animator[i].elapsed / curr->frame_duration;
     idx = idx % curr->count;

@@ -20,10 +20,10 @@ static void* get_spell_state(Ecs* registry, ecs_entity_t weapon)
   return (void*)component->state;
 }
 #define SPELL_ICON(n) { TEX_ICON_##n, { 0, 0, 16, 16} }
-const Spell g_spell_tbl[NUM_SPELLS] = {
-  /*Name               CastFunc              ProcFunc              Cost  Cooldown  Icon                  */
-  { "ice arrow",       ice_arrow_cast,       default_process_func, 1,    15,       SPELL_ICON(ICE_ARROW) },
-  { "fire ball",       fire_ball_cast,       default_process_func, 1,    10,       SPELL_ICON(FIRE_BALL) },
+const Spell gSpellTbl[NUM_SPELLS] = {
+  /*Name               CastFunc              ProcFunc              Cost  Cooldown  Icon */
+  { "ice arrow", ice_arrow_cast, default_process_func, 1, 15, SPELL_ICON(ICE_ARROW) },
+  { "fire ball", fire_ball_cast, default_process_func, 1, 10, SPELL_ICON(FIRE_BALL) },
 };
 
 #define PLAY_SOUND(id) Mix_PlayChannel(-1, get_sfx(id), 0)

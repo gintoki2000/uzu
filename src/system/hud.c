@@ -155,7 +155,7 @@ static void draw_player_mana_bar(ecs_entity_t player)
 static void draw_coins()
 {
   char str_coins[10];
-  sprintf(str_coins, "%d", g_session.coins);
+  sprintf(str_coins, "%d", gSession.coins);
   FC_DrawColor(get_font(FONT_DAMAGE_INDICATOR),
                g_renderer,
                COINS_POSITION_X,
@@ -177,9 +177,9 @@ static void draw_spell_icon(ecs_entity_t player)
   SDL_RenderCopy(g_renderer, get_texture(TEX_SPELL_FRAME), NULL, &frame_dst);
 
   aslot = ecs_get(g_ecs, player, ATTUNEMENT_SLOT);
-  if (aslot->spell_id == SPELL_ID_NULL)
+  if (aslot->spellId == SPELL_ID_NULL)
     return;
-  spell = &g_spell_tbl[aslot->spell_id];
+  spell = &gSpellTbl[aslot->spellId];
   icon  = spell->icon;
 
   SDL_RenderCopy(g_renderer, get_texture(icon.texture_id), &icon.rect, &icon_dst);

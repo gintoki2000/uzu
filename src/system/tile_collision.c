@@ -145,7 +145,7 @@ void tile_collision_system()
     has_collision = has_collision ||
                     check(obj_right, obj_bottom, obj_right / TILE_SIZE, obj_bottom / TILE_SIZE);
     if (has_collision)
-      components.transform->position = components.transform->prev_position;
+      components.transform->position = components.transform->lastPosition;
   }
 }
 

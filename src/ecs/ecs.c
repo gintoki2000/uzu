@@ -80,14 +80,14 @@ Ecs* ecs_init(Ecs* self, const EcsType* types, ecs_size_t cnt)
   return self;
 }
 
-static void __callback_clear(void* udata, ecs_entity_t entity)
+static void clear_callback(void* udata, ecs_entity_t entity)
 {
   ecs_destroy((Ecs*)udata, entity);
 }
 
 void ecs_fini(Ecs* self)
 {
-  ecs_each(self, CALLBACK_1(self, __callback_clear));
+  ecs_each(self, CALLBACK_1(self, clear_callback));
   for (int i = 0; i < self->type_cnt; ++i)
     ecs_pool_del(self->pools[i]);
   SDL_free(self->pools);
@@ -158,7 +158,10 @@ void* ecs_add(Ecs* self, ecs_entity_t entity, ecs_size_t type_id)
   component = ecs_pool_add(self->pools[type_id], entity);
   construct(&self->types[type_id], component);
   signal_emit(&self->on_construct[type_id],
-              &(EcsComponentEvent){ .entity = entity, .component = component });
+              &(EcsComponentAdded){
+                  .entity    = entity,
+                  .component = component,
+              });
   return component;
 }
 
@@ -171,7 +174,10 @@ void ecs_rmv(Ecs* self, ecs_entity_t entity, ecs_size_t type_id)
   if ((component = ecs_pool_get(self->pools[type_id], entity)) != NULL)
   {
     signal_emit(&self->on_destruct[type_id],
-                &(EcsComponentEvent){ .entity = entity, .component = component });
+                &(EcsComponentRemoved){
+                    .entity    = entity,
+                    .component = component,
+                });
     destruct(&self->types[type_id], component);
     ecs_pool_rmv(self->pools[type_id], entity);
   }
@@ -248,7 +254,7 @@ SDL_bool ecs_has(Ecs* self, ecs_entity_t entity, ecs_size_t type_id)
 
 void ecs_clear(Ecs* self)
 {
-  ecs_each(self, CALLBACK_1(self, __callback_clear));
+  ecs_each(self, CALLBACK_1(self, clear_callback));
 }
 
 void* ecs_set(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const void* data)
@@ -259,12 +265,12 @@ void* ecs_set(Ecs* self, ecs_entity_t entity, ecs_size_t type_id, const void* da
 
   if (raw != NULL)
   {
-    copy(&self->types[type_id], raw, data);
+    SDL_memcpy(raw, data, self->types[type_id].size);
   }
   else
   {
     raw = ecs_pool_add(self->pools[type_id], entity);
-    copy(&self->types[type_id], raw, data);
+    SDL_memcpy(raw, data, self->types[type_id].size);
     signal_emit(&self->on_construct[type_id],
                 &(EcsComponentEvent){ .entity = entity, .component = raw });
   }

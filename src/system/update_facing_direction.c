@@ -8,31 +8,31 @@ extern Ecs* g_ecs;
 
 static Vec2 get_mouse_position(void)
 {
-  Vec2 mouse_position;
-  int  x, y;
+  Vec2        mousePosition;
+  extern RECT g_viewport;
+  int         x, y;
   SDL_GetMouseState(&x, &y);
-  mouse_position.x = x / SCL_X;
-  mouse_position.y = y / SCL_Y;
-  return mouse_position;
+  mousePosition.x = x / SCL_X;
+  mousePosition.y = y / SCL_Y;
+  mousePosition.x += g_viewport.x;
+  mousePosition.y += g_viewport.y;
+  return mousePosition;
 }
 
 static void update_player_facing_direction(void)
 {
   ecs_entity_t     player = scn_get_player(g_ecs);
-  Vec2             mouse_position;
-  Vec2             player_position;
-  FacingDirection* facing_direction;
-  extern RECT      g_viewport;
+  Vec2             mousePosition;
+  Vec2             playerPosition;
+  FacingDirection* facingDirection;
 
-  if (player != ECS_NULL_ENT && (facing_direction = ecs_get(g_ecs, player, FACING_DIRECTION)))
+  if (player != ECS_NULL_ENT && (facingDirection = ecs_get(g_ecs, player, FACING_DIRECTION)))
   {
-    if (!facing_direction->frezze)
+    if (!facingDirection->frezze)
     {
-      mouse_position                      = get_mouse_position();
-      mouse_position.x += g_viewport.x;
-      mouse_position.y += g_viewport.y;
-      player_position                     = ett_get_position(g_ecs, player);
-      facing_direction->value             = vec2_unit(vec2_sub(mouse_position, player_position));
+      mousePosition          = get_mouse_position();
+      playerPosition         = ett_get_position(g_ecs, player);
+      facingDirection->value = vec2_unit(vec2_sub(mousePosition, playerPosition));
     }
   }
 }
@@ -42,35 +42,35 @@ static void update_facing_direction_by_attack_target(void)
   ecs_entity_t* entities;
   ecs_size_t    count;
 
-  FacingDirection*    facing_direction;
-  Transform *         self_transform, *target_transform;
-  const AttackTarget* attack_target;
-  Vec2                relative_position;
+  FacingDirection*    facingDirection;
+  Transform *         selfTransform, *targetTransform;
+  const AttackTarget* attackTarget;
+  Vec2                relativePosition;
   const Motion*       motion;
 
-  ecs_raw(g_ecs, FACING_DIRECTION, &entities, (void**)&facing_direction, &count);
+  ecs_raw(g_ecs, FACING_DIRECTION, &entities, (void**)&facingDirection, &count);
   for (int i = 0; i < count; ++i)
   {
     if (ecs_has(g_ecs, entities[i], PLAYER_TAG))
       continue;
-    if (!facing_direction->frezze)
+    if (!facingDirection->frezze)
     {
-      if ((attack_target = ecs_get(g_ecs, entities[i], ATTACK_TARGET)) &&
-          (attack_target->value != ECS_NULL_ENT))
+      if ((attackTarget = ecs_get(g_ecs, entities[i], ATTACK_TARGET)) &&
+          (attackTarget->value != ECS_NULL_ENT))
       {
-        target_transform = ecs_get(g_ecs, attack_target->value, TRANSFORM);
-        self_transform   = ecs_get(g_ecs, entities[i], TRANSFORM);
+        targetTransform = ecs_get(g_ecs, attackTarget->value, TRANSFORM);
+        selfTransform   = ecs_get(g_ecs, entities[i], TRANSFORM);
 
-        relative_position         = vec2_sub(target_transform->position, self_transform->position);
-        facing_direction[i].value = vec2_unit(relative_position);
+        relativePosition         = vec2_sub(targetTransform->position, selfTransform->position);
+        facingDirection[i].value = vec2_unit(relativePosition);
       }
       else
       {
-        // không có mục tiêu tấn công facing_direction = speed
+        // không có mục tiêu tấn công facingDirection = speed
         motion = ecs_get(g_ecs, entities[i], MOTION);
         if (motion && vec2_mag(motion->vel) > 0.1f)
         {
-          facing_direction[i].value = vec2_unit(motion->vel);
+          facingDirection[i].value = vec2_unit(motion->vel);
         }
       }
     }

@@ -15,7 +15,6 @@ static BOOL update(void* _self, SDL_UNUSED ecs_entity_t target)
 }
 
 static ActionVtbl _wait_action_vtbl = {
-  .size    = sizeof(WaitAction),
   .start   = action_default_start_func,
   .end     = action_default_end_func,
   .update  = update,
@@ -24,7 +23,7 @@ static ActionVtbl _wait_action_vtbl = {
 
 Action* wait_action_new(int duration)
 {
-  WaitAction* obj = action_alloc(&_wait_action_vtbl);
+  WaitAction* obj = action_alloc(WaitAction, &_wait_action_vtbl);
 
   obj->duration = duration;
   return ACTION(obj);

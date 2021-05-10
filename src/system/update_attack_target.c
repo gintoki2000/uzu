@@ -5,15 +5,15 @@
 
 extern Ecs* g_ecs;
 
-static void on_entity_died(SDL_UNUSED void* arg, MSG_EntityDied* event)
+static void on_entity_died(SDL_UNUSED void* arg, EntityDiedMsg* event)
 {
   ecs_entity_t* entities;
-  ecs_size_t    cnt;
-  AttackTarget* attack_target;
-  ecs_raw(g_ecs, ATTACK_TARGET, &entities, (void**)&attack_target, &cnt);
-  for (int i = cnt - 1; i >= 0; --i)
+  ecs_size_t    entityCount;
+  AttackTarget* attackTarget;
+  ecs_raw(g_ecs, ATTACK_TARGET, &entities, (void**)&attackTarget, &entityCount);
+  for (int i = entityCount - 1; i >= 0; --i)
   {
-    if (attack_target[i].value == event->entity)
+    if (attackTarget[i].value == event->entity)
       ecs_rmv(g_ecs, entities[i], ATTACK_TARGET);
   }
 }
@@ -26,21 +26,20 @@ void update_attack_target_system_init()
 void update_attack_target_system(void)
 {
   ecs_entity_t* entities;
-  ecs_size_t    cnt;
-  Vec2          target_position;
-  AttackTarget* attack_target;
-  AggroArea*    aggro_area;
+  ecs_size_t    entityCount;
+  AttackTarget* attackTarget;
+  AggroArea*    aggroArea;
   ecs_entity_t  player;
-  Vec2          player_position;
+  Vec2          playerPosition;
 
-  ecs_raw(g_ecs, AGGRO_AREA, &entities, (void**)&aggro_area, &cnt);
-  for (int i = 0; i < cnt; ++i)
+  ecs_raw(g_ecs, AGGRO_AREA, &entities, (void**)&aggroArea, &entityCount);
+  for (int i = entityCount - 1; i >= 0; --i)
   {
-    if ((attack_target = ecs_get(g_ecs, entities[i], ATTACK_TARGET)))
+    if ((attackTarget = ecs_get(g_ecs, entities[i], ATTACK_TARGET)))
     {
-      if (!ecs_is_valid(g_ecs, attack_target->value) ||
-          vec2_dist(ett_get_position(g_ecs, attack_target->value), aggro_area[i].position) >
-              aggro_area[i].radius)
+      if (!ecs_is_valid(g_ecs, attackTarget->value) ||
+          vec2_dist(ett_get_position(g_ecs, attackTarget->value), aggroArea[i].position) >
+              aggroArea[i].radius)
 
       {
         ecs_rmv(g_ecs, entities[i], ATTACK_TARGET);
@@ -48,8 +47,8 @@ void update_attack_target_system(void)
     }
     else if ((player = scn_get_player(g_ecs)) != ECS_NULL_ENT)
     {
-      player_position = ett_get_position(g_ecs, player);
-      if (vec2_dist(player_position, aggro_area[i].position) <= aggro_area[i].radius)
+      playerPosition = ett_get_position(g_ecs, player);
+      if (vec2_dist(playerPosition, aggroArea[i].position) <= aggroArea[i].radius)
       {
         ecs_set(g_ecs, entities[i], ATTACK_TARGET, &(AttackTarget){ player });
       }

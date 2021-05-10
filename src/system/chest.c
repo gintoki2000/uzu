@@ -9,8 +9,8 @@
 
 extern Ecs* g_ecs;
 
-static void on_level_loaded(void*, const MSG_LevelLoaded*);
-static void on_level_unload(void*, const MSG_LevelUnloaded*);
+static void on_level_loaded(void*, const LevelLoadedMsg*);
+static void on_level_unload(void*, const LevelUnloadedMsg*);
 
 static void open_chest(ecs_entity_t entity)
 {
@@ -19,7 +19,7 @@ static void open_chest(ecs_entity_t entity)
 
   attrs = ecs_get(g_ecs, entity, CHEST);
 
-  if (attrs->num_slots == 0)
+  if (attrs->numSlots == 0)
   {
     visual              = ecs_get(g_ecs, entity, VISUAL);
     visual->sprite.rect = RECT_CHEST_OPEN;
@@ -28,8 +28,8 @@ static void open_chest(ecs_entity_t entity)
   }
   else
   {
-    UI_MsgBoxWIcon_Entry entries[attrs->num_slots];
-    for (int i = 0; i < attrs->num_slots; ++i)
+    UI_MsgBoxWIcon_Entry entries[attrs->numSlots];
+    for (int i = 0; i < attrs->numSlots; ++i)
     {
       inv_add_item(attrs->items[i].type, attrs->items[i].quality);
       SDL_strlcpy(entries[i].text,
@@ -37,22 +37,22 @@ static void open_chest(ecs_entity_t entity)
                   UI_MSGBOX_W_ICON_MAX_TEXT_LEN);
       entries[i].icon = g_item_types[attrs->items[i].type].icon;
     }
-    ui_msgbox_w_icon_show(entries, attrs->num_slots);
-    attrs->num_slots    = 0;
+    ui_msgbox_w_icon_show(entries, attrs->numSlots);
+    attrs->numSlots     = 0;
     visual              = ecs_get(g_ecs, entity, VISUAL);
     visual->sprite.rect = RECT_CHEST_OPEN;
     attrs->state        = CHEST_STATE_OPEN;
   }
 }
 
-static void on_command_selected(pointer_t arg, const MSG_CommandSelected* event)
+static void on_command_selected(pointer_t arg, const CommandSelectedMsg* event)
 {
   (void)arg;
   if (!strcmp(event->cmd, TEXT_COMMAND_OPEN) && ecs_has(g_ecs, event->entity, CHEST))
     open_chest(event->entity);
 }
 
-static void on_level_unload(SDL_UNUSED void* arg, const MSG_LevelUnloaded* event)
+static void on_level_unload(SDL_UNUSED void* arg, const LevelUnloadedMsg* event)
 {
   char       sav[256];
   SDL_RWops* file;
@@ -72,7 +72,7 @@ static void on_level_unload(SDL_UNUSED void* arg, const MSG_LevelUnloaded* event
   }
 }
 
-static void on_level_loaded(SDL_UNUSED void* arg, const MSG_LevelLoaded* event)
+static void on_level_loaded(SDL_UNUSED void* arg, const LevelLoadedMsg* event)
 {
   char       sav[256];
   SDL_RWops* file;

@@ -27,7 +27,7 @@ static Vec2 get_random_speed()
   return random_speed;
 }
 
-static void on_entity_died(SDL_UNUSED void* arg, const MSG_EntityDied* event)
+static void on_entity_died(SDL_UNUSED void* arg, const EntityDiedMsg* event)
 {
   Drop*        drop;
   Transform*   transform;

@@ -11,13 +11,13 @@ typedef Uint16 u16;
 typedef Sint32 s32;
 typedef Uint32 u32;
 
-typedef const void* constpointer_t;
-typedef void*       pointer_t;
-typedef int (*compare_fn_t)(constpointer_t lhs, constpointer_t rhs);
-typedef void (*destroy_fn_t)(pointer_t p);
-typedef bool (*equal_fn_t)(constpointer_t lhs, constpointer_t rhs);
-typedef bool (*consume_fn_t)(pointer_t user_data, pointer_t val);
+typedef void* pointer_t;
 typedef void (*funcptr_t)();
+
+typedef int (*CompareFunc)(const void* lhs, const void* rhs);
+typedef void (*DestroyFunc)(void* p);
+typedef bool (*EqualFunc)(const void* lhs, const void* rhs);
+typedef u32 (*HashFunc)(const void* v);
 
 #define RECT SDL_Rect
 #define POINT SDL_Point
@@ -124,11 +124,31 @@ typedef struct
   int x, y;
 } Vec2i;
 
-#define VEC2_ZERO  (Vec2){  0.f,  0.f }
-#define VEC2_UP    (Vec2){  0.f, -1.f }
-#define VEC2_DOWN  (Vec2){  0.f,  1.f }
-#define VEC2_LEFT  (Vec2){ -1.f,  0.f }
-#define VEC2_RIGHT (Vec2){  1.f,  0.f }
+#define VEC2_ZERO                                                                                  \
+  (Vec2)                                                                                           \
+  {                                                                                                \
+    0.f, 0.f                                                                                       \
+  }
+#define VEC2_UP                                                                                    \
+  (Vec2)                                                                                           \
+  {                                                                                                \
+    0.f, -1.f                                                                                      \
+  }
+#define VEC2_DOWN                                                                                  \
+  (Vec2)                                                                                           \
+  {                                                                                                \
+    0.f, 1.f                                                                                       \
+  }
+#define VEC2_LEFT                                                                                  \
+  (Vec2)                                                                                           \
+  {                                                                                                \
+    -1.f, 0.f                                                                                      \
+  }
+#define VEC2_RIGHT                                                                                 \
+  (Vec2)                                                                                           \
+  {                                                                                                \
+    1.f, 0.f                                                                                       \
+  }
 
 typedef struct
 {

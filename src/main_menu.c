@@ -130,7 +130,7 @@ static void draw_main_menu(void)
   SDL_RenderCopy(g_renderer, _table, NULL, &_dst);
 
   effect = (FC_Effect){
-    .color     = COLOR_WHITE,
+    .color     = gColorWhite,
     .alignment = FC_ALIGN_CENTER,
     .scale     = { 1.f, 1.f },
   };

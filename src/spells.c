@@ -6,13 +6,8 @@
 static void fire_ball_cast(Ecs* registry, ecs_entity_t caster, ecs_entity_t weapon);
 static void ice_arrow_cast(Ecs* registry, ecs_entity_t caster, ecs_entity_t weapon);
 
-static BOOL default_process_func(Ecs* registry, ecs_entity_t caster, ecs_entity_t weapon);
-
-struct __HomieFire
-{
-    int remaining;
-    int cooldown;
-};
+static BOOL dummy_process_callback(Ecs*, ecs_entity_t, ecs_entity_t);
+static void dummy_cast_callback(Ecs*, ecs_entity_t, ecs_entity_t);
 
 static void* get_spell_state(Ecs* registry, ecs_entity_t weapon)
 {
@@ -21,9 +16,8 @@ static void* get_spell_state(Ecs* registry, ecs_entity_t weapon)
 }
 #define SPELL_ICON(n) { TEX_ICON_##n, { 0, 0, 16, 16} }
 const Spell gSpellTbl[NUM_SPELLS] = {
-  /*Name               CastFunc              ProcFunc              Cost  Cooldown  Icon */
-  { "ice arrow", ice_arrow_cast, default_process_func, 1, 15, SPELL_ICON(ICE_ARROW) },
-  { "fire ball", fire_ball_cast, default_process_func, 1, 10, SPELL_ICON(FIRE_BALL) },
+  { "ice arrow", ice_arrow_cast, dummy_process_callback, 1, 15, SPELL_ICON(ICE_ARROW) },
+  { "fire ball", fire_ball_cast, dummy_process_callback, 1, 10, SPELL_ICON(FIRE_BALL) },
 };
 
 #define PLAY_SOUND(id) Mix_PlayChannel(-1, get_sfx(id), 0)
@@ -44,41 +38,47 @@ static Vec2 vec2_rot(Vec2 v, float angle)
 static void fire_ball_cast(Ecs* registry, ecs_entity_t caster, SDL_UNUSED ecs_entity_t weapon)
 {
   Vec2  position;
-  u16   attack_mask;
-  Vec2  facing_direction;
-  Vec2  projectile_speed; 
+  u16   attackMask;
+  Vec2  aimDirection;
+  Vec2  projectileSpeed; 
 
-  position         = ett_get_position(registry, caster);
-  attack_mask      = ett_get_atk_mask(registry, caster);
-  facing_direction = ett_get_facing_direction(registry, caster);
+  position         = ett_get_position        (registry, caster);
+  attackMask       = ett_get_atk_mask        (registry, caster);
+  aimDirection     = ett_get_facing_direction(registry, caster);
 
-  projectile_speed = vec2_mul(facing_direction, 250.f);
-  make_fire_ball(registry, caster, position, projectile_speed, attack_mask);
+  projectileSpeed = vec2_mul(aimDirection, 250.f);
+  make_fire_ball(registry, caster, position, projectileSpeed, attackMask);
   PLAY_SOUND(SFX_FIRE_BALL_LAUCH);
 }
 
 static void ice_arrow_cast(Ecs* registry, ecs_entity_t caster, ecs_entity_t SDL_UNUSED weapon)
 {
   Vec2  position;
-  u16   attack_mask;
-  Vec2  facing_direction;
-  Vec2  projectile_speed; 
+  u16   attackMask;
+  Vec2  aimDirection;
+  Vec2  projectileSpeed;
 
   position         = ett_get_position(registry, caster);
-  attack_mask      = ett_get_atk_mask(registry, caster);
-  facing_direction = ett_get_facing_direction(registry, caster);
+  attackMask       = ett_get_atk_mask(registry, caster);
+  aimDirection     = ett_get_facing_direction(registry, caster);
 
-  projectile_speed = vec2_mul(facing_direction, 250.f);
+  projectileSpeed = vec2_mul(aimDirection, 250.f);
 
-  make_ice_arrow(registry, caster, position, projectile_speed, attack_mask);
+  make_ice_arrow(registry, caster, position, projectileSpeed, attackMask);
 
   PLAY_SOUND(SFX_ICE_SHOOT);
 }
 
 
-static BOOL default_process_func(SDL_UNUSED Ecs*         registry, 
-                                 SDL_UNUSED ecs_entity_t caster  , 
-                                 SDL_UNUSED ecs_entity_t weapon  )
+static BOOL dummy_process_callback(SDL_UNUSED Ecs*         registry, 
+                                   SDL_UNUSED ecs_entity_t caster, 
+                                   SDL_UNUSED ecs_entity_t weapon)
 {
   return TRUE;
+}
+
+static void dummy_cast_callback(SDL_UNUSED Ecs*         registry, 
+                                SDL_UNUSED ecs_entity_t caster, 
+                                SDL_UNUSED ecs_entity_t weapon)
+{
 }

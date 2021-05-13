@@ -77,6 +77,6 @@ void sprite_renderer_draw(Sprite sprite, POINT position, int depth)
                           (POINT){ sprite.rect.w / 2, sprite.rect.h / 2 },
                           0.0,
                           SDL_FLIP_NONE,
-                          COLOR_WHITE,
+                          gColorWhite,
                           depth);
 }

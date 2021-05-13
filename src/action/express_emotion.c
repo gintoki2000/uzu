@@ -30,9 +30,9 @@ static BOOL update(void* _self, SDL_UNUSED ecs_entity_t target)
 
 static ActionVtbl _express_emotion_action_vtbl = {
   .start   = start,
-  .end     = action_default_end_func,
+  .end     = action_on_end,
   .update  = update,
-  .cleanup = action_default_cleanup_func,
+  .cleanup = action_on_cleanup,
 };
 
 Action* express_emotion_action_new(int emoji, int time)

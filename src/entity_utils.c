@@ -144,7 +144,8 @@ ecs_entity_t get_equiped_weapon(Ecs* registry, ecs_entity_t holder)
 }
 u16 ett_get_equiped_weapon_type(Ecs* ecs, ecs_entity_t holder)
 {
-  return wpn_get_type(ecs, get_equiped_weapon(ecs, holder));
+  ecs_entity_t weapon = get_equiped_weapon(ecs, holder);
+  return weapon != ECS_NULL_ENT ? wpn_get_type(ecs, weapon) : WEAPON_ID_NULL;
 }
 
 void ett_set_conversation(Ecs* ecs, ecs_entity_t entity, u16 conversation_id)
@@ -154,21 +155,21 @@ void ett_set_conversation(Ecs* ecs, ecs_entity_t entity, u16 conversation_id)
 
 void ett_animate_hand(Ecs* registry, ecs_entity_t entity, const HandAnimParams* params)
 {
-  Hand*          hand   = ecs_get(registry, entity, HAND);
-  HandAnimation* ha     = ecs_add(registry, entity, HAND_ANIMATION);
+  Hand*          hand      = ecs_get(registry, entity, HAND);
+  HandAnimation* ha        = ecs_add(registry, entity, HAND_ANIMATION);
   ha->currentIndex         = -1;
   ha->initialAngle         = hand->angle;
   ha->initialOriginalPoint = hand->originalPoint;
-  ha->initialLength     = hand->length;
-  ha->keyframes         = params->keyframes;
-  ha->relative          = params->realtiveCurrentState;
-  ha->cbCompleted       = params->cbFinished;
-  ha->cbFrame           = params->cbFrame;
+  ha->initialLength        = hand->length;
+  ha->keyframes            = params->keyframes;
+  ha->relative             = params->realtiveCurrentState;
+  ha->cbCompleted          = params->cbFinished;
+  ha->cbFrame              = params->cbFrame;
 }
 
 Vec2 ett_get_facing_direction(Ecs* registry, ecs_entity_t entity)
 {
-  return ((FacingDirection*)ecs_get(registry, entity, FACING_DIRECTION))->value;
+  return ((AimDirection*)ecs_get(registry, entity, AIM_DIRECTION))->value;
 }
 
 u16 ett_get_atk_mask(Ecs* registry, ecs_entity_t entity)
@@ -178,7 +179,8 @@ u16 ett_get_atk_mask(Ecs* registry, ecs_entity_t entity)
 
 ecs_entity_t wpn_get_holder(Ecs* registry, ecs_entity_t weapon)
 {
-  return ((Holder*)ecs_get(registry, weapon, HOLDER))->value;
+  Holder* holder = ecs_get(registry, weapon, HOLDER);
+  return holder ? holder->value : ECS_NULL_ENT;
 }
 void ett_unable_to_move_push(Ecs* registry, ecs_entity_t entity)
 {

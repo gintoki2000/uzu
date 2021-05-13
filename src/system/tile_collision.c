@@ -32,7 +32,7 @@ static void draw_right(int, int);
 #endif
 
 #define _(id, fn) [id] = fn
-static BOOL (*const _check_fn_tbl[NUM_TILES])(int, int, int, int) = {
+static BOOL (*const _checkFuncTbl[NUM_TILES])(int, int, int, int) = {
   _(14, check_midle), _(15, check_midle), _(16, check_midle), _(17, check_midle),
   _(19, check_right), _(20, check_left),  _(21, check_midle), _(22, check_midle),
   _(23, check_midle), _(24, check_midle), _(34, check_midle), _(35, check_midle),
@@ -44,7 +44,7 @@ static BOOL (*const _check_fn_tbl[NUM_TILES])(int, int, int, int) = {
 };
 
 #if DEBUG
-static void (*const _debug_fn_tbl[NUM_TILES])(int, int) = {
+static void (*const _debugFuncTbl[NUM_TILES])(int, int) = {
   _(14, draw_midle), _(15, draw_midle), _(16, draw_midle), _(17, draw_midle), _(19, draw_right),
   _(20, draw_left),  _(21, draw_midle), _(22, draw_midle), _(23, draw_midle), _(24, draw_midle),
   _(34, draw_midle), _(35, draw_midle), _(36, draw_midle), _(37, draw_midle), _(38, draw_midle),
@@ -55,19 +55,19 @@ static void (*const _debug_fn_tbl[NUM_TILES])(int, int) = {
 #endif
 #undef _
 
-static const ecs_size_t _component_ids[] = { TRANSFORM, HITBOX };
+static const ecs_size_t _componentIds[] = { TRANSFORM, HITBOX };
 
 INLINE BOOL has_collider(tile_t tile)
 {
-  return tile && _check_fn_tbl[tile - 1];
+  return tile && _checkFuncTbl[tile - 1];
 }
 
 INLINE BOOL check(int obj_x, int obj_y, int cell_x, int cell_y)
 {
   tile_t tile = map_at(MAP_LAYER_WALL, cell_x, cell_y);
-  if (tile > 0 && _check_fn_tbl[tile - 1] != NULL)
+  if (tile > 0 && _checkFuncTbl[tile - 1] != NULL)
   {
-    return _check_fn_tbl[tile - 1](obj_x, obj_y, cell_x, cell_y);
+    return _checkFuncTbl[tile - 1](obj_x, obj_y, cell_x, cell_y);
   }
   return FALSE;
 }
@@ -99,8 +99,8 @@ void draw_map_colliders(void)
     for (int x = start_x; x <= end_x; ++x)
     {
       tile = map_at(MAP_LAYER_WALL, x, y);
-      if (tile > 0 && _debug_fn_tbl[tile - 1] != NULL)
-        _debug_fn_tbl[tile - 1](x, y);
+      if (tile > 0 && _debugFuncTbl[tile - 1] != NULL)
+        _debugFuncTbl[tile - 1](x, y);
     }
 }
 #endif
@@ -133,7 +133,7 @@ void tile_collision_system()
 
   for (int i = 0; i < cnt; ++i)
   {
-    ecs_fill(g_ecs, entities[i], _component_ids, 2, (void**)&components);
+    ecs_fill(g_ecs, entities[i], _componentIds, 2, (void**)&components);
     obj_bottom = get_obj_bottom(components);
     obj_left   = get_obj_left(components);
     obj_right  = get_obj_right(components);

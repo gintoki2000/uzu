@@ -16,7 +16,7 @@ typedef struct EcsType
   ecs_comp_init_fn_t fini_fn;
   ecs_comp_cpy_fn_t  cpy_fn;
   ecs_size_t         size;
-} EcsType;
+} EcsCompDesc;
 
 #define ECS_ENT_VER_SHIFT 16
 #define ECS_ENT_IDX_SHIFT 0

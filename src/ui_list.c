@@ -104,13 +104,13 @@ void ui_list_draw()
     return;
 
   draw_bordered_box(&(RECT){ _pos_x, _pos_y, UI_LIST_WIDTH, _num_entries * 20 },
-                    UI_COLOR_BG,
-                    UI_COLOR_BORDER);
+                    gUIColorBg,
+                    gUIColorBorder);
 
   COLOR color;
   for (int i = 0; i < _num_entries; ++i)
   {
-    color = (i != _selected) ? UI_COLOR_TEXT : UI_COLOR_TEXT_SELECT;
+    color = (i != _selected) ? gUIColorText : gUIColorTextSelected;
     FC_DrawEffect(get_font(FONT_ITEM_PICKED_UP),
                   g_renderer,
                   _pos_x + UI_LIST_WIDTH / 2,

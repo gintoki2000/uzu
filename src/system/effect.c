@@ -30,7 +30,7 @@ static void on_item_picked_up(SDL_UNUSED void* arg, const ItemPickedUpMsg* event
   if (attrs->sfx != SFX_ID_NULL)
     Mix_PlayChannel(-1, get_sfx(attrs->sfx), 0);
   if (item_type_id != ITEM_TYPE_ID_NULL)
-    make_fx_item_picked_up(g_ecs, event->position, g_item_types[item_type_id].name);
+    make_fx_item_picked_up(g_ecs, event->position, gItemTypes[item_type_id].name);
 }
 
 static ecs_entity_t (*const s_hit_effect_fn_tbl[])(Ecs*, Vec2) = {

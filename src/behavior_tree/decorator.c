@@ -1,8 +1,8 @@
 #include "behavior_tree/base.h"
 BT_GLOBAL_VTBL_INITIALIZER_IMPL(BTDecorator, bt_decorator, BTNode, bt_node, {
-  ((BTNodeVtbl*)vtbl)->fini   = (BTFinalizeFunc)bt_decorator_fini;
-  ((BTNodeVtbl*)vtbl)->finish = (BTOnFinishFunc)bt_decorator_on_finish;
-  ((BTNodeVtbl*)vtbl)->tick   = (BTOnTickFunc)bt_decorator_on_tick;
+  BT_NODE_VTBL(vtbl)->fini   = (BTFinalizeFunc)bt_decorator_fini;
+  BT_NODE_VTBL(vtbl)->finish = (BTOnFinishFunc)bt_decorator_on_finish;
+  BT_NODE_VTBL(vtbl)->tick   = (BTOnTickFunc)bt_decorator_on_tick;
 })
 
 BTDecorator* bt_decorator_init(BTDecorator* self)
@@ -42,6 +42,12 @@ BTNode* bt_decorator_steal_child(BTDecorator* self)
   return child;
 }
 
+static void finish_child_execution(BTDecorator* self, const BTUpdateContext* ctx)
+{
+  self->isChildRunning = FALSE;
+  bt_node_finish(self->child, ctx);
+}
+
 BTStatus bt_decorator_on_tick(BTDecorator* self, const BTUpdateContext* ctx)
 {
   BTStatus status;
@@ -51,10 +57,9 @@ BTStatus bt_decorator_on_tick(BTDecorator* self, const BTUpdateContext* ctx)
     bt_node_start(self->child, ctx);
   }
   status = bt_node_tick(self->child, ctx);
-  if (status == BT_STATUS_FAILURE || status == BT_STATUS_SUCCESS)
+  if (status != BT_STATUS_RUNNING)
   {
-    self->isChildRunning = FALSE;
-    bt_node_finish(self->child, ctx);
+    finish_child_execution(self, ctx);
   }
   return status;
 }
@@ -62,5 +67,5 @@ BTStatus bt_decorator_on_tick(BTDecorator* self, const BTUpdateContext* ctx)
 void bt_decorator_on_finish(BTDecorator* self, const BTUpdateContext* ctx)
 {
   if (self->isChildRunning)
-    bt_node_finish(self->child, ctx);
+    finish_child_execution(self, ctx);
 }

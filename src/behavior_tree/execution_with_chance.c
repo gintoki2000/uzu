@@ -22,8 +22,8 @@ static BTStatus on_tick(ExecutionWithChance* self, const BTUpdateContext* ctx)
 BT_VTBL_INITIALIZER(ExecutionWithChance, BTDecorator, bt_decorator, {
   BT_NODE_VTBL(vtbl)->tick = (BTOnTickFunc)on_tick;
 })
-BT_INST_ALLOC_FN(ExecutionWithChance, execution_with_chance)
+
 BTNode* bt_execution_with_chance_new(int chance)
 {
-  return BT_NODE(initialize(execution_with_chance_alloc(), chance));
+  return BT_NODE(initialize(bt_alloc (vtbl_inst()), chance));
 }

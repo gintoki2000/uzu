@@ -25,7 +25,7 @@ void character_controller_system()
   Animator*        animator;
   Motion*          motion;
   Visual*          visual;
-  FacingDirection* facing_direction;
+  AimDirection*    facing_direction;
 
   float          vx, vy;
   AnimationState next_state;
@@ -36,7 +36,7 @@ void character_controller_system()
     if ((motion = ecs_get(g_ecs, entities[i], MOTION)) &&
         (visual = ecs_get(g_ecs, entities[i], VISUAL)) &&
         (animator = ecs_get(g_ecs, entities[i], ANIMATOR)) &&
-        (facing_direction = ecs_get(g_ecs, entities[i], FACING_DIRECTION)))
+        (facing_direction = ecs_get(g_ecs, entities[i], AIM_DIRECTION)))
     {
 
       if (ecs_has(g_ecs, entities[i], INVULNERABLE) || ecs_has(g_ecs, entities[i], STAGGER))

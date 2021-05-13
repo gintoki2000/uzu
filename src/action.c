@@ -17,25 +17,25 @@ void action_delete(Action* action)
   }
 }
 
-void action_default_cleanup_func(SDL_UNUSED void* self)
+void action_on_cleanup(SDL_UNUSED void* self)
 {
 #if DEBUG
   INFO("action cleanup\n");
 #endif
 }
 
-void action_default_start_func(SDL_UNUSED void* self, SDL_UNUSED ecs_entity_t target)
+void action_on_start(SDL_UNUSED void* self, SDL_UNUSED ecs_entity_t target)
 {
 #if DEBUG
   INFO("action start\n");
 #endif
 }
 
-void action_default_end_func(SDL_UNUSED void* self, SDL_UNUSED ecs_entity_t target)
+void action_on_end(SDL_UNUSED void* self, SDL_UNUSED ecs_entity_t target)
 {
 }
 
-BOOL action_default_update_func(SDL_UNUSED void* self, SDL_UNUSED ecs_entity_t target)
+BOOL action_on_update(SDL_UNUSED void* self, SDL_UNUSED ecs_entity_t target)
 {
   return TRUE;
 }
@@ -152,7 +152,7 @@ CompositeAction* parallel_action_new(void)
 typedef struct SequenceAction
 {
   CompositeAction parent_instance;
-  int             current_child_index;
+  int             currentChildIndex;
 } SequenceAction;
 
 #define SEQUENCE_ACTION(ptr) ((SequenceAction*)ptr)
@@ -160,7 +160,7 @@ typedef struct SequenceAction
 static SequenceAction* sequence_action_init(SequenceAction* self)
 {
   composite_action_init(COMPOSITE_ACTION(self));
-  self->current_child_index = -1;
+  self->currentChildIndex = -1;
   return self;
 }
 
@@ -171,18 +171,18 @@ void static sequence_action_start(void* _self, ecs_entity_t target)
   if (super->children->cnt == 0)
     return;
 
-  self->current_child_index = 0;
+  self->currentChildIndex = 0;
   ACTION_START(ptr_array_at(super->children, 0), target);
 }
 void static sequence_action_end(void* self, SDL_UNUSED ecs_entity_t target)
 {
-  SEQUENCE_ACTION(self)->current_child_index = -1;
+  SEQUENCE_ACTION(self)->currentChildIndex = -1;
 }
 
 INLINE Action* sequence_action_next_child(SequenceAction* self)
 {
-  return self->current_child_index < COMPOSITE_ACTION(self)->children->cnt - 1
-             ? ptr_array_at(COMPOSITE_ACTION(self)->children, ++self->current_child_index)
+  return self->currentChildIndex < COMPOSITE_ACTION(self)->children->cnt - 1
+             ? ptr_array_at(COMPOSITE_ACTION(self)->children, ++self->currentChildIndex)
              : NULL;
 }
 
@@ -195,7 +195,7 @@ static BOOL sequence_action_update(void* _self, ecs_entity_t target)
   children = COMPOSITE_ACTION(self)->children;
   if (children->cnt == 0)
     return TRUE;
-  current_child = ptr_array_at(children, self->current_child_index);
+  current_child = ptr_array_at(children, self->currentChildIndex);
   if (ACTION_UPDATE(current_child, target))
   {
     ACTION_END(current_child, target);

@@ -75,7 +75,7 @@ static BOOL next_sentence(void)
 
 static void on_command_selected(SDL_UNUSED void* arg, const CommandSelectedMsg* msg)
 {
-  if (!SDL_strcmp(msg->cmd, TEXT_COMMAND_TALK) && ecs_has(g_ecs, msg->entity, DIALOGUE))
+  if (!SDL_strcmp(msg->cmd, gCmdTalk) && ecs_has(g_ecs, msg->entity, DIALOGUE))
   {
     display_dialogue(ett_get_conversation(g_ecs, msg->entity), msg->entity);
   }

@@ -7,13 +7,12 @@ BT_INST_DECL(Sequence, BTCompositeNode, {
 })
 
 BT_VTBL_DECL_EMPTY(Sequence, BTCompositeNode)
-BT_INST_ALLOC_FN(Sequence, sequence)
 
 #define super BT_COMPOSITE_NODE(self)
 
-static Sequence* initialize(Sequence* self)
+static Sequence* init(Sequence* self)
 {
-  bt_composite_node_fini(super);
+  bt_composite_node_init(super);
   self->activeChildIndex            = -1;
   self->activeChild                 = NULL;
   self->lastChildExecutionCompleted = TRUE;
@@ -81,5 +80,6 @@ BT_VTBL_INITIALIZER(Sequence, BTCompositeNode, bt_composite_node, {
 
 BTCompositeNode* bt_sequence_new()
 {
-  return BT_COMPOSITE_NODE(initialize(sequence_alloc()));
+  Sequence* self = bt_alloc( vtbl_inst() );
+  return BT_COMPOSITE_NODE(init(self));
 }

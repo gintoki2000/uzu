@@ -100,7 +100,7 @@ ecs_entity_t make_character_base(Ecs* registry, const MakeCharacterParams* param
   ecs_add(registry, entity, ENABLE_TILE_COLLISION_TAG);
   ecs_add(registry, entity, CHARACTER_ANIMATOR_TAG);
 
-  ecs_add(registry, entity, FACING_DIRECTION);
+  ecs_add(registry, entity, AIM_DIRECTION);
   return entity;
 }
 
@@ -163,8 +163,8 @@ typedef struct MakeMonsterParams
   u16              strength;
 } MakeMonParams;
 
-static const Vec2 _mon_big_size   = { 20.f, 20.f };
-static const Vec2 _mon_small_size = { 10.f, 12.f };
+static const Vec2 _monBigSize   = { 20.f, 20.f };
+static const Vec2 _monSizeSmall = { 10.f, 12.f };
 
 ecs_entity_t make_monster_base(Ecs* registry, const MakeMonParams* params)
 {
@@ -218,9 +218,9 @@ ecs_entity_t make_monster_base(Ecs* registry, const MakeMonParams* params)
           });
 
   ecs_add(registry, entity, MOTION);
-  ecs_add(registry, entity, ENABLE_TILE_COLLISION_TAG);
+  //ecs_add(registry, entity, ENABLE_TILE_COLLISION_TAG);
   ecs_add(registry, entity, CHARACTER_ANIMATOR_TAG);
-  ecs_add(registry, entity, FACING_DIRECTION);
+  ecs_add(registry, entity, AIM_DIRECTION);
   ecs_set(registry, entity, ATTACK_MASK, &(AttackMask){ BIT(CATEGORY_PLAYER) });
   return entity;
 }
@@ -232,7 +232,7 @@ ecs_entity_t make_huge_demon(Ecs* registry, Vec2 position)
   params.vitality      = 30;
   params.anims         = g_anims_huge_demon;
   params.position      = position;
-  params.size          = _mon_big_size;
+  params.size          = _monBigSize;
   return make_monster_base(registry, &params);
 }
 
@@ -243,7 +243,7 @@ ecs_entity_t make_imp(Ecs* registry, Vec2 position)
   params.vitality      = 6;
   params.anims         = g_anims_imp;
   params.position      = position;
-  params.size          = _mon_small_size;
+  params.size          = _monSizeSmall;
   ecs_entity_t entity  = make_monster_base(registry, &params);
   return entity;
 }
@@ -255,7 +255,7 @@ ecs_entity_t make_wogol(Ecs* registry, Vec2 position)
   params.vitality      = 6;
   params.anims         = g_anims_wogol;
   params.position      = position;
-  params.size          = _mon_small_size;
+  params.size          = _monSizeSmall;
   ecs_entity_t entity  = make_monster_base(registry, &params);
   return entity;
 }
@@ -305,23 +305,46 @@ ecs_entity_t make_animated_pickupable_entity(Ecs*                               
   return entity;
 }
 
+enum {
+  BB_CHORT_DESTINATION,
+  BB_CHORT_NUM_ENTRIES
+};
+
+static BTRoot* build_chort_behavior_tree(void)
+{
+  BTCompositeNode* seqMoveToRandomLocation;
+
+  seqMoveToRandomLocation = bt_sequence_new();
+  bt_composite_node_add(
+      seqMoveToRandomLocation,
+      bt_get_random_location_task_new(BB_CHORT_DESTINATION, 64.f));
+  bt_composite_node_add(
+      seqMoveToRandomLocation,
+      bt_walk_directly_toward_task_new(BB_CHORT_DESTINATION));
+  bt_composite_node_add(
+      seqMoveToRandomLocation, 
+      bt_wait_task_new(180));
+
+  return bt_root_new (BT_NODE(seqMoveToRandomLocation));
+}
+
 ecs_entity_t make_chort(Ecs* registry, Vec2 position)
 {
   MakeMonParams params = { 0 };
-  params.agility       = 7;
+  params.agility       = 4;
   params.vitality      = 30;
   params.anims         = g_anims_chort;
   params.position      = position;
-  params.size          = _mon_small_size;
+  params.size          = _monSizeSmall;
   ecs_entity_t entity  = make_monster_base(registry, &params);
 
   /*components */
   Hand*      hand;
-  AggroArea* spot;
+  AggroArea* aggroArea;
 
-  spot           = ecs_add(registry, entity, AGGRO_AREA);
-  spot->radius   = TILE_SIZE * 7;
-  spot->position = position;
+  aggroArea           = ecs_add(registry, entity, AGGRO_AREA);
+  aggroArea->radius   = TILE_SIZE * 7;
+  aggroArea->position = position;
 
   ecs_set(registry,
           entity,
@@ -346,6 +369,9 @@ ecs_entity_t make_chort(Ecs* registry, Vec2 position)
   ecs_entity_t weapon = gMakeWeaponFnTbl[weapons[rand() % 3]](registry);
 
   ett_equip_weapon(registry, entity, weapon);
+
+  blackboard_init(ecs_add(registry, entity, BLACKBOARD), BB_CHORT_NUM_ENTRIES);
+  ecs_set (registry, entity, BRAIN, &(Brain){ build_chort_behavior_tree() });
 
   return entity;
 }
@@ -647,7 +673,7 @@ ecs_entity_t make_chest(Ecs* registry, const MakeChestParams* params)
   entity                    = ecs_create(registry);
   visual                    = ecs_add(registry, entity, VISUAL);
   visual->sprite.texture_id = TEX_CHEST;
-  visual->sprite.rect = params->state == CHEST_STATE_CLOSE ? RECT_CHEST_CLOSE : RECT_CHEST_CLOSE;
+  visual->sprite.rect = params->state == CHEST_STATE_CLOSE ? gRectChestClose : gRectChestClose;
   visual->anchor.x    = 8.f;
   visual->anchor.y    = 16.f;
 
@@ -659,7 +685,7 @@ ecs_entity_t make_chest(Ecs* registry, const MakeChestParams* params)
 
   interactable              = ecs_add(registry, entity, INTERACTABLE);
   interactable->numCommands = 1;
-  interactable->commands[0] = TEXT_COMMAND_OPEN;
+  interactable->commands[0] = gCmdOpen;
 
   hitbox           = ecs_add(registry, entity, HITBOX);
   hitbox->size     = (Vec2){ 16, 16 };
@@ -715,7 +741,7 @@ ecs_entity_t make_door(Ecs* registry, Vec2 position)
 
   visual                    = ecs_add(registry, entity, VISUAL);
   visual->sprite.texture_id = TEX_DOOR;
-  visual->sprite.rect       = RECT_DOOR_CLOSE;
+  visual->sprite.rect       = gRectClose;
   visual->anchor.x          = 16;
   visual->anchor.y          = 34;
 
@@ -730,7 +756,7 @@ ecs_entity_t make_door(Ecs* registry, Vec2 position)
 
   interactable              = ecs_add(registry, entity, INTERACTABLE);
   interactable->numCommands = 1;
-  interactable->commands[0] = TEXT_COMMAND_OPEN;
+  interactable->commands[0] = gCmdOpen;
 
   door_info              = ecs_add(registry, entity, DOOR_ATTRIBUTES);
   door_info->requiredKey = DOOR_NO_REQUIRED_KEY;
@@ -1102,8 +1128,7 @@ ecs_entity_t make_npc_brian(Ecs* registry, Vec2 position, u16 conversation_id)
   hitbox->anchor.x = 6;
   hitbox->anchor.y = 19;
 
-  interactable_init(ecs_add(registry, entity, INTERACTABLE),
-                    (const char*[]){ TEXT_COMMAND_TALK, NULL });
+  interactable_init(ecs_add(registry, entity, INTERACTABLE), (const char*[]){ gCmdTalk, NULL });
 
   ecs_set(registry,
           entity,

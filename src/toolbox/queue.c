@@ -1,13 +1,13 @@
 #include "toolbox/queue.h"
 
-Queue* queue_init_full(Queue* self, u32 cap, destroy_fn_t destroy_fn)
+Queue* queue_init_full(Queue* self, u32 cap, DestroyFunc destroyFunc)
 {
-  self->cnt        = 0;
-  self->cap        = cap;
-  self->destroy_fn = destroy_fn;
-  self->storage    = malloc(cap * sizeof(pointer_t));
-  self->rear       = -1;
-  self->front      = -1;
+  self->cnt         = 0;
+  self->cap         = cap;
+  self->destroyFunc = destroyFunc;
+  self->storage     = SDL_malloc(cap * sizeof(pointer_t));
+  self->rear        = -1;
+  self->front       = -1;
   return self;
 }
 
@@ -18,10 +18,10 @@ Queue* queue_init(Queue* self, u32 cap)
 
 void queue_fini(Queue* self)
 {
-  if (self->destroy_fn != NULL)
+  if (self->destroyFunc != NULL)
     for (u32 i = 0; i < self->cap; ++i)
-      self->destroy_fn(self->storage[i]);
-  free(self->storage);
+      self->destroyFunc(self->storage[i]);
+  SDL_free(self->storage);
 }
 
 void queue_offer(Queue* self, pointer_t item)

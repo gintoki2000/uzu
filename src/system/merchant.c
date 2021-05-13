@@ -14,7 +14,7 @@
 extern Ecs*          g_ecs;
 extern SDL_Renderer* g_renderer;
 
-static s32          _current;
+static u32          _current;
 static ecs_entity_t _merchant = ECS_NULL_ENT;
 
 #define SHOP_X 16
@@ -46,7 +46,7 @@ void merchant_system()
 
   RECT bg = { SHOP_X, SHOP_Y, 110, MAX_DISPLAYABLE * CELL_HEIGHT };
 
-  draw_bordered_box(&bg, UI_COLOR_BG, UI_COLOR_BORDER);
+  draw_bordered_box(&bg, gUIColorBg, gUIColorBorder);
 
   for (u32 i = 0; i < merchant->numPayloads; ++i)
   {
@@ -61,30 +61,17 @@ static void display_shop(ecs_entity_t entity)
   input_push_state(INPUT_STATE_INST_1(process_input));
 }
 
-#define MAX_LENGTH_OF_ITEM_NAME 11
+#define MAX_LENGTH_OF_ITEM_NAME 15
 
-static char* item_name(ItemTypeId type_id, char name[MAX_LENGTH_OF_ITEM_NAME])
+static char* item_name(ItemTypeId type_id, char name[MAX_LENGTH_OF_ITEM_NAME + 1])
 {
-
-  const char* item_name;
-  int         i;
-
-  item_name = g_item_types[type_id].name;
-  for (i = 0; i < MAX_LENGTH_OF_ITEM_NAME && item_name[i] != '\0'; ++i)
-  {
-    name[i] = item_name[i];
-  }
-
-  for (; i < MAX_LENGTH_OF_ITEM_NAME - 1; ++i)
-    name[i] = ' ';
-  name[MAX_LENGTH_OF_ITEM_NAME - 1] = '\0';
-
+  SDL_strlcpy(name, gItemTypes[type_id].name, MAX_LENGTH_OF_ITEM_NAME);
   return name;
 }
 
 static void draw_item(const ItemPayload* payload, s32 x, s32 y, BOOL selected)
 {
-  const ItemType* item_type = &g_item_types[payload->type_id];
+  const ItemType* item_type = &gItemTypes[payload->type_id];
   FONT*           font      = get_font(FONT_DAMAGE_INDICATOR);
 
   RECT dst = { x, y, item_type->icon.rect.w, item_type->icon.rect.h };
@@ -99,7 +86,7 @@ static void draw_item(const ItemPayload* payload, s32 x, s32 y, BOOL selected)
                  g_renderer,
                  x + dst.w + 4,
                  y + 5,
-                 selected ? UI_COLOR_TEXT_SELECT : UI_COLOR_TEXT,
+                 selected ? gUIColorTextSelected : gUIColorText,
                  "%s --- %3u$",
                  item_name(payload->type_id, name),
                  payload->price);
@@ -110,7 +97,7 @@ static void draw_item(const ItemPayload* payload, s32 x, s32 y, BOOL selected)
                  g_renderer,
                  x + dst.w + 4,
                  y + 5,
-                 selected ? UI_COLOR_TEXT_SELECT : UI_COLOR_TEXT,
+                 selected ? gUIColorTextSelected : gUIColorText,
                  "%s %3d %3u$",
                  item_name(payload->type_id, name),
                  payload->available,
@@ -159,8 +146,6 @@ static void process_input(SDL_UNUSED void* arg)
       ui_quality_display("count:", 1, 1, merchant->payloads[_current].available);
       ui_quality_hook(UI_QUALITY_ON_SELECTED, CALLBACK_2(on_quality_selected));
     }
-    else /* TODO: play sound*/
-      ;
   }
 
   if (mouse_button_just_pressed(SDL_BUTTON_RIGHT))

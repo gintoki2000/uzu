@@ -1,13 +1,14 @@
 #include "behavior_tree/base.h"
 #include "components.h"
+#include "resources.h"
 
 BT_VTBL_DECL_EMPTY(WaitTask, BTNode)
 BT_INST_DECL(WaitTask, BTNode, {
-  int duration;
-  int remaining;
+  u32 duration;
+  u32 remaining;
 })
 
-static WaitTask* initialize(WaitTask* self, int duration)
+static WaitTask* init(WaitTask* self, u32 duration)
 {
   bt_node_init((BTNode*)self);
   self->duration  = duration;
@@ -22,18 +23,28 @@ static void on_start(WaitTask* self, SDL_UNUSED const BTUpdateContext* ctx)
 
 static BTStatus on_tick(WaitTask* self, SDL_UNUSED const BTUpdateContext* ctx)
 {
+  ecs_set(ctx->registry,
+          ctx->entity,
+          TEXT,
+          &(Text){
+              .value  = "wait",
+              .font   = get_font(FONT_ITEM_PICKED_UP),
+              .effect = { .alignment = FC_ALIGN_CENTER,
+                          .scale     = { 1.f, 1.f },
+                          .color     = { 0xff, 0xff, 0xff, 0xff } },
+          });
   --self->remaining;
   return self->remaining > 0 ? BT_STATUS_RUNNING : BT_STATUS_SUCCESS;
 }
 
 BT_VTBL_INITIALIZER(WaitTask, BTNode, bt_node, {
-  ((BTNodeVtbl*)vtbl)->start = (BTOnStartFunc)on_start;
-  ((BTNodeVtbl*)vtbl)->tick  = (BTOnTickFunc)on_tick;
+  BT_NODE_VTBL(vtbl)->start = (BTOnStartFunc)on_start;
+  BT_NODE_VTBL(vtbl)->tick  = (BTOnTickFunc)on_tick;
 })
 
-BT_INST_ALLOC_FN(WaitTask, wait_task)
+#define ALLOC_MEM() bt_alloc(vtbl_inst())
 
-BTNode* bt_task_wait_new(int duration)
+BTNode* bt_wait_task_new(u32 duration)
 {
-  return BT_NODE(initialize(wait_task_alloc(), duration));
+  return BT_NODE(init(ALLOC_MEM(), duration));
 }

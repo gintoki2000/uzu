@@ -4,8 +4,8 @@ BT_INST_DECL(Repeater, BTDecorator, {
   int total;
   int remaining;
 })
+
 BT_VTBL_DECL_EMPTY(Repeater, BTDecorator)
-BT_INST_ALLOC_FN(Repeater, repeater)
 
 #define super BT_DECORATOR(self)
 static Repeater* initialize(Repeater* self, int total)
@@ -39,5 +39,5 @@ BT_VTBL_INITIALIZER(Repeater, BTDecorator, bt_decorator, {
 
 BTDecorator* bt_repeater_new(int totals)
 {
-  return BT_DECORATOR(initialize(repeater_alloc(), totals));
+  return BT_DECORATOR(initialize(bt_alloc(vtbl_inst()), totals));
 }

@@ -190,12 +190,10 @@ BOOL resources_load()
 
   _fonts[FONT_ITEM_PICKED_UP] = font;
 
-  const FieldMetaData* conversation_fmd =
-      STRUCT_META_DATA_TBL[STRUCT_META_DATA_CONVERSATION].fields;
   for (int i = 0; i < NUM_CONVERSATIONS; ++i)
   {
     struct json_object* json = load_json_from_file(_conversation_files[i]);
-    parse_struct(conversation_fmd, &_conversations[i], json);
+    parse_struct(gStructMetaData_Conversation.fields, &_conversations[i], json);
     json_object_put(json);
   }
 

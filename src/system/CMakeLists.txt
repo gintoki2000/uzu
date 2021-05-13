@@ -35,6 +35,8 @@ set(SYSTEM_SOURCE_FILES
   src/system/emoji.c
   src/system/stats.c
   src/system/status_effect.c
+  src/system/walk_directly_toward_system.c
+  src/system/pathfiniding.c
 
   #weapon skill systems
   src/system/weapon_skill/charge.c
@@ -48,4 +50,5 @@ set(SYSTEM_SOURCE_FILES
   src/system/debug/draw_hitbox.c
   src/system/debug/draw_target.c
   src/system/debug/draw_position.c
+  src/system/debug/draw_destination.c
 )

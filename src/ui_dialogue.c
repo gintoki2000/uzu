@@ -77,5 +77,5 @@ void ui_dialogue_draw(void)
   if (!_is_visible)
     return;
   SDL_RenderCopy(g_renderer, _texture_dialogue, NULL, &_rect_dialogue);
-  FC_DrawBoxColor(_font, g_renderer, _rect_textbox, COLOR_BLACK, "%s", _displayed_text);
+  FC_DrawBoxColor(_font, g_renderer, _rect_textbox, gColorBlack, "%s", _displayed_text);
 }

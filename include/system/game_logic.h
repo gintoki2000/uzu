@@ -48,6 +48,9 @@ void update_facing_direction_system(void);
 void status_effect_system(void);
 void status_effect_rendering_system(void);
 void status_effect_system_init(void);
+void walk_directly_toward_system(void);
+void pathfinding_system(void);
+void pathfinding_system_init(void);
 
 void draw_map_colliders(void);
 

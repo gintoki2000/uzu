@@ -1,12 +1,12 @@
 #include "behavior_tree/base.h"
 BT_GLOBAL_VTBL_INITIALIZER_IMPL(BTCompositeNode, bt_composite_node, BTNode, bt_node, {
-  ((BTNodeVtbl*)vtbl)->fini = (BTFinalizeFunc)bt_composite_node_init;
+  ((BTNodeVtbl*)vtbl)->fini = (BTFinalizeFunc)bt_composite_node_fini;
 })
 
 BTCompositeNode* bt_composite_node_init(BTCompositeNode* self)
 {
   bt_node_init(BT_NODE(self));
-  self->children = ptr_array_new((destroy_fn_t)bt_node_del);
+  self->children = ptr_array_new((DestroyFunc)bt_node_del);
   return (self);
 }
 

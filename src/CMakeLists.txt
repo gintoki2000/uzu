@@ -7,13 +7,20 @@ include(src/game_event/CMakeLists.txt)
 
 set(SOURCE_FILES 
   src/SDL_FontCache.c
+  src/action.c
+  src/action/express_emotion.c
+  src/action/talk.c
+  src/action/vanish.c
+  src/action/walk.c
   src/animations.c
-  src/behaviour_tree.c 
+  src/behavior_tree.c 
+  src/camera_shaker.c
   src/components.c
   src/constances.c
   src/dungeon.c 
   src/entity_factory.c
   src/entity_utils.c
+  src/game_event.c
   src/game_scene.c
   src/global.c
   src/inventory.c
@@ -22,12 +29,12 @@ set(SOURCE_FILES
   src/level_loader.c
   src/main_menu.c
   src/map.c 
-  src/path_finder.c
   src/read_all.c
   src/resources.c 
   src/select_character.c
   src/session.c
   src/spells.c
+  src/sprite_renderer.c
   src/struct_meta_data.c
   src/ui_dialogue.c
   src/ui_helper.c
@@ -36,14 +43,6 @@ set(SOURCE_FILES
   src/ui_msgbox_w_icon.c
   src/ui_quality.c
   src/ui_subtile.c
-  src/sprite_renderer.c
-  src/action.c
-  src/action/walk.c
-  src/action/talk.c
-  src/action/express_emotion.c
-  src/action/vanish.c
-  src/game_event.c
-  src/camera_shaker.c
   ${BEHAVIOR_NODE_SOURCE_FILES}
   ${ECS_SOURCE_FILES}
   ${ENGINE_SOURCE_FILES}

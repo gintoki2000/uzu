@@ -13,14 +13,14 @@ static HandAnimKeyFrame _keyframes[] = {
   { .duration = -1 },
 };
 
-struct _query_overlap_callback_data
+struct _QueryOverlapCallbackData
 {
   ecs_entity_t entity;
   int          damage;
   Vec2         impact_force;
 };
 
-static void query_overlap_callback(struct _query_overlap_callback_data* d, ecs_entity_t e)
+static void query_overlap_callback(struct _QueryOverlapCallbackData* d, ecs_entity_t e)
 {
   ems_broadcast(MSG_DEAL_DAMAGE,
                 &(InflictDamageMsg){
@@ -35,17 +35,18 @@ static void query_overlap_callback(struct _query_overlap_callback_data* d, ecs_e
 
 static void hand_animation_finished_callback(SDL_UNUSED void* arg, ecs_entity_t entity)
 {
-  HandAnimation*   hanim           = ecs_get(g_ecs, entity, HAND_ANIMATION);
-  Hand*            hand            = ecs_get(g_ecs, entity, HAND);
-  AttackMask*      mask            = ecs_get(g_ecs, entity, ATTACK_MASK);
-  Transform*       transform       = ecs_get(g_ecs, entity, TRANSFORM);
-  FacingDirection* facingDirection = ecs_get(g_ecs, entity, FACING_DIRECTION);
-  AttackCommand*   attackCommand   = ecs_get(g_ecs, entity, ATTACK_COMMAND);
+  HandAnimation* hanim         = ecs_get(g_ecs, entity, HAND_ANIMATION);
+  Hand*          hand          = ecs_get(g_ecs, entity, HAND);
+  AttackMask*    mask          = ecs_get(g_ecs, entity, ATTACK_MASK);
+  Transform*     transform     = ecs_get(g_ecs, entity, TRANSFORM);
+  AimDirection*  aimDirection  = ecs_get(g_ecs, entity, AIM_DIRECTION);
+  AttackCommand* attackCommand = ecs_get(g_ecs, entity, ATTACK_COMMAND);
 
   WeaponAttributes*  weaponAttributes = ecs_get(g_ecs, hand->weapon, WEAPON_ATTRIBUTES);
   WeaponSwingAttack* swing            = ecs_get(g_ecs, hand->weapon, WEAPON_SWING_ATTACK);
 
   INVOKE_EVENT(attackCommand->cbCompleted, TRUE);
+  ecs_rmv(g_ecs, entity, ATTACK_COMMAND);
   double a        = hanim->initialAngle * DEG_TO_RAD;
   int    midRange = (weaponAttributes->range.min + weaponAttributes->range.max) / 2;
 
@@ -60,9 +61,9 @@ static void hand_animation_finished_callback(SDL_UNUSED void* arg, ecs_entity_t 
   box.y = v.y - swing->wide / 2;
   box.w = box.h = swing->wide;
 
-  struct _query_overlap_callback_data cbdata = { entity,
-                                                 weaponAttributes->atk,
-                                                 vec2_mul(facingDirection->value, 60.f) };
+  struct _QueryOverlapCallbackData cbdata = { entity,
+                                              weaponAttributes->atk,
+                                              vec2_mul(aimDirection->value, 60.f) };
   collision_box_query(&box, mask->value, CALLBACK_1(&cbdata, query_overlap_callback));
 }
 
@@ -73,11 +74,11 @@ static void play_slash_effect(Ecs* registry, ecs_entity_t entity, float length)
   SDL_RendererFlip flip;
   Transform*       transform;
   Hand*            hand;
-  FacingDirection* facingDirection;
+  AimDirection*    facingDirection;
 
   transform       = ecs_get(registry, entity, TRANSFORM);
   hand            = ecs_get(registry, entity, HAND);
-  facingDirection = ecs_get(registry, entity, FACING_DIRECTION);
+  facingDirection = ecs_get(registry, entity, AIM_DIRECTION);
 
   pos = transform->position;
   pos = vec2_add(pos, hand->originalPoint);

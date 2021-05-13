@@ -176,7 +176,7 @@ typedef struct Spell
   void (*cast)(Ecs*, ecs_entity_t, ecs_entity_t);
   BOOL (*process)(Ecs*, ecs_entity_t, ecs_entity_t);
   u16  cost;
-  u16  cast_spd;
+  u16  coolDownTime;
   Icon icon;
 } Spell;
 
@@ -237,7 +237,7 @@ extern ecs_entity_t (*const gMakeCharacterFnTbl[NUM_JOBS])(Ecs*, Vec2);
 extern ecs_entity_t (*const gMakePickupableFnTbl[NUM_ITEM_TYPES])(Ecs*, Vec2 pos);
 extern ecs_entity_t (*const gMakeProjectileFn[])(Ecs*, Vec2 pos, Vec2 dir, u16 mask);
 extern ecs_entity_t (*const gMakeCastEffectFnTbl[NUM_CAST_EFFECTS])(Ecs* ecs, Vec2 pos);
-extern const ItemType g_item_types[NUM_ITEM_TYPES];
+extern const ItemType gItemTypes[NUM_ITEM_TYPES];
 extern const Spell    gSpellTbl[NUM_SPELLS];
 extern const u16      gPickupableToItemTypeIdTbl[];
 

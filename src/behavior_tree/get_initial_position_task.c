@@ -1,8 +1,15 @@
-#include "behavior_tree.h"
+#include "behavior_tree/base.h"
 #include "components.h"
 
 BT_INST_DECL(GetInitialPositionTask, BTNode, { u32 bbResultKey; })
 typedef BTNodeVtbl GetInitialPositionTaskVtbl;
+
+static GetInitialPositionTask* init(GetInitialPositionTask*self, u32 resultKey)
+{
+  bt_node_init(BT_NODE(self));
+  self->bbResultKey = resultKey;
+  return self;
+}
 
 static BTStatus on_tick(GetInitialPositionTask* self, const BTUpdateContext* ctx)
 {
@@ -19,11 +26,10 @@ BT_VTBL_INITIALIZER(GetInitialPositionTask, BTNode, bt_node, {
   vtbl->tick = (BTOnTickFunc)on_tick;
 })
 
+
 BTNode* bt_get_initial_position_task_new(u32 resultKey)
 {
-  GetInitialPositionTask* self = SDL_malloc(sizeof(GetInitialPositionTask));
-  BT_SET_VTBL(self, vtbl_inst());
+  GetInitialPositionTask* self = bt_alloc(vtbl_inst());
 
-  self->bbResultKey = resultKey;
-  return BT_NODE(self);
+  return BT_NODE(init(self, resultKey));
 }

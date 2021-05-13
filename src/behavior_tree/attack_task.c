@@ -12,9 +12,8 @@ typedef struct
 {
   BTNodeVtbl _base;
 } AttackTaskVtbl;
-typedef BTUpdateContext UpdateContext;
 
-static AttackTask* initialize(AttackTask* self, u32 fireCode)
+static AttackTask* init(AttackTask* self, u32 fireCode)
 {
   self->pendingStatus = BT_STATUS_FAILURE;
   self->fireCode      = fireCode;
@@ -26,7 +25,7 @@ static void attack_request_completed_callback(AttackTask* self, BOOL result)
   self->pendingStatus = result ? BT_STATUS_SUCCESS : BT_STATUS_FAILURE;
 }
 
-static void on_start(AttackTask* self, const UpdateContext* ctx)
+static void on_start(AttackTask* self, const BTUpdateContext* ctx)
 {
   if (ecs_has(ctx->registry, ctx->entity, ATTACK_COMMAND))
   {
@@ -45,12 +44,12 @@ static void on_start(AttackTask* self, const UpdateContext* ctx)
   }
 }
 
-static BTStatus on_tick(AttackTask* self, SDL_UNUSED const UpdateContext* ctx)
+static BTStatus on_tick(AttackTask* self, SDL_UNUSED const BTUpdateContext* ctx)
 {
   return self->pendingStatus;
 }
 
-static void on_finish(AttackTask* self, const UpdateContext* ctx)
+static void on_finish(AttackTask* self, const BTUpdateContext* ctx)
 {
   if (self->pendingStatus == BT_STATUS_RUNNING)
   {
@@ -65,9 +64,7 @@ BT_VTBL_INITIALIZER(AttackTask, BTNode, bt_node, {
   BT_NODE_VTBL(vtbl)->tick   = (BTOnTickFunc)on_tick;
 })
 
-BT_INST_ALLOC_FN(AttackTask, attack_task)
-
 BTNode* bt_attack_task_new(u32 fireCode)
 {
-  return BT_NODE(initialize(attack_task_alloc(), fireCode));
+  return BT_NODE(init(bt_alloc(vtbl_inst()), fireCode));
 }

@@ -42,3 +42,9 @@ BTStatus bt_node_on_tick(SDL_UNUSED BTNode* self, SDL_UNUSED const BTUpdateConte
 {
   return BT_STATUS_SUCCESS;
 }
+void* bt_alloc(const BTNodeVtbl* vtbl)
+{
+  void* mem = SDL_malloc(vtbl->size);
+  BT_SET_VTBL(mem, vtbl);
+  return mem;
+}

@@ -1,4 +1,5 @@
 #include "components.h"
+#include "entity_factory.h"
 #include "entity_utils.h"
 #include "global.h"
 #include "resources.h"
@@ -11,7 +12,7 @@ static void equipment_item_use_callback(const void* data, Ecs* ecs, ecs_entity_t
 
 typedef struct ScrollData
 {
-  u16 spell_id;
+  u16 spellId;
 } ScrollData;
 
 typedef struct HealingItemData
@@ -22,22 +23,27 @@ typedef struct HealingItemData
 
 typedef struct EquipmentItemData
 {
-  u16 weapon_id;
+  u16 weaponId;
 } EquipmentItemData;
 
-static const ScrollData k_scroll_data_ice_arrow = { SPELL_ICE_ARROW };
-static const ScrollData k_scrool_data_fire_ball = { SPELL_FIRE_BALL };
+static const ScrollData _scrollDataIceArrow = { SPELL_ICE_ARROW };
+static const ScrollData _scrollDataFireBall = { SPELL_FIRE_BALL };
 
-static const HealingItemData k_healing_item_data_red_flask     = { .hp = 5 };
-static const HealingItemData k_healing_item_data_blue_flask    = { .mp = 5 };
-static const HealingItemData k_healing_item_data_big_red_flask = { .hp = 10 };
+static const HealingItemData _healingItemDataRedFlask    = { .hp = 5 };
+static const HealingItemData _healingItemDataBlueFlask   = { .mp = 5 };
+static const HealingItemData _healingItemDataBigRedFlask = { .hp = 10 };
 
-static const EquipmentItemData k_equipemt_item_data_spear       = { WEAPON_SPEAR };
-static const EquipmentItemData k_equipemt_item_data_anime_sword = { WEAPON_ANIME_SWORD };
-static const EquipmentItemData k_equipemt_item_data_staff       = { WEAPON_STAFF };
-static const EquipmentItemData k_equipemt_item_data_cleaver     = { WEAPON_CLEAVER };
+static const EquipmentItemData _equipmentItemDataSpear      = { WEAPON_SPEAR };
+static const EquipmentItemData _equipmentItemAataAnimeSword = { WEAPON_ANIME_SWORD };
+static const EquipmentItemData _equipmentItemDataStaff      = { WEAPON_STAFF };
+static const EquipmentItemData _equipmentItemDataCleaver    = { WEAPON_CLEAVER };
 
-const ItemType g_item_types[NUM_ITEM_TYPES] = {
+#define ITEM_SPRITE(name)                                                                          \
+  {                                                                                                \
+    .texture_id = TEX_ITEM_##name, .rect = { 0, 0, 16, 6 }                                         \
+  }
+
+const ItemType gItemTypes[NUM_ITEM_TYPES] = {
   [ITEM_TYPE_RED_FLASK] =
       {
           .name        = "red flask",
@@ -45,7 +51,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
           .stackable   = TRUE,
           .category    = ITEM_CATEGORY_CONSUMABLE,
           .use      = healing_item_use_callback,
-          .data = &k_healing_item_data_red_flask,
+          .data = &_healingItemDataRedFlask,
           .icon      = {.texture_id = TEX_ITEM_FLASK_RED, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_BIG_RED_FLASK] =
@@ -55,7 +61,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
           .stackable   = TRUE,
           .category    = ITEM_CATEGORY_CONSUMABLE,
           .use      = healing_item_use_callback,
-          .data = &k_healing_item_data_big_red_flask,
+          .data = &_healingItemDataBigRedFlask,
           .icon      = {.texture_id = TEX_ITEM_FLASK_RED_BIG, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_BLUE_FLASK] =
@@ -65,7 +71,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
           .stackable   = TRUE,
           .category    = ITEM_CATEGORY_CONSUMABLE,
           .use      = healing_item_use_callback,
-          .data = &k_healing_item_data_blue_flask,
+          .data = &_healingItemDataBlueFlask,
           .icon      = {.texture_id =  TEX_ITEM_BLUE_FLASK, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_SCROLL_ICE_ARROW] = 
@@ -75,7 +81,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
           .stackable = FALSE,
           .category  = ITEM_CATEGORY_SCROLL,
           .use = scroll_use_callback,
-          .data = &k_scroll_data_ice_arrow,
+          .data = &_scrollDataIceArrow,
           .icon = {.texture_id = TEX_ICON_ICE_ARROW, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_SCROLL_FIRE_BALL] = 
@@ -85,7 +91,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
           .stackable = FALSE,
           .category  = ITEM_CATEGORY_SCROLL,
           .use = scroll_use_callback,
-          .data = &k_scrool_data_fire_ball,
+          .data = &_scrollDataFireBall,
           .icon = {.texture_id = TEX_ICON_FIRE_BALL, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_KEY_1_1] =
@@ -105,7 +111,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
           .stackable = FALSE,
           .category  = ITEM_CATEGORY_EQUIPMENT,
           .use = equipment_item_use_callback,
-          .data = &k_equipemt_item_data_anime_sword,
+          .data = &_equipmentItemAataAnimeSword,
           .icon = {.texture_id = TEX_ICON_CLEAVER, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_SPEAR] =
@@ -115,7 +121,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
           .stackable = FALSE,
           .category  = ITEM_CATEGORY_EQUIPMENT,
           .use = equipment_item_use_callback,
-          .data = &k_equipemt_item_data_spear,
+          .data = &_equipmentItemDataSpear,
           .icon = {.texture_id = TEX_ICON_SPEAR, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_STAFF] =
@@ -125,7 +131,7 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
           .stackable = FALSE,
           .category  = ITEM_CATEGORY_EQUIPMENT,
           .use = equipment_item_use_callback,
-          .data = &k_equipemt_item_data_staff,
+          .data = &_equipmentItemDataStaff,
           .icon = {.texture_id = TEX_ICON_STAFF, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_CLEAVER] =
@@ -135,21 +141,21 @@ const ItemType g_item_types[NUM_ITEM_TYPES] = {
           .stackable = FALSE,
           .category  = ITEM_CATEGORY_EQUIPMENT,
           .use = equipment_item_use_callback,
-          .data = &k_equipemt_item_data_cleaver,
+          .data = &_equipmentItemDataCleaver,
           .icon = {.texture_id = TEX_ICON_CLEAVER, .rect = {-1, 0, 16, 16}},
       },
   
 };
 
-static void healing_item_use_callback(const void* data, Ecs* ecs, ecs_entity_t entity)
+static void healing_item_use_callback(const void* _data, Ecs* ecs, ecs_entity_t entity)
 {
-  const HealingItemData* healing_item_data = (const HealingItemData*)data;
-  Mana*                  mana              = ecs_get(ecs, entity, MANA);
-  Health*                health            = ecs_get(ecs, entity, HEALTH);
+  const HealingItemData* data   = (const HealingItemData*)_data;
+  Mana*                  mana   = ecs_get(ecs, entity, MANA);
+  Health*                health = ecs_get(ecs, entity, HEALTH);
   if (health != NULL)
-    health->current = min(health->max, health->current + healing_item_data->hp);
+    health->current = min(health->max, health->current + data->hp);
   if (mana != NULL)
-    mana->current = min(mana->max, mana->current + healing_item_data->mp);
+    mana->current = min(mana->max, mana->current + data->mp);
 }
 
 static void scroll_use_callback(const void* _data, Ecs* ecs, ecs_entity_t entity)
@@ -158,7 +164,7 @@ static void scroll_use_callback(const void* _data, Ecs* ecs, ecs_entity_t entity
   AttunementSlot*   attunement_slot = ecs_get(ecs, entity, ATTUNEMENT_SLOT);
   if (attunement_slot != NULL)
   {
-    attunement_slot->spellId = data->spell_id;
+    attunement_slot->spellId = data->spellId;
   }
 }
 
@@ -174,6 +180,6 @@ static void equipment_item_use_callback(const void* _data, Ecs* ecs, ecs_entity_
   const EquipmentItemData* data = (const EquipmentItemData*)_data;
   ecs_entity_t             weapon;
 
-  weapon = make_weapon(ecs, data->weapon_id);
+  weapon = make_weapon(ecs, data->weaponId);
   ett_equip_weapon(ecs, entity, weapon);
 }

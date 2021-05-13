@@ -65,10 +65,10 @@ static void parse_item(Item* item, json_object* json)
   const char* item_name;
   int         num_items;
 
-  item_name       = JV(json, string, "type"   );
-  num_items       = JV(json, int   , "quality");
-  item->type      = item_id_from_string(item_name);
-  item->quality   = num_items;
+  item_name     = JV(json, string, "type");
+  num_items     = JV(json, int, "quality");
+  item->type    = item_id_from_string(item_name);
+  item->quality = num_items;
 }
 
 static void parse_item_list(Item items[5], u16* num_items, const char* input)
@@ -122,11 +122,11 @@ static int parse_tilelayer(const json_object* tilelayer_json_obj, tile_t* data)
 
 static void (*get_entity_create_fn(const char* entity_type_name))(Ecs*, const EntityProperties*)
 {
-  struct
+  static struct
   {
     const char* name;
     void (*const fn)(Ecs*, const EntityProperties*);
-  } static lut[] = {
+  } lut[] = {
     { "Imp", parse_imp },     { "Wogol", parse_wogol },   { "BigDemon", parse_huge_demon },
     { "Chest", parse_chest }, { "Ladder", parse_ladder }, { "Chort", parse_chort },
     { "Door", parse_door }

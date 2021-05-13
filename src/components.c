@@ -17,89 +17,91 @@ static void holder_init(Holder* holder);
 static void visual_init(Visual* v);
 static void brain_fini(Brain* ai_agent);
 static void hitbox_init(HitBox* h);
-static void facing_direction_init(FacingDirection* fd);
+static void aim_direction_init(AimDirection* fd);
 static void attack_target_init(AttackTarget* attack_target);
 static void script_fini(Script* script);
 
 void delete_action(void* action);
 
-const EcsType g_comp_types[NUM_COMPONENTS] = {
-  [AGGRO_AREA]                = COMPONENT_DESC(AggroArea),
-  [AGILITY_CHANGED]           = COMPONENT_DESC(AgilityChanged),
-  [ANIMATOR]                  = COMPONENT_DESC(Animator),
-  [ATTACKER]                  = COMPONENT_DESC(Attacker),
-  [ATTACK_COMMAND]            = COMPONENT_DESC(AttackCommand),
-  [ATTACK_MASK]               = COMPONENT_DESC(AttackMask),
-  [ATTACK_TARGET]             = COMPONENT_DESC_EX(AttackTarget, attack_target_init, NULL, NULL),
-  [ATTUNEMENT_SLOT]           = COMPONENT_DESC(AttunementSlot),
-  [BRAIN]                     = COMPONENT_DESC_EX(Brain, NULL, brain_fini, NULL),
-  [CAMERA_TARGET_TAG]         = COMPONENT_DESC(CameraTargetTag),
-  [CHARACTER_ANIMATOR_TAG]    = COMPONENT_DESC(CharacterAnimatorTag),
-  [CHEST]                     = COMPONENT_DESC(ChestAttributes),
-  [DESIRED_DIRECTION]         = COMPONENT_DESC(DesiredDirection),
-  [DESTROYED_TAG]             = COMPONENT_DESC(DestroyedTag),
-  [DIALOGUE]                  = { .size = sizeof(Dialogue) },
-  [DOOR_ATTRIBUTES]           = COMPONENT_DESC(DoorAttributes),
-  [DROP]                      = COMPONENT_DESC(Drop),
-  [EMOJI]                     = COMPONENT_DESC(Emoji),
-  [ENABLE_TILE_COLLISION_TAG] = COMPONENT_DESC(EnableTileCollisionTag),
-  [ENEMY_TAG]                 = COMPONENT_DESC(PlayerTag),
-  [FACING_DIRECTION]      = COMPONENT_DESC_EX(FacingDirection, facing_direction_init, NULL, NULL),
-  [FOLLOWING_TARGET]      = COMPONENT_DESC(FollowingTarget),
-  [HAND]                  = COMPONENT_DESC(Hand),
-  [HAND_ANIMATION]        = COMPONENT_DESC(HandAnimation),
-  [HEALTH]                = COMPONENT_DESC(Health),
-  [HEAL_BAR]              = COMPONENT_DESC(HealthBar),
-  [HITBOX]                = COMPONENT_DESC_EX(HitBox, hitbox_init, NULL, NULL),
-  [HOLDER]                = COMPONENT_DESC_EX(Holder, holder_init, NULL, NULL),
-  [INTELLIGENT_CHANGED]   = COMPONENT_DESC(IntelligentChanged),
-  [INTERACTABLE]          = { .size = sizeof(Interactable) },
-  [INVULNERABLE]          = COMPONENT_DESC(Invulnerable),
-  [LADDER_ATTRIBUTES]     = COMPONENT_DESC(PortalAttributes),
-  [LIFE_SPAN]             = COMPONENT_DESC(LifeSpan),
-  [MANA]                  = COMPONENT_DESC(Mana),
-  [MERCHANT]              = { .size = sizeof(Merchant) },
-  [MOTION]                = COMPONENT_DESC(Motion),
-  [MOVE_SPEED]            = COMPONENT_DESC(MoveSpeed),
-  [NAME]                  = COMPONENT_DESC(Name),
-  [PATH]                  = COMPONENT_DESC(Path),
-  [PICKUPABLE_ATTRIBUTES] = { .size = sizeof(PickupableAttributes) },
-  [PLAYER_TAG]            = COMPONENT_DESC(PlayerTag),
-  [PROJECTILE_ATTRIBUTES] = COMPONENT_DESC(ProjectileAttributes),
-  [REMOVE_IF_OFFSCREEN]   = COMPONENT_DESC(RemoveIfOffScreen),
-  [SCRIPT]                = COMPONENT_DESC_EX(Script, NULL, script_fini, NULL),
-  [STAGGER]               = COMPONENT_DESC(Stagger),
-  [STATS]                 = COMPONENT_DESC(Stats),
-  [STATUS_EFFECT]         = COMPONENT_DESC(StatusEffect),
-  [STRENGTH_CHANGED]      = COMPONENT_DESC(StrengthChanged),
-  [TEXT]                  = COMPONENT_DESC(Text),
-  [TRANSFORM]             = COMPONENT_DESC_EX(Transform, transform_init, NULL, NULL),
-  [UNABLE_TO_MOVE]        = COMPONENT_DESC(UnableToMove),
-  [VISUAL]                = COMPONENT_DESC_EX(Visual, visual_init, NULL, NULL),
-  [VITALITY_CHANGED]      = COMPONENT_DESC(VitalityChanged),
-  [WALK_DIRECTLY_TOWARD]  = COMPONENT_DESC(WalkDirectlyToward),
-  [WEAPON_ATTRIBUTES]     = COMPONENT_DESC(WeaponAttributes),
-  [WEAPON_CAST]           = COMPONENT_DESC(WeaponCast),
-  [WEAPON_CHARGE_ATTACK]  = COMPONENT_DESC(WeaponChargeAttack),
-  [WEAPON_SHOOT]          = COMPONENT_DESC(WeaponShoot),
-  [WEAPON_SWING_ATTACK]   = COMPONENT_DESC(WeaponSwingAttack),
+const EcsCompDesc gCompDescs[NUM_COMPONENTS] = {
+  [AGGRO_AREA]                   = COMPONENT_DESC(AggroArea),
+  [AGILITY_CHANGED]              = COMPONENT_DESC(AgilityChanged),
+  [AIM_DIRECTION]                = COMPONENT_DESC_EX(AimDirection, aim_direction_init, NULL, NULL),
+  [ANIMATOR]                     = COMPONENT_DESC(Animator),
+  [ATTACKER]                     = COMPONENT_DESC(Attacker),
+  [ATTACK_COMMAND]               = COMPONENT_DESC(AttackCommand),
+  [ATTACK_MASK]                  = COMPONENT_DESC(AttackMask),
+  [ATTACK_TARGET]                = COMPONENT_DESC_EX(AttackTarget, attack_target_init, NULL, NULL),
+  [ATTUNEMENT_SLOT]              = COMPONENT_DESC(AttunementSlot),
+  [BLACKBOARD]                   = COMPONENT_DESC_EX(Blackboard, NULL, blackboard_fini, NULL),
+  [BRAIN]                        = COMPONENT_DESC_EX(Brain, NULL, brain_fini, NULL),
+  [CAMERA_TARGET_TAG]            = COMPONENT_DESC(CameraTargetTag),
+  [CHARACTER_ANIMATOR_TAG]       = COMPONENT_DESC(CharacterAnimatorTag),
+  [CHEST]                        = COMPONENT_DESC(ChestAttributes),
+  [DESIRED_DIRECTION]            = COMPONENT_DESC(DesiredDirection),
+  [DESTROYED_TAG]                = COMPONENT_DESC(DestroyedTag),
+  [DIALOGUE]                     = { .size = sizeof(Dialogue) },
+  [DOOR_ATTRIBUTES]              = COMPONENT_DESC(DoorAttributes),
+  [DROP]                         = COMPONENT_DESC(Drop),
+  [EMOJI]                        = COMPONENT_DESC(Emoji),
+  [ENABLE_TILE_COLLISION_TAG]    = COMPONENT_DESC(EnableTileCollisionTag),
+  [ENEMY_TAG]                    = COMPONENT_DESC(PlayerTag),
+  [FOLLOWING_TARGET]             = COMPONENT_DESC(FollowingTarget),
+  [HAND]                         = COMPONENT_DESC(Hand),
+  [HAND_ANIMATION]               = COMPONENT_DESC(HandAnimation),
+  [HEALTH]                       = COMPONENT_DESC(Health),
+  [HEAL_BAR]                     = COMPONENT_DESC(HealthBar),
+  [HITBOX]                       = COMPONENT_DESC_EX(HitBox, hitbox_init, NULL, NULL),
+  [HOLDER]                       = COMPONENT_DESC_EX(Holder, holder_init, NULL, NULL),
+  [INTELLIGENT_CHANGED]          = COMPONENT_DESC(IntelligentChanged),
+  [INTERACTABLE]                 = { .size = sizeof(Interactable) },
+  [INVULNERABLE]                 = COMPONENT_DESC(Invulnerable),
+  [LADDER_ATTRIBUTES]            = COMPONENT_DESC(PortalAttributes),
+  [LIFE_SPAN]                    = COMPONENT_DESC(LifeSpan),
+  [MANA]                         = COMPONENT_DESC(Mana),
+  [MERCHANT]                     = { .size = sizeof(Merchant) },
+  [MOTION]                       = COMPONENT_DESC(Motion),
+  [MOVE_SPEED]                   = COMPONENT_DESC(MoveSpeed),
+  [NAME]                         = COMPONENT_DESC(Name),
+  [PATH]                         = COMPONENT_DESC(Path),
+  [PICKUPABLE_ATTRIBUTES]        = { .size = sizeof(PickupableAttributes) },
+  [PLAYER_TAG]                   = COMPONENT_DESC(PlayerTag),
+  [PROJECTILE_ATTRIBUTES]        = COMPONENT_DESC(ProjectileAttributes),
+  [REMOVE_IF_OFFSCREEN]          = COMPONENT_DESC(RemoveIfOffScreen),
+  [SCRIPT]                       = COMPONENT_DESC_EX(Script, NULL, script_fini, NULL),
+  [STAGGER]                      = COMPONENT_DESC(Stagger),
+  [STATS]                        = COMPONENT_DESC(Stats),
+  [STATUS_EFFECT]                = COMPONENT_DESC(StatusEffect),
+  [STRENGTH_CHANGED]             = COMPONENT_DESC(StrengthChanged),
+  [TEXT]                         = COMPONENT_DESC(Text),
+  [TRANSFORM]                    = COMPONENT_DESC_EX(Transform, transform_init, NULL, NULL),
+  [UNABLE_TO_MOVE]               = COMPONENT_DESC(UnableToMove),
+  [VISUAL]                       = COMPONENT_DESC_EX(Visual, visual_init, NULL, NULL),
+  [VITALITY_CHANGED]             = COMPONENT_DESC(VitalityChanged),
+  [WALK_DIRECTLY_TOWARD]         = COMPONENT_DESC(WalkDirectlyToward),
+  [WEAPON_ATTRIBUTES]            = COMPONENT_DESC(WeaponAttributes),
+  [WEAPON_CAST]                  = COMPONENT_DESC(WeaponCast),
+  [WEAPON_CHARGE_ATTACK]         = COMPONENT_DESC(WeaponChargeAttack),
+  [WEAPON_SHOOT]                 = COMPONENT_DESC(WeaponShoot),
+  [WEAPON_SWING_ATTACK]          = COMPONENT_DESC(WeaponSwingAttack),
   [WEAPON_THUNDER_STORM_RELEASE] = COMPONENT_DESC(WeaponThunderStormRelease),
   [WEAPON_THUST_ATTACK]          = COMPONENT_DESC(WeaponThustAttack),
+  [PATHFINDING_PARAMS]           = COMPONENT_DESC(PathfindingParams),
 };
 
 void brain_fini(Brain* brain)
 {
-  bt_node_del(brain->root);
+  bt_node_del((BTNode*)brain->root);
   brain->root = NULL;
 }
 
 void hitbox_init(HitBox* h)
 {
-  h->proxyId   = RTREE_NULL_NODE;
-  h->anchor    = (Vec2){ 0 };
-  h->category  = 0;
-  h->size      = (Vec2){ 16.f, 16.f };
-  h->mask      = 0xffff;
+  h->proxyId  = RTREE_NULL_NODE;
+  h->anchor   = (Vec2){ 0 };
+  h->category = 0;
+  h->size     = (Vec2){ 16.f, 16.f };
+  h->mask     = 0xffff;
 }
 
 void portal_attrs_init(PortalAttributes* attrs, const char* level, const char* dest, u16 direction)
@@ -142,12 +144,12 @@ static void holder_init(Holder* holder)
 
 static void transform_init(Transform* t)
 {
-  t->lastPosition = t->position  = (Vec2){ 0 };
-  t->rotation                    = 0.0;
-  t->z                           = 0.f;
+  t->lastPosition = t->position = (Vec2){ 0 };
+  t->rotation                   = 0.0;
+  t->z                          = 0.f;
 }
 
-static void facing_direction_init(FacingDirection* fd)
+static void aim_direction_init(AimDirection* fd)
 {
   fd->value  = (Vec2){ 1.f, 0.f };
   fd->frezze = 0;

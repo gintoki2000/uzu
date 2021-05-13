@@ -9,16 +9,15 @@ BT_INST_DECL(Selector, BTCompositeNode, {
 BT_VTBL_DECL_EMPTY(Selector, BTCompositeNode)
 
 #define super BT_COMPOSITE_NODE(self)
-typedef BTUpdateContext UpdateContext;
 
-static Selector* initialize(Selector* self)
+static Selector* init(Selector* self)
 {
   bt_composite_node_init(super);
   self->activeChildIndex = 0;
   return self;
 }
 
-static void on_start(Selector* self, const UpdateContext* ctx)
+static void on_start(Selector* self, const BTUpdateContext* ctx)
 {
   if (super->children->cnt == 0)
     return;
@@ -41,7 +40,13 @@ static BOOL next_child(Selector* self)
   return FALSE;
 }
 
-static BTStatus on_tick(Selector* self, const UpdateContext* ctx)
+static void finish_child_execution(Selector* self, const BTUpdateContext* ctx)
+{
+  self->lastChildExcutionCompleted = TRUE;
+  bt_node_finish(self->activeChild, ctx);
+}
+
+static BTStatus on_tick(Selector* self, const BTUpdateContext* ctx)
 {
   if (self->lastChildExcutionCompleted)
   {
@@ -53,31 +58,28 @@ static BTStatus on_tick(Selector* self, const UpdateContext* ctx)
   case BT_STATUS_RUNNING:
     return BT_STATUS_RUNNING;
   case BT_STATUS_FAILURE:
-    bt_node_finish(self->activeChild, ctx);
-    self->lastChildExcutionCompleted = TRUE;
+    finish_child_execution(self, ctx);
     return next_child(self) ? BT_STATUS_RUNNING : BT_STATUS_FAILURE;
   case BT_STATUS_SUCCESS:
-    bt_node_finish(self->activeChild, ctx);
-    self->lastChildExcutionCompleted = TRUE;
+    finish_child_execution(self, ctx);
     return BT_STATUS_SUCCESS;
   }
 }
 
-static void on_finish(Selector* self, const UpdateContext* ctx)
+static void on_finish(Selector* self, const BTUpdateContext* ctx)
 {
   if (!self->lastChildExcutionCompleted && self->activeChild != NULL)
     bt_node_finish(self->activeChild, ctx);
 }
 
 BT_VTBL_INITIALIZER(Selector, BTCompositeNode, bt_composite_node, {
-  ((BTNodeVtbl*)vtbl)->tick   = (BTOnTickFunc)on_tick;
-  ((BTNodeVtbl*)vtbl)->start  = (BTOnStartFunc)on_start;
-  ((BTNodeVtbl*)vtbl)->finish = (BTOnFinishFunc)on_finish;
+  BT_NODE_VTBL(vtbl)->tick   = (BTOnTickFunc)on_tick;
+  BT_NODE_VTBL(vtbl)->start  = (BTOnStartFunc)on_start;
+  BT_NODE_VTBL(vtbl)->finish = (BTOnFinishFunc)on_finish;
 })
-
-BT_INST_ALLOC_FN(Selector, selector)
 
 BTCompositeNode* bt_selector_new()
 {
-  return BT_COMPOSITE_NODE(initialize(selector_alloc()));
+  Selector* self = bt_alloc(vtbl_inst());
+  return BT_COMPOSITE_NODE(init(self));
 }

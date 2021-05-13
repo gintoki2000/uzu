@@ -5,29 +5,29 @@
 #include "toolbox/toolbox.h"
 
 #define DT 0.0166f
-#define SPEED_LIMIT 200.f
+#define SPEED_LIMIT 400.f
 #define GRAVITY -6.f
 
 extern Ecs* g_ecs;
 
-static void apply_controller_input(void)
+static void move(void)
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;
 
   const MoveSpeed*  move_speed;
-  DesiredDirection* desired_direction;
+  DesiredDirection* desiredDirection;
   Motion*           motion;
 
-  ecs_raw(g_ecs, DESIRED_DIRECTION, &entities, (void**)&desired_direction, &cnt);
+  ecs_raw(g_ecs, DESIRED_DIRECTION, &entities, (void**)&desiredDirection, &cnt);
   for (int i = 0; i < cnt; ++i)
   {
     if (!ecs_has(g_ecs, entities[i], UNABLE_TO_MOVE) &&
         (motion = ecs_get(g_ecs, entities[i], MOTION)) &&
         (move_speed = ecs_get(g_ecs, entities[i], MOVE_SPEED)))
     {
-      motion->vel          = vec2_mul(desired_direction[i], (float)move_speed->value);
-      desired_direction[i] = VEC2_ZERO;
+      motion->vel         = vec2_mul(desiredDirection[i], (float)move_speed->value);
+      desiredDirection[i] = VEC2_ZERO;
     }
   }
 }
@@ -41,7 +41,7 @@ void motion_system()
   Transform* transform;
   Motion*    motion;
 
-  apply_controller_input();
+  move();
 
   ecs_raw(g_ecs, MOTION, &entities, (void**)&motion, &cnt);
 

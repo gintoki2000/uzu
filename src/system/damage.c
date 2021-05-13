@@ -14,7 +14,7 @@ static const Vec2 _trap_impact_force = { 100.f, 0.f };
 
 static void on_hit_trap(SDL_UNUSED void* arg, const EntityHitTrapMsg* event)
 {
-  const FacingDirection* facing_direction = ecs_get(g_ecs, event->entity, FACING_DIRECTION);
+  const AimDirection*    facing_direction = ecs_get(g_ecs, event->entity, AIM_DIRECTION);
   Vec2                   force = vec2_mul(_trap_impact_force, signf(facing_direction->value.x));
   ems_broadcast(MSG_DEAL_DAMAGE,
                 &(InflictDamageMsg){ .damage      = 1,

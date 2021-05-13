@@ -22,7 +22,7 @@ static void open_chest(ecs_entity_t entity)
   if (attrs->numSlots == 0)
   {
     visual              = ecs_get(g_ecs, entity, VISUAL);
-    visual->sprite.rect = RECT_CHEST_OPEN;
+    visual->sprite.rect = gRectChestOpen;
     attrs->state        = CHEST_STATE_OPEN;
     ui_msgbox_display("chest empty!");
   }
@@ -33,14 +33,14 @@ static void open_chest(ecs_entity_t entity)
     {
       inv_add_item(attrs->items[i].type, attrs->items[i].quality);
       SDL_strlcpy(entries[i].text,
-                  g_item_types[attrs->items[i].type].name,
+                  gItemTypes[attrs->items[i].type].name,
                   UI_MSGBOX_W_ICON_MAX_TEXT_LEN);
-      entries[i].icon = g_item_types[attrs->items[i].type].icon;
+      entries[i].icon = gItemTypes[attrs->items[i].type].icon;
     }
     ui_msgbox_w_icon_show(entries, attrs->numSlots);
     attrs->numSlots     = 0;
     visual              = ecs_get(g_ecs, entity, VISUAL);
-    visual->sprite.rect = RECT_CHEST_OPEN;
+    visual->sprite.rect = gRectChestOpen;
     attrs->state        = CHEST_STATE_OPEN;
   }
 }
@@ -48,7 +48,7 @@ static void open_chest(ecs_entity_t entity)
 static void on_command_selected(pointer_t arg, const CommandSelectedMsg* event)
 {
   (void)arg;
-  if (!strcmp(event->cmd, TEXT_COMMAND_OPEN) && ecs_has(g_ecs, event->entity, CHEST))
+  if (!strcmp(event->cmd, gCmdOpen) && ecs_has(g_ecs, event->entity, CHEST))
     open_chest(event->entity);
 }
 

@@ -28,6 +28,7 @@ typedef void (*BTOnStartFunc)(BTNode*, const BTUpdateContext*);
 
 typedef struct BTNodeVtbl
 {
+  size_t         size;
   BTFinalizeFunc fini;
   BTOnStartFunc  start;
   BTOnTickFunc   tick;
@@ -38,6 +39,7 @@ typedef struct BTNodeVtbl
   static void vtbl_init(T##Vtbl* vtbl)                                                             \
   {                                                                                                \
     base##_vtbl_init((Base##Vtbl*)vtbl);                                                           \
+    BT_NODE_VTBL(vtbl)->size = sizeof(T);                                                          \
     __VA_ARGS__                                                                                    \
   }                                                                                                \
   static const BTNodeVtbl* vtbl_inst()                                                             \
@@ -59,6 +61,12 @@ typedef struct BTNodeVtbl
     struct __VA_ARGS__;                                                                            \
   } T;
 
+#define BT_INST_DECL_EMPTY(T, Base)                                                                \
+  typedef struct _##T                                                                              \
+  {                                                                                                \
+    Base _base;                                                                                    \
+  } T;
+
 #define BT_VTBL_DECL(T, Base, ...)                                                                 \
   typedef struct _##T##Vtbl                                                                        \
   {                                                                                                \
@@ -72,30 +80,13 @@ typedef struct BTNodeVtbl
     Base##Vtbl _base;                                                                              \
   } T##Vtbl;
 
-#define BT_INST_ALLOC_FN(T, name)                                                                  \
-  static const BTNodeVtbl* vtbl_inst(void);                                                        \
-  INLINE T* name##_alloc()                                                                         \
-  {                                                                                                \
-    T* self             = SDL_malloc(sizeof(T));                                                   \
-    BT_NODE(self)->vtbl = vtbl_inst();                                                             \
-    return self;                                                                                   \
-  }
-
-#define BT_GLOBAL_INST_ALLOC_FN_IMPL(T, name)                                                      \
-  const BTNodeVtbl* name##_vtbl_inst(void);                                                        \
-  T*                name##_alloc()                                                                 \
-  {                                                                                                \
-    T* self             = SDL_malloc(sizeof(T));                                                   \
-    BT_NODE(self)->vtbl = vtbl_inst();                                                             \
-    return self;                                                                                   \
-  }
-
 #define BT_GLOBAL_VTBL_INITIALIZER_DECL(T, t) void t##_vtbl_init(T##Vtbl* vtbl);
 
 #define BT_GLOBAL_VTBL_INITIALIZER_IMPL(T, t, B, b, ...)                                           \
   void t##_vtbl_init(T##Vtbl* vtbl)                                                                \
   {                                                                                                \
     b##_vtbl_init((B##Vtbl*)vtbl);                                                                 \
+    BT_NODE_VTBL(vtbl)->size = sizeof(T);                                                          \
     __VA_ARGS__                                                                                    \
   }
 
@@ -107,6 +98,7 @@ struct _BTNode
   BTNode*           parent;
 };
 
+void* bt_alloc(const BTNodeVtbl* vtbl);
 
 BTNode*  bt_node_init(BTNode* self);
 void     bt_node_fini(BTNode* self);
@@ -138,7 +130,6 @@ void             bt_composite_node_fini(BTCompositeNode* self);
 void             bt_composite_node_add(BTCompositeNode* self, BTNode* node);
 BTNode*          bt_composite_node_child_at(BTCompositeNode* self, int index);
 
-
 typedef BTNodeVtbl BTDecoratorVtbl;
 BT_INST_DECL(BTDecorator, BTNode, {
   BTNode* child;
@@ -153,6 +144,5 @@ void         bt_decorator_on_finish(BTDecorator* self, const BTUpdateContext* ct
 BTStatus     bt_decorator_on_tick(BTDecorator* self, const BTUpdateContext* ctx);
 void         bt_decorator_set_child(BTDecorator* self, BTNode* node);
 BTNode*      bt_decorator_steal_child(BTDecorator* self);
-
 
 #endif // BEHAVIOR_TREE

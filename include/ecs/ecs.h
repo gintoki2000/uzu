@@ -14,7 +14,7 @@ enum
 typedef struct Ecs
 {
   ecs_size_t    type_cnt;
-  EcsType*      types;
+  EcsCompDesc*  types;
   EcsPool**     pools;
   Signal*       on_construct;
   Signal*       on_destruct;
@@ -38,10 +38,10 @@ typedef struct EcsComponentEvent
   void*        component;
 } EcsComponentEvent, EcsComponentAdded, EcsComponentRemoved;
 
-Ecs* ecs_new(const EcsType* types, ecs_size_t cnt);
+Ecs* ecs_new(const EcsCompDesc* types, ecs_size_t cnt);
 void ecs_del(Ecs* ecs);
 
-Ecs* ecs_init(Ecs* self, const EcsType* types, ecs_size_t type_cnt);
+Ecs* ecs_init(Ecs* self, const EcsCompDesc* types, ecs_size_t type_cnt);
 void ecs_fini(Ecs* self);
 
 ecs_entity_t ecs_create(Ecs* self);

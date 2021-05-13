@@ -44,7 +44,7 @@ static ActionVtbl _walk_action_vtbl = {
   .start   = start,
   .end     = end,
   .update  = update,
-  .cleanup = action_default_cleanup_func,
+  .cleanup = action_on_cleanup,
 };
 
 Action* walk_action_new(Vec2 destination)

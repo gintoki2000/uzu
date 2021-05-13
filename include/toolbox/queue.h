@@ -3,15 +3,15 @@
 #include "common.h"
 typedef struct
 {
-  pointer_t*   storage;
-  u32          cnt;
-  u32          cap;
-  s32          front;
-  s32          rear;
-  destroy_fn_t destroy_fn;
+  pointer_t*  storage;
+  u32         cnt;
+  u32         cap;
+  s32         front;
+  s32         rear;
+  DestroyFunc destroyFunc;
 } Queue;
 
-Queue* queue_init_full(Queue* self, u32 cap, destroy_fn_t destroy_fn);
+Queue* queue_init_full(Queue* self, u32 cap, DestroyFunc destroyFunc);
 Queue* queue_init(Queue* self, u32 cap);
 void   queue_fini(Queue* self);
 

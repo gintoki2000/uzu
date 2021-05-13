@@ -6,40 +6,40 @@
 
 extern Ecs* g_ecs;
 
-static void on_deal_damage(void* arg, const InflictDamageMsg* event)
+static void on_deal_damage(void* arg, const InflictDamageMsg* msg)
 {
   (void)arg;
   Health* health;
   Motion* motion;
-  if ((health = ecs_get(g_ecs, event->receiver, HEALTH)) != NULL &&
-      !ecs_has(g_ecs, event->receiver, INVULNERABLE))
+  if ((health = ecs_get(g_ecs, msg->receiver, HEALTH)) != NULL &&
+      !ecs_has(g_ecs, msg->receiver, INVULNERABLE))
   {
-    health->current -= min(event->damage, health->current);
+    health->current -= min(msg->damage, health->current);
     ems_broadcast(MSG_GET_DAMAGED,
                   &(GetDamagedMsg){
-                      .dealer  = event->dealer,
-                      .damagee = event->receiver,
-                      .damage  = event->damage,
-                      .type    = event->type,
+                      .dealer  = msg->dealer,
+                      .damagee = msg->receiver,
+                      .damage  = msg->damage,
+                      .type    = msg->type,
                   });
-    ecs_set(g_ecs, event->receiver, INVULNERABLE, &(Invulnerable){ event->impact_time });
+    ecs_set(g_ecs, msg->receiver, INVULNERABLE, &(Invulnerable){ msg->impact_time });
 
-    if (event->dealer != ECS_NULL_ENT)
-      ecs_set(g_ecs, event->receiver, ATTACKER, &(Attacker){ event->dealer });
+    if (msg->dealer != ECS_NULL_ENT)
+      ecs_set(g_ecs, msg->receiver, ATTACKER, &(Attacker){ msg->dealer });
 
-    if (event->impact_time > 0 && (motion = ecs_get(g_ecs, event->receiver, MOTION)))
+    if (msg->impact_time > 0 && (motion = ecs_get(g_ecs, msg->receiver, MOTION)))
     {
-      motion->acc.x += event->force.x;
-      motion->acc.y += event->force.y;
-      motion->vz = event->zforce;
-      if (!ecs_has(g_ecs, event->receiver, STAGGER))
-        ecs_set(g_ecs, event->receiver, STAGGER, &(Stagger){ event->impact_time });
+      motion->acc.x += msg->force.x;
+      motion->acc.y += msg->force.y;
+      motion->vz = msg->zforce;
+      if (!ecs_has(g_ecs, msg->receiver, STAGGER))
+        ecs_set(g_ecs, msg->receiver, STAGGER, &(Stagger){ msg->impact_time });
     }
     if (health->current <= 0)
     {
       health->current = 0;
-      ems_broadcast(MSG_ENTITY_DIED, &(EntityDiedMsg){ event->receiver });
-      ecs_add(g_ecs, event->receiver, DESTROYED_TAG);
+      ems_broadcast(MSG_ENTITY_DIED, &(EntityDiedMsg){ msg->receiver });
+      ecs_add(g_ecs, msg->receiver, DESTROYED_TAG);
     }
   }
 }

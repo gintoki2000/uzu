@@ -30,24 +30,24 @@ static void on_command_selected(SDL_UNUSED void* arg, const CommandSelectedMsg* 
   {
     visual       = ecs_get(g_ecs, event->entity, VISUAL);
     interactable = ecs_get(g_ecs, event->entity, INTERACTABLE);
-    if (strcmp(event->cmd, TEXT_COMMAND_OPEN) == 0)
+    if (strcmp(event->cmd, gCmdOpen) == 0)
     {
       if (attrs->requiredKey == DOOR_NO_REQUIRED_KEY || inv_has(attrs->requiredKey))
       {
-        visual->sprite.rect       = RECT_DOOR_OPEN;
+        visual->sprite.rect       = gRectOpen;
         attrs->state              = DOOR_STATE_OPEN;
-        interactable->commands[0] = TEXT_COMMAND_CLOSE;
+        interactable->commands[0] = gCmdClose;
       }
       else
       {
         ui_msgbox_display("it's locked!");
       }
     }
-    else if (strcmp(event->cmd, TEXT_COMMAND_CLOSE) == 0)
+    else if (strcmp(event->cmd, gCmdClose) == 0)
     {
-      visual->sprite.rect       = RECT_DOOR_CLOSE;
+      visual->sprite.rect       = gRectClose;
       attrs->state              = DOOR_STATE_CLOSE;
-      interactable->commands[0] = TEXT_COMMAND_OPEN;
+      interactable->commands[0] = gCmdOpen;
     }
   }
 }

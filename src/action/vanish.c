@@ -13,9 +13,9 @@ static void start(SDL_UNUSED void* _self, ecs_entity_t target)
 
 static ActionVtbl _vanish_action_vtbl = {
   .start   = start,
-  .end     = action_default_end_func,
-  .update  = action_default_update_func,
-  .cleanup = action_default_cleanup_func,
+  .end     = action_on_end,
+  .update  = action_on_update,
+  .cleanup = action_on_cleanup,
 };
 
 Action* vanish_action_new(void)

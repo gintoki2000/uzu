@@ -52,9 +52,7 @@ BT_VTBL_INITIALIZER(BTRoot, BTNode, bt_node, {
   ((BTNodeVtbl*)vtbl)->tick   = (BTOnTickFunc)on_tick;
 })
 
-BT_INST_ALLOC_FN(BTRoot, root)
-
 BTRoot* bt_root_new(BTNode* child)
 {
-  return initialize(root_alloc(), child);
+  return initialize(bt_alloc(vtbl_inst()), child);
 }

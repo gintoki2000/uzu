@@ -9,6 +9,7 @@ extern Ecs*        g_ecs;
 const HandAnimKeyFrame _keyframes[] = {
   { .duration = 2, .length = -1, .angle = -15.0 },
   { .duration = 2, .length = -2, .angle = -20.0 },
+  { .duration = 2, .length = 0, .angle = -20.0 },
   { .duration = 3, .length = 3, .angle = 0 },
   { .duration = -1 },
 };
@@ -43,11 +44,12 @@ void weapon_casting_system()
       }
     }
     else if (cast[i].cooldownTimer == 0 &&
-             (holder = wpn_get_holder(g_ecs, entities[i])) != ECS_NULL_ENT &&
-             (attackCommand = ecs_get(g_ecs, holder, ATTACK_COMMAND)) &&
-             (spell = ett_get_attuned_spell(g_ecs, holder)) &&
-             (mana = ecs_get(g_ecs, holder, MANA)))
+             ((holder = wpn_get_holder(g_ecs, entities[i])) != ECS_NULL_ENT) &&
+             (attackCommand = ecs_get(g_ecs, holder, ATTACK_COMMAND)))
     {
+      spell = ett_get_attuned_spell(g_ecs, holder);
+      mana  = ecs_get(g_ecs, holder, MANA);
+
       isTriggered = !attackCommand->processing && attackCommand->code == 0;
       hasEnoughMp = mana->current >= spell->cost;
 
@@ -58,7 +60,7 @@ void weapon_casting_system()
           mana->current -= spell->cost;
           spell->cast(g_ecs, holder, entities[i]);
           cast[i].processing        = TRUE;
-          cast[i].cooldownTimer     = spell->cast_spd;
+          cast[i].cooldownTimer     = spell->coolDownTime;
           attackCommand->processing = TRUE;
 
           HandAnimParams params       = { 0 };
@@ -73,7 +75,7 @@ void weapon_casting_system()
         }
       }
     }
-    else
+    else if (cast[i].cooldownTimer > 0)
     {
       --cast[i].cooldownTimer;
     }

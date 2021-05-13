@@ -11,7 +11,7 @@ void weapon_transform_system()
   Hand*         hand;
   // owner components
   Transform*       transform;
-  FacingDirection* aimDirection;
+  AimDirection*    aimDirection;
 
   // weapon components
   WeaponAttributes* weaponAttributes;
@@ -28,7 +28,7 @@ void weapon_transform_system()
     if (hand[i].weapon == ECS_NULL_ENT)
       continue;
     transform    = ecs_get(g_ecs, entities[i], TRANSFORM);
-    aimDirection = ecs_get(g_ecs, entities[i], FACING_DIRECTION);
+    aimDirection = ecs_get(g_ecs, entities[i], AIM_DIRECTION);
 
     weaponAttributes = ecs_get(g_ecs, hand[i].weapon, WEAPON_ATTRIBUTES);
     weaponTransform  = ecs_get(g_ecs, hand[i].weapon, TRANSFORM);
@@ -64,7 +64,7 @@ void hand_animation_system(void)
   HandAnimation*          handAnim;
   Hand*                   hand;
   const HandAnimKeyFrame* kf;
-  FacingDirection*        fdir;
+  AimDirection*           fdir;
 
   BOOL notStarted;
   BOOL justFinishedCurrentCurrFrame;
@@ -79,7 +79,7 @@ void hand_animation_system(void)
       if (next_kframe(&handAnim[i]))
       {
         hand = ecs_get(g_ecs, entities[i], HAND);
-        fdir = ecs_get(g_ecs, entities[i], FACING_DIRECTION);
+        fdir = ecs_get(g_ecs, entities[i], AIM_DIRECTION);
 
         INVOKE_EVENT(handAnim[i].cbFrame, entities[i], handAnim[i].currentIndex);
         kf                   = handAnim[i].keyframes + handAnim[i].currentIndex;
@@ -103,7 +103,7 @@ void hand_system(void)
   ecs_entity_t*     entities;
   ecs_size_t        cnt;
   Hand*             hand;
-  FacingDirection*  fdir;
+  AimDirection*     fdir;
   WeaponAttributes* attrs;
 
   ecs_raw(g_ecs, HAND, &entities, (void**)&hand, &cnt);
@@ -113,7 +113,7 @@ void hand_system(void)
       continue;
     if (hand[i].weapon == ECS_NULL_ENT)
       continue;
-    fdir          = ecs_get(g_ecs, entities[i], FACING_DIRECTION);
+    fdir          = ecs_get(g_ecs, entities[i], AIM_DIRECTION);
     attrs         = ecs_get(g_ecs, hand[i].weapon, WEAPON_ATTRIBUTES);
     hand[i].angle = SDL_atan2f(fdir->value.y, fdir->value.x) * RAD_TO_DEG;
 

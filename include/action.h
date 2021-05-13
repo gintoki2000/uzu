@@ -27,10 +27,10 @@ void* _action_alloc(size_t size, const ActionVtbl* type);
 #define ACTION_END(action, target) ACTION(action)->vtbl->end(action, target)
 #define ACTION_UPDATE(action, target) ACTION(action)->vtbl->update(action, target)
 
-void action_default_start_func(void* self, ecs_entity_t target);
-void action_default_end_func(void* self, ecs_entity_t target);
-BOOL action_default_update_func(void* self, ecs_entity_t target);
-void action_default_cleanup_func(void* self);
+void action_on_start(void* self, ecs_entity_t target);
+void action_on_end(void* self, ecs_entity_t target);
+BOOL action_on_update(void* self, ecs_entity_t target);
+void action_on_cleanup(void* self);
 void action_delete(Action* action);
 
 typedef struct CompositeAction

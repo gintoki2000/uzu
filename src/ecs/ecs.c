@@ -15,7 +15,7 @@
 #define ASSERT_VALID_EVENT_ID(event_id)                                                            \
   ASSERT((event_id >= 0 && event_id < ECS_NUM_EVENTS) && "invalid event id")
 
-INLINE void construct(const EcsType* type, void* component)
+INLINE void construct(const EcsCompDesc* type, void* component)
 {
   if (type->init_fn != NULL)
     type->init_fn(component);
@@ -23,13 +23,13 @@ INLINE void construct(const EcsType* type, void* component)
     SDL_memset(component, 0, type->size);
 }
 
-INLINE void destruct(const EcsType* type, void* component)
+INLINE void destruct(const EcsCompDesc* type, void* component)
 {
   if (type->fini_fn != NULL)
     type->fini_fn(component);
 }
 
-INLINE void copy(const EcsType* type, void* dst, const void* src)
+INLINE void copy(const EcsCompDesc* type, void* dst, const void* src)
 {
   if (type->cpy_fn != NULL)
     type->cpy_fn(dst, src);
@@ -37,7 +37,7 @@ INLINE void copy(const EcsType* type, void* dst, const void* src)
     SDL_memcpy(dst, src, type->size);
 }
 
-Ecs* ecs_new(const EcsType* types, ecs_size_t cnt)
+Ecs* ecs_new(const EcsCompDesc* types, ecs_size_t cnt)
 {
   return ecs_init(SDL_malloc(sizeof(Ecs)), types, cnt);
 }
@@ -51,12 +51,12 @@ void ecs_del(Ecs* ecs)
   }
 }
 
-Ecs* ecs_init(Ecs* self, const EcsType* types, ecs_size_t cnt)
+Ecs* ecs_init(Ecs* self, const EcsCompDesc* types, ecs_size_t cnt)
 {
   self->type_cnt = cnt;
-  self->types    = SDL_malloc(cnt * sizeof(EcsType));
+  self->types    = SDL_malloc(cnt * sizeof(EcsCompDesc));
   self->pools    = SDL_calloc(cnt, sizeof(void*));
-  SDL_memcpy(self->types, types, cnt * sizeof(EcsType));
+  SDL_memcpy(self->types, types, cnt * sizeof(EcsCompDesc));
   for (int i = 0; i < cnt; ++i)
   {
     self->pools[i] = ecs_pool_new(types[i].size);
@@ -187,7 +187,7 @@ void ecs_rmv_all(Ecs* self, ecs_entity_t entity)
 {
   ASSERT_VALID_ENTITY(self, entity);
   void*          component;
-  const EcsType* types;
+  const EcsCompDesc* types;
   EcsPool**      pools;
 
   types = self->types;

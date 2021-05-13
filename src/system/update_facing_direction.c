@@ -24,9 +24,9 @@ static void update_player_facing_direction(void)
   ecs_entity_t     player = scn_get_player(g_ecs);
   Vec2             mousePosition;
   Vec2             playerPosition;
-  FacingDirection* facingDirection;
+  AimDirection*    facingDirection;
 
-  if (player != ECS_NULL_ENT && (facingDirection = ecs_get(g_ecs, player, FACING_DIRECTION)))
+  if (player != ECS_NULL_ENT && (facingDirection = ecs_get(g_ecs, player, AIM_DIRECTION)))
   {
     if (!facingDirection->frezze)
     {
@@ -42,13 +42,13 @@ static void update_facing_direction_by_attack_target(void)
   ecs_entity_t* entities;
   ecs_size_t    count;
 
-  FacingDirection*    facingDirection;
+  AimDirection*       facingDirection;
   Transform *         selfTransform, *targetTransform;
   const AttackTarget* attackTarget;
   Vec2                relativePosition;
   const Motion*       motion;
 
-  ecs_raw(g_ecs, FACING_DIRECTION, &entities, (void**)&facingDirection, &count);
+  ecs_raw(g_ecs, AIM_DIRECTION, &entities, (void**)&facingDirection, &count);
   for (int i = 0; i < count; ++i)
   {
     if (ecs_has(g_ecs, entities[i], PLAYER_TAG))

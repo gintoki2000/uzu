@@ -34,7 +34,7 @@ typedef enum ComponentId
   EMOJI,
   ENABLE_TILE_COLLISION_TAG,
   ENEMY_TAG,
-  FACING_DIRECTION,
+  AIM_DIRECTION,
   FOLLOWING_TARGET,
   HAND,
   HAND_ANIMATION,
@@ -77,8 +77,11 @@ typedef enum ComponentId
   WEAPON_THUNDER_STORM_RELEASE,
   WEAPON_THUST_ATTACK,
   INITIAL_POSITION,
+  PATHFINDING_PARAMS,
   NUM_COMPONENTS
 } ComponentId;
+
+extern const EcsCompDesc gCompDescs[];
 
 typedef struct Motion
 {
@@ -98,11 +101,11 @@ typedef struct Transform
   float  z;
 } Transform;
 
-typedef struct FacingDirection
+typedef struct AimDirection
 {
   Vec2 value;
   BOOL frezze;
-} FacingDirection;
+} AimDirection;
 
 typedef struct Visual
 {
@@ -329,7 +332,7 @@ typedef struct
 
 typedef struct
 {
-  BTNode* root;
+  BTRoot* root;
 } Brain;
 
 typedef struct WalkDirectlyToward
@@ -337,14 +340,6 @@ typedef struct WalkDirectlyToward
   Vec2     destination;
   Callback cbCompleted;
 } WalkDirectlyToward;
-
-#define PATH_MAX_NUM_NODES 100
-typedef struct Path
-{
-  Vec2i nodes[PATH_MAX_NUM_NODES];
-  int   num_nodes;
-  int   curr;
-} Path;
 
 typedef struct
 {
@@ -520,6 +515,22 @@ typedef struct UnableToMove
 } UnableToMove;
 
 typedef Vec2 InitialPosition;
+
+#define PATH_MAX_NUM_NODES 100
+typedef struct Path
+{
+  POINT    nodes[100];
+  int      count;
+  int      currentIndex;
+  Callback cbCompleted;
+} Path;
+
+typedef struct PathfindingParams
+{
+  POINT    start;
+  POINT    goal;
+  Callback cbCompleted;
+} PathfindingParams;
 
 void portal_attrs_init(PortalAttributes* sw, const char* level, const char* dest, u16 direction);
 void name_init(Name* name, const char* value);

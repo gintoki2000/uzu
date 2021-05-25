@@ -4,7 +4,7 @@
 #include "engine/keyboard.h"
 #include "resources.h"
 #include "ui_helper.h"
-extern SDL_Renderer* g_renderer;
+extern SDL_Renderer* gRenderer;
 
 static char* _title;
 static BOOL  _visible;
@@ -86,8 +86,8 @@ void ui_quality_draw()
 
   draw_bordered_box(&_rectBox, _colorBg, _colorBorder);
 
-  FC_DrawBoxColor(font, g_renderer, _rectTile, gColorWhite, _title);
-  FC_DrawBoxEffect(font, g_renderer, _rectQuality, effect, "< %u >", _value);
+  FC_DrawBoxColor(font, gRenderer, _rectTile, gColorWhite, _title);
+  FC_DrawBoxEffect(font, gRenderer, _rectQuality, effect, "< %u >", _value);
 }
 
 void ui_quality_hook(s32 event_id, Callback callback)

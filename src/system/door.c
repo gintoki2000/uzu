@@ -7,7 +7,7 @@
 #include "toolbox/toolbox.h"
 #include "ui_msgbox.h"
 
-extern Ecs* g_ecs;
+extern Ecs* gEcs;
 
 //<-------------------event callbacks---------------------->//
 static void on_command_selected(void* arg, const CommandSelectedMsg* event);
@@ -26,13 +26,13 @@ static void on_command_selected(SDL_UNUSED void* arg, const CommandSelectedMsg* 
   Visual*         visual;
   Interactable*   interactable;
 
-  if ((attrs = ecs_get(g_ecs, event->entity, DOOR_ATTRIBUTES)))
+  if ((attrs = ecs_get(gEcs, event->entity, DOOR_ATTRIBUTES)))
   {
-    visual       = ecs_get(g_ecs, event->entity, VISUAL);
-    interactable = ecs_get(g_ecs, event->entity, INTERACTABLE);
+    visual       = ecs_get(gEcs, event->entity, VISUAL);
+    interactable = ecs_get(gEcs, event->entity, INTERACTABLE);
     if (strcmp(event->cmd, gCmdOpen) == 0)
     {
-      if (attrs->requiredKey == DOOR_NO_REQUIRED_KEY || inv_has(attrs->requiredKey))
+      if (attrs->requiredKey == DOOR_NO_REQUIRED_KEY || inv_has_item(attrs->requiredKey))
       {
         visual->sprite.rect       = gRectOpen;
         attrs->state              = DOOR_STATE_OPEN;
@@ -62,15 +62,15 @@ static void on_entity_collied_door(SDL_UNUSED void* arg, const HitDoorMsg* event
   RECT er;
   RECT dr;
 
-  door_info = ecs_get(g_ecs, event->door, DOOR_ATTRIBUTES);
+  door_info = ecs_get(gEcs, event->door, DOOR_ATTRIBUTES);
 
   if (door_info->state == DOOR_STATE_OPEN)
     return;
 
-  eh  = ecs_get(g_ecs, event->entity, HITBOX);
-  dh  = ecs_get(g_ecs, event->door, HITBOX);
-  etx = ecs_get(g_ecs, event->entity, TRANSFORM);
-  dtx = ecs_get(g_ecs, event->door, TRANSFORM);
+  eh  = ecs_get(gEcs, event->entity, HITBOX);
+  dh  = ecs_get(gEcs, event->door, HITBOX);
+  etx = ecs_get(gEcs, event->entity, TRANSFORM);
+  dtx = ecs_get(gEcs, event->door, TRANSFORM);
 
   er.x = etx->position.x - eh->anchor.x;
   er.y = etx->position.y - 5;

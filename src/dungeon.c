@@ -14,11 +14,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-SDL_Rect g_viewport;
+SDL_Rect gViewport;
 
 static const Scene* _current_scene = NULL;
 
-extern SDL_Renderer* g_renderer;
+extern SDL_Renderer* gRenderer;
 extern SDL_Window*   g_window;
 
 Cursor g_cursor_cross   = { .sprite = { TEX_CURSOR_CROSS, { 0, 0, 9, 9 } }, .hotspot = { 4, 4 } };
@@ -43,11 +43,11 @@ static void on_event(const SDL_Event* e);
 
 static BOOL on_game_init()
 {
-  SDL_RenderSetScale(g_renderer, SCL_X, SCL_Y);
+  SDL_RenderSetScale(gRenderer, SCL_X, SCL_Y);
 
   srand(SDL_GetTicks());
 
-  g_viewport = (SDL_Rect){ 0, 0, WIN_WIDTH, WIN_HEIGHT };
+  gViewport = (SDL_Rect){ 0, 0, WIN_WIDTH, WIN_HEIGHT };
 
   if (!resources_load())
   {
@@ -88,7 +88,7 @@ static void draw_cursor(void)
   dst.w = cursor.sprite.rect.w;
   dst.h = cursor.sprite.rect.h;
 
-  SDL_RenderCopy(g_renderer, get_texture(cursor.sprite.texture_id), &cursor.sprite.rect, &dst);
+  SDL_RenderCopy(gRenderer, get_texture(cursor.sprite.textureId), &cursor.sprite.rect, &dst);
 }
 static void on_game_loop()
 {
@@ -96,7 +96,7 @@ static void on_game_loop()
   if (_current_scene != NULL)
     _current_scene->on_update();
 #if SHOW_TIME_ELAPSED
-  FC_Draw(_fps_font, g_renderer, 0, 0, "%dms", SDL_GetTicks() - start);
+  FC_Draw(_fps_font, gRenderer, 0, 0, "%dms", SDL_GetTicks() - start);
 #endif
   draw_cursor();
 }

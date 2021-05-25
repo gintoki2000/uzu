@@ -2,9 +2,9 @@
 #include "ecs/ecs.h"
 #include "system/rendering.h"
 
-extern SDL_Rect      g_viewport;
-extern SDL_Renderer* g_renderer;
-extern Ecs*          g_ecs;
+extern SDL_Rect      gViewport;
+extern SDL_Renderer* gRenderer;
+extern Ecs*          gEcs;
 
 
 void healthbar_rendering_system()
@@ -19,18 +19,18 @@ void healthbar_rendering_system()
   SDL_Rect   border;
   SDL_Rect   inner;
 
-  ecs_raw(g_ecs, HEAL_BAR, &entities, (void**)&health_bar, &cnt);
+  ecs_raw(gEcs, HEAL_BAR, &entities, (void**)&health_bar, &cnt);
 
   for (int i = 0; i < cnt; ++i)
   {
-    transform = ecs_get(g_ecs, entities[i], TRANSFORM);
-    health    = ecs_get(g_ecs, entities[i], HEALTH);
+    transform = ecs_get(gEcs, entities[i], TRANSFORM);
+    health    = ecs_get(gEcs, entities[i], HEALTH);
     if (health->current == health->max)
       continue;
     p = (float)health->current / (float)health->max;
 
-    border.x = transform->position.x - health_bar[i].anchor.x - g_viewport.x;
-    border.y = transform->position.y - health_bar[i].anchor.y - g_viewport.y;
+    border.x = transform->position.x - health_bar[i].anchor.x - gViewport.x;
+    border.y = transform->position.y - health_bar[i].anchor.y - gViewport.y;
     border.w = health_bar[i].len;
     border.h = 3;
 
@@ -41,11 +41,11 @@ void healthbar_rendering_system()
     inner.y = border.y + 1;
     inner.w = health_bar[i].len * p;
     inner.h = 1;
-    SDL_SetRenderDrawColor(g_renderer,
+    SDL_SetRenderDrawColor(gRenderer,
                            health_bar[i].color.r,
                            health_bar[i].color.g,
                            health_bar[i].color.b,
                            health_bar->color.a);
-    SDL_RenderFillRect(g_renderer, &inner);
+    SDL_RenderFillRect(gRenderer, &inner);
   }
 }

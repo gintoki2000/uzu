@@ -12,18 +12,18 @@
 
 static Conversation* _conversation;
 static Queue         _queue;
-static u16           _conversation_id;
+static u16           _conversationId;
 static ecs_entity_t  _npc;
-extern Ecs*          g_ecs;
+extern Ecs*          gEcs;
 
 static void process_input(void* arg);
 static BOOL next_sentence(void);
 static void on_text_selected(void* arg, const char* text);
 
-void display_dialogue(u16 conversation_id, ecs_entity_t entity)
+void display_dialogue(u16 conversationId, ecs_entity_t entity)
 {
-  _conversation    = get_conversation(conversation_id);
-  _conversation_id = conversation_id;
+  _conversation    = get_conversation(conversationId);
+  _conversationId = conversationId;
   _npc             = entity;
   queue_clear(&_queue);
   for (int i = 0; i < _conversation->sentences->cnt; ++i)
@@ -46,7 +46,7 @@ static void end_conversation(const char* res)
   input_pop_state();
   ems_broadcast(
       MSG_CONVERSATION_FINISHED,
-      &(MSG_ConversationFinished){ .npc = _npc, .response = res, .id = _conversation_id });
+      &(MSG_ConversationFinished){ .npc = _npc, .response = res, .id = _conversationId });
 }
 
 static void on_text_selected(SDL_UNUSED void* arg, const char* text)
@@ -75,9 +75,9 @@ static BOOL next_sentence(void)
 
 static void on_command_selected(SDL_UNUSED void* arg, const CommandSelectedMsg* msg)
 {
-  if (!SDL_strcmp(msg->cmd, gCmdTalk) && ecs_has(g_ecs, msg->entity, DIALOGUE))
+  if (!SDL_strcmp(msg->cmd, gCmdTalk) && ecs_has(gEcs, msg->entity, DIALOGUE))
   {
-    display_dialogue(ett_get_conversation(g_ecs, msg->entity), msg->entity);
+    display_dialogue(ett_get_conversation(gEcs, msg->entity), msg->entity);
   }
 }
 

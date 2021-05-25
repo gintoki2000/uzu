@@ -3,8 +3,8 @@
 #include "resources.h"
 #include "sprite_renderer.h"
 
-extern Ecs* g_ecs;
-extern RECT g_viewport;
+extern Ecs* gEcs;
+extern RECT gViewport;
 
 static Sprite _sprite_tbl[NUM_EMOJIES] = {
   { TEX_EMOJI_QUESTION, { 0, 0, 20, 19 } },
@@ -20,35 +20,35 @@ void emoji_system(void)
   Emoji*        emoji;
   HitBox*       hitbox;
   Transform*    transform;
-  RECT          dst_rect;
-  ecs_raw(g_ecs, EMOJI, &entities, (void**)&emoji, &cnt);
+  RECT          dstRect;
+  ecs_raw(gEcs, EMOJI, &entities, (void**)&emoji, &cnt);
   for (int i = cnt - 1; i >= 0; --i)
   {
     ASSERT(emoji[i].id >= 0 && emoji[i].id < NUM_EMOJIES && "invalid emoji id");
     if (emoji[i].duration != -1 && (emoji[i].duration--) == 0)
     {
       INVOKE_EVENT(emoji[i].cbTimeOut, NULL);
-      ecs_rmv(g_ecs, entities[i], EMOJI);
+      ecs_rmv(gEcs, entities[i], EMOJI);
       continue;
     }
-    hitbox = ecs_get(g_ecs, entities[i], HITBOX);
-    if ((transform = ecs_get(g_ecs, entities[i], TRANSFORM)))
+    hitbox = ecs_get(gEcs, entities[i], HITBOX);
+    if ((transform = ecs_get(gEcs, entities[i], TRANSFORM)))
     {
-      dst_rect.x = transform->position.x;
-      dst_rect.y = transform->position.y;
-      dst_rect.w = _sprite_tbl[emoji[i].id].rect.w;
-      dst_rect.h = _sprite_tbl[emoji[i].id].rect.h;
+      dstRect.x = transform->position.x;
+      dstRect.y = transform->position.y;
+      dstRect.w = _sprite_tbl[emoji[i].id].rect.w;
+      dstRect.h = _sprite_tbl[emoji[i].id].rect.h;
 
-      dst_rect.y += hitbox ? (-hitbox->anchor.y) : 0;
-      dst_rect.x += hitbox ? (hitbox->size.x / 2.f - hitbox->anchor.x) : 0;
+      dstRect.y += hitbox ? (-hitbox->anchor.y) : 0;
+      dstRect.x += hitbox ? (hitbox->size.x / 2.f - hitbox->anchor.x) : 0;
 
-      dst_rect.x -= 13;
-      dst_rect.y -= 20;
-      if (SDL_HasIntersection(&g_viewport, &dst_rect))
+      dstRect.x -= 13;
+      dstRect.y -= 20;
+      if (SDL_HasIntersection(&gViewport, &dstRect))
       {
-        dst_rect.x -= g_viewport.x;
-        dst_rect.y -= g_viewport.y;
-        sprite_renderer_draw(_sprite_tbl[emoji[i].id], (POINT){ dst_rect.x, dst_rect.y }, 999);
+        dstRect.x -= gViewport.x;
+        dstRect.y -= gViewport.y;
+        sprite_renderer_draw(_sprite_tbl[emoji[i].id], (POINT){ dstRect.x, dstRect.y }, 999);
       }
     }
   }

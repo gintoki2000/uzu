@@ -40,7 +40,7 @@ static const EquipmentItemData _equipmentItemDataCleaver    = { WEAPON_CLEAVER }
 
 #define ITEM_SPRITE(name)                                                                          \
   {                                                                                                \
-    .texture_id = TEX_ITEM_##name, .rect = { 0, 0, 16, 6 }                                         \
+    .textureId = TEX_ITEM_##name, .rect = { 0, 0, 16, 6 }                                         \
   }
 
 const ItemType gItemTypes[NUM_ITEM_TYPES] = {
@@ -52,7 +52,7 @@ const ItemType gItemTypes[NUM_ITEM_TYPES] = {
           .category    = ITEM_CATEGORY_CONSUMABLE,
           .use      = healing_item_use_callback,
           .data = &_healingItemDataRedFlask,
-          .icon      = {.texture_id = TEX_ITEM_FLASK_RED, .rect = {0, 0, 16, 16}},
+          .icon      = {.textureId = TEX_ITEM_FLASK_RED, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_BIG_RED_FLASK] =
       {
@@ -62,7 +62,7 @@ const ItemType gItemTypes[NUM_ITEM_TYPES] = {
           .category    = ITEM_CATEGORY_CONSUMABLE,
           .use      = healing_item_use_callback,
           .data = &_healingItemDataBigRedFlask,
-          .icon      = {.texture_id = TEX_ITEM_FLASK_RED_BIG, .rect = {0, 0, 16, 16}},
+          .icon      = {.textureId = TEX_ITEM_FLASK_RED_BIG, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_BLUE_FLASK] =
       {
@@ -72,7 +72,7 @@ const ItemType gItemTypes[NUM_ITEM_TYPES] = {
           .category    = ITEM_CATEGORY_CONSUMABLE,
           .use      = healing_item_use_callback,
           .data = &_healingItemDataBlueFlask,
-          .icon      = {.texture_id =  TEX_ITEM_BLUE_FLASK, .rect = {0, 0, 16, 16}},
+          .icon      = {.textureId =  TEX_ITEM_BLUE_FLASK, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_SCROLL_ICE_ARROW] = 
       {
@@ -82,7 +82,7 @@ const ItemType gItemTypes[NUM_ITEM_TYPES] = {
           .category  = ITEM_CATEGORY_SCROLL,
           .use = scroll_use_callback,
           .data = &_scrollDataIceArrow,
-          .icon = {.texture_id = TEX_ICON_ICE_ARROW, .rect = {0, 0, 16, 16}},
+          .icon = {.textureId = TEX_ICON_ICE_ARROW, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_SCROLL_FIRE_BALL] = 
       {
@@ -92,7 +92,7 @@ const ItemType gItemTypes[NUM_ITEM_TYPES] = {
           .category  = ITEM_CATEGORY_SCROLL,
           .use = scroll_use_callback,
           .data = &_scrollDataFireBall,
-          .icon = {.texture_id = TEX_ICON_FIRE_BALL, .rect = {0, 0, 16, 16}},
+          .icon = {.textureId = TEX_ICON_FIRE_BALL, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_KEY_1_1] =
       {
@@ -102,7 +102,7 @@ const ItemType gItemTypes[NUM_ITEM_TYPES] = {
           .category  = ITEM_CATEGORY_KEY,
           .use = do_nothing_callback,
           .data = NULL,
-          .icon = {.texture_id = TEX_ITEM_KEY, .rect = {0, 0, 16, 16}},
+          .icon = {.textureId = TEX_ITEM_KEY, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_ANIME_SWORD] =
       {
@@ -112,7 +112,7 @@ const ItemType gItemTypes[NUM_ITEM_TYPES] = {
           .category  = ITEM_CATEGORY_EQUIPMENT,
           .use = equipment_item_use_callback,
           .data = &_equipmentItemAataAnimeSword,
-          .icon = {.texture_id = TEX_ICON_CLEAVER, .rect = {0, 0, 16, 16}},
+          .icon = {.textureId = TEX_ICON_CLEAVER, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_SPEAR] =
       {
@@ -122,7 +122,7 @@ const ItemType gItemTypes[NUM_ITEM_TYPES] = {
           .category  = ITEM_CATEGORY_EQUIPMENT,
           .use = equipment_item_use_callback,
           .data = &_equipmentItemDataSpear,
-          .icon = {.texture_id = TEX_ICON_SPEAR, .rect = {0, 0, 16, 16}},
+          .icon = {.textureId = TEX_ICON_SPEAR, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_STAFF] =
       {
@@ -132,7 +132,7 @@ const ItemType gItemTypes[NUM_ITEM_TYPES] = {
           .category  = ITEM_CATEGORY_EQUIPMENT,
           .use = equipment_item_use_callback,
           .data = &_equipmentItemDataStaff,
-          .icon = {.texture_id = TEX_ICON_STAFF, .rect = {0, 0, 16, 16}},
+          .icon = {.textureId = TEX_ICON_STAFF, .rect = {0, 0, 16, 16}},
       },
   [ITEM_TYPE_CLEAVER] =
       {
@@ -142,7 +142,7 @@ const ItemType gItemTypes[NUM_ITEM_TYPES] = {
           .category  = ITEM_CATEGORY_EQUIPMENT,
           .use = equipment_item_use_callback,
           .data = &_equipmentItemDataCleaver,
-          .icon = {.texture_id = TEX_ICON_CLEAVER, .rect = {-1, 0, 16, 16}},
+          .icon = {.textureId = TEX_ICON_CLEAVER, .rect = {-1, 0, 16, 16}},
       },
   
 };

@@ -33,12 +33,12 @@ static int compare_depth(const struct _Command* lhs, const struct _Command* rhs)
 
 void sprite_renderer_end()
 {
-  extern RENDERER* g_renderer;
+  extern RENDERER* gRenderer;
   ASSERT(_is_drawing);
   SDL_qsort(_buff, _cnt, sizeof(struct _Command), (int (*)(const void*, const void*))compare_depth);
   for (int i = 0; i < _cnt; ++i)
   {
-    SDL_RenderCopyEx(g_renderer,
+    SDL_RenderCopyEx(gRenderer,
                      get_texture(_buff[i].texture_id),
                      &_buff[i].src,
                      &_buff[i].dst,
@@ -59,7 +59,7 @@ void sprite_renderer_draw_ex(Sprite sprite,
                              int    depth)
 {
   ASSERT(_cnt < MAX_BUFFER_SIZE - 1);
-  _buff[_cnt].texture_id = sprite.texture_id;
+  _buff[_cnt].texture_id = sprite.textureId;
   _buff[_cnt].src        = sprite.rect;
   _buff[_cnt].dst        = (RECT){ position.x, position.y, sprite.rect.w, sprite.rect.h };
   _buff[_cnt].flip       = flip;

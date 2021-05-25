@@ -64,7 +64,7 @@ typedef struct
   ecs_entity_t receiver;
   int          damage;
   int          type;
-  u16          impact_time;
+  u16          impactTime;
   Vec2         force;
   float        zforce;
 } InflictDamageMsg;
@@ -92,7 +92,7 @@ typedef struct
 typedef struct MSG_HitPickupableEntity
 {
   ecs_entity_t player;
-  ecs_entity_t pickupable_entity;
+  ecs_entity_t pickupableEntity;
 } HitPickupableEntityMsg;
 
 typedef struct

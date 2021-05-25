@@ -11,13 +11,13 @@ static const SDL_Rect _body = { 4, 0, 3, 9 };
 
 static const SDL_Rect _end = { 7, 0, 5, 9 };
 
-static const SDL_Color blood_active = { 237, 19, 41, 255 };
+static const SDL_Color _bloodActive = { 237, 19, 41, 255 };
 
-static const SDL_Color blood_inactive = { 135, 11, 23, 255 };
+static const SDL_Color _bloodInactive = { 135, 11, 23, 255 };
 
-static const SDL_Color mana_active = { 87, 152, 203, 255 };
+static const SDL_Color _manaActive = { 87, 152, 203, 255 };
 
-static const SDL_Color mana_inactive = { 96, 47, 86, 255 };
+static const SDL_Color _manaInactive = { 96, 47, 86, 255 };
 
 #define HUD_HEALTH_BAR_POSITION_X 32
 #define HUD_HEALTH_BAR_POSITION_Y 5
@@ -28,8 +28,8 @@ static const SDL_Color mana_inactive = { 96, 47, 86, 255 };
 #define COINS_POSITION_X 5
 #define COINS_POSITION_Y 60
 
-extern Ecs*          g_ecs;
-extern SDL_Renderer* g_renderer;
+extern Ecs*          gEcs;
+extern SDL_Renderer* gRenderer;
 
 typedef struct DrawBarParams
 {
@@ -51,7 +51,7 @@ static void draw_spell_icon(ecs_entity_t player);
 void hub_rendering_system()
 {
   ecs_entity_t player;
-  if ((player = scn_get_player(g_ecs)) != ECS_NULL_ENT)
+  if ((player = scn_get_player(gEcs)) != ECS_NULL_ENT)
   {
     draw_player_health_bar(player);
     draw_player_mana_bar(player);
@@ -74,7 +74,7 @@ static void draw_bar(const DrawBarParams* params)
 
   texture = get_texture(TEX_PLAYER_HEALTH_BAR);
 
-  SDL_RenderCopy(g_renderer, texture, &_start, &dst);
+  SDL_RenderCopy(gRenderer, texture, &_start, &dst);
 
   for (int i = 0; i < params->length; ++i)
   {
@@ -82,15 +82,15 @@ static void draw_bar(const DrawBarParams* params)
     dst.y = params->position_y;
     dst.w = _body.w;
     dst.h = _body.h;
-    SDL_RenderCopy(g_renderer, texture, &_body, &dst);
-    SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);
+    SDL_RenderCopy(gRenderer, texture, &_body, &dst);
+    SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
   }
 
   dst.x = params->position_x + _start.w + params->length * _body.w;
   dst.y = params->position_y;
   dst.w = _end.w;
   dst.h = _end.h;
-  SDL_RenderCopy(g_renderer, texture, &_end, &dst);
+  SDL_RenderCopy(gRenderer, texture, &_end, &dst);
 
   for (int i = 0; i < params->length; ++i)
   {
@@ -100,7 +100,7 @@ static void draw_bar(const DrawBarParams* params)
     dst.h = 3;
     if (i < params->points)
     {
-      SDL_SetRenderDrawColor(g_renderer,
+      SDL_SetRenderDrawColor(gRenderer,
                              params->active_color.r,
                              params->active_color.g,
                              params->active_color.b,
@@ -108,13 +108,13 @@ static void draw_bar(const DrawBarParams* params)
     }
     else
     {
-      SDL_SetRenderDrawColor(g_renderer,
+      SDL_SetRenderDrawColor(gRenderer,
                              params->inactive_color.r,
                              params->inactive_color.g,
                              params->inactive_color.b,
                              params->inactive_color.a);
     }
-    SDL_RenderFillRect(g_renderer, &dst);
+    SDL_RenderFillRect(gRenderer, &dst);
   }
 }
 
@@ -122,13 +122,13 @@ static void draw_player_health_bar(ecs_entity_t player)
 {
   Health* health;
 
-  if ((health = ecs_get(g_ecs, player, HEALTH)))
+  if ((health = ecs_get(gEcs, player, HEALTH)))
   {
     DrawBarParams params;
     params.position_x     = HUD_HEALTH_BAR_POSITION_X;
     params.position_y     = HUD_HEALTH_BAR_POSITION_Y;
-    params.active_color   = blood_active;
-    params.inactive_color = blood_inactive;
+    params.active_color   = _bloodActive;
+    params.inactive_color = _bloodInactive;
     params.length         = health->max;
     params.points         = health->current;
     draw_bar(&params);
@@ -139,13 +139,13 @@ static void draw_player_mana_bar(ecs_entity_t player)
 {
   Mana* mana;
 
-  if ((mana = ecs_get(g_ecs, player, MANA)))
+  if ((mana = ecs_get(gEcs, player, MANA)))
   {
     DrawBarParams params;
     params.position_x     = HUD_MANA_BAR_POSITION_X;
     params.position_y     = HUD_MANA_BAR_POSITION_Y;
-    params.active_color   = mana_active;
-    params.inactive_color = mana_inactive;
+    params.active_color   = _manaActive;
+    params.inactive_color = _manaInactive;
     params.length         = mana->max;
     params.points         = mana->current;
     draw_bar(&params);
@@ -157,7 +157,7 @@ static void draw_coins()
   char str_coins[10];
   sprintf(str_coins, "%d", gSession.coins);
   FC_DrawColor(get_font(FONT_DAMAGE_INDICATOR),
-               g_renderer,
+               gRenderer,
                COINS_POSITION_X,
                COINS_POSITION_Y,
                (COLOR){ 245, 185, 66, 255 },
@@ -174,13 +174,13 @@ static void draw_spell_icon(ecs_entity_t player)
   const Spell*    spell;
   Icon            icon;
 
-  SDL_RenderCopy(g_renderer, get_texture(TEX_SPELL_FRAME), NULL, &frame_dst);
+  SDL_RenderCopy(gRenderer, get_texture(TEX_SPELL_FRAME), NULL, &frame_dst);
 
-  aslot = ecs_get(g_ecs, player, ATTUNEMENT_SLOT);
+  aslot = ecs_get(gEcs, player, ATTUNEMENT_SLOT);
   if (aslot->spellId == SPELL_ID_NULL)
     return;
   spell = &gSpellTbl[aslot->spellId];
   icon  = spell->icon;
 
-  SDL_RenderCopy(g_renderer, get_texture(icon.texture_id), &icon.rect, &icon_dst);
+  SDL_RenderCopy(gRenderer, get_texture(icon.textureId), &icon.rect, &icon_dst);
 }

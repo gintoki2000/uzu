@@ -110,7 +110,7 @@ ecs_entity_t make_knight(Ecs* registry, Vec2 position)
   params.position    = position;
   params.animations  = g_anims_knight_m;
   params.vitality    = 10;
-  params.intelligent = 5;
+  params.intelligent = 1;
   params.strength    = 5;
   params.agility     = 10;
   return make_character_base(registry, &params);
@@ -122,7 +122,7 @@ ecs_entity_t make_elf(Ecs* registry, Vec2 position)
   params.position    = position;
   params.animations  = g_anims_elf_m;
   params.vitality    = 10;
-  params.intelligent = 5;
+  params.intelligent = 3;
   params.strength    = 5;
   params.agility     = 10;
   return make_character_base(registry, &params);
@@ -133,8 +133,8 @@ ecs_entity_t make_wizzard(Ecs* registry, Vec2 position)
   MakeCharacterParams params;
   params.position    = position;
   params.animations  = g_anims_wizzard_m;
-  params.vitality    = 20;
-  params.intelligent = 30;
+  params.vitality    = 3;
+  params.intelligent = 5;
   params.strength    = 5;
   params.agility     = 10;
   return make_character_base(registry, &params);
@@ -146,7 +146,7 @@ ecs_entity_t make_lizzard(Ecs* registry, Vec2 position)
   params.position    = position;
   params.animations  = g_anims_lizzard_m;
   params.vitality    = 10;
-  params.intelligent = 5;
+  params.intelligent = 2;
   params.strength    = 5;
   params.agility     = 10;
   return make_character_base(registry, &params);
@@ -175,8 +175,8 @@ ecs_entity_t make_monster_base(Ecs* registry, const MakeMonParams* params)
   Visual*    visual;
   HitBox*    hitbox;
 
-  const int sprite_width  = params->anims[0].sprite_width;
-  const int sprite_height = params->anims[0].sprite_height;
+  const int sprite_width  = params->anims[0].spriteWidth;
+  const int sprite_height = params->anims[0].spriteHeight;
 
   entity = ecs_create(registry);
 
@@ -332,7 +332,7 @@ ecs_entity_t make_chort(Ecs* registry, Vec2 position)
 {
   MakeMonParams params = { 0 };
   params.agility       = 4;
-  params.vitality      = 30;
+  params.vitality      = 2;
   params.anims         = g_anims_chort;
   params.position      = position;
   params.size          = _monSizeSmall;
@@ -529,7 +529,7 @@ make_static_pickupable_entity(Ecs* registry, u16 texture_id, u16 id, Vec2 positi
   entity = ecs_create(registry);
 
   visual                    = ecs_add(registry, entity, VISUAL);
-  visual->sprite.texture_id = texture_id;
+  visual->sprite.textureId = texture_id;
   sprite_init(&visual->sprite, texture_id);
   visual->anchor.x = visual->sprite.rect.w / 2;
   visual->anchor.y = visual->sprite.rect.h;
@@ -672,7 +672,7 @@ ecs_entity_t make_chest(Ecs* registry, const MakeChestParams* params)
 
   entity                    = ecs_create(registry);
   visual                    = ecs_add(registry, entity, VISUAL);
-  visual->sprite.texture_id = TEX_CHEST;
+  visual->sprite.textureId = TEX_CHEST;
   visual->sprite.rect = params->state == CHEST_STATE_CLOSE ? gRectChestClose : gRectChestClose;
   visual->anchor.x    = 8.f;
   visual->anchor.y    = 16.f;
@@ -723,6 +723,7 @@ ecs_entity_t make_spear(Ecs* registry)
   attributes        = ecs_add(registry, entity, WEAPON_ATTRIBUTES);
   attributes->atk   = 1;
   attributes->range = (WeaponRange){ 26, 32 };
+  attributes->typeId = WEAPON_SPEAR;
 
   return entity;
 }
@@ -734,13 +735,13 @@ ecs_entity_t make_door(Ecs* registry, Vec2 position)
   HitBox*         hitbox;
   Visual*         visual;
   Transform*      transform;
-  DoorAttributes* door_info;
+  DoorAttributes* attributes;
   Interactable*   interactable;
 
   entity = ecs_create(registry);
 
   visual                    = ecs_add(registry, entity, VISUAL);
-  visual->sprite.texture_id = TEX_DOOR;
+  visual->sprite.textureId = TEX_DOOR;
   visual->sprite.rect       = gRectClose;
   visual->anchor.x          = 16;
   visual->anchor.y          = 34;
@@ -758,14 +759,14 @@ ecs_entity_t make_door(Ecs* registry, Vec2 position)
   interactable->numCommands = 1;
   interactable->commands[0] = gCmdOpen;
 
-  door_info              = ecs_add(registry, entity, DOOR_ATTRIBUTES);
-  door_info->requiredKey = DOOR_NO_REQUIRED_KEY;
-  door_info->state       = DOOR_STATE_CLOSE;
+  attributes              = ecs_add(registry, entity, DOOR_ATTRIBUTES);
+  attributes->requiredKey = DOOR_NO_REQUIRED_KEY;
+  attributes->state       = DOOR_STATE_CLOSE;
 
   return entity;
 }
 
-static const Animation* _blood_effect_tbl[] = {
+static const Animation* _bloodEffectTbl[] = {
   &g_anim_blood_loss_1,
   &g_anim_blood_loss_2,
 };
@@ -792,7 +793,7 @@ ecs_entity_t make_fx_blood_loss(Ecs* registry, Vec2 position)
   visual->anchor.x = sw / 2;
   visual->anchor.y = sh / 2;
 
-  animator = ecs_set(registry, entity, ANIMATOR, &(Animator){ .anims = _blood_effect_tbl[i] });
+  animator = ecs_set(registry, entity, ANIMATOR, &(Animator){ .anims = _bloodEffectTbl[i] });
 
   transform           = ecs_add(registry, entity, TRANSFORM);
   transform->position = position;
@@ -1219,9 +1220,9 @@ ecs_entity_t make_bow(Ecs* registry)
           entity,
           WEAPON_SHOOT,
           &(WeaponShoot){
-              .code      = 0,
-              .projspd   = 170.f,
-              .fire_rate = 20,
+              .triggerCode = 0,
+              .projspd     = 170.f,
+              .fire_rate   = 20,
           });
 
   return entity;

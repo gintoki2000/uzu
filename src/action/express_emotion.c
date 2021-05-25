@@ -9,7 +9,7 @@ typedef struct ExpressEmotionAction
   BOOL   finished;
 } ExpressEmotionAction;
 
-extern Ecs* g_ecs;
+extern Ecs* gEcs;
 
 static void on_emoji_time_out(ExpressEmotionAction* self, SDL_UNUSED const void* data)
 {
@@ -19,7 +19,7 @@ static void on_emoji_time_out(ExpressEmotionAction* self, SDL_UNUSED const void*
 static void start(void* _self, ecs_entity_t target)
 {
   ExpressEmotionAction* self = _self;
-  ecs_set(g_ecs, target, EMOJI, &(Emoji){ self->emoji, self->time, { self, on_emoji_time_out } });
+  ecs_set(gEcs, target, EMOJI, &(Emoji){ self->emoji, self->time, { self, on_emoji_time_out } });
 }
 
 static BOOL update(void* _self, SDL_UNUSED ecs_entity_t target)

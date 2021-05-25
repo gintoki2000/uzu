@@ -5,7 +5,7 @@
 #include "system/event_messaging_sys.h"
 #include "toolbox/toolbox.h"
 
-extern Ecs* g_ecs;
+extern Ecs* gEcs;
 
 static HandAnimKeyFrame _keyframes[] = {
   { .duration = 5, .angle = -60.0 },
@@ -24,29 +24,29 @@ static void query_overlap_callback(struct _QueryOverlapCallbackData* d, ecs_enti
 {
   ems_broadcast(MSG_DEAL_DAMAGE,
                 &(InflictDamageMsg){
-                    .dealer      = d->entity,
-                    .receiver    = e,
-                    .damage      = d->damage,
-                    .type        = DAMAGE_TYPE_STRIKE,
-                    .impact_time = 10,
-                    .force       = d->impact_force,
+                    .dealer     = d->entity,
+                    .receiver   = e,
+                    .damage     = d->damage,
+                    .type       = DAMAGE_TYPE_STRIKE,
+                    .impactTime = 10,
+                    .force      = d->impact_force,
                 });
 }
 
 static void hand_animation_finished_callback(SDL_UNUSED void* arg, ecs_entity_t entity)
 {
-  HandAnimation* hanim         = ecs_get(g_ecs, entity, HAND_ANIMATION);
-  Hand*          hand          = ecs_get(g_ecs, entity, HAND);
-  AttackMask*    mask          = ecs_get(g_ecs, entity, ATTACK_MASK);
-  Transform*     transform     = ecs_get(g_ecs, entity, TRANSFORM);
-  AimDirection*  aimDirection  = ecs_get(g_ecs, entity, AIM_DIRECTION);
-  AttackCommand* attackCommand = ecs_get(g_ecs, entity, ATTACK_COMMAND);
+  HandAnimation* hanim         = ecs_get(gEcs, entity, HAND_ANIMATION);
+  Hand*          hand          = ecs_get(gEcs, entity, HAND);
+  AttackMask*    mask          = ecs_get(gEcs, entity, ATTACK_MASK);
+  Transform*     transform     = ecs_get(gEcs, entity, TRANSFORM);
+  AimDirection*  aimDirection  = ecs_get(gEcs, entity, AIM_DIRECTION);
+  AttackCommand* attackCommand = ecs_get(gEcs, entity, ATTACK_COMMAND);
 
-  WeaponAttributes*  weaponAttributes = ecs_get(g_ecs, hand->weapon, WEAPON_ATTRIBUTES);
-  WeaponSwingAttack* swing            = ecs_get(g_ecs, hand->weapon, WEAPON_SWING_ATTACK);
+  WeaponAttributes*  weaponAttributes = ecs_get(gEcs, hand->weapon, WEAPON_ATTRIBUTES);
+  WeaponSwingAttack* swing            = ecs_get(gEcs, hand->weapon, WEAPON_SWING_ATTACK);
 
   INVOKE_EVENT(attackCommand->cbCompleted, TRUE);
-  ecs_rmv(g_ecs, entity, ATTACK_COMMAND);
+  ecs_rmv(gEcs, entity, ATTACK_COMMAND);
   double a        = hanim->initialAngle * DEG_TO_RAD;
   int    midRange = (weaponAttributes->range.min + weaponAttributes->range.max) / 2;
 
@@ -100,26 +100,27 @@ void weapon_swing_attack_system(void)
   Holder*            holder;
   AttackCommand*     attackCommand;
 
-  ecs_raw(g_ecs, WEAPON_SWING_ATTACK, &entities, (void**)&swing, &cnt);
+  ecs_raw(gEcs, WEAPON_SWING_ATTACK, &entities, (void**)&swing, &cnt);
   for (int i = 0; i < cnt; ++i)
   {
-    holder = ecs_get(g_ecs, entities[i], HOLDER);
-    if (holder == NULL || !ecs_is_valid(g_ecs, holder->value))
+    holder = ecs_get(gEcs, entities[i], HOLDER);
+    if (holder == NULL || !ecs_is_valid(gEcs, holder->value))
       continue;
 
-    attackCommand = ecs_get(g_ecs, holder->value, ATTACK_COMMAND);
+    attackCommand = ecs_get(gEcs, holder->value, ATTACK_COMMAND);
     if (attackCommand == NULL || attackCommand->processing)
       continue;
 
-    if (attackCommand->code == swing[i].code && !ecs_has(g_ecs, holder->value, HAND_ANIMATION))
+    if (attackCommand->triggerCode == swing[i].code &&
+        !ecs_has(gEcs, holder->value, HAND_ANIMATION))
     {
       HandAnimParams params       = { 0 };
       params.cbFinished           = CALLBACK_2(hand_animation_finished_callback);
       params.keyframes            = _keyframes;
       params.realtiveCurrentState = TRUE;
-      ett_animate_hand(g_ecs, holder->value, &params);
+      ett_animate_hand(gEcs, holder->value, &params);
       attackCommand->processing = TRUE;
-      play_slash_effect(g_ecs, holder->value, 16);
+      play_slash_effect(gEcs, holder->value, 16);
       Mix_PlayChannel(-1, get_sfx(SFX_WEAPON_SWORD), 0);
     }
   }

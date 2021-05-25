@@ -4,19 +4,19 @@
 
 void life_span_system()
 {
-  extern Ecs*   g_ecs;
+  extern Ecs*   gEcs;
   ecs_entity_t* entities;
   ecs_size_t    cnt;
-  LifeSpan*     life_span;
+  LifeSpan*     lifeSpan;
 
-  ecs_raw(g_ecs, LIFE_SPAN, &entities, (void**)&life_span, &cnt);
+  ecs_raw(gEcs, LIFE_SPAN, &entities, (void**)&lifeSpan, &cnt);
 
   for (int i = cnt - 1; i >= 0; --i)
   {
-    if (--life_span[i].remaining == 0)
+    if (--lifeSpan[i].remaining == 0)
     {
       ems_broadcast(MSG_LIFE_SPAN_FINISHED, &(LifeSpanFinishedMsg){ entities[i] });
-      ecs_destroy(g_ecs, entities[i]);
+      ecs_destroy(gEcs, entities[i]);
     }
   }
 }

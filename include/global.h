@@ -52,7 +52,7 @@ typedef enum
 
 typedef struct Sprite
 {
-  u16      texture_id;
+  u32      textureId;
   SDL_Rect rect;
 } Sprite, Icon;
 
@@ -72,13 +72,13 @@ Sprite sprite_sheet_at(const SpriteSheet* sheet, int index);
 
 typedef struct Animation
 {
-  u16 frame_duration;
+  u16 frameDuration;
   u16 mode;
-  u16 texture_id;
-  u16 offset_x;
-  u16 offset_y;
-  u16 sprite_width;
-  u16 sprite_height;
+  u16 textureId;
+  u16 offsetX;
+  u16 offsetY;
+  u16 spriteWidth;
+  u16 spriteHeight;
   u16 count;
 } Animation;
 
@@ -150,7 +150,7 @@ typedef struct Item
 #define ITEM_PAYLOAD_INFINTE -1
 typedef struct
 {
-  ItemTypeId type_id;
+  ItemTypeId typeId;
   s16        available;
   u16        price;
 } ItemPayload;
@@ -180,18 +180,6 @@ typedef struct Spell
   Icon icon;
 } Spell;
 
-typedef enum
-{
-  WEAPON_SPEAR,
-  WEAPON_CLEAVER,
-  WEAPON_LAVIS_SWORD,
-  WEAPON_ANIME_SWORD,
-  WEAPON_STAFF,
-  WEAPON_BOW,
-  WEAPON_KATANA,
-  NUM_WEAPONS,
-} WeaponType;
-#define WEAPON_ID_NULL NUM_WEAPONS
 
 typedef enum
 {
@@ -223,16 +211,8 @@ typedef struct Cursor
   SDL_Point hotspot;
 } Cursor;
 
-enum StatusEffectType
-{
-  STATUS_EFFECT_FREEZED,
-  STATUS_EFFECT_POISONED,
-  STATUS_EFFECT_PARALYZED,
-  STATUS_EFFECT_BURNED,
-  NUM_STATUS_EFFECT,
-};
 
-extern ecs_entity_t (*const gMakeWeaponFnTbl[NUM_WEAPONS])(Ecs*);
+extern ecs_entity_t (*const gMakeWeaponFnTbl[])(Ecs*);
 extern ecs_entity_t (*const gMakeCharacterFnTbl[NUM_JOBS])(Ecs*, Vec2);
 extern ecs_entity_t (*const gMakePickupableFnTbl[NUM_ITEM_TYPES])(Ecs*, Vec2 pos);
 extern ecs_entity_t (*const gMakeProjectileFn[])(Ecs*, Vec2 pos, Vec2 dir, u16 mask);

@@ -2,9 +2,9 @@
 
 #include "components.h"
 
-extern SDL_Rect      g_viewport;
-extern SDL_Renderer* g_renderer;
-extern Ecs*          g_ecs;
+extern SDL_Rect      gViewport;
+extern SDL_Renderer* gRenderer;
+extern Ecs*          gEcs;
 
 
 
@@ -16,17 +16,17 @@ void hitbox_rendering_system_update()
   Transform*    transform;
   RECT rect;
 
-  ecs_raw(g_ecs, HITBOX, &entities, (void**)&hitboxs, &cnt);
+  ecs_raw(gEcs, HITBOX, &entities, (void**)&hitboxs, &cnt);
 
-  SDL_SetRenderDrawColor(g_renderer, 0xff, 0x00, 0xff, 0xff);
+  SDL_SetRenderDrawColor(gRenderer, 0xff, 0x00, 0xff, 0xff);
   for (int i = 0; i < cnt; ++i)
   {
-    transform = ecs_get(g_ecs, entities[i], TRANSFORM);
+    transform = ecs_get(gEcs, entities[i], TRANSFORM);
 
-    rect.x = transform->position.x - hitboxs[i].anchor.x - g_viewport.x;
-    rect.y = transform->position.y - hitboxs[i].anchor.y - g_viewport.y;
+    rect.x = transform->position.x - hitboxs[i].anchor.x - gViewport.x;
+    rect.y = transform->position.y - hitboxs[i].anchor.y - gViewport.y;
     rect.w = hitboxs[i].size.x;
     rect.h = hitboxs[i].size.y;
-    SDL_RenderDrawRect(g_renderer, &rect);
+    SDL_RenderDrawRect(gRenderer, &rect);
   }
 }

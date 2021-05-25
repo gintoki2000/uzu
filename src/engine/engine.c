@@ -10,7 +10,7 @@ static Uint32   _delay_ticks;
 static Uint32   _frame_rate;
 
 SDL_Window*   g_window;
-SDL_Renderer* g_renderer;
+SDL_Renderer* gRenderer;
 
 static SDL_bool init(const GameSetting* setting)
 {
@@ -24,8 +24,8 @@ static SDL_bool init(const GameSetting* setting)
   if (g_window == NULL)
     return SDL_FALSE;
 
-  g_renderer = SDL_CreateRenderer(g_window, -1, SDL_RENDERER_ACCELERATED);
-  if (g_renderer == NULL)
+  gRenderer = SDL_CreateRenderer(g_window, -1, SDL_RENDERER_ACCELERATED);
+  if (gRenderer == NULL)
     return SDL_FALSE;
   if (IMG_Init(IMG_INIT_PNG) != IMG_INIT_PNG)
   {
@@ -37,7 +37,7 @@ static SDL_bool init(const GameSetting* setting)
     ERROR("open audio failed\n");
     return FALSE;
   }
-  SDL_SetRenderDrawBlendMode(g_renderer, SDL_BLENDMODE_BLEND);
+  SDL_SetRenderDrawBlendMode(gRenderer, SDL_BLENDMODE_BLEND);
   input_init();
   engine_set_frame_rate(setting->frame_rate);
   return SDL_TRUE;
@@ -65,10 +65,10 @@ void engine_run(GameDelegate* game_delegate, const GameSetting* setting)
         event_fn(&event);
       }
       input_update();
-      SDL_SetRenderDrawColor(g_renderer, 0, 0, 0, 0);
-      SDL_RenderClear(g_renderer);
+      SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0);
+      SDL_RenderClear(gRenderer);
       loop_fn();
-      SDL_RenderPresent(g_renderer);
+      SDL_RenderPresent(gRenderer);
       elapsedTicks = SDL_GetTicks() - beginingTick;
       if (elapsedTicks < _delay_ticks)
       {
@@ -77,7 +77,7 @@ void engine_run(GameDelegate* game_delegate, const GameSetting* setting)
     }
   }
   game_delegate->fini();
-  SDL_DestroyRenderer(g_renderer);
+  SDL_DestroyRenderer(gRenderer);
   SDL_DestroyWindow(g_window);
   IMG_Quit();
   Mix_Quit();

@@ -24,7 +24,7 @@ struct PingPongValue
   s8 dir;
 };
 
-extern RENDERER* g_renderer;
+extern RENDERER* gRenderer;
 
 static const char* _jobdesc[NUM_JOBS] = { "knight job desc",
                                           "lizzard job desc",
@@ -136,24 +136,24 @@ static void draw_character(void)
   const Animation* anim = _jobanim[_job];
 
   // draw box
-  SDL_SetRenderDrawColor(g_renderer, 0x00, 0x00, 0x00, 0xd0);
-  SDL_RenderFillRect(g_renderer, &_jobbox);
+  SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xd0);
+  SDL_RenderFillRect(gRenderer, &_jobbox);
 
-  frame_index = (_ticks / anim->frame_duration) % anim->count;
+  frame_index = (_ticks / anim->frameDuration) % anim->count;
 
-  texture = get_texture(anim->texture_id);
+  texture = get_texture(anim->textureId);
 
-  src.x = anim->offset_x + frame_index * anim->sprite_width;
-  src.y = anim->offset_y;
-  src.w = anim->sprite_width;
-  src.h = anim->sprite_height;
+  src.x = anim->offsetX + frame_index * anim->spriteWidth;
+  src.y = anim->offsetY;
+  src.w = anim->spriteWidth;
+  src.h = anim->spriteHeight;
 
   dst.x = CHARACTER_POS_X;
   dst.y = CHARACTER_POS_Y;
   dst.w = src.w;
   dst.h = src.h;
 
-  SDL_RenderCopy(g_renderer, texture, &src, &dst);
+  SDL_RenderCopy(gRenderer, texture, &src, &dst);
 
   draw_icon(_lbtn_icon, BUTTON_LEFT_POS_X, BUTTON_LR_POS_Y);
   draw_icon(_rbtn_icon, BUTTON_RIGHT_POS_X, BUTTON_LR_POS_Y);
@@ -161,14 +161,14 @@ static void draw_character(void)
 
 static void draw_jobdesc()
 {
-  SDL_SetRenderDrawColor(g_renderer, 0x00, 0x00, 0x00, ppv_step(&_transparent));
-  SDL_RenderFillRect(g_renderer, &_descbox);
-  FC_DrawBoxEffect(_font, g_renderer, _descbox, _jobdesc_text_effect, _jobdesc[_job]);
+  SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, ppv_step(&_transparent));
+  SDL_RenderFillRect(gRenderer, &_descbox);
+  FC_DrawBoxEffect(_font, gRenderer, _descbox, _jobdesc_text_effect, _jobdesc[_job]);
 }
 
 static void draw_bg(void)
 {
-  SDL_RenderCopy(g_renderer, _bgimg, NULL, NULL);
+  SDL_RenderCopy(gRenderer, _bgimg, NULL, NULL);
 }
 
 static u8 ppv_step(struct PingPongValue* ppv)
@@ -188,5 +188,5 @@ static void draw_icon(Icon icon, int x, int y)
   dst.w = icon.rect.w;
   dst.h = icon.rect.h;
 
-  SDL_RenderCopy(g_renderer, get_texture(icon.texture_id), &icon.rect, &dst);
+  SDL_RenderCopy(gRenderer, get_texture(icon.textureId), &icon.rect, &dst);
 }

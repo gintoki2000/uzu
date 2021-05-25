@@ -1,9 +1,9 @@
 #include "system/debug/draw_position.h"
 #include <components.h>
 
-extern SDL_Rect      g_viewport;
-extern SDL_Renderer* g_renderer;
-extern Ecs*          g_ecs;
+extern SDL_Rect      gViewport;
+extern SDL_Renderer* gRenderer;
+extern Ecs*          gEcs;
 
 void position_rendering_system_update()
 {
@@ -12,13 +12,13 @@ void position_rendering_system_update()
 
   Transform* transforms;
 
-  ecs_raw(g_ecs, TRANSFORM, &entities, (void**)&transforms, &cnt);
+  ecs_raw(gEcs, TRANSFORM, &entities, (void**)&transforms, &cnt);
 
-  SDL_SetRenderDrawColor(g_renderer, 0, 255, 0, 255);
+  SDL_SetRenderDrawColor(gRenderer, 0, 255, 0, 255);
   for (int i = 0; i < cnt; ++i)
   {
-    SDL_RenderDrawPoint(g_renderer,
-                        transforms[i].position.x - g_viewport.x,
-                        transforms[i].position.y - g_viewport.y);
+    SDL_RenderDrawPoint(gRenderer,
+                        transforms[i].position.x - gViewport.x,
+                        transforms[i].position.y - gViewport.y);
   }
 }

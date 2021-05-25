@@ -251,7 +251,7 @@ static void rcpy(POINT* in, POINT* out, int count)
     out[j] = in[i];
 }
 
-extern Ecs* g_ecs;
+extern Ecs* gEcs;
 static POINT _nodeBuff[100];
 void pathfinding_system(void)
 {
@@ -260,23 +260,23 @@ void pathfinding_system(void)
    PathfindingParams* params;
    Path* path;
    int nodeCount;
-   void (*pathfindingCompletedCallback)(void*, Ecs*, ecs_size_t, Path*);
-   ecs_raw (g_ecs, PATHFINDING_PARAMS, &entities, (void**)&params, &count);
+   void (*completedCallback)(void*, Ecs*, ecs_entity_t, Path*);
+   ecs_raw (gEcs, PATHFINDING_PARAMS, &entities, (void**)&params, &count);
    for (int i = count -1; i >= 0; --i)
    {
-     pathfindingCompletedCallback = SDL_static_cast(void(*)(void*, Ecs*, ecs_size_t, Path*), params[i].cbCompleted.func);
+     completedCallback = SDL_static_cast(void(*)(void*, Ecs*, ecs_entity_t, Path*), params[i].cbCompleted.func);
      if (find_path(params[i].start, params[i].goal, _nodeBuff, &nodeCount)){
-        path = ecs_add (g_ecs, entities[i], PATH);
+        path = ecs_add (gEcs, entities[i], PATH);
         path->count        = nodeCount;
         path->currentIndex = 0;
         rcpy(_nodeBuff, path->nodes, nodeCount);
-        if (pathfindingCompletedCallback)
-          pathfindingCompletedCallback(params[i].cbCompleted.user_data, g_ecs, entities[i], path);
+        if (completedCallback)
+          completedCallback(params[i].cbCompleted.user_data, gEcs, entities[i], path);
      } else {
-        if (pathfindingCompletedCallback)
-          pathfindingCompletedCallback(params[i].cbCompleted.user_data, g_ecs, entities[i], NULL);
+        if (completedCallback)
+          completedCallback(params[i].cbCompleted.user_data, gEcs, entities[i], NULL);
      } 
-     ecs_rmv(g_ecs, entities[i], PATHFINDING_PARAMS);
+     ecs_rmv(gEcs, entities[i], PATHFINDING_PARAMS);
    }
 }
 
@@ -285,18 +285,18 @@ void pathfinding_system(void)
 static RECT _rectBuff[MAX_TILES];
 void draw_gird(void)
 {
-  extern RENDERER* g_renderer;
-  extern RECT g_viewport;
+  extern RENDERER* gRenderer;
+  extern RECT gViewport;
   RECT r; 
 
   s32 startX, startY, endX, endY;
   int c = 0;
 
-  startX = g_viewport.x / TILE_SIZE;
-  startY = g_viewport.y / TILE_SIZE;
+  startX = gViewport.x / TILE_SIZE;
+  startY = gViewport.y / TILE_SIZE;
 
-  endX = (g_viewport.x + g_viewport.w) / TILE_SIZE;
-  endY = (g_viewport.y + g_viewport.h) / TILE_SIZE;
+  endX = (gViewport.x + gViewport.w) / TILE_SIZE;
+  endY = (gViewport.y + gViewport.h) / TILE_SIZE;
 
   startX = max(0, startX);
   startY = max(0, startY);
@@ -310,8 +310,8 @@ void draw_gird(void)
     for (int x = startX; x <= endX; ++x)
     {
       if (_gird[y][x]){
-        r.x = x * TILE_SIZE - g_viewport.x + 6;
-        r.y = y * TILE_SIZE - g_viewport.y + 6;
+        r.x = x * TILE_SIZE - gViewport.x + 6;
+        r.y = y * TILE_SIZE - gViewport.y + 6;
         if (c >= MAX_TILES)
           printf("het cho trong buffer\n");
         else 
@@ -320,22 +320,22 @@ void draw_gird(void)
 
       if (_costSoFar[y][x] == INT32_MAX || _costSoFar[y][x] == 0)
         continue;
-      r.x = x * TILE_SIZE - g_viewport.x + 6;
-      r.y = y * TILE_SIZE - g_viewport.y + 6;
-      FC_Draw(font, g_renderer, r.x, r.y, "%d", _costSoFar[y][x]);
+      r.x = x * TILE_SIZE - gViewport.x + 6;
+      r.y = y * TILE_SIZE - gViewport.y + 6;
+      FC_Draw(font, gRenderer, r.x, r.y, "%d", _costSoFar[y][x]);
     }
-  SDL_SetRenderDrawColor(g_renderer, 0xff, 0x00, 0x00, 0xd0);
-  SDL_RenderFillRects(g_renderer, _rectBuff, c);
+  SDL_SetRenderDrawColor(gRenderer, 0xff, 0x00, 0x00, 0xd0);
+  SDL_RenderFillRects(gRenderer, _rectBuff, c);
 
   int tileX, tileY, mouseX, mouseY;
   SDL_GetMouseState(&mouseX, &mouseY);
   mouseX = mouseX / SCL_X;
   mouseY = mouseY / SCL_Y;
-  tileX = mouseX + g_viewport.x;
-  tileY = mouseY + g_viewport.y;
+  tileX = mouseX + gViewport.x;
+  tileY = mouseY + gViewport.y;
   tileX /= TILE_SIZE;
   tileY /= TILE_SIZE;
-  FC_DrawColor(get_font(FONT_ITEM_PICKED_UP), g_renderer, mouseX, mouseY,
+  FC_DrawColor(get_font(FONT_ITEM_PICKED_UP), gRenderer, mouseX, mouseY,
       _gird[tileY][tileX] ?  (COLOR){0xff, 0x00, 0x00, 0xff} : (COLOR){ 0xff, 0xff, 0xff, 0xff } ,"(%d, %d)", tileX, tileY);
 }
 

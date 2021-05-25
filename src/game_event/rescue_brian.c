@@ -32,7 +32,7 @@ static const Vec2 _enemy_position_tbl[] = {
 };
 static ecs_entity_t _enemies[NUM_ENEMIES];
 static Vec2         _brian_position = { 47 * 16, 7 * 16 };
-extern Ecs*         g_ecs;
+extern Ecs*         gEcs;
 
 GAME_EVENT("event.brian_rescue")
 static void processing();
@@ -61,9 +61,9 @@ static void INACTIVE_on_event_finished(SDL_UNUSED void* arg, const EventFinished
     if (!SDL_strcmp(msg->status, "accept"))
     {
       _save.state        = PROCESSING;
-      ecs_entity_t brian = scn_find(g_ecs, "brian");
+      ecs_entity_t brian = scn_find(gEcs, "brian");
       if (brian != ECS_NULL_ENT)
-        ecs_set(g_ecs, brian, DIALOGUE, &(Dialogue){ CON_BRIAN_RESCUE_1 });
+        ecs_set(gEcs, brian, DIALOGUE, &(Dialogue){ CON_BRIAN_RESCUE_1 });
       processing();
     }
     else
@@ -81,13 +81,13 @@ static void PROCESSING_on_level_loaded(SDL_UNUSED void* arg, const LevelLoadedMs
     for (int i = 0; i < NUM_ENEMIES; ++i)
     {
       if (_save.alive[i])
-        _enemies[i] = make_chort(g_ecs, _enemy_position_tbl[i]);
+        _enemies[i] = make_chort(gEcs, _enemy_position_tbl[i]);
     }
     ems_connect(MSG_ENTITY_DIED, CALLBACK_2(PROCESSING_on_entity_died));
   }
   else if (!SDL_strcmp(msg->level_name, "demon_ruin"))
   {
-    make_npc_brian(g_ecs, _brian_position, CON_BRIAN_RESCUE_1);
+    make_npc_brian(gEcs, _brian_position, CON_BRIAN_RESCUE_1);
   }
 }
 
@@ -95,7 +95,7 @@ static void PICKUP_on_level_loaded(SDL_UNUSED void* arg, const LevelLoadedMsg* m
 {
   if (!SDL_strcmp(msg->level_name, "demon_ruin"))
   {
-    make_npc_brian(g_ecs, _brian_position, CON_BRIAN_RESCUE_2);
+    make_npc_brian(gEcs, _brian_position, CON_BRIAN_RESCUE_2);
     ems_connect(MSG_CONVERSATION_FINISHED, CALLBACK_2(PICKUP_on_converastion_finished));
   }
 }
@@ -124,9 +124,9 @@ static void PROCESSING_on_entity_died(SDL_UNUSED void* arg, const EntityDiedMsg*
 
 static void PICKUP_on_msgbox_close(SDL_UNUSED void* arg, SDL_UNUSED const void* msg)
 {
-  ecs_entity_t brian = scn_find(g_ecs, "brian");
+  ecs_entity_t brian = scn_find(gEcs, "brian");
   ASSERT(brian != ECS_NULL_ENT);
-  ecs_set(g_ecs, brian, SCRIPT, &(Script){ create_action_sequence(), { 0 } });
+  ecs_set(gEcs, brian, SCRIPT, &(Script){ create_action_sequence(), { 0 } });
 }
 
 static void PICKUP_on_converastion_finished(SDL_UNUSED void*                arg,

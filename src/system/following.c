@@ -4,32 +4,32 @@
 
 void following_system(void)
 {
-  extern Ecs*       g_ecs;
+  extern Ecs*       gEcs;
   ecs_entity_t*     entities;
   ecs_size_t        cnt;
   FollowingTarget*  target;
   Transform*        transform;
   Vec2              target_pos;
   Vec2              desired;
-  DesiredDirection* desired_direction;
+  DesiredDirection* desiredDirection;
   float             r;
   float             d;
 
-  ecs_raw(g_ecs, FOLLOWING_TARGET, &entities, (void**)&target, &cnt);
+  ecs_raw(gEcs, FOLLOWING_TARGET, &entities, (void**)&target, &cnt);
   for (int i = cnt - 1; i >= 0; --i)
   {
-    if (!ecs_is_valid(g_ecs, target[i].entity) &&
-        (desired_direction = ecs_get(g_ecs, entities[i], DESIRED_DIRECTION)))
+    if (!ecs_is_valid(gEcs, target[i].entity) &&
+        (desiredDirection = ecs_get(gEcs, entities[i], DESIRED_DIRECTION)))
     {
-      ecs_rmv(g_ecs, entities[i], FOLLOWING_TARGET);
-      *desired_direction = VEC2_ZERO;
+      ecs_rmv(gEcs, entities[i], FOLLOWING_TARGET);
+      *desiredDirection = VEC2_ZERO;
       continue;
     }
 
-    if ((transform = ecs_get(g_ecs, entities[i], TRANSFORM)) &&
-        (desired_direction = ecs_get(g_ecs, entities[i], DESIRED_DIRECTION)))
+    if ((transform = ecs_get(gEcs, entities[i], TRANSFORM)) &&
+        (desiredDirection = ecs_get(gEcs, entities[i], DESIRED_DIRECTION)))
     {
-      target_pos = ett_get_position(g_ecs, target[i].entity);
+      target_pos = ett_get_position(gEcs, target[i].entity);
       desired    = vec2_sub(target_pos, transform->position);
 
       d       = vec2_mag2(desired);
@@ -37,12 +37,12 @@ void following_system(void)
       r       = target[i].radius;
       if (d < r * r)
       {
-        ecs_rmv(g_ecs, entities[i], FOLLOWING_TARGET);
-        *desired_direction = VEC2_ZERO;
+        ecs_rmv(gEcs, entities[i], FOLLOWING_TARGET);
+        *desiredDirection = VEC2_ZERO;
         continue;
       }
 
-      *desired_direction = desired;
+      *desiredDirection = desired;
     }
   }
 }

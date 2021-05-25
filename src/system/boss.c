@@ -2,7 +2,7 @@
 #include "ecs/ecs.h"
 #include "system/event_messaging_sys.h"
 
-extern Ecs* g_ecs;
+extern Ecs* gEcs;
 static RECT _boss_room;
 
 static ecs_entity_t get_boss_room(Ecs* registry)

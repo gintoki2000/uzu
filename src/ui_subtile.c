@@ -7,7 +7,7 @@
 #define POSITION_X (WIN_WIDTH / 2)
 #define POSITION_Y (WIN_HEIGHT - 30)
 
-extern RENDERER* g_renderer;
+extern RENDERER* gRenderer;
 
 static const char** _items;
 static u16          _ticks;
@@ -48,7 +48,7 @@ void ui_subtile_update()
 void ui_subtile_draw()
 {
   if (_items != NULL && *_items != NULL)
-    FC_DrawEffect(_font, g_renderer, POSITION_X, POSITION_Y, TEXT_EFFECT, "%s",*_items);
+    FC_DrawEffect(_font, gRenderer, POSITION_X, POSITION_Y, TEXT_EFFECT, "%s",*_items);
 }
 
 void ui_subtile_show(const char* items[])

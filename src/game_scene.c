@@ -56,32 +56,32 @@ static void music_player_on_level_loaded(void* arg, const LevelLoadedMsg* event)
 
 DEFINE_SCENE(game);
 
-Ecs* g_ecs;
+Ecs* gEcs;
 
 static BOOL _bHasNextLevel;
 static char _pendingLevel[LADDER_ATTRS_MAX_LEVEL_NAME_LEN + 1];
 static char _targetPortal[LADDER_ATTRS_MAX_DEST_LEN + 1];
-static BOOL _bPaused;
-static BOOL _bPlayerDied;
+static BOOL _isPaused;
+static BOOL _isPlayerDied;
 
 #if DEBUG
-static BOOL _bDrawTileCollider;
-static BOOL _bDrawHitbox;
-static BOOL _bDrawPosition;
-static BOOL _bDrawRTree;
-static BOOL _bDrawGird;
-static BOOL _bDrawPath;
+static BOOL _drawTileColliderEnabled;
+static BOOL _drawHitboxEnable;
+static BOOL _drawPositionEnabled;
+static BOOL _drawRTreeEnabled;
+static BOOL _drawGirdEnabled;
+static BOOL _drawPathEnabled;
 #endif
 
 static void spawn_player(Vec2 position)
 {
   ecs_entity_t player;
 
-  player = make_character(g_ecs, gSession.job, position);
-  player = make_player(g_ecs, player);
+  player = make_character(gEcs, gSession.job, position);
+  player = make_player(gEcs, player);
 
-  ett_equip_weapon(g_ecs, player, make_weapon(g_ecs, gSession.weapon));
-  ett_attune_spell(g_ecs, player, gSession.spell);
+  ett_equip_weapon(gEcs, player, make_weapon(gEcs, gSession.weapon));
+  ett_attune_spell(gEcs, player, gSession.spell);
 }
 
 static void remove_unprocessed_attack_commands(void)
@@ -89,13 +89,13 @@ static void remove_unprocessed_attack_commands(void)
   ecs_entity_t*  entities;
   ecs_size_t     cnt;
   AttackCommand* attackCommand;
-  ecs_raw(g_ecs, ATTACK_COMMAND, &entities, (void**)&attackCommand, &cnt);
+  ecs_raw(gEcs, ATTACK_COMMAND, &entities, (void**)&attackCommand, &cnt);
   for (int i = cnt - 1; i >= 0; --i)
   {
     if (!attackCommand[i].processing)
     {
       INVOKE_EVENT(attackCommand[i].cbCompleted, FALSE);
-      ecs_rmv(g_ecs, entities[i], ATTACK_COMMAND);
+      ecs_rmv(gEcs, entities[i], ATTACK_COMMAND);
     }
   }
 }
@@ -104,7 +104,7 @@ static void on_load()
 {
   extern Cursor g_cursor_cross;
   push_cursor_state(g_cursor_cross);
-  g_ecs = ecs_new(gCompDescs, NUM_COMPONENTS);
+  gEcs = ecs_new(gCompDescs, NUM_COMPONENTS);
 
   ems_init();
   collision_system_init();
@@ -152,10 +152,10 @@ static void on_unload()
   ems_broadcast(MSG_GAME_SCENE_UNLOAD, NULL);
   dialogue_system_fini();
   game_event_fini();
-  ecs_del(g_ecs);
+  ecs_del(gEcs);
   ems_fini();
 
-  g_ecs = NULL;
+  gEcs = NULL;
 }
 
 static void on_event(const SDL_UNUSED SDL_Event* evt)
@@ -167,20 +167,20 @@ static void find_path_from_player_to_mouse_position(void)
 {
   int         tileX, tileY, mouseX, mouseY;
   int         playerTileX, playerTileY;
-  extern RECT g_viewport;
+  extern RECT gViewport;
   SDL_GetMouseState(&mouseX, &mouseY);
   mouseX = mouseX / SCL_X;
   mouseY = mouseY / SCL_Y;
-  tileX  = (mouseX + g_viewport.x) / TILE_SIZE;
-  tileY  = (mouseY + g_viewport.y) / TILE_SIZE;
+  tileX  = (mouseX + gViewport.x) / TILE_SIZE;
+  tileY  = (mouseY + gViewport.y) / TILE_SIZE;
 
-  ecs_entity_t player         = scn_get_player(g_ecs);
-  Vec2         playerPosition = ett_get_position(g_ecs, player);
+  ecs_entity_t player         = scn_get_player(gEcs);
+  Vec2         playerPosition = ett_get_position(gEcs, player);
   playerTileX                 = (int)playerPosition.x / TILE_SIZE;
   playerTileY                 = (int)playerPosition.y / TILE_SIZE;
 
-  ecs_rmv(g_ecs, player, PATH);
-  ecs_set(g_ecs,
+  ecs_rmv(gEcs, player, PATH);
+  ecs_set(gEcs,
           player,
           PATHFINDING_PARAMS,
           &(PathfindingParams){
@@ -194,13 +194,19 @@ static void on_update()
 {
 #if DEBUG
   if (key_just_pressed(SDL_SCANCODE_H))
-    _bDrawHitbox = !_bDrawHitbox;
+    _drawHitboxEnable = !_drawHitboxEnable;
   if (key_just_pressed(SDL_SCANCODE_J))
-    _bDrawPosition = !_bDrawPosition;
+    _drawPositionEnabled = !_drawPositionEnabled;
   if (key_just_pressed(SDL_SCANCODE_K))
-    _bDrawTileCollider = !_bDrawTileCollider;
+    _drawTileColliderEnabled = !_drawTileColliderEnabled;
   if (key_just_pressed(SDL_SCANCODE_L))
-    _bDrawRTree = !_bDrawRTree;
+    _drawRTreeEnabled = !_drawRTreeEnabled;
+
+  if (key_just_pressed(SDL_SCANCODE_N))
+    _drawGirdEnabled = !_drawGirdEnabled;
+
+  if (key_just_pressed(SDL_SCANCODE_M))
+    _drawPathEnabled = !_drawPathEnabled;
 
   if (mouse_button_just_pressed(SDL_BUTTON_LEFT))
   {
@@ -216,7 +222,7 @@ static void on_update()
   else
   {
     // update
-    if (!_bPaused)
+    if (!_isPaused)
     {
       update_game_logic();
     }
@@ -226,22 +232,22 @@ static void on_update()
     render_ui();
 
 #if DEBUG
-    if (_bDrawHitbox)
+    if (_drawHitboxEnable)
       hitbox_rendering_system_update();
 
-    if (_bDrawPosition)
+    if (_drawPositionEnabled)
       position_rendering_system_update();
 
-    if (_bDrawTileCollider)
+    if (_drawTileColliderEnabled)
       draw_map_colliders();
 
-    if (_bDrawRTree)
+    if (_drawRTreeEnabled)
       collision_system_render_debug();
 
-    if (_bDrawPath)
+    if (_drawPathEnabled)
       draw_path_system();
 
-    if (_bDrawGird)
+    if (_drawGirdEnabled)
       draw_gird();
     draw_destination_system();
 #endif
@@ -255,7 +261,7 @@ static void on_update()
 
 static void on_player_enter_portal(SDL_UNUSED void* arg, const EnterPortalMsg* event)
 {
-  PortalAttributes* portalAttributes = ecs_get(g_ecs, event->portal, LADDER_ATTRIBUTES);
+  PortalAttributes* portalAttributes = ecs_get(gEcs, event->portal, LADDER_ATTRIBUTES);
   request_load_level(portalAttributes->level, portalAttributes->dest);
 }
 
@@ -268,8 +274,8 @@ void request_load_level(const char* level, const char* portalAttributes)
 
 static void on_entity_died(SDL_UNUSED void* arg, const EntityDiedMsg* event)
 {
-  if (ecs_has(g_ecs, event->entity, PLAYER_TAG))
-    _bPlayerDied = TRUE;
+  if (ecs_has(gEcs, event->entity, PLAYER_TAG))
+    _isPlayerDied = TRUE;
 }
 
 static Mix_Music* music_from_level_name(const char* level_name)
@@ -300,22 +306,22 @@ static void music_player_on_level_loaded(SDL_UNUSED void* arg, const LevelLoaded
 static void unload_current_level()
 {
   ems_broadcast(MSG_LEVEL_UNLOADED, &(LevelUnloadedMsg){ gSession.level });
-  ecs_entity_t player = scn_get_player(g_ecs);
-  gSession.spell      = ett_get_attuned_spell_type(g_ecs, player);
-  gSession.weapon     = ett_get_equiped_weapon_type(g_ecs, player);
-  ecs_clear(g_ecs);
+  ecs_entity_t player = scn_get_player(gEcs);
+  gSession.spell      = ett_get_attuned_spell_type(gEcs, player);
+  gSession.weapon     = ett_get_equiped_weapon_type(gEcs, player);
+  ecs_clear(gEcs);
   map_clear();
 }
 
 void game_scene_pause()
 {
-  _bPaused = TRUE;
+  _isPaused = TRUE;
   ems_broadcast(MSG_GAME_PAUSED, NULL);
 }
 
 void game_scene_resume()
 {
-  _bPaused = FALSE;
+  _isPaused = FALSE;
   ems_broadcast(MSG_GAME_RESUMED, NULL);
 }
 static void update_ui()
@@ -347,7 +353,7 @@ static void update_game_logic(void)
   RUN_SYSTEM(animator_system);
   RUN_SYSTEM(ai_system);
   RUN_SYSTEM(walk_directly_toward_system);
-  RUN_SYSTEM(health_system);
+  RUN_SYSTEM(invulnerable_timer_system);
   RUN_SYSTEM(camera_system);
   RUN_SYSTEM(following_system);
   RUN_SYSTEM(stagger_system);
@@ -385,9 +391,9 @@ static void render_game_world(void)
 
 static Vec2 get_spawn_localtion(ecs_entity_t portal)
 {
-  PortalAttributes* portalAttributes = ecs_get(g_ecs, portal, LADDER_ATTRIBUTES);
-  HitBox*           hixbox           = ecs_get(g_ecs, portal, HITBOX);
-  Vec2              position         = ett_get_position(g_ecs, portal);
+  PortalAttributes* portalAttributes = ecs_get(gEcs, portal, LADDER_ATTRIBUTES);
+  HitBox*           hixbox           = ecs_get(gEcs, portal, HITBOX);
+  Vec2              position         = ett_get_position(gEcs, portal);
   switch (portalAttributes->exitDirection)
   {
   case UP:
@@ -415,7 +421,7 @@ static void load_pending_level(void)
   Vec2         spawn_localtion;
   load_level(_pendingLevel);
 
-  if ((portal = scn_find_portal(g_ecs, _targetPortal)) != ECS_NULL_ENT)
+  if ((portal = scn_find_portal(gEcs, _targetPortal)) != ECS_NULL_ENT)
   {
     spawn_localtion = get_spawn_localtion(portal);
     spawn_player(spawn_localtion);

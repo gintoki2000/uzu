@@ -11,15 +11,15 @@
 #include "system/event_messaging_sys.h"
 #include "ui_list.h"
 
-extern Ecs* g_ecs;
-extern RECT g_viewport;
+extern Ecs* gEcs;
+extern RECT gViewport;
 
 #define INTERACTABLE_DISTANCE (TILE_SIZE * 1)
 #define POINTER_DOWN_WIDTH 6
 #define POINTER_DOWN_HEIGHT 3
 #define MOVE_SPEED 100.f
 
-ecs_entity_t g_curr_iteractable_entity = ECS_NULL_ENT;
+ecs_entity_t gCurrentInteractingEntity = ECS_NULL_ENT;
 
 //<--------------------------------event callbacks----------------------------------->//
 
@@ -32,14 +32,14 @@ static void on_list_select(SDL_UNUSED pointer_t arg, const char* item)
 {
   ems_broadcast(MSG_COMANND_SELECTED,
                 &(CommandSelectedMsg){
-                    g_curr_iteractable_entity,
+                    gCurrentInteractingEntity,
                     item,
                 });
 }
 
 static void on_level_unloaded(SDL_UNUSED pointer_t arg, SDL_UNUSED pointer_t event)
 {
-  g_curr_iteractable_entity = ECS_NULL_ENT;
+  gCurrentInteractingEntity = ECS_NULL_ENT;
 }
 
 struct _QueryClosestInteracableEntityArgs
@@ -53,9 +53,9 @@ static BOOL
 query_closest_interactable_entity_callback(struct _QueryClosestInteracableEntityArgs* args,
                                            ecs_entity_t                               e)
 {
-  Vec2  entity_position = ett_get_position(g_ecs, e);
+  Vec2  entity_position = ett_get_position(gEcs, e);
   float dist            = vec2_dist(args->player_position, entity_position);
-  if (dist < args->closest_distance && ecs_has(g_ecs, e, INTERACTABLE))
+  if (dist < args->closest_distance && ecs_has(gEcs, e, INTERACTABLE))
   {
     args->closest_distance = dist;
     args->closest_entity   = e;
@@ -65,14 +65,14 @@ query_closest_interactable_entity_callback(struct _QueryClosestInteracableEntity
 
 static void update_interactable_entity()
 {
-  if (g_curr_iteractable_entity == ECS_NULL_ENT)
+  if (gCurrentInteractingEntity == ECS_NULL_ENT)
   {
     Vec2 player_pos;
     RECT rect;
 
     struct _QueryClosestInteracableEntityArgs cbargs;
 
-    player_pos = snn_get_player_position(g_ecs);
+    player_pos = snn_get_player_position(gEcs);
     rect.x     = player_pos.x - INTERACTABLE_DISTANCE / 2;
     rect.y     = player_pos.y - INTERACTABLE_DISTANCE / 2;
     rect.w     = INTERACTABLE_DISTANCE;
@@ -85,26 +85,26 @@ static void update_interactable_entity()
     collision_box_query(&rect,
                         0xffff,
                         CALLBACK_1(&cbargs, query_closest_interactable_entity_callback));
-    g_curr_iteractable_entity = cbargs.closest_entity;
+    gCurrentInteractingEntity = cbargs.closest_entity;
   }
   else
   {
     Vec2 player_pos, ientity_pos;
 
-    player_pos  = snn_get_player_position(g_ecs);
-    ientity_pos = ett_get_position(g_ecs, g_curr_iteractable_entity);
+    player_pos  = snn_get_player_position(gEcs);
+    ientity_pos = ett_get_position(gEcs, gCurrentInteractingEntity);
 
     if (vec2_dist(player_pos, ientity_pos) > INTERACTABLE_DISTANCE ||
-        !ecs_has(g_ecs, g_curr_iteractable_entity, INTERACTABLE))
+        !ecs_has(gEcs, gCurrentInteractingEntity, INTERACTABLE))
     {
-      g_curr_iteractable_entity = ECS_NULL_ENT;
+      gCurrentInteractingEntity = ECS_NULL_ENT;
     }
   }
 }
 
 static void begin_interact(ecs_entity_t entity)
 {
-  Interactable* interactable = ecs_get(g_ecs, entity, INTERACTABLE);
+  Interactable* interactable = ecs_get(gEcs, entity, INTERACTABLE);
   if (!interactable)
     return;
   ui_list_display((const char**)interactable->commands, interactable->numCommands);
@@ -119,14 +119,14 @@ void player_process_input(SDL_UNUSED void* arg)
   ecs_entity_t      player;
   DesiredDirection* desired_direction;
 
-  if ((player = scn_get_player(g_ecs)) == ECS_NULL_ENT)
+  if ((player = scn_get_player(gEcs)) == ECS_NULL_ENT)
     return;
-  if (ecs_has(g_ecs, player, SCRIPT))
+  if (ecs_has(gEcs, player, SCRIPT))
     return;
   update_interactable_entity();
 
-  desired_direction = ecs_get(g_ecs, player, DESIRED_DIRECTION);
-  if (!ecs_has(g_ecs, player, INVULNERABLE))
+  desired_direction = ecs_get(gEcs, player, DESIRED_DIRECTION);
+  if (!ecs_has(gEcs, player, INVULNERABLE))
   {
     *desired_direction = VEC2_ZERO;
     if (button_pressed(BUTTON_UP))
@@ -148,25 +148,24 @@ void player_process_input(SDL_UNUSED void* arg)
       inventory_display();
       return;
     }
-    if (mouse_button_just_pressed(SDL_BUTTON_LEFT) && !ecs_has(g_ecs, player, ATTACK_COMMAND))
+    if (mouse_button_just_pressed(SDL_BUTTON_LEFT) && !ecs_has(gEcs, player, ATTACK_COMMAND))
     {
-      printf("attack\n");
-      ecs_set(g_ecs, player, ATTACK_COMMAND, &(AttackCommand){ .code = 0 });
+      ecs_set(gEcs, player, ATTACK_COMMAND, &(AttackCommand){ .triggerCode = 0 });
     }
 
     if (button_just_pressed(BUTTON_JUMP))
     {
-      Transform* transform = ecs_get(g_ecs, player, TRANSFORM);
+      Transform* transform = ecs_get(gEcs, player, TRANSFORM);
       if (transform->z <= 0.f)
       {
-        Motion* motion = ecs_get(g_ecs, player, MOTION);
+        Motion* motion = ecs_get(gEcs, player, MOTION);
         motion->vz     = 100.f;
         Mix_PlayChannel(-1, get_sfx(SFX_MOV_JUMP), 0);
       }
     }
 
-    if (button_just_pressed(BUTTON_INTERACT) && g_curr_iteractable_entity != ECS_NULL_ENT)
-      begin_interact(g_curr_iteractable_entity);
+    if (button_just_pressed(BUTTON_INTERACT) && gCurrentInteractingEntity != ECS_NULL_ENT)
+      begin_interact(gCurrentInteractingEntity);
   }
 }
 

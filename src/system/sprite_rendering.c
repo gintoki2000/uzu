@@ -7,9 +7,9 @@
 
 void rendering_system(void)
 {
-  extern SDL_Rect      g_viewport;
-  extern SDL_Renderer* g_renderer;
-  extern Ecs*          g_ecs;
+  extern SDL_Rect      gViewport;
+  extern SDL_Renderer* gRenderer;
+  extern Ecs*          gEcs;
   ecs_entity_t*        entities;
   Visual*              visuals;
   Transform*           transform;
@@ -19,11 +19,11 @@ void rendering_system(void)
   int   depth;
   RECT  dst;
 
-  ecs_raw(g_ecs, VISUAL, &entities, (void**)&visuals, &cnt);
+  ecs_raw(gEcs, VISUAL, &entities, (void**)&visuals, &cnt);
 
   for (int i = 0; i < cnt; ++i)
   {
-    if ((transform = ecs_get(g_ecs, entities[i], TRANSFORM)))
+    if ((transform = ecs_get(gEcs, entities[i], TRANSFORM)))
     {
       position.x = transform->position.x - visuals[i].anchor.x;
       position.y = transform->position.y - visuals[i].anchor.y - transform->z;
@@ -34,10 +34,10 @@ void rendering_system(void)
       dst.w = visuals[i].sprite.rect.w;
       dst.h = visuals[i].sprite.rect.h;
 
-      if (SDL_HasIntersection(&g_viewport, &dst))
+      if (SDL_HasIntersection(&gViewport, &dst))
       {
-        position.x -= g_viewport.x;
-        position.y -= g_viewport.y;
+        position.x -= gViewport.x;
+        position.y -= gViewport.y;
         sprite_renderer_draw_ex(visuals[i].sprite,
                                 position,
                                 visuals[i].anchor,

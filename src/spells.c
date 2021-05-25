@@ -37,6 +37,7 @@ static Vec2 vec2_rot(Vec2 v, float angle)
 
 static void fire_ball_cast(Ecs* registry, ecs_entity_t caster, SDL_UNUSED ecs_entity_t weapon)
 {
+  const float SPEED = 250.f;
   Vec2  position;
   u16   attackMask;
   Vec2  aimDirection;
@@ -46,13 +47,14 @@ static void fire_ball_cast(Ecs* registry, ecs_entity_t caster, SDL_UNUSED ecs_en
   attackMask       = ett_get_atk_mask        (registry, caster);
   aimDirection     = ett_get_facing_direction(registry, caster);
 
-  projectileSpeed = vec2_mul(aimDirection, 250.f);
+  projectileSpeed = vec2_mul(aimDirection, SPEED);
   make_fire_ball(registry, caster, position, projectileSpeed, attackMask);
   PLAY_SOUND(SFX_FIRE_BALL_LAUCH);
 }
 
 static void ice_arrow_cast(Ecs* registry, ecs_entity_t caster, ecs_entity_t SDL_UNUSED weapon)
 {
+  const float SPEED = 250.f;
   Vec2  position;
   u16   attackMask;
   Vec2  aimDirection;
@@ -62,7 +64,7 @@ static void ice_arrow_cast(Ecs* registry, ecs_entity_t caster, ecs_entity_t SDL_
   attackMask       = ett_get_atk_mask(registry, caster);
   aimDirection     = ett_get_facing_direction(registry, caster);
 
-  projectileSpeed = vec2_mul(aimDirection, 250.f);
+  projectileSpeed = vec2_mul(aimDirection, SPEED);
 
   make_ice_arrow(registry, caster, position, projectileSpeed, attackMask);
 

@@ -9,7 +9,7 @@ static BOOL _visible;
 static s32  _ticks;
 static char _msg[512];
 
-extern SDL_Renderer* g_renderer;
+extern SDL_Renderer* gRenderer;
 
 static const RECT      _box_rect         = { WIN_WIDTH / 2 - 50, WIN_HEIGHT / 2 - 15, 100, 30 };
 static const RECT      _text_rect        = { WIN_WIDTH / 2 - 46, WIN_HEIGHT / 2 - 11, 94, 24 };
@@ -66,5 +66,5 @@ void ui_msgbox_draw()
   }
 
   draw_bordered_box(&_box_rect, _background_color, _border_color);
-  FC_DrawBoxEffect(get_font(FONT_ITEM_PICKED_UP), g_renderer, _text_rect, _text_effect, _msg);
+  FC_DrawBoxEffect(get_font(FONT_ITEM_PICKED_UP), gRenderer, _text_rect, _text_effect, _msg);
 }

@@ -9,12 +9,12 @@
 #include "system/event_messaging_sys.h"
 #include "system/game_logic.h"
 
-extern Ecs* g_ecs;
+extern Ecs* gEcs;
 
 static void item_handler(ecs_entity_t, const PickupableAttributes*, const Vec2 position);
 static void coin_handler(ecs_entity_t, const PickupableAttributes*, const Vec2 position);
 
-static void (*const handler_tbl[])(ecs_entity_t, const PickupableAttributes*, const Vec2) = {
+static void (*const handlerFuncTbl[])(ecs_entity_t, const PickupableAttributes*, const Vec2) = {
   [PICKUPABLE_RED_FLASK] = item_handler,  [PICKUPABLE_BIG_RED_FLASK] = item_handler,
   [PICKUPABLE_BLUE_FLASK] = item_handler, [PICKUPABLE_KEY_1_1] = item_handler,
   [PICKUPABLE_COIN] = coin_handler,
@@ -22,28 +22,28 @@ static void (*const handler_tbl[])(ecs_entity_t, const PickupableAttributes*, co
 
 static void on_hit_pickupable_entity(SDL_UNUSED void* arg, const HitPickupableEntityMsg* msg)
 {
-  PickupableAttributes* attrs     = ecs_get(g_ecs, msg->pickupable_entity, PICKUPABLE_ATTRIBUTES);
-  Transform*            transform = ecs_get(g_ecs, msg->pickupable_entity, TRANSFORM);
+  PickupableAttributes* attrs     = ecs_get(gEcs, msg->pickupableEntity, PICKUPABLE_ATTRIBUTES);
+  Transform*            transform = ecs_get(gEcs, msg->pickupableEntity, TRANSFORM);
 
   void (*handler)(ecs_entity_t, const PickupableAttributes*, const Vec2);
 
-  if ((handler = handler_tbl[attrs->id], handler != NULL))
-    handler(msg->pickupable_entity, attrs, transform->position);
+  if ((handler = handlerFuncTbl[attrs->id], handler != NULL))
+    handler(msg->pickupableEntity, attrs, transform->position);
 }
 
 static void
 item_handler(ecs_entity_t entity, const PickupableAttributes* attrs, const Vec2 position)
 {
-  u16 item_type_id = gPickupableToItemTypeIdTbl[attrs->id];
-  if (item_type_id != ITEM_TYPE_ID_NULL)
+  u16 itemTypeId = gPickupableToItemTypeIdTbl[attrs->id];
+  if (itemTypeId != ITEM_TYPE_ID_NULL)
   {
-    if (inv_add_item(item_type_id, attrs->quality))
+    if (inv_add_item(itemTypeId, attrs->quality))
     {
       ems_broadcast(MSG_ITEM_PICKED_UP,
                     &(ItemPickedUpMsg){ .pickupable_entity = entity,
-                                        .item_type_id      = item_type_id,
+                                        .item_type_id      = itemTypeId,
                                         .position          = position });
-      ecs_add(g_ecs, entity, DESTROYED_TAG);
+      ecs_add(gEcs, entity, DESTROYED_TAG);
     }
   }
 }
@@ -53,7 +53,7 @@ coin_handler(ecs_entity_t entity, const PickupableAttributes* attrs, const Vec2 
 {
   gSession.coins += attrs->quality;
   ems_broadcast(MSG_COIN_PICKED_UP, &(CoinPickedUpMsg){ attrs->quality, position });
-  ecs_add(g_ecs, entity, DESTROYED_TAG);
+  ecs_add(gEcs, entity, DESTROYED_TAG);
 }
 void pickup_system_init()
 {

@@ -6,7 +6,7 @@
 #include "system/event_messaging_sys.h"
 #include <toolbox/toolbox.h>
 
-extern Ecs* g_ecs;
+extern Ecs* gEcs;
 
 static void on_collision(void* arg, OverlapMsg* event);
 static void weapon_vs_entity(ecs_entity_t weapon, ecs_entity_t entity);
@@ -72,8 +72,8 @@ static void on_collision(SDL_UNUSED void* arg, OverlapMsg* event)
   HitBox* hitbox2;
   void (*fn)(ecs_entity_t, ecs_entity_t);
 
-  if ((hitbox1 = ecs_get(g_ecs, event->e1, HITBOX)) != NULL &&
-      (hitbox2 = ecs_get(g_ecs, event->e2, HITBOX)) != NULL)
+  if ((hitbox1 = ecs_get(gEcs, event->e1, HITBOX)) != NULL &&
+      (hitbox2 = ecs_get(gEcs, event->e2, HITBOX)) != NULL)
   {
 
     fn = _handle_fn_tbl[hitbox1->category][hitbox2->category];
@@ -119,8 +119,8 @@ static void player_vs_item(ecs_entity_t player, ecs_entity_t item)
 {
   ems_broadcast(MSG_PLAYER_HIT_ITEM,
                 &(HitPickupableEntityMsg){
-                    .pickupable_entity = item,
-                    .player            = player,
+                    .pickupableEntity = item,
+                    .player           = player,
                 });
 }
 
@@ -128,8 +128,8 @@ static void item_vs_player(ecs_entity_t item, ecs_entity_t player)
 {
   ems_broadcast(MSG_PLAYER_HIT_ITEM,
                 &(HitPickupableEntityMsg){
-                    .pickupable_entity = item,
-                    .player            = player,
+                    .pickupableEntity = item,
+                    .player           = player,
                 });
 }
 
@@ -152,7 +152,7 @@ static void ladder_vs_player(ecs_entity_t ladder, ecs_entity_t player)
 
 static void interacable_vs_entity(ecs_entity_t interacable, ecs_entity_t entity)
 {
-  if (ecs_has(g_ecs, interacable, DOOR_ATTRIBUTES))
+  if (ecs_has(gEcs, interacable, DOOR_ATTRIBUTES))
   {
     ems_broadcast(MSG_HIT_DOOR, &(HitDoorMsg){ .door = interacable, .entity = entity });
   }

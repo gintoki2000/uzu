@@ -4,10 +4,10 @@
 #include "constances.h"
 #include "global.h"
 #include "inventory.h"
-
+#include "components.h"
 struct Session gSession;
 
-static u16 _startingWeaponTbl[] = {
+static u16 _startingWeaponTbl[NUM_WEAPONS] = {
   WEAPON_CLEAVER,
   WEAPON_SPEAR,
   WEAPON_STAFF,

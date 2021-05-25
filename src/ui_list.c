@@ -21,7 +21,7 @@ static int           _pos_x;
 static int           _pos_y;
 static int           _selected;
 
-extern SDL_Renderer* g_renderer;
+extern SDL_Renderer* gRenderer;
 
 static int get_height()
 {
@@ -112,7 +112,7 @@ void ui_list_draw()
   {
     color = (i != _selected) ? gUIColorText : gUIColorTextSelected;
     FC_DrawEffect(get_font(FONT_ITEM_PICKED_UP),
-                  g_renderer,
+                  gRenderer,
                   _pos_x + UI_LIST_WIDTH / 2,
                   _pos_y + i * (ENTRY_HEIGHT + ENTRY_VGAP) + FIRST_ENTRY_Y,
                   (FC_Effect){

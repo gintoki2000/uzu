@@ -23,7 +23,7 @@ void effect_system_init(void);
 void emoji_system(void);
 void equipment_system(void);
 void following_system(void);
-void health_system(void);
+void invulnerable_timer_system(void);
 void health_system_init(void);
 void interaction_system(void);
 void interaction_system_init(void);

@@ -2,7 +2,7 @@
 #include "config.h"
 #include "system/game_logic.h"
 
-extern Ecs* g_ecs;
+extern Ecs* gEcs;
 
 void weapon_transform_system()
 {
@@ -14,7 +14,6 @@ void weapon_transform_system()
   AimDirection*    aimDirection;
 
   // weapon components
-  WeaponAttributes* weaponAttributes;
   Transform*        weaponTransform;
   Visual*           weaponVisual;
 
@@ -22,17 +21,16 @@ void weapon_transform_system()
   Vec2 attachPoint;
 
   double s, c, a;
-  ecs_raw(g_ecs, HAND, &entities, (void**)&hand, &count);
+  ecs_raw(gEcs, HAND, &entities, (void**)&hand, &count);
   for (int i = 0; i < count; ++i)
   {
     if (hand[i].weapon == ECS_NULL_ENT)
       continue;
-    transform    = ecs_get(g_ecs, entities[i], TRANSFORM);
-    aimDirection = ecs_get(g_ecs, entities[i], AIM_DIRECTION);
+    transform    = ecs_get(gEcs, entities[i], TRANSFORM);
+    aimDirection = ecs_get(gEcs, entities[i], AIM_DIRECTION);
 
-    weaponAttributes = ecs_get(g_ecs, hand[i].weapon, WEAPON_ATTRIBUTES);
-    weaponTransform  = ecs_get(g_ecs, hand[i].weapon, TRANSFORM);
-    weaponVisual     = ecs_get(g_ecs, hand[i].weapon, VISUAL);
+    weaponTransform  = ecs_get(gEcs, hand[i].weapon, TRANSFORM);
+    weaponVisual     = ecs_get(gEcs, hand[i].weapon, VISUAL);
 
     weaponPosition = vec2_add(transform->position, hand->originalPoint);
     a              = hand[i].angle * DEG_TO_RAD;
@@ -68,7 +66,7 @@ void hand_animation_system(void)
 
   BOOL notStarted;
   BOOL justFinishedCurrentCurrFrame;
-  ecs_raw(g_ecs, HAND_ANIMATION, &entities, (void**)&handAnim, &cnt);
+  ecs_raw(gEcs, HAND_ANIMATION, &entities, (void**)&handAnim, &cnt);
   for (int i = cnt - 1; i >= 0; --i)
   {
     notStarted = handAnim[i].currentIndex == -1;
@@ -78,8 +76,8 @@ void hand_animation_system(void)
     {
       if (next_kframe(&handAnim[i]))
       {
-        hand = ecs_get(g_ecs, entities[i], HAND);
-        fdir = ecs_get(g_ecs, entities[i], AIM_DIRECTION);
+        hand = ecs_get(gEcs, entities[i], HAND);
+        fdir = ecs_get(gEcs, entities[i], AIM_DIRECTION);
 
         INVOKE_EVENT(handAnim[i].cbFrame, entities[i], handAnim[i].currentIndex);
         kf                   = handAnim[i].keyframes + handAnim[i].currentIndex;
@@ -90,9 +88,9 @@ void hand_animation_system(void)
       else
       {
         INVOKE_EVENT(handAnim[i].cbCompleted, entities[i]);
-        hand         = ecs_get(g_ecs, entities[i], HAND);
+        hand         = ecs_get(gEcs, entities[i], HAND);
         hand->length = handAnim[i].initialLength;
-        ecs_rmv(g_ecs, entities[i], HAND_ANIMATION);
+        ecs_rmv(gEcs, entities[i], HAND_ANIMATION);
       }
     }
   }
@@ -104,17 +102,15 @@ void hand_system(void)
   ecs_size_t        cnt;
   Hand*             hand;
   AimDirection*     fdir;
-  WeaponAttributes* attrs;
 
-  ecs_raw(g_ecs, HAND, &entities, (void**)&hand, &cnt);
+  ecs_raw(gEcs, HAND, &entities, (void**)&hand, &cnt);
   for (int i = 0; i < cnt; ++i)
   {
-    if (ecs_has(g_ecs, entities[i], HAND_ANIMATION))
+    if (ecs_has(gEcs, entities[i], HAND_ANIMATION))
       continue;
     if (hand[i].weapon == ECS_NULL_ENT)
       continue;
-    fdir          = ecs_get(g_ecs, entities[i], AIM_DIRECTION);
-    attrs         = ecs_get(g_ecs, hand[i].weapon, WEAPON_ATTRIBUTES);
+    fdir          = ecs_get(gEcs, entities[i], AIM_DIRECTION);
     hand[i].angle = SDL_atan2f(fdir->value.y, fdir->value.x) * RAD_TO_DEG;
 
     /*
@@ -125,7 +121,7 @@ void hand_system(void)
     */
 
 #if 0
-    if (ecs_has(g_ecs, entities[i], PLAYER_TAG))
+    if (ecs_has(gEcs, entities[i], PLAYER_TAG))
       printf("angle: %lf\n", hand[i].angle);
 #endif
   }

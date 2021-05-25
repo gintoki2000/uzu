@@ -97,7 +97,7 @@ u16 ett_get_hp(Ecs* ecs, ecs_entity_t entity)
 
 u16 ett_get_conversation(Ecs* ecs, ecs_entity_t entity)
 {
-  return ((Dialogue*)ecs_get(ecs, entity, DIALOGUE))->conversation_id;
+  return ((Dialogue*)ecs_get(ecs, entity, DIALOGUE))->conversationId;
 }
 
 const char* ett_get_name(Ecs* ecs, ecs_entity_t entity)

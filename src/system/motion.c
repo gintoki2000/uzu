@@ -8,25 +8,25 @@
 #define SPEED_LIMIT 400.f
 #define GRAVITY -6.f
 
-extern Ecs* g_ecs;
+extern Ecs* gEcs;
 
 static void move(void)
 {
   ecs_entity_t* entities;
   ecs_size_t    cnt;
 
-  const MoveSpeed*  move_speed;
+  const MoveSpeed*  moveSpeed;
   DesiredDirection* desiredDirection;
   Motion*           motion;
 
-  ecs_raw(g_ecs, DESIRED_DIRECTION, &entities, (void**)&desiredDirection, &cnt);
+  ecs_raw(gEcs, DESIRED_DIRECTION, &entities, (void**)&desiredDirection, &cnt);
   for (int i = 0; i < cnt; ++i)
   {
-    if (!ecs_has(g_ecs, entities[i], UNABLE_TO_MOVE) &&
-        (motion = ecs_get(g_ecs, entities[i], MOTION)) &&
-        (move_speed = ecs_get(g_ecs, entities[i], MOVE_SPEED)))
+    if (!ecs_has(gEcs, entities[i], UNABLE_TO_MOVE) &&
+        (motion = ecs_get(gEcs, entities[i], MOTION)) &&
+        (moveSpeed = ecs_get(gEcs, entities[i], MOVE_SPEED)))
     {
-      motion->vel         = vec2_mul(desiredDirection[i], (float)move_speed->value);
+      motion->vel         = vec2_mul(desiredDirection[i], (float)moveSpeed->value);
       desiredDirection[i] = VEC2_ZERO;
     }
   }
@@ -43,7 +43,7 @@ void motion_system()
 
   move();
 
-  ecs_raw(g_ecs, MOTION, &entities, (void**)&motion, &cnt);
+  ecs_raw(gEcs, MOTION, &entities, (void**)&motion, &cnt);
 
   for (int i = 0; i < cnt; ++i)
   {
@@ -55,7 +55,7 @@ void motion_system()
 
   for (int i = 0; i < cnt; ++i)
   {
-    transform = ecs_get(g_ecs, entities[i], TRANSFORM);
+    transform = ecs_get(gEcs, entities[i], TRANSFORM);
 
     transform->lastPosition = transform->position;
     transform->position.x += motion[i].vel.x * DT;

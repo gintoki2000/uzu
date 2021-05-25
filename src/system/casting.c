@@ -4,7 +4,7 @@
 #include "global.h"
 
 extern const Spell gSpellTbl[];
-extern Ecs*        g_ecs;
+extern Ecs*        gEcs;
 
 const HandAnimKeyFrame _keyframes[] = {
   { .duration = 2, .length = -1, .angle = -15.0 },
@@ -27,30 +27,30 @@ void weapon_casting_system()
   ecs_entity_t   holder;
   AttackCommand* attackCommand;
 
-  ecs_raw(g_ecs, WEAPON_CAST, &entities, (pointer_t*)&cast, &cnt);
+  ecs_raw(gEcs, WEAPON_CAST, &entities, (pointer_t*)&cast, &cnt);
 
   for (int i = 0; i < cnt; ++i)
   {
     if (cast[i].processing)
     {
-      holder        = wpn_get_holder(g_ecs, entities[i]);
-      spell         = ett_get_attuned_spell(g_ecs, holder);
-      attackCommand = ecs_get(g_ecs, holder, ATTACK_COMMAND);
-      if (spell->process(g_ecs, holder, entities[i]))
+      holder        = wpn_get_holder(gEcs, entities[i]);
+      spell         = ett_get_attuned_spell(gEcs, holder);
+      attackCommand = ecs_get(gEcs, holder, ATTACK_COMMAND);
+      if (spell->process(gEcs, holder, entities[i]))
       {
         cast->processing = FALSE;
         INVOKE_EVENT(attackCommand->cbCompleted, TRUE);
-        ecs_rmv(g_ecs, holder, ATTACK_COMMAND);
+        ecs_rmv(gEcs, holder, ATTACK_COMMAND);
       }
     }
     else if (cast[i].cooldownTimer == 0 &&
-             ((holder = wpn_get_holder(g_ecs, entities[i])) != ECS_NULL_ENT) &&
-             (attackCommand = ecs_get(g_ecs, holder, ATTACK_COMMAND)))
+             ((holder = wpn_get_holder(gEcs, entities[i])) != ECS_NULL_ENT) &&
+             (attackCommand = ecs_get(gEcs, holder, ATTACK_COMMAND)))
     {
-      spell = ett_get_attuned_spell(g_ecs, holder);
-      mana  = ecs_get(g_ecs, holder, MANA);
+      spell = ett_get_attuned_spell(gEcs, holder);
+      mana  = ecs_get(gEcs, holder, MANA);
 
-      isTriggered = !attackCommand->processing && attackCommand->code == 0;
+      isTriggered = !attackCommand->processing && attackCommand->triggerCode == 0;
       hasEnoughMp = mana->current >= spell->cost;
 
       if (isTriggered)
@@ -58,7 +58,7 @@ void weapon_casting_system()
         if (hasEnoughMp)
         {
           mana->current -= spell->cost;
-          spell->cast(g_ecs, holder, entities[i]);
+          spell->cast(gEcs, holder, entities[i]);
           cast[i].processing        = TRUE;
           cast[i].cooldownTimer     = spell->coolDownTime;
           attackCommand->processing = TRUE;
@@ -66,12 +66,12 @@ void weapon_casting_system()
           HandAnimParams params       = { 0 };
           params.keyframes            = _keyframes;
           params.realtiveCurrentState = TRUE;
-          ett_animate_hand(g_ecs, holder, &params);
+          ett_animate_hand(gEcs, holder, &params);
         }
         else
         {
           INVOKE_EVENT(attackCommand->cbCompleted, FALSE);
-          ecs_rmv(g_ecs, holder, ATTACK_COMMAND);
+          ecs_rmv(gEcs, holder, ATTACK_COMMAND);
         }
       }
     }

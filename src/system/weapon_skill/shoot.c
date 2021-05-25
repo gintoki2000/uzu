@@ -2,7 +2,7 @@
 #include "entity_factory.h"
 #include "system/game_logic.h"
 
-extern Ecs* g_ecs;
+extern Ecs* gEcs;
 
 struct hand_frame
 {

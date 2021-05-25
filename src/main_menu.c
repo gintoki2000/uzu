@@ -55,7 +55,7 @@ static FC_Effect _about_content_text_effect = {
   .color     = { 0xff, 0xff, 0xff, 0xdf },
 };
 
-extern RENDERER* g_renderer;
+extern RENDERER* gRenderer;
 
 static void on_load()
 {
@@ -126,8 +126,8 @@ static void draw_main_menu(void)
   int       x, y;
   FC_Effect effect;
 
-  SDL_RenderCopy(g_renderer, _bg, NULL, NULL);
-  SDL_RenderCopy(g_renderer, _table, NULL, &_dst);
+  SDL_RenderCopy(gRenderer, _bg, NULL, NULL);
+  SDL_RenderCopy(gRenderer, _table, NULL, &_dst);
 
   effect = (FC_Effect){
     .color     = gColorWhite,
@@ -139,23 +139,23 @@ static void draw_main_menu(void)
   for (int i = 0; i < MAIN_MENU_NUM_OPTS; ++i)
   {
     y = MAIN_MENU_POS_Y + 10 + i * 15;
-    FC_DrawEffect(_font, g_renderer, x, y, effect, _options[i]);
+    FC_DrawEffect(_font, gRenderer, x, y, effect, _options[i]);
   }
   x = MAIN_MENU_POS_X + 10;
   y = MAIN_MENU_POS_Y + 11 + _select * 15;
-  SDL_RenderCopy(g_renderer, _pointer, NULL, &(RECT){ x, y, 5, 5 });
+  SDL_RenderCopy(gRenderer, _pointer, NULL, &(RECT){ x, y, 5, 5 });
 }
 static void draw_about_panel(void)
 {
-  SDL_RenderCopy(g_renderer, _bg, NULL, NULL);
-  SDL_SetRenderDrawColor(g_renderer,
+  SDL_RenderCopy(gRenderer, _bg, NULL, NULL);
+  SDL_SetRenderDrawColor(gRenderer,
                          _about_panel_color.r,
                          _about_panel_color.g,
                          _about_panel_color.b,
                          _about_panel_color.a);
-  SDL_RenderFillRect(g_renderer, &_about_panel_rect);
+  SDL_RenderFillRect(gRenderer, &_about_panel_rect);
   FC_DrawBoxEffect(_font,
-                   g_renderer,
+                   gRenderer,
                    _about_panel_rect,
                    _about_content_text_effect,
                    _about_content);

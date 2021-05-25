@@ -4,6 +4,7 @@
 #include "toolbox/toolbox.h"
 
 extern Ecs* g_ecs;
+extern ecs_entity_t gPlayer;
 void game_scene_pause(void);
 void game_scene_resume(void);
 #endif // GAMESCR_H

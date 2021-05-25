@@ -1,8 +1,8 @@
 #include "system/game_logic.h"
 #include "components.h"
 
-extern SDL_Rect g_viewport;
-extern Ecs*     g_ecs;
+extern SDL_Rect gViewport;
+extern Ecs*     gEcs;
 void            camera_system()
 {
   ecs_entity_t* entities;
@@ -11,13 +11,13 @@ void            camera_system()
 
   Vec2 target;
 
-  ecs_raw(g_ecs, CAMERA_TARGET_TAG, &entities, NULL, &cnt);
+  ecs_raw(gEcs, CAMERA_TARGET_TAG, &entities, NULL, &cnt);
 
-  if (cnt > 0 && (transform = ecs_get(g_ecs, entities[0], TRANSFORM)))
+  if (cnt > 0 && (transform = ecs_get(gEcs, entities[0], TRANSFORM)))
   {
-    target.x = transform->position.x - g_viewport.w / 2.f;
-    target.y = transform->position.y - g_viewport.h / 2.f;
-    g_viewport.x += (target.x - g_viewport.x) * 0.2f;
-    g_viewport.y += (target.y - g_viewport.y) * 0.2f;
+    target.x = transform->position.x - gViewport.w / 2.f;
+    target.y = transform->position.y - gViewport.h / 2.f;
+    gViewport.x += (target.x - gViewport.x) * 0.2f;
+    gViewport.y += (target.y - gViewport.y) * 0.2f;
   }
 }

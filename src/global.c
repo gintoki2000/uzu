@@ -44,7 +44,7 @@ void conversation_fini(Conversation* self)
 
 void sprite_init(Sprite* s, u16 texture_id)
 {
-  s->texture_id = texture_id;
+  s->textureId = texture_id;
   SDL_QueryTexture(get_texture(texture_id), NULL, NULL, &s->rect.w, &s->rect.h);
 }
 
@@ -56,15 +56,15 @@ ecs_entity_t make_weapon(Ecs* registry, u16 type)
 
 Sprite animation_keyframe(const Animation* animation, u16 elapsed)
 {
-  Sprite current_key_frame;
+  Sprite currentKeyFrame;
   int    idx;
-  idx = elapsed / animation->frame_duration;
+  idx = elapsed / animation->frameDuration;
   idx = idx % animation->count;
 
-  current_key_frame.texture_id = animation->texture_id;
-  current_key_frame.rect.x     = animation->offset_x + animation->sprite_width * idx;
-  current_key_frame.rect.y     = animation->offset_y;
-  current_key_frame.rect.w     = animation->sprite_width;
-  current_key_frame.rect.h     = animation->sprite_height;
-  return current_key_frame;
+  currentKeyFrame.textureId = animation->textureId;
+  currentKeyFrame.rect.x     = animation->offsetX + animation->spriteWidth * idx;
+  currentKeyFrame.rect.y     = animation->offsetY;
+  currentKeyFrame.rect.w     = animation->spriteWidth;
+  currentKeyFrame.rect.h     = animation->spriteHeight;
+  return currentKeyFrame;
 }

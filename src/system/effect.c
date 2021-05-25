@@ -8,7 +8,8 @@
 #include "system/event_messaging_sys.h"
 #include "system/game_logic.h"
 
-extern Ecs* g_ecs;
+extern Ecs* gEcs;
+extern RECT gViewport;
 
 //<----------------------------event callback---------------------->//
 static void on_item_picked_up(void* arg, const ItemPickedUpMsg* event);
@@ -25,68 +26,68 @@ void effect_system_init()
 
 static void on_item_picked_up(SDL_UNUSED void* arg, const ItemPickedUpMsg* event)
 {
-  PickupableAttributes* attrs = ecs_get(g_ecs, event->pickupable_entity, PICKUPABLE_ATTRIBUTES);
-  u16                   item_type_id = gPickupableToItemTypeIdTbl[attrs->id];
+  PickupableAttributes* attrs = ecs_get(gEcs, event->pickupable_entity, PICKUPABLE_ATTRIBUTES);
+  u16                   itemTypeId = gPickupableToItemTypeIdTbl[attrs->id];
   if (attrs->sfx != SFX_ID_NULL)
     Mix_PlayChannel(-1, get_sfx(attrs->sfx), 0);
-  if (item_type_id != ITEM_TYPE_ID_NULL)
-    make_fx_item_picked_up(g_ecs, event->position, gItemTypes[item_type_id].name);
+  if (itemTypeId != ITEM_TYPE_ID_NULL)
+    make_fx_item_picked_up(gEcs, event->position, gItemTypes[itemTypeId].name);
 }
 
-static ecs_entity_t (*const s_hit_effect_fn_tbl[])(Ecs*, Vec2) = {
+static ecs_entity_t (*const _hitEffectFuncTbl[])(Ecs*, Vec2) = {
   make_fx_blood_loss, make_fx_blood_loss, make_fx_fire_hit, make_fx_blood_loss, make_fx_ice_hit,
 };
 
-static COLOR s_damage_type_color_tbl[] = {
+static COLOR _damageTypeColorTbl[] = {
   { 0xff, 0x00, 0x00, 0xff }, { 0xff, 0x00, 0x00, 0xff }, { 0xfc, 0xad, 0x03, 0xff },
   { 0xff, 0x00, 0x00, 0xff }, { 0x03, 0xba, 0xfc, 0xff },
 };
 
-static u16 s_hit_sfx_tbl[] = {
+static u32 _hitSfxTbl[] = {
   SFX_SWORD_HIT, SFX_SWORD_HIT, SFX_SWORD_HIT, SFX_SWORD_HIT, SFX_SWORD_HIT,
 };
 
-extern RECT g_viewport;
 
-static void on_get_damaged(void* arg, const GetDamagedMsg* event)
+static void on_get_damaged(SDL_UNUSED void* arg, const GetDamagedMsg* event)
 {
-  (void)arg;
   Transform* transform;
   HitBox*    hitbox;
-  Vec2       particle_position;
-  Vec2       damagee_topleft;
-  POINT      p;
+  Vec2       particlePosition;
+  Vec2       damageeTopleft;
+  POINT      damageePosition;
 
-  transform = ecs_get(g_ecs, event->damagee, TRANSFORM);
-  hitbox    = ecs_get(g_ecs, event->damagee, HITBOX);
+  transform = ecs_get(gEcs, event->damagee, TRANSFORM);
+  hitbox    = ecs_get(gEcs, event->damagee, HITBOX);
   if (transform != NULL)
   {
-    particle_position.x = transform->position.x;
-    particle_position.y = transform->position.y - 30.f;
-    make_fx_damage_indicator(g_ecs,
-                             particle_position,
-                             s_damage_type_color_tbl[event->type],
+    particlePosition.x = transform->position.x;
+    particlePosition.y = transform->position.y - 30.f;
+    make_fx_damage_indicator(gEcs,
+                             particlePosition,
+                             _damageTypeColorTbl[event->type],
                              event->damage);
 
-    p.x = transform->position.x;
-    p.y = transform->position.y;
-    if (SDL_PointInRect(&p, &g_viewport))
-      Mix_PlayChannel(-1, get_sfx(s_hit_sfx_tbl[event->type]), 0);
+    damageePosition.x = transform->position.x;
+    damageePosition.y = transform->position.y;
+
+    BOOL isDammageeInViewport = SDL_PointInRect(&damageePosition, &gViewport);
+    if (isDammageeInViewport)
+      Mix_PlayChannel(-1, get_sfx(_hitSfxTbl[event->type]), 0);
   }
 
   if (transform != NULL && hitbox != NULL)
   {
-    damagee_topleft.x = transform->position.x - hitbox->anchor.x;
-    damagee_topleft.y = transform->position.y - hitbox->anchor.y;
+    damageeTopleft.x = transform->position.x - hitbox->anchor.x;
+    damageeTopleft.y = transform->position.y - hitbox->anchor.y;
 
-    particle_position.x = rand() % ((int)hitbox->size.x) + damagee_topleft.x;
-    particle_position.y = rand() % ((int)hitbox->size.y) + damagee_topleft.y;
+    particlePosition.x = rand() % ((int)hitbox->size.x) + damageeTopleft.x;
+    particlePosition.y = rand() % ((int)hitbox->size.y) + damageeTopleft.y;
 
-    s_hit_effect_fn_tbl[event->type](g_ecs, particle_position);
+    _hitEffectFuncTbl[event->type](gEcs, particlePosition);
   }
 }
 
-static void on_coin_picked_up(void* arg, const CoinPickedUpMsg* event)
+static void on_coin_picked_up(SDL_UNUSED void* arg, SDL_UNUSED const CoinPickedUpMsg* event)
 {
   Mix_PlayChannel(-1, get_sfx(SFX_COIN), 0);
 }

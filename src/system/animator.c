@@ -3,7 +3,7 @@
 #include "resources.h"
 #include "system/game_logic.h"
 
-extern Ecs* g_ecs;
+extern Ecs* gEcs;
 
 void animator_system(void)
 {
@@ -16,22 +16,22 @@ void animator_system(void)
   int                      idx;
   RECT                     rect;
 
-  ecs_raw(g_ecs, ANIMATOR, &entities, (void**)&animator, &cnt);
+  ecs_raw(gEcs, ANIMATOR, &entities, (void**)&animator, &cnt);
 
   for (int i = 0; i < cnt; ++i)
   {
-    visual = ecs_get(g_ecs, entities[i], VISUAL);
+    visual = ecs_get(gEcs, entities[i], VISUAL);
     curr   = &animator[i].anims[animator[i].currentAnimation];
 
-    idx = animator[i].elapsed / curr->frame_duration;
+    idx = animator[i].elapsed / curr->frameDuration;
     idx = idx % curr->count;
 
-    rect.x = curr->offset_x + curr->sprite_width * idx;
-    rect.y = curr->offset_y;
-    rect.w = curr->sprite_width;
-    rect.h = curr->sprite_height;
+    rect.x = curr->offsetX + curr->spriteWidth * idx;
+    rect.y = curr->offsetY;
+    rect.w = curr->spriteWidth;
+    rect.h = curr->spriteHeight;
 
-    visual->sprite.texture_id = curr->texture_id;
+    visual->sprite.textureId = curr->textureId;
     visual->sprite.rect       = rect;
 
     animator[i].elapsed++;

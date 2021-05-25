@@ -131,11 +131,11 @@ static char*        _conversation_files[NUM_CONVERSATIONS] = {
   [CON_BRIAN_RESCUE_3]        = "res/conversation/rescue_brian_3.json",
 };
 
-extern SDL_Renderer* g_renderer;
+extern SDL_Renderer* gRenderer;
 
 static SDL_Texture* load_texture(const char* file)
 {
-  return IMG_LoadTexture(g_renderer, file);
+  return IMG_LoadTexture(gRenderer, file);
 }
 
 BOOL resources_load()
@@ -171,7 +171,7 @@ BOOL resources_load()
   FONT* font = FC_CreateFont();
 
   FC_LoadFont(font,
-              g_renderer,
+              gRenderer,
               "res/font/font.TTF",
               8,
               (COLOR){ 255, 255, 255, 255 },
@@ -182,7 +182,7 @@ BOOL resources_load()
   font = FC_CreateFont();
 
   FC_LoadFont(font,
-              g_renderer,
+              gRenderer,
               "res/font/font.TTF",
               8,
               (COLOR){ 255, 255, 255, 255 },

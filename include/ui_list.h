@@ -18,7 +18,7 @@ typedef struct UI_List_Entry
   char text[UI_LIST_ENTRY_MAX_LEN + 1];
 } UI_List_Entry;
 
-void ui_list_display(const char* items[], u32 cnt);
+void ui_list_display(const char* const items[], u32 cnt);
 void ui_list_close(void);
 void ui_list_hook(u32 event_id, Callback callback);
 void ui_list_draw(void);

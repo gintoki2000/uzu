@@ -4,7 +4,7 @@
 #  Build Instructions
 ###  Prerequisites: 
 * **gcc** or **clang** compiler 
-* **meson**
+* **cmake >=3.1**
 * **ninja**
 ### Install dependencies
 
@@ -24,7 +24,7 @@ $ make install
 ```
 ### Build & run
 ```
-$ meson build
-$ ninja -C build install
-$ cd dist && ./uzu
+$ mkdir build && cd build
+$ cmake ..
+$ make && ./uzu
 ```

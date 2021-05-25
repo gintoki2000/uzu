@@ -10,27 +10,27 @@
 
 static const char* _text;
 static FONT*       _font;
-static TEXTURE*    _texture_dialogue;
-static u16         _text_length;
-static char        _displayed_text[MAX_TEXT_LENGTH + 1];
-static u16         _displayed_text_length;
+static TEXTURE*    _textureDialogue;
+static u32         _textLength;
+static char        _displayedText[MAX_TEXT_LENGTH + 1];
+static u32         _displayedTextLength;
 static u16         _delay;        // thời gian cho kí tự tiếp theo xuất hiện
-static u16         _elpased_time; // thời gian kể từ khi kí tự trước đó xuất hiện
-static BOOL        _is_visible;
+static u32         _elpasedTime; // thời gian kể từ khi kí tự trước đó xuất hiện
+static BOOL        _isVisible;
 
-static const RECT _rect_dialogue = { 10, 167, 299, 60 };
-static const RECT _rect_textbox  = { 10 + 17, 167 + 5, 282, 54 };
+static const RECT _rectDialogue = { 10, 167, 299, 60 };
+static const RECT _rectTextbox  = { 10 + 17, 167 + 5, 282, 54 };
 
-extern RENDERER* g_renderer;
+extern RENDERER* gRenderer;
 
 void ui_dialogue_init(void)
 {
   _font                  = get_font(FONT_DAMAGE_INDICATOR);
-  _texture_dialogue      = get_texture(TEX_UI_DIALOGUE);
-  _is_visible            = FALSE;
+  _textureDialogue      = get_texture(TEX_UI_DIALOGUE);
+  _isVisible            = FALSE;
   _delay                 = 3;
-  _displayed_text[0]     = '\0';
-  _displayed_text_length = 0;
+  _displayedText[0]     = '\0';
+  _displayedTextLength = 0;
 }
 
 void ui_dialogue_fini()
@@ -39,7 +39,7 @@ void ui_dialogue_fini()
 
 void ui_dialogue_set_visible(SDL_bool value)
 {
-  _is_visible = value;
+  _isVisible = value;
 }
 
 void ui_dialogue_set_delay(u16 value)
@@ -50,32 +50,32 @@ void ui_dialogue_set_delay(u16 value)
 void ui_dialogue_set_text(const char* text)
 {
   _text                  = text;
-  _elpased_time          = 0;
-  _displayed_text[0]     = '\0';
-  _displayed_text_length = 0;
-  _text_length           = SDL_strlen(text);
+  _elpasedTime          = 0;
+  _displayedText[0]     = '\0';
+  _displayedTextLength = 0;
+  _textLength           = SDL_strlen(text);
 }
 
 void ui_dialogue_update(void)
 {
-  if (!_is_visible)
+  if (!_isVisible)
     return;
-  if (++_elpased_time >= _delay)
+  if (++_elpasedTime >= _delay)
   {
-    _elpased_time = 0;
-    if (_displayed_text_length < MAX_TEXT_LENGTH && _displayed_text_length < _text_length)
+    _elpasedTime = 0;
+    if (_displayedTextLength < MAX_TEXT_LENGTH && _displayedTextLength < _textLength)
     {
-      _displayed_text[_displayed_text_length]     = _text[_displayed_text_length];
-      _displayed_text[_displayed_text_length + 1] = '\0';
-      ++_displayed_text_length;
+      _displayedText[_displayedTextLength]     = _text[_displayedTextLength];
+      _displayedText[_displayedTextLength + 1] = '\0';
+      ++_displayedTextLength;
     }
   }
 }
 
 void ui_dialogue_draw(void)
 {
-  if (!_is_visible)
+  if (!_isVisible)
     return;
-  SDL_RenderCopy(g_renderer, _texture_dialogue, NULL, &_rect_dialogue);
-  FC_DrawBoxColor(_font, g_renderer, _rect_textbox, gColorBlack, "%s", _displayed_text);
+  SDL_RenderCopy(gRenderer, _textureDialogue, NULL, &_rectDialogue);
+  FC_DrawBoxColor(_font, gRenderer, _rectTextbox, gColorBlack, "%s", _displayedText);
 }

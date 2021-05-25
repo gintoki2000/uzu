@@ -12,9 +12,9 @@ struct _Components
   HitBox*    hitbox;
 };
 
-extern Ecs*      g_ecs;
-extern RECT      g_viewport;
-extern RENDERER* g_renderer;
+extern Ecs*      gEcs;
+extern RECT      gViewport;
+extern RENDERER* gRenderer;
 
 #define NUM_TILES 65
 
@@ -81,11 +81,11 @@ void draw_map_colliders(void)
 
   map_get_size(&w, &h);
 
-  start_x = g_viewport.x / TILE_SIZE;
-  start_y = g_viewport.y / TILE_SIZE;
+  start_x = gViewport.x / TILE_SIZE;
+  start_y = gViewport.y / TILE_SIZE;
 
-  end_x = (g_viewport.x + g_viewport.w) / TILE_SIZE;
-  end_y = (g_viewport.y + g_viewport.h) / TILE_SIZE;
+  end_x = (gViewport.x + gViewport.w) / TILE_SIZE;
+  end_y = (gViewport.y + gViewport.h) / TILE_SIZE;
 
   start_x = max(0, start_x);
   start_y = max(0, start_y);
@@ -126,74 +126,74 @@ void tile_collision_system()
   ecs_size_t         cnt;
   struct _Components components;
 
-  int  obj_bottom, obj_left, obj_right, obj_midle;
+  int  objBottom, objLeft, objRight, objMidle;
   BOOL has_collision = FALSE;
 
-  ecs_raw(g_ecs, ENABLE_TILE_COLLISION_TAG, &entities, NULL, &cnt);
+  ecs_raw(gEcs, ENABLE_TILE_COLLISION_TAG, &entities, NULL, &cnt);
 
   for (int i = 0; i < cnt; ++i)
   {
-    ecs_fill(g_ecs, entities[i], _componentIds, 2, (void**)&components);
-    obj_bottom = get_obj_bottom(components);
-    obj_left   = get_obj_left(components);
-    obj_right  = get_obj_right(components);
-    obj_midle  = (obj_left + obj_right) / 2;
+    ecs_fill(gEcs, entities[i], _componentIds, 2, (void**)&components);
+    objBottom = get_obj_bottom(components);
+    objLeft   = get_obj_left(components);
+    objRight  = get_obj_right(components);
+    objMidle  = (objLeft + objRight) / 2;
 
-    has_collision = check(obj_left, obj_bottom, obj_left / TILE_SIZE, obj_bottom / TILE_SIZE);
+    has_collision = check(objLeft, objBottom, objLeft / TILE_SIZE, objBottom / TILE_SIZE);
     has_collision = has_collision ||
-                    check(obj_midle, obj_bottom, obj_midle / TILE_SIZE, obj_bottom / TILE_SIZE);
+                    check(objMidle, objBottom, objMidle / TILE_SIZE, objBottom / TILE_SIZE);
     has_collision = has_collision ||
-                    check(obj_right, obj_bottom, obj_right / TILE_SIZE, obj_bottom / TILE_SIZE);
+                    check(objRight, objBottom, objRight / TILE_SIZE, objBottom / TILE_SIZE);
     if (has_collision)
       components.transform->position = components.transform->lastPosition;
   }
 }
 
-static BOOL check_midle(int obj_x, int obj_y, int cell_x, int cell_y)
+static BOOL check_midle(int objX, int objY, int cellX, int cellY)
 {
-  POINT  obj_pos        = { obj_x, obj_y };
-  RECT   midle_collider = { cell_x * TILE_SIZE, cell_y * TILE_SIZE + 12, TILE_SIZE, 4 };
-  tile_t adj_left, adj_top, adj_right;
+  POINT  objPos        = { objX, objY };
+  RECT   midleCollider = { cellX * TILE_SIZE, cellY * TILE_SIZE + 12, TILE_SIZE, 4 };
+  tile_t adjLeft, adj_top, adj_right;
   BOOL   collision = FALSE;
-  adj_left         = map_at(MAP_LAYER_WALL, cell_x - 1, cell_y);
-  adj_top          = map_at(MAP_LAYER_WALL, cell_x, cell_y - 1);
-  adj_right        = map_at(MAP_LAYER_WALL, cell_x + 1, cell_y);
-  if (!has_collider(adj_left) && has_collider(adj_top))
+  adjLeft         = map_at(MAP_LAYER_WALL, cellX - 1, cellY);
+  adj_top          = map_at(MAP_LAYER_WALL, cellX, cellY - 1);
+  adj_right        = map_at(MAP_LAYER_WALL, cellX + 1, cellY);
+  if (!has_collider(adjLeft) && has_collider(adj_top))
   {
-    RECT left_collider = { cell_x * TILE_SIZE, cell_y * TILE_SIZE, 4, TILE_SIZE };
-    collision          = SDL_PointInRect(&obj_pos, &left_collider);
+    RECT left_collider = { cellX * TILE_SIZE, cellY * TILE_SIZE, 4, TILE_SIZE };
+    collision          = SDL_PointInRect(&objPos, &left_collider);
   }
   if (!has_collider(adj_right) && has_collider(adj_top))
   {
-    RECT right_collider = { cell_x * TILE_SIZE + 12, cell_y * TILE_SIZE, 4, TILE_SIZE };
-    collision           = collision || SDL_PointInRect(&obj_pos, &right_collider);
+    RECT right_collider = { cellX * TILE_SIZE + 12, cellY * TILE_SIZE, 4, TILE_SIZE };
+    collision           = collision || SDL_PointInRect(&objPos, &right_collider);
   }
-  return collision || SDL_PointInRect(&obj_pos, &midle_collider);
+  return collision || SDL_PointInRect(&objPos, &midleCollider);
 }
 
-static BOOL check_right(int obj_x, int obj_y, int cell_x, int cell_y)
+static BOOL check_right(int objX, int objY, int cellX, int cellY)
 {
-  tile_t adj_top   = map_at(MAP_LAYER_WALL, cell_x, cell_y - 1);
-  tile_t adj_right = map_at(MAP_LAYER_WALL, cell_x - 1, cell_y);
+  tile_t adjTop   = map_at(MAP_LAYER_WALL, cellX, cellY - 1);
+  tile_t adjRight = map_at(MAP_LAYER_WALL, cellX - 1, cellY);
 
-  if (!has_collider(adj_top) && has_collider(adj_right))
+  if (!has_collider(adjTop) && has_collider(adjRight))
     return FALSE;
-  POINT obj_pos  = { obj_x, obj_y };
-  RECT  collider = { cell_x * TILE_SIZE, cell_y * TILE_SIZE, 4, TILE_SIZE };
-  return SDL_PointInRect(&obj_pos, &collider);
+  POINT objPos  = { objX, objY };
+  RECT  collider = { cellX * TILE_SIZE, cellY * TILE_SIZE, 4, TILE_SIZE };
+  return SDL_PointInRect(&objPos, &collider);
 }
 
 static BOOL check_left(int obj_x, int obj_y, int cell_x, int cell_y)
 {
-  tile_t adj_top  = map_at(MAP_LAYER_WALL, cell_x, cell_y - 1);
-  tile_t adj_left = map_at(MAP_LAYER_WALL, cell_x + 1, cell_y);
+  tile_t adjTop  = map_at(MAP_LAYER_WALL, cell_x, cell_y - 1);
+  tile_t adjLeft = map_at(MAP_LAYER_WALL, cell_x + 1, cell_y);
 
-  if (!has_collider(adj_top) && has_collider(adj_left))
+  if (!has_collider(adjTop) && has_collider(adjLeft))
     return FALSE;
 
-  POINT obj_pos  = { obj_x, obj_y };
+  POINT objPos  = { obj_x, obj_y };
   RECT  collider = { cell_x * TILE_SIZE + 12, cell_y * TILE_SIZE, 4, TILE_SIZE };
-  return SDL_PointInRect(&obj_pos, &collider);
+  return SDL_PointInRect(&objPos, &collider);
 }
 
 #if DEBUG
@@ -210,16 +210,16 @@ static void draw_midle(int cell_x, int cell_y)
   if (!has_collider(adj_right) && has_collider(adj_top))
     draw_left(cell_x, cell_y);
 
-  RECT collider = { cell_x * TILE_SIZE - g_viewport.x,
-                    cell_y * TILE_SIZE + 12 - g_viewport.y,
+  RECT collider = { cell_x * TILE_SIZE - gViewport.x,
+                    cell_y * TILE_SIZE + 12 - gViewport.y,
                     TILE_SIZE,
                     4 };
-  SDL_SetRenderDrawColor(g_renderer,
+  SDL_SetRenderDrawColor(gRenderer,
                          _collider_color.r,
                          _collider_color.g,
                          _collider_color.b,
                          _collider_color.a);
-  SDL_RenderDrawRect(g_renderer, &collider);
+  SDL_RenderDrawRect(gRenderer, &collider);
 }
 
 static void draw_left(int cell_x, int cell_y)
@@ -231,16 +231,16 @@ static void draw_left(int cell_x, int cell_y)
   if (!has_collider(adj_top) && has_collider(adj_left))
     return;
 
-  RECT collider = { cell_x * TILE_SIZE - g_viewport.x + 12,
-                    cell_y * TILE_SIZE - g_viewport.y,
+  RECT collider = { cell_x * TILE_SIZE - gViewport.x + 12,
+                    cell_y * TILE_SIZE - gViewport.y,
                     4,
                     TILE_SIZE };
-  SDL_SetRenderDrawColor(g_renderer,
+  SDL_SetRenderDrawColor(gRenderer,
                          _collider_color.r,
                          _collider_color.g,
                          _collider_color.b,
                          _collider_color.a);
-  SDL_RenderDrawRect(g_renderer, &collider);
+  SDL_RenderDrawRect(gRenderer, &collider);
 }
 static void draw_right(int cell_x, int cell_y)
 {
@@ -249,15 +249,15 @@ static void draw_right(int cell_x, int cell_y)
 
   if (!has_collider(adj_top) && has_collider(adj_right))
     return;
-  RECT collider = { cell_x * TILE_SIZE - g_viewport.x,
-                    cell_y * TILE_SIZE - g_viewport.y,
+  RECT collider = { cell_x * TILE_SIZE - gViewport.x,
+                    cell_y * TILE_SIZE - gViewport.y,
                     4,
                     TILE_SIZE };
-  SDL_SetRenderDrawColor(g_renderer,
+  SDL_SetRenderDrawColor(gRenderer,
                          _collider_color.r,
                          _collider_color.g,
                          _collider_color.b,
                          _collider_color.a);
-  SDL_RenderDrawRect(g_renderer, &collider);
+  SDL_RenderDrawRect(gRenderer, &collider);
 }
 #endif

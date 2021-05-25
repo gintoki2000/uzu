@@ -7,7 +7,7 @@ typedef struct WalkAction
   BOOL   completed;
 } WalkAction;
 
-extern Ecs* g_ecs;
+extern Ecs* gEcs;
 
 static void walk_directly_toward_completed_callback(WalkAction* self, SDL_UNUSED BOOL result)
 {
@@ -17,8 +17,8 @@ static void walk_directly_toward_completed_callback(WalkAction* self, SDL_UNUSED
 static void start(void* _self, ecs_entity_t target)
 {
   WalkAction* self = _self;
-  ASSERT(!ecs_has(g_ecs, target, WALK_DIRECTLY_TOWARD));
-  ecs_set(g_ecs,
+  ASSERT(!ecs_has(gEcs, target, WALK_DIRECTLY_TOWARD));
+  ecs_set(gEcs,
           target,
           WALK_DIRECTLY_TOWARD,
           &(WalkDirectlyToward){
@@ -36,7 +36,7 @@ static BOOL update(void* _self, SDL_UNUSED ecs_entity_t target)
 static void end(void* _self, ecs_entity_t target)
 {
   WalkAction* self      = _self;
-  Transform*  transform = ecs_get(g_ecs, target, TRANSFORM);
+  Transform*  transform = ecs_get(gEcs, target, TRANSFORM);
   transform->position   = self->destination;
 }
 

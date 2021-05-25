@@ -4,7 +4,6 @@
 #include "action.h"
 #include "behavior_tree.h"
 #include "global.h"
-#include "path_finder.h"
 #include "toolbox/toolbox.h"
 
 typedef enum ComponentId
@@ -89,7 +88,7 @@ typedef struct Motion
   Vec2  acc;
   float friction;
   float vz;
-  float gravity_scale;
+  float gravityScale;
   float bounching;
 } Motion;
 
@@ -172,11 +171,22 @@ typedef struct WeaponRange
   int max;
 } WeaponRange;
 
+typedef enum
+{
+  WEAPON_SPEAR,
+  WEAPON_CLEAVER,
+  WEAPON_LAVIS_SWORD,
+  WEAPON_ANIME_SWORD,
+  WEAPON_STAFF,
+  WEAPON_BOW,
+  WEAPON_KATANA,
+  NUM_WEAPONS,
+} WeaponType;
+#define WEAPON_ID_NULL NUM_WEAPONS
 typedef struct WeaponAttributes
 {
-  s32         atk;
-  u16         typeId;
-  u16         category;
+  u32         atk;
+  WeaponType  typeId;
   WeaponRange range;
 } WeaponAttributes;
 
@@ -204,7 +214,7 @@ typedef struct WeaponThunderStormRelease
 
 typedef struct WeaponShoot
 {
-  u32   code;
+  u32   triggerCode;
   u16   fire_rate;
   u16   timer;
   float projspd;
@@ -212,7 +222,7 @@ typedef struct WeaponShoot
 
 typedef struct WeaponCast
 {
-  u32  code;
+  u32  triggerCode;
   u32  cooldownTimer;
   BOOL processing;
   u8   state[32];
@@ -220,7 +230,7 @@ typedef struct WeaponCast
 
 typedef struct AttackCommand
 {
-  u32      code;
+  u32      triggerCode;
   BOOL     processing;
   Callback cbCompleted;
 } AttackCommand;
@@ -312,7 +322,7 @@ typedef struct LifeSpan
 #define DROP_MAX_NUM_ITEMS 4
 typedef struct Drop
 {
-  u16 type[DROP_MAX_NUM_ITEMS];
+  ItemTypeId type[DROP_MAX_NUM_ITEMS];
   u8  rate[DROP_MAX_NUM_ITEMS];
   u8  quality[DROP_MAX_NUM_ITEMS];
   u8  cnt;
@@ -379,7 +389,7 @@ typedef struct Interatcable
 
 typedef struct
 {
-  int conversation_id;
+  int conversationId;
 } Dialogue;
 
 #define MERCHANT_MAX_PAYLOADS 100
@@ -501,9 +511,18 @@ typedef struct Emoji
   Callback cbTimeOut;
 } Emoji;
 
+typedef enum StatusEffectType
+{
+  STATUS_EFFECT_FREEZED,
+  STATUS_EFFECT_POISONED,
+  STATUS_EFFECT_PARALYZED,
+  STATUS_EFFECT_BURNED,
+  NUM_STATUS_EFFECT,
+} StatusEffectType;
+
 typedef struct StatusEffect
 {
-  u16 type;
+  StatusEffectType type;
   u16 duration;
   u16 elapsed;
   u8  state[16];

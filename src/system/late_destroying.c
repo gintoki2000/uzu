@@ -3,8 +3,8 @@
 #include "system/game_logic.h"
 #include "toolbox/toolbox.h"
 
-extern Ecs* g_ecs;
-extern RECT g_viewport;
+extern Ecs* gEcs;
+extern RECT gViewport;
 
 static void destroy_offscreen_entities()
 {
@@ -13,15 +13,15 @@ static void destroy_offscreen_entities()
 
   Vec2 position;
 
-  ecs_raw(g_ecs, REMOVE_IF_OFFSCREEN, &entities, NULL, &cnt);
+  ecs_raw(gEcs, REMOVE_IF_OFFSCREEN, &entities, NULL, &cnt);
 
   for (int i = cnt - 1; i >= 0; --i)
   {
-    position = ett_get_position(g_ecs, entities[i]);
+    position = ett_get_position(gEcs, entities[i]);
 
-    if (!SDL_PointInRect(&(POINT){ position.x, position.y }, &g_viewport))
+    if (!SDL_PointInRect(&(POINT){ position.x, position.y }, &gViewport))
     {
-      ecs_destroy(g_ecs, entities[i]);
+      ecs_destroy(gEcs, entities[i]);
     }
   }
 }
@@ -34,15 +34,15 @@ static void destroy_tagged_entities()
 
   Hand* equipment;
 
-  ecs_raw(g_ecs, DESTROYED_TAG, &entities, NULL, &cnt);
+  ecs_raw(gEcs, DESTROYED_TAG, &entities, NULL, &cnt);
   for (int i = cnt - 1; i >= 0; --i)
   {
-    if ((equipment = ecs_get(g_ecs, entities[i], HAND)))
+    if ((equipment = ecs_get(gEcs, entities[i], HAND)))
     {
       if (equipment->weapon != ECS_NULL_ENT)
-        ecs_destroy(g_ecs, equipment->weapon);
+        ecs_destroy(gEcs, equipment->weapon);
     }
-    ecs_destroy(g_ecs, entities[i]);
+    ecs_destroy(gEcs, entities[i]);
   }
 }
 

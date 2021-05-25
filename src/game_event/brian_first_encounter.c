@@ -15,7 +15,7 @@ static struct
 } _save;
 
 static Vec2 _brian_position = { 47 * 16, 7 * 16 };
-extern Ecs* g_ecs;
+extern Ecs* gEcs;
 
 GAME_EVENT("event.brian_initial_encounter")
 
@@ -42,7 +42,7 @@ static void PROCESSING_on_level_loaded(SDL_UNUSED void* arg, const LevelLoadedMs
 {
   if (!SDL_strcmp(msg->level_name, "demon_ruin"))
   {
-    make_npc_brian(g_ecs, _brian_position, CON_BRIAN_FIRST_ENCOUNTER);
+    make_npc_brian(gEcs, _brian_position, CON_BRIAN_FIRST_ENCOUNTER);
     ems_connect(MSG_CONVERSATION_FINISHED, CALLBACK_2(PROCESSING_on_conversation_finished));
   }
 }

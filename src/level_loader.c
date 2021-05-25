@@ -11,7 +11,7 @@
 #define LEVEL_DATA_DIR "res/level/"
 #define JV(json_object, type, name) json_object_object_get_as_##type(json_object, name)
 
-extern Ecs* g_ecs;
+extern Ecs* gEcs;
 
 typedef struct EntityProperties
 {
@@ -166,7 +166,7 @@ static int parse_objectgroup(const json_object* jobjectgroup)
     params.id         = json_object_object_get_as_int(jobj, "id");
 
     if ((parse_fn = get_entity_create_fn(objtype)) != NULL)
-      parse_fn(g_ecs, &params);
+      parse_fn(gEcs, &params);
   }
 
   return 0;

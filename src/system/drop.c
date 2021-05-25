@@ -12,7 +12,7 @@ static ecs_entity_t (*const _pickupableMakeFnTbl[NUM_PICKUPABLE_TYPES])(Ecs*, Ve
   [PICKUPABLE_COIN]          = make_coin,
 };
 
-extern Ecs* g_ecs;
+extern Ecs* gEcs;
 
 static Vec2 get_random_speed()
 {
@@ -36,8 +36,10 @@ static void on_entity_died(SDL_UNUSED void* arg, const EntityDiedMsg* event)
   BOOL         shouldDrop;
   Motion*      motion;
 
-  if ((drop      = ecs_get(g_ecs, event->entity, DROP      )) &&
-      (transform = ecs_get(g_ecs, event->entity, TRANSFORM)))
+
+
+  if ((drop      = ecs_get(gEcs, event->entity, DROP      )) &&
+      (transform = ecs_get(gEcs, event->entity, TRANSFORM)))
   {
     for (int i = 0; i < drop->cnt; ++i)
     {
@@ -46,8 +48,8 @@ static void on_entity_died(SDL_UNUSED void* arg, const EntityDiedMsg* event)
       if (shouldDrop)
       {
         pickupable =
-            _pickupableMakeFnTbl[drop->type[i]](g_ecs, transform->position, drop->quality[i]);
-        motion      = ecs_get(g_ecs, pickupable, MOTION);
+            _pickupableMakeFnTbl[drop->type[i]](gEcs, transform->position, drop->quality[i]);
+        motion      = ecs_get(gEcs, pickupable, MOTION);
         motion->vel = get_random_speed();
         motion->vz  = 80.f;
       }

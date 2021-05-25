@@ -31,7 +31,8 @@ static RECT _cell_panel = { FIRST_CELL_X,
                             (CELL_SIZE + CELL_GAP) * NUM_COLS,
                             (CELL_SIZE + CELL_GAP) * NUM_ROWS };
 
-extern RENDERER* g_renderer;
+extern RENDERER* gRenderer;
+extern Ecs* gEcs;
 
 static Item         _items[NUM_ITEM_CATEGORIES][MAX_CELLS];
 static s32          _currCol, _currRow;
@@ -94,16 +95,16 @@ static Item* current_item(void)
 static int find_item(ItemTypeId type)
 {
   const ItemCategory itemCategory = gItemTypes[type].category;
-  for (u32 i = 0; i < MAX_CELLS; ++i)
+  for (int i = 0; i < MAX_CELLS; ++i)
     if (_items[itemCategory][i].type == type)
       return i;
   return -1;
 }
 
-static int find_empty_slot(u16 category)
+static int find_empty_slot(ItemCategory category)
 {
   ASSERT(category < NUM_ITEM_CATEGORIES && "invalid category");
-  for (u32 i = 0; i < MAX_CELLS; ++i)
+  for (int i = 0; i < MAX_CELLS; ++i)
     if (_items[category][i].quality == 0)
       return i;
   return -1;
@@ -156,7 +157,7 @@ static void process_input(SDL_UNUSED void* arg)
   if (button_just_pressed(BUTTON_INTERACT) && current_item()->quality > 0)
   {
     play_sound(SFX_INTERACTION);
-    ui_list_display((const char**)_options, 2);
+    ui_list_display(_options, 2);
     ui_list_set_pos(UI_LIST_POS_CENTER_X, UI_LIST_POS_CENTER_Y);
     ui_list_hook(UI_LIST_ON_SELECT, CALLBACK_2(on_list_selected));
   }
@@ -181,7 +182,7 @@ static void process_input(SDL_UNUSED void* arg)
     if (SDL_PointInRect(&mousePosition, &_cell_panel) && current_item()->quality > 0)
     {
       play_sound(SFX_INTERACTION);
-      ui_list_display((const char**)_options, 2);
+      ui_list_display(_options, 2);
       ui_list_set_pos(UI_LIST_POS_CENTER_X, UI_LIST_POS_CENTER_Y);
       ui_list_hook(UI_LIST_ON_SELECT, CALLBACK_2(on_list_selected));
     }
@@ -197,7 +198,7 @@ static void on_list_selected(SDL_UNUSED pointer_t arg, const char* value)
   {
     if (type->category == ITEM_CATEGORY_CONSUMABLE)
       it->quality--;
-    type->use(type->data, g_ecs, scn_get_player(g_ecs));
+    type->use(type->data, gEcs, scn_get_player(gEcs));
   }
   else if (STREQ(value, _textDrop))
   {
@@ -223,7 +224,7 @@ void inventory_init()
 
 #define item_desc(it) (gItemTypes[(it)->type].description)
 
-#define itemIcon(it) (gItemTypes[(it)->type].icon)
+#define item_icon(it) (gItemTypes[(it)->type].icon)
 
 BOOL inv_add_item(ItemTypeId type, u8 quality)
 {
@@ -256,14 +257,14 @@ BOOL inv_add_item(ItemTypeId type, u8 quality)
   return FALSE;
 }
 
-BOOL inv_has(ItemTypeId type)
+BOOL inv_has_item(ItemTypeId type)
 {
   return find_item(type) != -1;
 }
 
 Item* inv_get_item(ItemTypeId type)
 {
-  u16 category = gItemTypes[type].category;
+  ItemCategory category = gItemTypes[type].category;
   int index    = find_item(type);
   return index != -1 ? &_items[category][index] : NULL;
 }
@@ -305,7 +306,7 @@ static void draw_cursor(void)
   dst.w = CURSOR_WIDTH;
   dst.h = CURSOR_HEIGHT;
 
-  SDL_RenderCopy(g_renderer, _cursorTexture, &_cursorFrameRects[current_frame], &dst);
+  SDL_RenderCopy(gRenderer, _cursorTexture, &_cursorFrameRects[current_frame], &dst);
 }
 
 void inventory_draw()
@@ -319,7 +320,7 @@ void inventory_draw()
   if (!_visible)
     return;
 
-  SDL_RenderCopy(g_renderer, _inventoryTexture, NULL, &_inventoryDst);
+  SDL_RenderCopy(gRenderer, _inventoryTexture, NULL, &_inventoryDst);
 
   itemCellRect.w = 16;
   itemCellRect.h = 16;
@@ -338,23 +339,23 @@ void inventory_draw()
       itemType = &gItemTypes[items[idx].type];
       itemIcon = itemType->icon;
 
-      SDL_RenderCopy(g_renderer, get_texture(itemIcon.texture_id), &itemIcon.rect, &itemCellRect);
+      SDL_RenderCopy(gRenderer, get_texture(itemIcon.textureId), &itemIcon.rect, &itemCellRect);
       if (items[idx].quality >= 1)
-        FC_Draw(_font, g_renderer, itemCellRect.x, itemCellRect.y, "%d", items[idx].quality);
+        FC_Draw(_font, gRenderer, itemCellRect.x, itemCellRect.y, "%d", items[idx].quality);
     }
   }
   int currentItemIndex = _currRow * NUM_COLS + _currCol;
   if (items[currentItemIndex].quality > 0)
   {
     itemType = &gItemTypes[items[currentItemIndex].type];
-    FC_DrawEffect(_font, g_renderer, ITEM_NAME_X, ITEM_NAME_Y, _itemNameEffect, itemType->name);
-    FC_DrawBoxEffect(_font, g_renderer, _descriptionRect, _itemNameEffect, itemType->description);
+    FC_DrawEffect(_font, gRenderer, ITEM_NAME_X, ITEM_NAME_Y, _itemNameEffect, itemType->name);
+    FC_DrawBoxEffect(_font, gRenderer, _descriptionRect, _itemNameEffect, itemType->description);
   }
 
-  SDL_RenderCopy(g_renderer, _activeTabTexture, NULL, &_activeTabDstTbl[_category]);
+  SDL_RenderCopy(gRenderer, _activeTabTexture, NULL, &_activeTabDstTbl[_category]);
   for (int i = 0; i < NUM_ITEM_CATEGORIES; ++i)
   {
-    SDL_RenderCopy(g_renderer, _icon[i], NULL, &_iconDstTbl[i]);
+    SDL_RenderCopy(gRenderer, _icon[i], NULL, &_iconDstTbl[i]);
   }
 
   draw_cursor();

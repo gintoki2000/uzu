@@ -1,20 +1,20 @@
 #include "components.h"
 #include "system/game_logic.h"
 
-extern Ecs* g_ecs;
+extern Ecs* gEcs;
 
-static void play_animation(Animator* animator, u16 new_anim_state)
+static void play_animation(Animator* animator, u32 newAnimState)
 {
-  if (animator->currentAnimation != new_anim_state)
+  if (animator->currentAnimation != newAnimState)
   {
-    animator->currentAnimation = new_anim_state;
+    animator->currentAnimation = newAnimState;
     animator->elapsed      = 0;
   }
 }
 
-static void force_play_animation(Animator* animator, u16 new_anim_state)
+static void force_play_animation(Animator* animator, u32 newAnimState)
 {
-  animator->currentAnimation = new_anim_state;
+  animator->currentAnimation = newAnimState;
   animator->elapsed      = 0;
 }
 
@@ -25,21 +25,21 @@ void character_controller_system()
   Animator*        animator;
   Motion*          motion;
   Visual*          visual;
-  AimDirection*    facing_direction;
+  AimDirection*    aimDirection;
 
   float          vx, vy;
-  AnimationState next_state;
+  AnimationState nextState;
 
-  ecs_raw(g_ecs, CHARACTER_ANIMATOR_TAG, &entities, NULL, &cnt);
+  ecs_raw(gEcs, CHARACTER_ANIMATOR_TAG, &entities, NULL, &cnt);
   for (int i = 0; i < cnt; ++i)
   {
-    if ((motion = ecs_get(g_ecs, entities[i], MOTION)) &&
-        (visual = ecs_get(g_ecs, entities[i], VISUAL)) &&
-        (animator = ecs_get(g_ecs, entities[i], ANIMATOR)) &&
-        (facing_direction = ecs_get(g_ecs, entities[i], AIM_DIRECTION)))
+    if ((motion = ecs_get(gEcs, entities[i], MOTION)) &&
+        (visual = ecs_get(gEcs, entities[i], VISUAL)) &&
+        (animator = ecs_get(gEcs, entities[i], ANIMATOR)) &&
+        (aimDirection = ecs_get(gEcs, entities[i], AIM_DIRECTION)))
     {
 
-      if (ecs_has(g_ecs, entities[i], INVULNERABLE) || ecs_has(g_ecs, entities[i], STAGGER))
+      if (ecs_has(gEcs, entities[i], INVULNERABLE) || ecs_has(gEcs, entities[i], STAGGER))
       {
         play_animation(animator, ANIM_STATE_HIT);
         return;
@@ -53,10 +53,10 @@ void character_controller_system()
       vx = motion->vel.x;
       vy = motion->vel.y;
 
-      next_state = (absf(vx) > 0.1f || absf(vy) > 0.1f) ? ANIM_STATE_RUN : ANIM_STATE_IDLE;
+      nextState = (absf(vx) > 0.1f || absf(vy) > 0.1f) ? ANIM_STATE_RUN : ANIM_STATE_IDLE;
 
-      play_animation(animator, next_state);
-      visual->flip = signf(facing_direction->value.x) < 0 ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+      play_animation(animator, nextState);
+      visual->flip = signf(aimDirection->value.x) < 0 ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
     }
   }
 }

@@ -11,8 +11,8 @@
 #include "ui_helper.h"
 #include "ui_quality.h"
 
-extern Ecs*          g_ecs;
-extern SDL_Renderer* g_renderer;
+extern Ecs*          gEcs;
+extern SDL_Renderer* gRenderer;
 
 static u32          _current;
 static ecs_entity_t _merchant = ECS_NULL_ENT;
@@ -42,7 +42,7 @@ void merchant_system()
 {
   if (_merchant == ECS_NULL_ENT)
     return;
-  Merchant* merchant = ecs_get(g_ecs, _merchant, MERCHANT);
+  Merchant* merchant = ecs_get(gEcs, _merchant, MERCHANT);
 
   RECT bg = { SHOP_X, SHOP_Y, 110, MAX_DISPLAYABLE * CELL_HEIGHT };
 
@@ -71,35 +71,35 @@ static char* item_name(ItemTypeId type_id, char name[MAX_LENGTH_OF_ITEM_NAME + 1
 
 static void draw_item(const ItemPayload* payload, s32 x, s32 y, BOOL selected)
 {
-  const ItemType* item_type = &gItemTypes[payload->type_id];
+  const ItemType* itemType = &gItemTypes[payload->typeId];
   FONT*           font      = get_font(FONT_DAMAGE_INDICATOR);
 
-  RECT dst = { x, y, item_type->icon.rect.w, item_type->icon.rect.h };
+  RECT dst = { x, y, itemType->icon.rect.w, itemType->icon.rect.h };
 
   char name[MAX_LENGTH_OF_ITEM_NAME];
 
-  SDL_RenderCopy(g_renderer, get_texture(item_type->icon.texture_id), &item_type->icon.rect, &dst);
+  SDL_RenderCopy(gRenderer, get_texture(itemType->icon.textureId), &itemType->icon.rect, &dst);
 
   if (payload->available == MERCHANT_INIFINTE)
   {
     FC_DrawColor(font,
-                 g_renderer,
+                 gRenderer,
                  x + dst.w + 4,
                  y + 5,
                  selected ? gUIColorTextSelected : gUIColorText,
                  "%s --- %3u$",
-                 item_name(payload->type_id, name),
+                 item_name(payload->typeId, name),
                  payload->price);
   }
   else
   {
     FC_DrawColor(font,
-                 g_renderer,
+                 gRenderer,
                  x + dst.w + 4,
                  y + 5,
                  selected ? gUIColorTextSelected : gUIColorText,
                  "%s %3d %3u$",
-                 item_name(payload->type_id, name),
+                 item_name(payload->typeId, name),
                  payload->available,
                  payload->price);
   }
@@ -108,7 +108,7 @@ static void draw_item(const ItemPayload* payload, s32 x, s32 y, BOOL selected)
 static void on_command_selected(pointer_t arg, const CommandSelectedMsg* event)
 {
   (void)arg;
-  if (strcmp(event->cmd, "BUY") == 0)
+  if (SDL_strcmp(event->cmd, gCmdBuy) == 0)
   {
     display_shop(event->entity);
   }
@@ -119,7 +119,7 @@ static void process_input(SDL_UNUSED void* arg)
   Merchant* merchant;
   if (_merchant == ECS_NULL_ENT)
     return;
-  merchant = ecs_get(g_ecs, _merchant, MERCHANT);
+  merchant = ecs_get(gEcs, _merchant, MERCHANT);
   if (button_just_pressed(BUTTON_UP))
   {
     if (_current > 0)
@@ -161,13 +161,13 @@ static void on_quality_selected(pointer_t arg, u32 value)
   Merchant*    merchant;
   ItemPayload* payload;
 
-  merchant = ecs_get(g_ecs, _merchant, MERCHANT);
+  merchant = ecs_get(gEcs, _merchant, MERCHANT);
 
   payload = &merchant->payloads[_current];
 
   if (payload->available > 0)
   {
     payload->available -= value;
-    inv_add_item(payload->type_id, value);
+    inv_add_item(payload->typeId, (u8)value);
   }
 }

@@ -8,7 +8,7 @@ static u32          _hit_points;
 static u32          _max_health;
 static u32          _damaged;
 static u32          _elapsed_time;
-extern Ecs*         g_ecs;
+extern Ecs*         gEcs;
 
 #define MARGIN_BOTTOM (20)
 #define HEIGHT (15)
@@ -37,8 +37,8 @@ void ui_boss_health_bar_draw(void)
 {
   Health* health;
 
-  if (_target == ECS_NULL_ENT || !ecs_is_valid(g_ecs, _target))
+  if (_target == ECS_NULL_ENT || !ecs_is_valid(gEcs, _target))
     return;
 
-  health = ecs_get(g_ecs, _target, HEALTH);
+  health = ecs_get(gEcs, _target, HEALTH);
 }

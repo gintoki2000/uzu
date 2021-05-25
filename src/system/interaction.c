@@ -13,23 +13,23 @@
 #define POINTER_DOWN_WIDTH 6
 #define POINTER_DOWN_HEIGHT 3
 
-extern ecs_entity_t  g_curr_iteractable_entity;
-extern Ecs*          g_ecs;
-extern RECT          g_viewport;
-extern SDL_Renderer* g_renderer;
+extern ecs_entity_t  gCurrentInteractingEntity;
+extern Ecs*          gEcs;
+extern RECT          gViewport;
+extern SDL_Renderer* gRenderer;
 
 void interactable_rendering_system()
 {
-  if (g_curr_iteractable_entity != ECS_NULL_ENT)
+  if (gCurrentInteractingEntity != ECS_NULL_ENT)
   {
-    Vec2 position = ett_get_position(g_ecs, g_curr_iteractable_entity);
+    Vec2 position = ett_get_position(gEcs, gCurrentInteractingEntity);
 
-    SDL_RenderCopy(g_renderer,
+    SDL_RenderCopy(gRenderer,
                    get_texture(TEX_PONITER_DOWN),
                    NULL,
                    &(RECT){
-                       position.x - g_viewport.x - POINTER_DOWN_WIDTH / 2,
-                       position.y - 2 * TILE_SIZE - g_viewport.y,
+                       position.x - gViewport.x - POINTER_DOWN_WIDTH / 2,
+                       position.y - 2 * TILE_SIZE - gViewport.y,
                        POINTER_DOWN_WIDTH,
                        POINTER_DOWN_HEIGHT,
                    });

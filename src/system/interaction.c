@@ -14,7 +14,7 @@
 #define POINTER_DOWN_HEIGHT 3
 
 extern ecs_entity_t  gCurrentInteractingEntity;
-extern Ecs*          gEcs;
+extern ecs_Registry*          gRegistry;
 extern RECT          gViewport;
 extern SDL_Renderer* gRenderer;
 
@@ -22,7 +22,7 @@ void interactable_rendering_system()
 {
   if (gCurrentInteractingEntity != ECS_NULL_ENT)
   {
-    Vec2 position = ett_get_position(gEcs, gCurrentInteractingEntity);
+    Vec2 position = ett_get_position(gRegistry, gCurrentInteractingEntity);
 
     SDL_RenderCopy(gRenderer,
                    get_texture(TEX_PONITER_DOWN),

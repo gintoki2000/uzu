@@ -4,7 +4,7 @@
 
 extern SDL_Rect      gViewport;
 extern SDL_Renderer* gRenderer;
-extern Ecs*          gEcs;
+extern ecs_Registry*          gRegistry;
 
 
 void healthbar_rendering_system()
@@ -19,12 +19,12 @@ void healthbar_rendering_system()
   SDL_Rect   border;
   SDL_Rect   inner;
 
-  ecs_raw(gEcs, HEAL_BAR, &entities, (void**)&health_bar, &cnt);
+  ecs_raw(gRegistry, HEAL_BAR, &entities, (void**)&health_bar, &cnt);
 
   for (int i = 0; i < cnt; ++i)
   {
-    transform = ecs_get(gEcs, entities[i], TRANSFORM);
-    health    = ecs_get(gEcs, entities[i], HEALTH);
+    transform = ecs_get(gRegistry, entities[i], TRANSFORM);
+    health    = ecs_get(gRegistry, entities[i], HEALTH);
     if (health->current == health->max)
       continue;
     p = (float)health->current / (float)health->max;

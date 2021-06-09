@@ -14,25 +14,25 @@
 #define FIRST_ENTRY_Y 7
 
 static UI_List_Entry _entries[MAX_ENTRIES];
-static s32           _num_entries;
+static s32           _numEntries;
 static Callback      _events[UI_LIST_NUM_EVENTS];
 static BOOL          _visible;
-static int           _pos_x;
-static int           _pos_y;
+static int           _posX;
+static int           _posY;
 static int           _selected;
 
 extern SDL_Renderer* gRenderer;
 
 static int get_height()
 {
-  return _num_entries * ENTRY_HEIGHT + (_num_entries - 1) * ENTRY_VGAP;
+  return _numEntries * ENTRY_HEIGHT + (_numEntries - 1) * ENTRY_VGAP;
 }
 
 static RECT get_bound(void)
 {
   RECT bound;
-  bound.x = _pos_x;
-  bound.y = _pos_y;
+  bound.x = _posX;
+  bound.y = _posY;
   bound.w = UI_LIST_WIDTH;
   bound.h = get_height();
   return bound;
@@ -50,7 +50,7 @@ static void process_key_input(SDL_UNUSED void* arg)
 
   if (mouse_in_rect)
   {
-    int y = mouse_position.y - _pos_y - FIRST_ENTRY_Y;
+    int y = mouse_position.y - _posY - FIRST_ENTRY_Y;
     y /= (ENTRY_HEIGHT + ENTRY_VGAP);
     _selected = y;
   }
@@ -80,12 +80,12 @@ static void process_key_input(SDL_UNUSED void* arg)
   }
 }
 
-void ui_list_display(const char** items, u32 cnt)
+void ui_list_display(const char* const* items, u32 cnt)
 {
   _visible     = TRUE;
-  _num_entries = min(cnt, MAX_ENTRIES);
+  _numEntries = min(cnt, MAX_ENTRIES);
 
-  for (s32 i = 0; i < _num_entries; ++i)
+  for (s32 i = 0; i < _numEntries; ++i)
   {
     SDL_strlcpy(_entries[i].text, items[i], UI_LIST_ENTRY_MAX_LEN);
   }
@@ -103,18 +103,18 @@ void ui_list_draw()
   if (!_visible)
     return;
 
-  draw_bordered_box(&(RECT){ _pos_x, _pos_y, UI_LIST_WIDTH, _num_entries * 20 },
+  draw_bordered_box(&(RECT){ _posX, _posY, UI_LIST_WIDTH, _numEntries * 20 },
                     gUIColorBg,
                     gUIColorBorder);
 
   COLOR color;
-  for (int i = 0; i < _num_entries; ++i)
+  for (int i = 0; i < _numEntries; ++i)
   {
     color = (i != _selected) ? gUIColorText : gUIColorTextSelected;
     FC_DrawEffect(get_font(FONT_ITEM_PICKED_UP),
                   gRenderer,
-                  _pos_x + UI_LIST_WIDTH / 2,
-                  _pos_y + i * (ENTRY_HEIGHT + ENTRY_VGAP) + FIRST_ENTRY_Y,
+                  _posX + UI_LIST_WIDTH / 2,
+                  _posY + i * (ENTRY_HEIGHT + ENTRY_VGAP) + FIRST_ENTRY_Y,
                   (FC_Effect){
                       .color     = color,
                       .scale     = (FC_Scale){ 1.f, 1.f },
@@ -143,6 +143,6 @@ void ui_list_hook(u32 event_id, Callback callback)
 
 void ui_list_set_pos(s32 x, s32 y)
 {
-  _pos_x = (x == UI_LIST_POS_CENTER_X) ? WIN_WIDTH / 2 - UI_LIST_WIDTH / 2 : x;
-  _pos_y = (y == UI_LIST_POS_CENTER_Y) ? WIN_HEIGHT / 2 - get_height() / 2 : y;
+  _posX = (x == UI_LIST_POS_CENTER_X) ? WIN_WIDTH / 2 - UI_LIST_WIDTH / 2 : x;
+  _posY = (y == UI_LIST_POS_CENTER_Y) ? WIN_HEIGHT / 2 - get_height() / 2 : y;
 }

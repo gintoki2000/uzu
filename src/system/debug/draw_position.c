@@ -3,7 +3,7 @@
 
 extern SDL_Rect      gViewport;
 extern SDL_Renderer* gRenderer;
-extern Ecs*          gEcs;
+extern ecs_Registry*          gRegistry;
 
 void position_rendering_system_update()
 {
@@ -12,7 +12,7 @@ void position_rendering_system_update()
 
   Transform* transforms;
 
-  ecs_raw(gEcs, TRANSFORM, &entities, (void**)&transforms, &cnt);
+  ecs_raw(gRegistry, TRANSFORM, &entities, (void**)&transforms, &cnt);
 
   SDL_SetRenderDrawColor(gRenderer, 0, 255, 0, 255);
   for (int i = 0; i < cnt; ++i)

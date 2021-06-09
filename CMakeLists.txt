@@ -21,16 +21,11 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 	find_package(SDL2_mixer REQUIRED)
 	find_package(SDL2_ttf REQUIRED)
 	find_package(SDL2_gfx REQUIRED)
-		pkg_check_modules(json_c REQUIRED json-c)
-		set(JSON_C_LIBRARIES ${json_c_STATIC_LDFLAGS})
-		set(JSON_C_INCLUDE_DIRS ${json_c_INCLUDE_DIRS})
-		message(STATUS "json-c libraries: ${JSON_C_LIBRARIES}")
-		message(STATUS "sdl2 libraries: ${SDL2_LIBRARIES}")
-		message(STATUS "sdl2_mixer libraries: ${SDL2_MIXER_LIBRARIES}")
-		message(STATUS "sdl2_ttf libraries: ${SDL2_TTF_LIBRARIES}")
-		message(STATUS "sdl2_image libraries: ${SDL2_IMAGE_LIBRARIES}")
-		message(STATUS "sdl2_gfx libraries: ${SDL2_GFX_LIBRARIES}")
-		
+    find_package(EXPAT 2.2.5 MODULE REQUIRED)
+	find_package(Lua REQUIRED)
+	pkg_check_modules(JSON_C REQUIRED json-c)
+	set(JSON_C_LIBRARIES ${JSON_C_STATIC_LDFLAGS})
+	set(JSON_C_INCLUDE_DIRS ${JSON_C_INCLUDE_DIRS})
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 		set(SDL2_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/libraries/)
 		set(SDL2_LIBRARIES ${CMAKE_SOURCE_DIR}/libraries/)
@@ -56,6 +51,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 		${SDL2_TTF_INCLUDE_DIRS}
 		${JSON_C_INCLUDE_DIRS}
 		${SDL2_GFX_INCLUDE_DIRS}
+		${EXPAT_INCLUDE_DIRS}
+		${LUA_INCLUDE_DIR}
 		${CMAKE_SOURCE_DIR}/include
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE 
@@ -64,7 +61,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 		${SDL2_MIXER_LIBRARIES} 
 		${SDL2_TTF_LIBRARIES}
 		${SDL2_GFX_LIBRARIES}
+		${EXPAT_LIBRARIES}
 		${JSON_C_LIBRARIES}
+		${LUA_LIBRARIES}
 )
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
@@ -75,4 +74,6 @@ install(TARGETS ${PROJECT_NAME}
 	DESTINATION ${CMAKE_SOURCE_DIR}/dist
 )
 
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/res DESTINATION ${CMAKE_SOURCE_DIR}/dist)
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/res 
+	DESTINATION ${CMAKE_SOURCE_DIR}/dist
+)

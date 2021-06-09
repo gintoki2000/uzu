@@ -11,7 +11,7 @@
 #define LEVEL_DATA_DIR "res/level/"
 #define JV(json_object, type, name) json_object_object_get_as_##type(json_object, name)
 
-extern Ecs* gEcs;
+extern ecs_Registry* gRegistry;
 
 typedef struct EntityProperties
 {
@@ -51,13 +51,13 @@ static int item_id_from_string(const char* name)
 static int parse_tilelayer(const json_object* tilelayer_json_obj, tile_t* data);
 static int parse_objectgroup(const json_object* jobjectgroup);
 
-static void parse_imp(Ecs* registry, const EntityProperties* params);
-static void parse_wogol(Ecs* registry, const EntityProperties* params);
-static void parse_huge_demon(Ecs* registry, const EntityProperties* params);
-static void parse_chest(Ecs* registry, const EntityProperties* params);
-static void parse_ladder(Ecs* registry, const EntityProperties* params);
-static void parse_chort(Ecs* registry, const EntityProperties* params);
-static void parse_door(Ecs* registry, const EntityProperties* params);
+static void parse_imp(ecs_Registry* registry, const EntityProperties* params);
+static void parse_wogol(ecs_Registry* registry, const EntityProperties* params);
+static void parse_huge_demon(ecs_Registry* registry, const EntityProperties* params);
+static void parse_chest(ecs_Registry* registry, const EntityProperties* params);
+static void parse_ladder(ecs_Registry* registry, const EntityProperties* params);
+static void parse_chort(ecs_Registry* registry, const EntityProperties* params);
+static void parse_door(ecs_Registry* registry, const EntityProperties* params);
 
 static void parse_item(Item* item, json_object* json)
 {
@@ -120,12 +120,12 @@ static int parse_tilelayer(const json_object* tilelayer_json_obj, tile_t* data)
   return 0;
 }
 
-static void (*get_entity_create_fn(const char* entity_type_name))(Ecs*, const EntityProperties*)
+static void (*get_entity_create_fn(const char* entity_type_name))(ecs_Registry*, const EntityProperties*)
 {
   static struct
   {
     const char* name;
-    void (*const fn)(Ecs*, const EntityProperties*);
+    void (*const fn)(ecs_Registry*, const EntityProperties*);
   } lut[] = {
     { "Imp", parse_imp },     { "Wogol", parse_wogol },   { "BigDemon", parse_huge_demon },
     { "Chest", parse_chest }, { "Ladder", parse_ladder }, { "Chort", parse_chort },
@@ -146,7 +146,7 @@ static int parse_objectgroup(const json_object* jobjectgroup)
   const json_object* jobj;
 
   EntityProperties params;
-  void (*parse_fn)(Ecs*, const EntityProperties*);
+  void (*parse_fn)(ecs_Registry*, const EntityProperties*);
 
   jobjects = json_object_object_get(jobjectgroup, "objects");
   objcnt   = json_object_array_length(jobjects);
@@ -166,7 +166,7 @@ static int parse_objectgroup(const json_object* jobjectgroup)
     params.id         = json_object_object_get_as_int(jobj, "id");
 
     if ((parse_fn = get_entity_create_fn(objtype)) != NULL)
-      parse_fn(gEcs, &params);
+      parse_fn(gRegistry, &params);
   }
 
   return 0;
@@ -228,19 +228,19 @@ static Vec2 real_position(Vec2 top_left, Vec2 size)
   return result;
 }
 //*****************************************************************************//
-static void parse_imp(Ecs* registry, const EntityProperties* props)
+static void parse_imp(ecs_Registry* registry, const EntityProperties* props)
 {
   make_imp(registry, real_position(props->position, props->size));
 }
-static void parse_wogol(Ecs* registry, const EntityProperties* props)
+static void parse_wogol(ecs_Registry* registry, const EntityProperties* props)
 {
   make_wogol(registry, real_position(props->position, props->size));
 }
-static void parse_huge_demon(Ecs* registry, const EntityProperties* props)
+static void parse_huge_demon(ecs_Registry* registry, const EntityProperties* props)
 {
   make_huge_demon(registry, real_position(props->position, props->size));
 }
-static void parse_chest(Ecs* registry, const EntityProperties* props)
+static void parse_chest(ecs_Registry* registry, const EntityProperties* props)
 {
   MakeChestParams chest_params;
   chest_params.position = real_position(props->position, props->size);
@@ -272,7 +272,7 @@ static int direction_from_string(const char* value)
   return -1;
 }
 
-static void parse_ladder(Ecs* registry, const EntityProperties* props)
+static void parse_ladder(ecs_Registry* registry, const EntityProperties* props)
 {
   const char* direction;
 
@@ -288,12 +288,12 @@ static void parse_ladder(Ecs* registry, const EntityProperties* props)
   make_portal(registry, &params);
 }
 
-static void parse_chort(Ecs* registry, const EntityProperties* params)
+static void parse_chort(ecs_Registry* registry, const EntityProperties* params)
 {
   make_chort(registry, real_position(params->position, params->size));
 }
 
-static void parse_door(Ecs* registry, const EntityProperties* params)
+static void parse_door(ecs_Registry* registry, const EntityProperties* params)
 {
   make_door(registry, real_position(params->position, params->size));
 }

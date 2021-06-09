@@ -2,7 +2,7 @@
 #include "config.h"
 #include "system/game_logic.h"
 
-extern Ecs* gEcs;
+extern ecs_Registry* gRegistry;
 
 void weapon_transform_system()
 {
@@ -21,16 +21,16 @@ void weapon_transform_system()
   Vec2 attachPoint;
 
   double s, c, a;
-  ecs_raw(gEcs, HAND, &entities, (void**)&hand, &count);
+  ecs_raw(gRegistry, HAND, &entities, (void**)&hand, &count);
   for (int i = 0; i < count; ++i)
   {
     if (hand[i].weapon == ECS_NULL_ENT)
       continue;
-    transform    = ecs_get(gEcs, entities[i], TRANSFORM);
-    aimDirection = ecs_get(gEcs, entities[i], AIM_DIRECTION);
+    transform    = ecs_get(gRegistry, entities[i], TRANSFORM);
+    aimDirection = ecs_get(gRegistry, entities[i], AIM_DIRECTION);
 
-    weaponTransform  = ecs_get(gEcs, hand[i].weapon, TRANSFORM);
-    weaponVisual     = ecs_get(gEcs, hand[i].weapon, VISUAL);
+    weaponTransform  = ecs_get(gRegistry, hand[i].weapon, TRANSFORM);
+    weaponVisual     = ecs_get(gRegistry, hand[i].weapon, VISUAL);
 
     weaponPosition = vec2_add(transform->position, hand->originalPoint);
     a              = hand[i].angle * DEG_TO_RAD;
@@ -66,7 +66,7 @@ void hand_animation_system(void)
 
   BOOL notStarted;
   BOOL justFinishedCurrentCurrFrame;
-  ecs_raw(gEcs, HAND_ANIMATION, &entities, (void**)&handAnim, &cnt);
+  ecs_raw(gRegistry, HAND_ANIMATION, &entities, (void**)&handAnim, &cnt);
   for (int i = cnt - 1; i >= 0; --i)
   {
     notStarted = handAnim[i].currentIndex == -1;
@@ -76,8 +76,8 @@ void hand_animation_system(void)
     {
       if (next_kframe(&handAnim[i]))
       {
-        hand = ecs_get(gEcs, entities[i], HAND);
-        fdir = ecs_get(gEcs, entities[i], AIM_DIRECTION);
+        hand = ecs_get(gRegistry, entities[i], HAND);
+        fdir = ecs_get(gRegistry, entities[i], AIM_DIRECTION);
 
         INVOKE_EVENT(handAnim[i].cbFrame, entities[i], handAnim[i].currentIndex);
         kf                   = handAnim[i].keyframes + handAnim[i].currentIndex;
@@ -88,9 +88,9 @@ void hand_animation_system(void)
       else
       {
         INVOKE_EVENT(handAnim[i].cbCompleted, entities[i]);
-        hand         = ecs_get(gEcs, entities[i], HAND);
+        hand         = ecs_get(gRegistry, entities[i], HAND);
         hand->length = handAnim[i].initialLength;
-        ecs_rmv(gEcs, entities[i], HAND_ANIMATION);
+        ecs_rmv(gRegistry, entities[i], HAND_ANIMATION);
       }
     }
   }
@@ -103,14 +103,14 @@ void hand_system(void)
   Hand*             hand;
   AimDirection*     fdir;
 
-  ecs_raw(gEcs, HAND, &entities, (void**)&hand, &cnt);
+  ecs_raw(gRegistry, HAND, &entities, (void**)&hand, &cnt);
   for (int i = 0; i < cnt; ++i)
   {
-    if (ecs_has(gEcs, entities[i], HAND_ANIMATION))
+    if (ecs_has(gRegistry, entities[i], HAND_ANIMATION))
       continue;
     if (hand[i].weapon == ECS_NULL_ENT)
       continue;
-    fdir          = ecs_get(gEcs, entities[i], AIM_DIRECTION);
+    fdir          = ecs_get(gRegistry, entities[i], AIM_DIRECTION);
     hand[i].angle = SDL_atan2f(fdir->value.y, fdir->value.x) * RAD_TO_DEG;
 
     /*

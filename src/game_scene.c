@@ -28,8 +28,6 @@
 #include "system/rendering.h"
 #include "system/weapon_skills.h"
 
-#include "game_event.h"
-
 #include "dungeon.h"
 #include "entity_utils.h"
 #include "system/debug.h"
@@ -40,6 +38,7 @@
 #include "system/event_messaging_sys.h"
 
 #include "entity_factory.h"
+#include "lua_script.h"
 
 static void on_player_enter_portal(void* arg, const EnterPortalMsg* event);
 static void on_entity_died(void* arg, const EntityDiedMsg* event);
@@ -56,7 +55,7 @@ static void music_player_on_level_loaded(void* arg, const LevelLoadedMsg* event)
 
 DEFINE_SCENE(game);
 
-Ecs* gEcs;
+ecs_Registry* gRegistry;
 
 static BOOL _bHasNextLevel;
 static char _pendingLevel[LADDER_ATTRS_MAX_LEVEL_NAME_LEN + 1];
@@ -73,15 +72,17 @@ static BOOL _drawGirdEnabled;
 static BOOL _drawPathEnabled;
 #endif
 
+static LuaScript* _testScript;
+
 static void spawn_player(Vec2 position)
 {
   ecs_entity_t player;
 
-  player = make_character(gEcs, gSession.job, position);
-  player = make_player(gEcs, player);
+  player = make_character(gRegistry, gSession.job, position);
+  player = make_player(gRegistry, player);
 
-  ett_equip_weapon(gEcs, player, make_weapon(gEcs, gSession.weapon));
-  ett_attune_spell(gEcs, player, gSession.spell);
+  ett_equip_weapon(gRegistry, player, make_weapon(gRegistry, gSession.weapon));
+  ett_attune_spell(gRegistry, player, gSession.spell);
 }
 
 static void remove_unprocessed_attack_commands(void)
@@ -89,13 +90,13 @@ static void remove_unprocessed_attack_commands(void)
   ecs_entity_t*  entities;
   ecs_size_t     cnt;
   AttackCommand* attackCommand;
-  ecs_raw(gEcs, ATTACK_COMMAND, &entities, (void**)&attackCommand, &cnt);
+  ecs_raw(gRegistry, ATTACK_COMMAND, &entities, (void**)&attackCommand, &cnt);
   for (int i = cnt - 1; i >= 0; --i)
   {
     if (!attackCommand[i].processing)
     {
       INVOKE_EVENT(attackCommand[i].cbCompleted, FALSE);
-      ecs_rmv(gEcs, entities[i], ATTACK_COMMAND);
+      ecs_rmv(gRegistry, entities[i], ATTACK_COMMAND);
     }
   }
 }
@@ -104,7 +105,7 @@ static void on_load()
 {
   extern Cursor g_cursor_cross;
   push_cursor_state(g_cursor_cross);
-  gEcs = ecs_new(gCompDescs, NUM_COMPONENTS);
+  gRegistry = ecs_registry_create(gCompDescs, NUM_COMPONENTS);
 
   ems_init();
   collision_system_init();
@@ -114,7 +115,6 @@ static void on_load()
   damage_system_init();
   collision_manager_system_init();
   dialogue_system_init();
-  game_event_init();
   merchant_system_init();
   door_system_init();
   chest_system_init();
@@ -141,6 +141,9 @@ static void on_load()
   input_push_state(INPUT_STATE_INST_1(player_process_input));
 
   inventory_load();
+
+  _testScript = lua_script_create("res/test.lua");
+  ems_broadcast(MSG_GAME_SCENE_LOADED, NULL);
   load_level(gSession.level);
   ems_broadcast(MSG_LEVEL_LOADED, &(LevelLoadedMsg){ gSession.level });
   spawn_player(gSession.pos);
@@ -151,11 +154,12 @@ static void on_unload()
   inventory_save();
   ems_broadcast(MSG_GAME_SCENE_UNLOAD, NULL);
   dialogue_system_fini();
-  game_event_fini();
-  ecs_del(gEcs);
+  ecs_registry_free(gRegistry);
   ems_fini();
 
-  gEcs = NULL;
+  lua_script_free(_testScript);
+
+  gRegistry = NULL;
 }
 
 static void on_event(const SDL_UNUSED SDL_Event* evt)
@@ -174,13 +178,13 @@ static void find_path_from_player_to_mouse_position(void)
   tileX  = (mouseX + gViewport.x) / TILE_SIZE;
   tileY  = (mouseY + gViewport.y) / TILE_SIZE;
 
-  ecs_entity_t player         = scn_get_player(gEcs);
-  Vec2         playerPosition = ett_get_position(gEcs, player);
+  ecs_entity_t player         = scn_get_player(gRegistry);
+  Vec2         playerPosition = ett_get_position(gRegistry, player);
   playerTileX                 = (int)playerPosition.x / TILE_SIZE;
   playerTileY                 = (int)playerPosition.y / TILE_SIZE;
 
-  ecs_rmv(gEcs, player, PATH);
-  ecs_set(gEcs,
+  ecs_rmv(gRegistry, player, PATH);
+  ecs_set(gRegistry,
           player,
           PATHFINDING_PARAMS,
           &(PathfindingParams){
@@ -261,7 +265,7 @@ static void on_update()
 
 static void on_player_enter_portal(SDL_UNUSED void* arg, const EnterPortalMsg* event)
 {
-  PortalAttributes* portalAttributes = ecs_get(gEcs, event->portal, LADDER_ATTRIBUTES);
+  PortalAttributes* portalAttributes = ecs_get(gRegistry, event->portal, LADDER_ATTRIBUTES);
   request_load_level(portalAttributes->level, portalAttributes->dest);
 }
 
@@ -274,7 +278,7 @@ void request_load_level(const char* level, const char* portalAttributes)
 
 static void on_entity_died(SDL_UNUSED void* arg, const EntityDiedMsg* event)
 {
-  if (ecs_has(gEcs, event->entity, PLAYER_TAG))
+  if (ecs_has(gRegistry, event->entity, PLAYER_TAG))
     _isPlayerDied = TRUE;
 }
 
@@ -306,10 +310,10 @@ static void music_player_on_level_loaded(SDL_UNUSED void* arg, const LevelLoaded
 static void unload_current_level()
 {
   ems_broadcast(MSG_LEVEL_UNLOADED, &(LevelUnloadedMsg){ gSession.level });
-  ecs_entity_t player = scn_get_player(gEcs);
-  gSession.spell      = ett_get_attuned_spell_type(gEcs, player);
-  gSession.weapon     = ett_get_equiped_weapon_type(gEcs, player);
-  ecs_clear(gEcs);
+  ecs_entity_t player = scn_get_player(gRegistry);
+  gSession.spell      = ett_get_attuned_spell_type(gRegistry, player);
+  gSession.weapon     = ett_get_equiped_weapon_type(gRegistry, player);
+  ecs_clear(gRegistry);
   map_clear();
 }
 
@@ -391,9 +395,9 @@ static void render_game_world(void)
 
 static Vec2 get_spawn_localtion(ecs_entity_t portal)
 {
-  PortalAttributes* portalAttributes = ecs_get(gEcs, portal, LADDER_ATTRIBUTES);
-  HitBox*           hixbox           = ecs_get(gEcs, portal, HITBOX);
-  Vec2              position         = ett_get_position(gEcs, portal);
+  PortalAttributes* portalAttributes = ecs_get(gRegistry, portal, LADDER_ATTRIBUTES);
+  HitBox*           hixbox           = ecs_get(gRegistry, portal, HITBOX);
+  Vec2              position         = ett_get_position(gRegistry, portal);
   switch (portalAttributes->exitDirection)
   {
   case UP:
@@ -421,7 +425,7 @@ static void load_pending_level(void)
   Vec2         spawn_localtion;
   load_level(_pendingLevel);
 
-  if ((portal = scn_find_portal(gEcs, _targetPortal)) != ECS_NULL_ENT)
+  if ((portal = scn_find_portal(gRegistry, _targetPortal)) != ECS_NULL_ENT)
   {
     spawn_localtion = get_spawn_localtion(portal);
     spawn_player(spawn_localtion);

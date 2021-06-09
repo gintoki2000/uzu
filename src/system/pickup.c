@@ -9,7 +9,7 @@
 #include "system/event_messaging_sys.h"
 #include "system/game_logic.h"
 
-extern Ecs* gEcs;
+extern ecs_Registry* gRegistry;
 
 static void item_handler(ecs_entity_t, const PickupableAttributes*, const Vec2 position);
 static void coin_handler(ecs_entity_t, const PickupableAttributes*, const Vec2 position);
@@ -22,8 +22,8 @@ static void (*const handlerFuncTbl[])(ecs_entity_t, const PickupableAttributes*,
 
 static void on_hit_pickupable_entity(SDL_UNUSED void* arg, const HitPickupableEntityMsg* msg)
 {
-  PickupableAttributes* attrs     = ecs_get(gEcs, msg->pickupableEntity, PICKUPABLE_ATTRIBUTES);
-  Transform*            transform = ecs_get(gEcs, msg->pickupableEntity, TRANSFORM);
+  PickupableAttributes* attrs     = ecs_get(gRegistry, msg->pickupableEntity, PICKUPABLE_ATTRIBUTES);
+  Transform*            transform = ecs_get(gRegistry, msg->pickupableEntity, TRANSFORM);
 
   void (*handler)(ecs_entity_t, const PickupableAttributes*, const Vec2);
 
@@ -41,9 +41,9 @@ item_handler(ecs_entity_t entity, const PickupableAttributes* attrs, const Vec2 
     {
       ems_broadcast(MSG_ITEM_PICKED_UP,
                     &(ItemPickedUpMsg){ .pickupable_entity = entity,
-                                        .item_type_id      = itemTypeId,
+                                        .itemTypeId        = itemTypeId,
                                         .position          = position });
-      ecs_add(gEcs, entity, DESTROYED_TAG);
+      ecs_add(gRegistry, entity, DESTROYED_TAG);
     }
   }
 }
@@ -53,7 +53,7 @@ coin_handler(ecs_entity_t entity, const PickupableAttributes* attrs, const Vec2 
 {
   gSession.coins += attrs->quality;
   ems_broadcast(MSG_COIN_PICKED_UP, &(CoinPickedUpMsg){ attrs->quality, position });
-  ecs_add(gEcs, entity, DESTROYED_TAG);
+  ecs_add(gRegistry, entity, DESTROYED_TAG);
 }
 void pickup_system_init()
 {

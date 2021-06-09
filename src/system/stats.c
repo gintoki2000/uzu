@@ -1,22 +1,22 @@
 #include "components.h"
 #include "config.h"
-extern Ecs* gEcs;
+extern ecs_Registry* gRegistry;
 
 #define STAT_MAX 16
 static int _manaTable[STAT_MAX + 1];
 static int _healthTable[STAT_MAX + 1];
 
-static void on_stats_added(SDL_UNUSED void* arg, const EcsComponentAdded* event)
+static void on_stats_added(SDL_UNUSED void* arg, const ecs_ComponentAdded* event)
 {
-  ecs_add(gEcs, event->entity, HEALTH);
-  ecs_add(gEcs, event->entity, MOVE_SPEED);
-  ecs_add(gEcs, event->entity, MANA);
-  ecs_add(gEcs, event->entity, DEFENSE);
+  ecs_add(gRegistry, event->entity, HEALTH);
+  ecs_add(gRegistry, event->entity, MOVE_SPEED);
+  ecs_add(gRegistry, event->entity, MANA);
+  ecs_add(gRegistry, event->entity, DEFENSE);
 
-  ecs_add(gEcs, event->entity, VITALITY_CHANGED);
-  ecs_add(gEcs, event->entity, AGILITY_CHANGED);
-  ecs_add(gEcs, event->entity, INTELLIGENT_CHANGED);
-  ecs_add(gEcs, event->entity, STRENGTH_CHANGED);
+  ecs_add(gRegistry, event->entity, VITALITY_CHANGED);
+  ecs_add(gRegistry, event->entity, AGILITY_CHANGED);
+  ecs_add(gRegistry, event->entity, INTELLIGENT_CHANGED);
+  ecs_add(gRegistry, event->entity, STRENGTH_CHANGED);
 }
 
 static int compute_final_points(const Stat* s)
@@ -33,17 +33,17 @@ static void vitality(void)
   Health*       health;
   const Stats*  stats;
   int vit;
-  ecs_raw(gEcs, VITALITY_CHANGED, &entities, NULL, &cnt);
+  ecs_raw(gRegistry, VITALITY_CHANGED, &entities, NULL, &cnt);
   for (int i = cnt - 1; i >= 0; --i)
   {
-    health          = ecs_get(gEcs, entities[i], HEALTH);
-    stats           = ecs_get(gEcs, entities[i], STATS);
+    health          = ecs_get(gRegistry, entities[i], HEALTH);
+    stats           = ecs_get(gRegistry, entities[i], STATS);
     vit             = compute_final_points(&stats->vitality);
     
     health->current = _healthTable[vit] - health->current;
     health->max = _healthTable[vit];
 
-    ecs_rmv(gEcs, entities[i], VITALITY_CHANGED);
+    ecs_rmv(gRegistry, entities[i], VITALITY_CHANGED);
   }
 }
 
@@ -55,14 +55,14 @@ static void agility(void)
   MoveSpeed*    moveSpeed;
   int           points;
 
-  ecs_raw(gEcs, AGILITY_CHANGED, &entities, NULL, &cnt);
+  ecs_raw(gRegistry, AGILITY_CHANGED, &entities, NULL, &cnt);
   for (int i = cnt - 1; i >= 0; --i)
   {
-    stats            = ecs_get(gEcs, entities[i], STATS);
-    moveSpeed        = ecs_get(gEcs, entities[i], MOVE_SPEED);
+    stats            = ecs_get(gRegistry, entities[i], STATS);
+    moveSpeed        = ecs_get(gRegistry, entities[i], MOVE_SPEED);
     points           = compute_final_points(&stats->agility);
     moveSpeed->value = points * 10;
-    ecs_rmv(gEcs, entities[i], AGILITY_CHANGED);
+    ecs_rmv(gRegistry, entities[i], AGILITY_CHANGED);
   }
 }
 
@@ -84,13 +84,13 @@ static void intelligent(void)
   Stats*        stats;
   int           intelligent;
 
-  ecs_raw(gEcs, INTELLIGENT_CHANGED, &entities, NULL, &cnt);
+  ecs_raw(gRegistry, INTELLIGENT_CHANGED, &entities, NULL, &cnt);
   for (int i = cnt - 1; i >= 0; --i)
   {
-    stats       = ecs_get(gEcs, entities[i], STATS);
+    stats       = ecs_get(gRegistry, entities[i], STATS);
     intelligent = compute_final_points(&stats->intelligent);
-    update_mana(intelligent, ecs_get(gEcs, entities[i], MANA));
-    ecs_rmv(gEcs, entities[i], INTELLIGENT_CHANGED);
+    update_mana(intelligent, ecs_get(gRegistry, entities[i], MANA));
+    ecs_rmv(gRegistry, entities[i], INTELLIGENT_CHANGED);
   }
 }
 
@@ -126,7 +126,7 @@ void stats_system_init(void)
 {
   init_mana_table();
   init_health_table();
-  signal_connect(ecs_on_construct(gEcs, STATS), CALLBACK_2(on_stats_added));
+  signal_connect(ecs_on_construct(gRegistry, STATS), CALLBACK_2(on_stats_added));
 }
 
 void stats_system(void)

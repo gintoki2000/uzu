@@ -1,0 +1,12 @@
+<BehaviorTree>
+	<BlackboardKeys>
+		<BlackboardKey name="destination">
+	</BlackboardKeys>
+	<Root>
+		<Sequence>
+			<GetRandomLocation radius="64" resultKey="destination"/>
+			<WalkDirectlyTorward destination="destination" stopWithinDistance="4"/>
+			<Wait duration="180">
+		</Sequence>
+	</Root>
+</BehaviorTree>

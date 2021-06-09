@@ -4,7 +4,7 @@
 
 struct _Command
 {
-  u16    texture_id;
+  u32 textureId;
   RECT   src;
   RECT   dst;
   POINT  center;
@@ -16,13 +16,13 @@ struct _Command
 
 #define MAX_BUFFER_SIZE 512
 static struct _Command _buff[MAX_BUFFER_SIZE];
-static int             _cnt;
-static BOOL            _is_drawing;
+static u32             _cnt;
+static BOOL            _isDrawing;
 
 void sprite_renderer_begin()
 {
-  ASSERT(!_is_drawing);
-  _is_drawing = TRUE;
+  ASSERT(!_isDrawing);
+  _isDrawing = TRUE;
   _cnt        = 0;
 }
 
@@ -34,19 +34,19 @@ static int compare_depth(const struct _Command* lhs, const struct _Command* rhs)
 void sprite_renderer_end()
 {
   extern RENDERER* gRenderer;
-  ASSERT(_is_drawing);
+  ASSERT(_isDrawing);
   SDL_qsort(_buff, _cnt, sizeof(struct _Command), (int (*)(const void*, const void*))compare_depth);
-  for (int i = 0; i < _cnt; ++i)
+  for (u32 i = 0; i < _cnt; ++i)
   {
     SDL_RenderCopyEx(gRenderer,
-                     get_texture(_buff[i].texture_id),
+                     get_texture(_buff[i].textureId),
                      &_buff[i].src,
                      &_buff[i].dst,
                      _buff[i].rotation,
                      &_buff[i].center,
                      _buff[i].flip);
   }
-  _is_drawing = FALSE;
+  _isDrawing = FALSE;
   _cnt        = 0;
 }
 
@@ -59,7 +59,7 @@ void sprite_renderer_draw_ex(Sprite sprite,
                              int    depth)
 {
   ASSERT(_cnt < MAX_BUFFER_SIZE - 1);
-  _buff[_cnt].texture_id = sprite.textureId;
+  _buff[_cnt].textureId = sprite.textureId;
   _buff[_cnt].src        = sprite.rect;
   _buff[_cnt].dst        = (RECT){ position.x, position.y, sprite.rect.w, sprite.rect.h };
   _buff[_cnt].flip       = flip;

@@ -10,23 +10,22 @@
 #include "ui_dialogue.h"
 #include "ui_list.h"
 
-static Conversation* _conversation;
+static const Conversation* _conversation;
 static Queue         _queue;
 static u16           _conversationId;
 static ecs_entity_t  _npc;
-extern Ecs*          gEcs;
+extern ecs_Registry* gRegistry;
 
 static void process_input(void* arg);
 static BOOL next_sentence(void);
 static void on_text_selected(void* arg, const char* text);
 
-void display_dialogue(u16 conversationId, ecs_entity_t entity)
+void display_dialogue(const Conversation* conversation, ecs_entity_t entity)
 {
-  _conversation    = get_conversation(conversationId);
-  _conversationId = conversationId;
-  _npc             = entity;
+  _conversation = conversation;
+  _npc          = entity;
   queue_clear(&_queue);
-  for (int i = 0; i < _conversation->sentences->cnt; ++i)
+  for (int i = 0; i < _conversation->sentences->count; ++i)
     queue_offer(&_queue, _conversation->sentences->storage[i]);
   ui_dialogue_set_visible(TRUE);
   next_sentence();
@@ -36,7 +35,7 @@ void display_dialogue(u16 conversationId, ecs_entity_t entity)
 static void display_responses(void)
 {
   ui_dialogue_set_visible(FALSE);
-  ui_list_display((const char**)_conversation->responses->storage, _conversation->responses->cnt);
+  ui_list_display((const char**)_conversation->responses->storage, _conversation->responses->count);
   ui_list_hook(UI_LIST_ON_SELECT, CALLBACK_2(on_text_selected));
 }
 
@@ -44,9 +43,11 @@ static void end_conversation(const char* res)
 {
   ui_dialogue_set_visible(FALSE);
   input_pop_state();
-  ems_broadcast(
-      MSG_CONVERSATION_FINISHED,
-      &(MSG_ConversationFinished){ .npc = _npc, .response = res, .id = _conversationId });
+  ems_broadcast(MSG_CONVERSATION_FINISHED,
+                &(ConversationFinishedMsg){ .npc      = _npc,
+                                            .response = res,
+                                            .id       = _conversationId,
+                                            .name     = _conversation->name });
 }
 
 static void on_text_selected(SDL_UNUSED void* arg, const char* text)
@@ -59,7 +60,7 @@ static void process_input(SDL_UNUSED void* arg)
   if (button_just_pressed(BUTTON_INTERACT))
   {
     if (!next_sentence())
-      _conversation->responses->cnt > 0 ? display_responses() : end_conversation(NULL);
+      _conversation->responses->count > 0 ? display_responses() : end_conversation(NULL);
   }
 }
 
@@ -75,9 +76,9 @@ static BOOL next_sentence(void)
 
 static void on_command_selected(SDL_UNUSED void* arg, const CommandSelectedMsg* msg)
 {
-  if (!SDL_strcmp(msg->cmd, gCmdTalk) && ecs_has(gEcs, msg->entity, DIALOGUE))
+  if (!SDL_strcmp(msg->cmd, gCmdTalk) && ecs_has(gRegistry, msg->entity, DIALOGUE))
   {
-    display_dialogue(ett_get_conversation(gEcs, msg->entity), msg->entity);
+    display_dialogue(ett_get_conversation(gRegistry, msg->entity), msg->entity);
   }
 }
 

@@ -17,7 +17,6 @@ typedef enum ComponentId
   ATTACK_POWER,
   ATTACK_TARGET,
   ATTUNEMENT_SLOT,
-  BLACKBOARD,
   BOSS_ROOM,
   BRAIN,
   CAMERA_TARGET_TAG,
@@ -80,7 +79,7 @@ typedef enum ComponentId
   NUM_COMPONENTS
 } ComponentId;
 
-extern const EcsCompDesc gCompDescs[];
+extern const ecs_CompDesc gCompDescs[];
 
 typedef struct Motion
 {
@@ -285,8 +284,8 @@ typedef struct DoorAttributes
 
 typedef struct PickupableAttributes
 {
-  u16 id;
-  u16 sfx;
+  u32 id;
+  u32 sfx;
   u8  quality;
 } PickupableAttributes;
 
@@ -322,10 +321,10 @@ typedef struct LifeSpan
 #define DROP_MAX_NUM_ITEMS 4
 typedef struct Drop
 {
-  ItemTypeId type[DROP_MAX_NUM_ITEMS];
-  u8  rate[DROP_MAX_NUM_ITEMS];
-  u8  quality[DROP_MAX_NUM_ITEMS];
-  u8  cnt;
+  PickupableType type[DROP_MAX_NUM_ITEMS];
+  u8             rate[DROP_MAX_NUM_ITEMS];
+  u8             quality[DROP_MAX_NUM_ITEMS];
+  u8             cnt;
 } Drop;
 
 //************^^status^^******************//
@@ -342,12 +341,15 @@ typedef struct
 
 typedef struct
 {
-  BTRoot* root;
+  const bt_Tree*         behaviorTree;
+  bt_RuntimeDataManager* runtimeDataManager;
+  Blackboard*            blackboard;
 } Brain;
 
 typedef struct WalkDirectlyToward
 {
   Vec2     destination;
+  float    stopWithinDistance;
   Callback cbCompleted;
 } WalkDirectlyToward;
 
@@ -389,7 +391,7 @@ typedef struct Interatcable
 
 typedef struct
 {
-  int conversationId;
+  const Conversation* conversation;
 } Dialogue;
 
 #define MERCHANT_MAX_PAYLOADS 100
@@ -523,9 +525,9 @@ typedef enum StatusEffectType
 typedef struct StatusEffect
 {
   StatusEffectType type;
-  u16 duration;
-  u16 elapsed;
-  u8  state[16];
+  u16              duration;
+  u16              elapsed;
+  u8               state[16];
 } StatusEffect;
 
 typedef struct UnableToMove
@@ -555,5 +557,6 @@ void portal_attrs_init(PortalAttributes* sw, const char* level, const char* dest
 void name_init(Name* name, const char* value);
 void text_init(Text* text, const char* value, FONT* font, COLOR color);
 void interactable_init(Interactable* i, const char* const cmds[]);
+void brain_init(Brain* brain, bt_Tree* btree);
 
 #endif // COMPONENTS_H

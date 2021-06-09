@@ -36,7 +36,7 @@ void action_delete(Action* action);
 typedef struct CompositeAction
 {
   Action    parent_instance;
-  PtrArray* children;
+  PointerArray* children;
 } CompositeAction;
 
 #define COMPOSITE_ACTION(ptr) ((CompositeAction*)ptr)

@@ -8,7 +8,7 @@
 #include "global.h"
 #include "resources.h"
 
-ecs_entity_t make_anime_sword(Ecs* registry)
+ecs_entity_t make_anime_sword(ecs_Registry* registry)
 {
 
   ecs_entity_t entity;
@@ -45,13 +45,13 @@ typedef struct NewCharacterParams
 {
   Vec2             position;
   const Animation* animations;
-  u16              vitality;
-  u16              intelligent;
-  u16              strength;
-  u16              agility;
+  u8               vitality;
+  u8               intelligent;
+  u8               strength;
+  u8               agility;
 } MakeCharacterParams;
 
-ecs_entity_t make_character_base(Ecs* registry, const MakeCharacterParams* params)
+ecs_entity_t make_character_base(ecs_Registry* registry, const MakeCharacterParams* params)
 {
   ecs_entity_t entity;
 
@@ -60,7 +60,6 @@ ecs_entity_t make_character_base(Ecs* registry, const MakeCharacterParams* param
   Visual*    visual;
   Hand*      hand;
   HitBox*    hitbox;
-  Motion*    motion;
 
   entity = ecs_create(registry);
 
@@ -95,7 +94,7 @@ ecs_entity_t make_character_base(Ecs* registry, const MakeCharacterParams* param
   hitbox->anchor  = (Vec2){ 3.f, 10.f };
   hitbox->proxyId = RTREE_NULL_NODE;
 
-  motion = ecs_add(registry, entity, MOTION);
+  ecs_add(registry, entity, MOTION);
 
   ecs_add(registry, entity, ENABLE_TILE_COLLISION_TAG);
   ecs_add(registry, entity, CHARACTER_ANIMATOR_TAG);
@@ -104,7 +103,7 @@ ecs_entity_t make_character_base(Ecs* registry, const MakeCharacterParams* param
   return entity;
 }
 
-ecs_entity_t make_knight(Ecs* registry, Vec2 position)
+ecs_entity_t make_knight(ecs_Registry* registry, Vec2 position)
 {
   MakeCharacterParams params;
   params.position    = position;
@@ -116,7 +115,7 @@ ecs_entity_t make_knight(Ecs* registry, Vec2 position)
   return make_character_base(registry, &params);
 }
 
-ecs_entity_t make_elf(Ecs* registry, Vec2 position)
+ecs_entity_t make_elf(ecs_Registry* registry, Vec2 position)
 {
   MakeCharacterParams params;
   params.position    = position;
@@ -128,7 +127,7 @@ ecs_entity_t make_elf(Ecs* registry, Vec2 position)
   return make_character_base(registry, &params);
 }
 
-ecs_entity_t make_wizzard(Ecs* registry, Vec2 position)
+ecs_entity_t make_wizzard(ecs_Registry* registry, Vec2 position)
 {
   MakeCharacterParams params;
   params.position    = position;
@@ -140,7 +139,7 @@ ecs_entity_t make_wizzard(Ecs* registry, Vec2 position)
   return make_character_base(registry, &params);
 }
 
-ecs_entity_t make_lizzard(Ecs* registry, Vec2 position)
+ecs_entity_t make_lizzard(ecs_Registry* registry, Vec2 position)
 {
   MakeCharacterParams params;
   params.position    = position;
@@ -157,16 +156,16 @@ typedef struct MakeMonsterParams
   Vec2             position;
   const Animation* anims;
   Vec2             size;
-  u16              vitality;
-  u16              intelligent;
-  u16              agility;
-  u16              strength;
+  u8               vitality;
+  u8               intelligent;
+  u8               agility;
+  u8               strength;
 } MakeMonParams;
 
 static const Vec2 _monBigSize   = { 20.f, 20.f };
 static const Vec2 _monSizeSmall = { 10.f, 12.f };
 
-ecs_entity_t make_monster_base(Ecs* registry, const MakeMonParams* params)
+ecs_entity_t make_monster_base(ecs_Registry* registry, const MakeMonParams* params)
 {
   ecs_entity_t entity;
 
@@ -218,14 +217,14 @@ ecs_entity_t make_monster_base(Ecs* registry, const MakeMonParams* params)
           });
 
   ecs_add(registry, entity, MOTION);
-  //ecs_add(registry, entity, ENABLE_TILE_COLLISION_TAG);
+  // ecs_add(registry, entity, ENABLE_TILE_COLLISION_TAG);
   ecs_add(registry, entity, CHARACTER_ANIMATOR_TAG);
   ecs_add(registry, entity, AIM_DIRECTION);
   ecs_set(registry, entity, ATTACK_MASK, &(AttackMask){ BIT(CATEGORY_PLAYER) });
   return entity;
 }
 
-ecs_entity_t make_huge_demon(Ecs* registry, Vec2 position)
+ecs_entity_t make_huge_demon(ecs_Registry* registry, Vec2 position)
 {
   MakeMonParams params = { 0 };
   params.agility       = 10;
@@ -236,7 +235,7 @@ ecs_entity_t make_huge_demon(Ecs* registry, Vec2 position)
   return make_monster_base(registry, &params);
 }
 
-ecs_entity_t make_imp(Ecs* registry, Vec2 position)
+ecs_entity_t make_imp(ecs_Registry* registry, Vec2 position)
 {
   MakeMonParams params = { 0 };
   params.agility       = 10;
@@ -248,7 +247,7 @@ ecs_entity_t make_imp(Ecs* registry, Vec2 position)
   return entity;
 }
 
-ecs_entity_t make_wogol(Ecs* registry, Vec2 position)
+ecs_entity_t make_wogol(ecs_Registry* registry, Vec2 position)
 {
   MakeMonParams params = { 0 };
   params.agility       = 10;
@@ -262,12 +261,12 @@ ecs_entity_t make_wogol(Ecs* registry, Vec2 position)
 
 struct AnimatedPickupableEntityParams
 {
-  u16              id;
-  u16              quality;
+  u32              id;
+  u8               quality;
   const Animation* animation;
   Vec2             position;
 };
-ecs_entity_t make_animated_pickupable_entity(Ecs*                                         registry,
+ecs_entity_t make_animated_pickupable_entity(ecs_Registry*                                registry,
                                              const struct AnimatedPickupableEntityParams* params)
 {
   ecs_entity_t entity;
@@ -305,30 +304,13 @@ ecs_entity_t make_animated_pickupable_entity(Ecs*                               
   return entity;
 }
 
-enum {
+enum
+{
   BB_CHORT_DESTINATION,
   BB_CHORT_NUM_ENTRIES
 };
 
-static BTRoot* build_chort_behavior_tree(void)
-{
-  BTCompositeNode* seqMoveToRandomLocation;
-
-  seqMoveToRandomLocation = bt_sequence_new();
-  bt_composite_node_add(
-      seqMoveToRandomLocation,
-      bt_get_random_location_task_new(BB_CHORT_DESTINATION, 64.f));
-  bt_composite_node_add(
-      seqMoveToRandomLocation,
-      bt_walk_directly_toward_task_new(BB_CHORT_DESTINATION));
-  bt_composite_node_add(
-      seqMoveToRandomLocation, 
-      bt_wait_task_new(180));
-
-  return bt_root_new (BT_NODE(seqMoveToRandomLocation));
-}
-
-ecs_entity_t make_chort(Ecs* registry, Vec2 position)
+ecs_entity_t make_chort(ecs_Registry* registry, Vec2 position)
 {
   MakeMonParams params = { 0 };
   params.agility       = 4;
@@ -370,13 +352,14 @@ ecs_entity_t make_chort(Ecs* registry, Vec2 position)
 
   ett_equip_weapon(registry, entity, weapon);
 
-  blackboard_init(ecs_add(registry, entity, BLACKBOARD), BB_CHORT_NUM_ENTRIES);
-  ecs_set (registry, entity, BRAIN, &(Brain){ build_chort_behavior_tree() });
+  Name name;
+  sprintf(name.value, "chort@%u", entity);
+  ecs_set(registry, entity, NAME, &name);
 
   return entity;
 }
 
-ecs_entity_t make_axe(Ecs* registry)
+ecs_entity_t make_axe(ecs_Registry* registry)
 {
   ecs_entity_t axe;
 
@@ -395,14 +378,11 @@ ecs_entity_t make_axe(Ecs* registry)
   return axe;
 }
 
-ecs_entity_t make_cleaver(Ecs* registry)
+ecs_entity_t make_cleaver(ecs_Registry* registry)
 {
   ecs_entity_t entity;
 
-  TEXTURE* texture;
-
-  entity  = ecs_create(registry);
-  texture = get_texture(TEX_WPN_CLEAVER);
+  entity = ecs_create(registry);
 
   Visual*            visual;
   WeaponAttributes*  attributes;
@@ -429,7 +409,7 @@ ecs_entity_t make_cleaver(Ecs* registry)
   return entity;
 }
 
-ecs_entity_t make_katana(Ecs* registry)
+ecs_entity_t make_katana(ecs_Registry* registry)
 {
 
   ecs_entity_t entity;
@@ -460,7 +440,7 @@ ecs_entity_t make_katana(Ecs* registry)
   return entity;
 }
 
-ecs_entity_t make_golden_sword(Ecs* registry)
+ecs_entity_t make_golden_sword(ecs_Registry* registry)
 {
   ecs_entity_t entity;
 
@@ -489,7 +469,7 @@ ecs_entity_t make_golden_sword(Ecs* registry)
   return entity;
 }
 
-ecs_entity_t make_big_red_flask(Ecs* registry, Vec2 position, u8 quality)
+ecs_entity_t make_big_red_flask(ecs_Registry* registry, Vec2 position, u8 quality)
 {
   return make_static_pickupable_entity(registry,
                                        TEX_ITEM_FLASK_RED_BIG,
@@ -498,7 +478,7 @@ ecs_entity_t make_big_red_flask(Ecs* registry, Vec2 position, u8 quality)
                                        quality);
 }
 
-ecs_entity_t make_red_flask(Ecs* registry, Vec2 position, u8 quality)
+ecs_entity_t make_red_flask(ecs_Registry* registry, Vec2 position, u8 quality)
 {
   return make_static_pickupable_entity(registry,
                                        TEX_ITEM_FLASK_RED,
@@ -507,7 +487,7 @@ ecs_entity_t make_red_flask(Ecs* registry, Vec2 position, u8 quality)
                                        quality);
 }
 
-ecs_entity_t make_blue_flask(Ecs* registry, Vec2 position, u8 quality)
+ecs_entity_t make_blue_flask(ecs_Registry* registry, Vec2 position, u8 quality)
 {
   return make_static_pickupable_entity(registry,
                                        TEX_ITEM_BLUE_FLASK,
@@ -516,8 +496,11 @@ ecs_entity_t make_blue_flask(Ecs* registry, Vec2 position, u8 quality)
                                        quality);
 }
 
-ecs_entity_t
-make_static_pickupable_entity(Ecs* registry, u16 texture_id, u16 id, Vec2 position, u8 quality)
+ecs_entity_t make_static_pickupable_entity(ecs_Registry* registry,
+                                           u16           texture_id,
+                                           u16           id,
+                                           Vec2          position,
+                                           u8            quality)
 {
   ecs_entity_t entity;
 
@@ -528,7 +511,7 @@ make_static_pickupable_entity(Ecs* registry, u16 texture_id, u16 id, Vec2 positi
 
   entity = ecs_create(registry);
 
-  visual                    = ecs_add(registry, entity, VISUAL);
+  visual                   = ecs_add(registry, entity, VISUAL);
   visual->sprite.textureId = texture_id;
   sprite_init(&visual->sprite, texture_id);
   visual->anchor.x = visual->sprite.rect.w / 2;
@@ -553,7 +536,7 @@ make_static_pickupable_entity(Ecs* registry, u16 texture_id, u16 id, Vec2 positi
   return entity;
 }
 
-ecs_entity_t make_player(Ecs* registry, ecs_entity_t character)
+ecs_entity_t make_player(ecs_Registry* registry, ecs_entity_t character)
 {
   ecs_add(registry, character, PLAYER_TAG);
   ecs_add(registry, character, CAMERA_TARGET_TAG);
@@ -575,12 +558,12 @@ ecs_entity_t make_player(Ecs* registry, ecs_entity_t character)
 }
 
 ecs_entity_t
-make_thunder(SDL_UNUSED Ecs* registry, SDL_UNUSED Vec2 position, SDL_UNUSED u16 mask_bits)
+make_thunder(SDL_UNUSED ecs_Registry* registry, SDL_UNUSED Vec2 position, SDL_UNUSED u16 mask_bits)
 {
   return ECS_NULL_ENT;
 }
 
-ecs_entity_t make_portal(Ecs* registry, const MakePortalParams* params)
+ecs_entity_t make_portal(ecs_Registry* registry, const MakePortalParams* params)
 {
   ecs_entity_t entity;
 
@@ -609,12 +592,12 @@ ecs_entity_t make_portal(Ecs* registry, const MakePortalParams* params)
   return entity;
 }
 
-ecs_entity_t make_text_particle(Ecs*        registry,
-                                const char* text,
-                                Vec2        position,
-                                Vec2        vel,
-                                FONT*       font,
-                                COLOR       color)
+ecs_entity_t make_text_particle(ecs_Registry* registry,
+                                const char*   text,
+                                Vec2          position,
+                                Vec2          vel,
+                                FONT*         font,
+                                COLOR         color)
 {
   ecs_entity_t entity;
 
@@ -638,7 +621,8 @@ ecs_entity_t make_text_particle(Ecs*        registry,
   return entity;
 }
 
-ecs_entity_t make_fx_damage_indicator(Ecs* registry, Vec2 position, COLOR color, int amount)
+ecs_entity_t
+make_fx_damage_indicator(ecs_Registry* registry, Vec2 position, COLOR color, int amount)
 {
   char strnum[5];
   sprintf(strnum, "%d", amount);
@@ -650,7 +634,7 @@ ecs_entity_t make_fx_damage_indicator(Ecs* registry, Vec2 position, COLOR color,
                             color);
 }
 
-ecs_entity_t make_fx_item_picked_up(Ecs* registry, Vec2 position, const char* item_name)
+ecs_entity_t make_fx_item_picked_up(ecs_Registry* registry, Vec2 position, const char* item_name)
 {
   return make_text_particle(registry,
                             item_name,
@@ -660,7 +644,7 @@ ecs_entity_t make_fx_item_picked_up(Ecs* registry, Vec2 position, const char* it
                             (COLOR){ 122, 196, 10, 255 });
 }
 
-ecs_entity_t make_chest(Ecs* registry, const MakeChestParams* params)
+ecs_entity_t make_chest(ecs_Registry* registry, const MakeChestParams* params)
 {
   ecs_entity_t entity;
 
@@ -670,12 +654,12 @@ ecs_entity_t make_chest(Ecs* registry, const MakeChestParams* params)
   HitBox*          hitbox;
   Transform*       transform;
 
-  entity                    = ecs_create(registry);
-  visual                    = ecs_add(registry, entity, VISUAL);
+  entity                   = ecs_create(registry);
+  visual                   = ecs_add(registry, entity, VISUAL);
   visual->sprite.textureId = TEX_CHEST;
-  visual->sprite.rect = params->state == CHEST_STATE_CLOSE ? gRectChestClose : gRectChestClose;
-  visual->anchor.x    = 8.f;
-  visual->anchor.y    = 16.f;
+  visual->sprite.rect      = params->state == CHEST_STATE_CLOSE ? gRectChestClose : gRectChestClose;
+  visual->anchor.x         = 8.f;
+  visual->anchor.y         = 16.f;
 
   chest = ecs_add(registry, entity, CHEST);
   SDL_memcpy(chest->items, params->items, params->num_slots * sizeof(Item));
@@ -699,12 +683,11 @@ ecs_entity_t make_chest(Ecs* registry, const MakeChestParams* params)
   return entity;
 }
 
-ecs_entity_t make_spear(Ecs* registry)
+ecs_entity_t make_spear(ecs_Registry* registry)
 {
   ecs_entity_t entity;
 
   Visual*            visual;
-  Transform*         transform;
   WeaponThustAttack* thust;
   WeaponAttributes*  attributes;
 
@@ -715,20 +698,20 @@ ecs_entity_t make_spear(Ecs* registry)
   visual->anchor.x = visual->sprite.rect.w / 2;
   visual->anchor.y = 3;
 
-  transform = ecs_add(registry, entity, TRANSFORM);
+  ecs_add(registry, entity, TRANSFORM);
 
   thust       = ecs_add(registry, entity, WEAPON_THUST_ATTACK);
   thust->code = 0;
 
-  attributes        = ecs_add(registry, entity, WEAPON_ATTRIBUTES);
-  attributes->atk   = 1;
-  attributes->range = (WeaponRange){ 26, 32 };
+  attributes         = ecs_add(registry, entity, WEAPON_ATTRIBUTES);
+  attributes->atk    = 1;
+  attributes->range  = (WeaponRange){ 26, 32 };
   attributes->typeId = WEAPON_SPEAR;
 
   return entity;
 }
 
-ecs_entity_t make_door(Ecs* registry, Vec2 position)
+ecs_entity_t make_door(ecs_Registry* registry, Vec2 position)
 {
   ecs_entity_t entity;
 
@@ -740,11 +723,11 @@ ecs_entity_t make_door(Ecs* registry, Vec2 position)
 
   entity = ecs_create(registry);
 
-  visual                    = ecs_add(registry, entity, VISUAL);
+  visual                   = ecs_add(registry, entity, VISUAL);
   visual->sprite.textureId = TEX_DOOR;
-  visual->sprite.rect       = gRectClose;
-  visual->anchor.x          = 16;
-  visual->anchor.y          = 34;
+  visual->sprite.rect      = gRectClose;
+  visual->anchor.x         = 16;
+  visual->anchor.y         = 34;
 
   transform           = ecs_add(registry, entity, TRANSFORM);
   transform->position = position;
@@ -773,7 +756,7 @@ static const Animation* _bloodEffectTbl[] = {
 
 #define NUM_BLOOD_LOSS_EFFECTS 2
 
-ecs_entity_t make_fx_blood_loss(Ecs* registry, Vec2 position)
+ecs_entity_t make_fx_blood_loss(ecs_Registry* registry, Vec2 position)
 {
   ecs_entity_t entity;
   Visual*      visual;
@@ -803,16 +786,14 @@ ecs_entity_t make_fx_blood_loss(Ecs* registry, Vec2 position)
   return entity;
 }
 
-ecs_entity_t make_staff(Ecs* registry)
+ecs_entity_t make_staff(ecs_Registry* registry)
 {
   ecs_entity_t entity = ecs_create(registry);
 
-  Transform*        transform;
   Visual*           visual;
   WeaponAttributes* attributes;
-  WeaponCast*       castable;
 
-  transform = ecs_add(registry, entity, TRANSFORM);
+  ecs_add(registry, entity, TRANSFORM);
 
   visual = ecs_add(registry, entity, VISUAL);
   sprite_init(&visual->sprite, (TEX_WPN_RED_STAFF));
@@ -823,14 +804,15 @@ ecs_entity_t make_staff(Ecs* registry)
   attributes->atk    = 1;
   attributes->typeId = WEAPON_STAFF;
 
-  castable = ecs_add(registry, entity, WEAPON_CAST);
+  ecs_add(registry, entity, WEAPON_CAST);
 
   ecs_add(registry, entity, HOLDER);
 
   return entity;
 }
 
-ecs_entity_t make_fire_ball(Ecs* registry, ecs_entity_t shooter, Vec2 pos, Vec2 direction, u16 mask)
+ecs_entity_t
+make_fire_ball(ecs_Registry* registry, ecs_entity_t shooter, Vec2 pos, Vec2 direction, u16 mask)
 {
   ecs_entity_t          entity = ecs_create(registry);
   Visual*               visual;
@@ -878,7 +860,7 @@ ecs_entity_t make_fire_ball(Ecs* registry, ecs_entity_t shooter, Vec2 pos, Vec2 
 }
 
 ecs_entity_t
-make_ice_arrow(Ecs* registry, ecs_entity_t shooter, Vec2 position, Vec2 speed, u16 mask)
+make_ice_arrow(ecs_Registry* registry, ecs_entity_t shooter, Vec2 position, Vec2 speed, u16 mask)
 {
   ecs_entity_t entity = ecs_create(registry);
 
@@ -926,7 +908,8 @@ make_ice_arrow(Ecs* registry, ecs_entity_t shooter, Vec2 position, Vec2 speed, u
   return entity;
 }
 
-ecs_entity_t make_arrow(Ecs* registry, ecs_entity_t shooter, Vec2 position, Vec2 speed, u16 mask)
+ecs_entity_t
+make_arrow(ecs_Registry* registry, ecs_entity_t shooter, Vec2 position, Vec2 speed, u16 mask)
 {
   ecs_entity_t entity = ecs_create(registry);
 
@@ -973,7 +956,7 @@ ecs_entity_t make_arrow(Ecs* registry, ecs_entity_t shooter, Vec2 position, Vec2
   return entity;
 }
 
-ecs_entity_t make_fx_cast_ice(Ecs* registry, Vec2 pos)
+ecs_entity_t make_fx_cast_ice(ecs_Registry* registry, Vec2 pos)
 {
   ecs_entity_t entity;
 
@@ -994,7 +977,7 @@ ecs_entity_t make_fx_cast_ice(Ecs* registry, Vec2 pos)
   return entity;
 }
 
-ecs_entity_t make_fx_cast_fire(Ecs* registry, Vec2 position)
+ecs_entity_t make_fx_cast_fire(ecs_Registry* registry, Vec2 position)
 {
   ecs_entity_t entity;
 
@@ -1015,7 +998,7 @@ ecs_entity_t make_fx_cast_fire(Ecs* registry, Vec2 position)
   return entity;
 }
 
-ecs_entity_t make_fx_slash(Ecs* registry, Vec2 position, double rot, SDL_RendererFlip flip)
+ecs_entity_t make_fx_slash(ecs_Registry* registry, Vec2 position, double rot, SDL_RendererFlip flip)
 {
   ecs_entity_t entity;
 
@@ -1044,7 +1027,7 @@ ecs_entity_t make_fx_slash(Ecs* registry, Vec2 position, double rot, SDL_Rendere
   return entity;
 }
 
-ecs_entity_t make_fx_fire_hit(Ecs* registry, Vec2 position)
+ecs_entity_t make_fx_fire_hit(ecs_Registry* registry, Vec2 position)
 {
 
   ecs_entity_t entity;
@@ -1069,7 +1052,7 @@ ecs_entity_t make_fx_fire_hit(Ecs* registry, Vec2 position)
 
   return entity;
 }
-ecs_entity_t make_fx_ice_hit(Ecs* registry, Vec2 position)
+ecs_entity_t make_fx_ice_hit(ecs_Registry* registry, Vec2 position)
 {
   ecs_entity_t entity;
 
@@ -1097,13 +1080,15 @@ ecs_entity_t make_fx_ice_hit(Ecs* registry, Vec2 position)
   return entity;
 }
 
-ecs_entity_t make_npc_brian(Ecs* registry, Vec2 position, u16 conversation_id)
+ecs_entity_t make_npc_brian(ecs_Registry* registry, Vec2 position, const char* conversationName)
 {
-  ecs_entity_t entity = ecs_create(registry);
-  HitBox*      hitbox;
+  ecs_entity_t        entity = ecs_create(registry);
+  HitBox*             hitbox;
+  const Conversation* con = get_conversation(conversationName);
+  ASSERT(con != NULL);
 
   ecs_set(registry, entity, TRANSFORM, &(Transform){ .position = position });
-  ecs_set(registry, entity, DIALOGUE, &(Dialogue){ conversation_id });
+  ecs_set(registry, entity, DIALOGUE, &(Dialogue){ con });
   ecs_set(registry, entity, NAME, &(Name){ .value = "brian" });
   ecs_set(registry,
           entity,
@@ -1158,7 +1143,7 @@ ecs_entity_t make_npc_brian(Ecs* registry, Vec2 position, u16 conversation_id)
   return entity;
 }
 
-ecs_entity_t make_trigger(Ecs* registry, Vec2 pos, Vec2 size, u16 mask)
+ecs_entity_t make_trigger(ecs_Registry* registry, Vec2 pos, Vec2 size, u16 mask)
 {
   ecs_entity_t entity;
 
@@ -1176,7 +1161,7 @@ ecs_entity_t make_trigger(Ecs* registry, Vec2 pos, Vec2 size, u16 mask)
   return entity;
 }
 
-ecs_entity_t make_coin(Ecs* registry, Vec2 position, u8 quality)
+ecs_entity_t make_coin(ecs_Registry* registry, Vec2 position, u8 quality)
 {
   return make_animated_pickupable_entity(registry,
                                          &(struct AnimatedPickupableEntityParams){
@@ -1187,12 +1172,12 @@ ecs_entity_t make_coin(Ecs* registry, Vec2 position, u8 quality)
                                          });
 }
 
-ecs_entity_t make_key_1_1(Ecs* registry, Vec2 pos, u8 quality)
+ecs_entity_t make_key_1_1(ecs_Registry* registry, Vec2 pos, u8 quality)
 {
   return make_static_pickupable_entity(registry, TEX_ITEM_KEY, PICKUPABLE_KEY_1_1, pos, quality);
 }
 
-ecs_entity_t make_bow(Ecs* registry)
+ecs_entity_t make_bow(ecs_Registry* registry)
 {
   ecs_entity_t entity;
 
@@ -1228,7 +1213,7 @@ ecs_entity_t make_bow(Ecs* registry)
   return entity;
 }
 
-ecs_entity_t make_character(Ecs* registry, u16 job, Vec2 position)
+ecs_entity_t make_character(ecs_Registry* registry, u16 job, Vec2 position)
 {
   ASSERT_MSG(job < NUM_JOBS, "Invalid job id");
   return gMakeCharacterFnTbl[job](registry, position);

@@ -5,10 +5,10 @@
 #include "resources.h"
 #include "ui_msgbox.h"
 
-static void scroll_use_callback(const void* data, Ecs* ecs, ecs_entity_t entity);
-static void healing_item_use_callback(const void* data, Ecs* ecs, ecs_entity_t entity);
-static void do_nothing_callback(const void*, Ecs*, ecs_entity_t);
-static void equipment_item_use_callback(const void* data, Ecs* ecs, ecs_entity_t entity);
+static void scroll_use_callback(const void* data, ecs_Registry* ecs, ecs_entity_t entity);
+static void healing_item_use_callback(const void* data, ecs_Registry* ecs, ecs_entity_t entity);
+static void do_nothing_callback(const void*, ecs_Registry*, ecs_entity_t);
+static void equipment_item_use_callback(const void* data, ecs_Registry* ecs, ecs_entity_t entity);
 
 typedef struct ScrollData
 {
@@ -147,7 +147,7 @@ const ItemType gItemTypes[NUM_ITEM_TYPES] = {
   
 };
 
-static void healing_item_use_callback(const void* _data, Ecs* ecs, ecs_entity_t entity)
+static void healing_item_use_callback(const void* _data, ecs_Registry* ecs, ecs_entity_t entity)
 {
   const HealingItemData* data   = (const HealingItemData*)_data;
   Mana*                  mana   = ecs_get(ecs, entity, MANA);
@@ -158,7 +158,7 @@ static void healing_item_use_callback(const void* _data, Ecs* ecs, ecs_entity_t 
     mana->current = min(mana->max, mana->current + data->mp);
 }
 
-static void scroll_use_callback(const void* _data, Ecs* ecs, ecs_entity_t entity)
+static void scroll_use_callback(const void* _data, ecs_Registry* ecs, ecs_entity_t entity)
 {
   const ScrollData* data            = (const ScrollData*)_data;
   AttunementSlot*   attunement_slot = ecs_get(ecs, entity, ATTUNEMENT_SLOT);
@@ -169,13 +169,13 @@ static void scroll_use_callback(const void* _data, Ecs* ecs, ecs_entity_t entity
 }
 
 static void do_nothing_callback(SDL_UNUSED const void* data,
-                                SDL_UNUSED Ecs*         ecs,
+                                SDL_UNUSED ecs_Registry*         ecs,
                                 SDL_UNUSED ecs_entity_t entity)
 {
   ui_msgbox_display("not thing happen");
 }
 
-static void equipment_item_use_callback(const void* _data, Ecs* ecs, ecs_entity_t entity)
+static void equipment_item_use_callback(const void* _data, ecs_Registry* ecs, ecs_entity_t entity)
 {
   const EquipmentItemData* data = (const EquipmentItemData*)_data;
   ecs_entity_t             weapon;

@@ -3,7 +3,7 @@
 #include "resources.h"
 #include "sprite_renderer.h"
 
-extern Ecs* gEcs;
+extern ecs_Registry* gRegistry;
 extern RECT gViewport;
 
 static Sprite _sprite_tbl[NUM_EMOJIES] = {
@@ -21,18 +21,18 @@ void emoji_system(void)
   HitBox*       hitbox;
   Transform*    transform;
   RECT          dstRect;
-  ecs_raw(gEcs, EMOJI, &entities, (void**)&emoji, &cnt);
+  ecs_raw(gRegistry, EMOJI, &entities, (void**)&emoji, &cnt);
   for (int i = cnt - 1; i >= 0; --i)
   {
     ASSERT(emoji[i].id >= 0 && emoji[i].id < NUM_EMOJIES && "invalid emoji id");
     if (emoji[i].duration != -1 && (emoji[i].duration--) == 0)
     {
       INVOKE_EVENT(emoji[i].cbTimeOut, NULL);
-      ecs_rmv(gEcs, entities[i], EMOJI);
+      ecs_rmv(gRegistry, entities[i], EMOJI);
       continue;
     }
-    hitbox = ecs_get(gEcs, entities[i], HITBOX);
-    if ((transform = ecs_get(gEcs, entities[i], TRANSFORM)))
+    hitbox = ecs_get(gRegistry, entities[i], HITBOX);
+    if ((transform = ecs_get(gRegistry, entities[i], TRANSFORM)))
     {
       dstRect.x = transform->position.x;
       dstRect.y = transform->position.y;

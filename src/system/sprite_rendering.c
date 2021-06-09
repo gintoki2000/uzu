@@ -8,8 +8,7 @@
 void rendering_system(void)
 {
   extern SDL_Rect      gViewport;
-  extern SDL_Renderer* gRenderer;
-  extern Ecs*          gEcs;
+  extern ecs_Registry* gRegistry;
   ecs_entity_t*        entities;
   Visual*              visuals;
   Transform*           transform;
@@ -19,11 +18,11 @@ void rendering_system(void)
   int   depth;
   RECT  dst;
 
-  ecs_raw(gEcs, VISUAL, &entities, (void**)&visuals, &cnt);
+  ecs_raw(gRegistry, VISUAL, &entities, (void**)&visuals, &cnt);
 
   for (int i = 0; i < cnt; ++i)
   {
-    if ((transform = ecs_get(gEcs, entities[i], TRANSFORM)))
+    if ((transform = ecs_get(gRegistry, entities[i], TRANSFORM)))
     {
       position.x = transform->position.x - visuals[i].anchor.x;
       position.y = transform->position.y - visuals[i].anchor.y - transform->z;

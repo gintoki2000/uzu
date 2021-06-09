@@ -6,6 +6,7 @@
 #include "engine/keyboard.h"
 #include "json_helper.h"
 #include "struct_meta_data.h"
+#include "toolbox/hash_table.h"
 static SDL_Texture* _textures[NUM_TEXS];
 static const char*  _texture_files[NUM_TEXS] = {
   [TEX_MON_BIG_DEMON] = "res/monster/big_demon.png",
@@ -123,12 +124,10 @@ static const char* _sfx_files[NUM_SFXS] = {
 
 static FONT* _fonts[NUM_FONTS];
 
-static Conversation _conversations[NUM_CONVERSATIONS];
-static char*        _conversation_files[NUM_CONVERSATIONS] = {
-  [CON_BRIAN_FIRST_ENCOUNTER] = "res/conversation/nova_00.json",
-  [CON_BRIAN_RESCUE_1]        = "res/conversation/nova_1A_1.json",
-  [CON_BRIAN_RESCUE_2]        = "res/conversation/nova_2A_1.json",
-  [CON_BRIAN_RESCUE_3]        = "res/conversation/rescue_brian_3.json",
+static HashTable* _conversations;
+static char*      _conversation_files[] = {
+  "res/conversation/rescue_brian_3.json",
+  NULL,
 };
 
 extern SDL_Renderer* gRenderer;
@@ -136,6 +135,30 @@ extern SDL_Renderer* gRenderer;
 static SDL_Texture* load_texture(const char* file)
 {
   return IMG_LoadTexture(gRenderer, file);
+}
+
+static u32 hash_string(const char* str)
+{
+  u32 hash = 5381;
+  int c;
+
+  while ((c = *str++))
+    hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+
+  return hash;
+}
+
+static BOOL equal_string(const char* lhs, const char* rhs)
+{
+  return !SDL_strcmp(lhs, rhs);
+}
+
+void conversation_free(Conversation* self)
+{
+  pointer_array_free(self->responses);
+  pointer_array_free(self->sentences);
+  SDL_free(self->name);
+  SDL_free(self);
 }
 
 BOOL resources_load()
@@ -190,10 +213,12 @@ BOOL resources_load()
 
   _fonts[FONT_ITEM_PICKED_UP] = font;
 
-  for (int i = 0; i < NUM_CONVERSATIONS; ++i)
+  _conversations = hash_table_create((HashFunc)hash_string, (EqualFunc)equal_string, (DestroyFunc)conversation_free);
+  for (int i = 0; _conversation_files[i] ; ++i)
   {
-    struct json_object* json = load_json_from_file(_conversation_files[i]);
-    parse_struct(gStructMetaData_Conversation.fields, &_conversations[i], json);
+    struct json_object* json         = load_json_from_file(_conversation_files[i]);
+    Conversation*       conversation = json_to_struct(&gStructMetaData_Conversation, json);
+    hash_table_insert(_conversations, conversation->name, conversation);
     json_object_put(json);
   }
 
@@ -235,10 +260,7 @@ void resources_unload()
     }
   }
 
-  for (int i = 0; i < NUM_CONVERSATIONS; ++i)
-  {
-    conversation_fini(&_conversations[i]);
-  }
+  hash_table_free(_conversations);
 }
 
 SDL_Texture* get_texture(TextureId id)
@@ -261,9 +283,9 @@ FONT* get_font(FontId id)
   return _fonts[id];
 }
 
-Conversation* get_conversation(ConversationId id)
+Conversation* get_conversation(const char* name)
 {
-  return _conversations + id;
+  return hash_table_lookup(_conversations, (void*)name);
 }
 
 static Icon _key_icon_tbl[] = {

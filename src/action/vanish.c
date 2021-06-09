@@ -7,8 +7,8 @@ typedef struct VanishAction
 
 static void start(SDL_UNUSED void* _self, ecs_entity_t target)
 {
-  extern Ecs* gEcs;
-  ecs_add(gEcs, target, DESTROYED_TAG);
+  extern ecs_Registry* gRegistry;
+  ecs_add(gRegistry, target, DESTROYED_TAG);
 }
 
 static ActionVtbl _vanish_action_vtbl = {

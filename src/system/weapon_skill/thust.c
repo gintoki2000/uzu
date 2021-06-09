@@ -4,7 +4,7 @@
 #include <components.h>
 #include <ecs/ecs.h>
 
-extern Ecs* gEcs;
+extern ecs_Registry* gRegistry;
 
 void weapon_thust_attack_system()
 {

@@ -11,7 +11,7 @@
 #include "ui_helper.h"
 #include "ui_quality.h"
 
-extern Ecs*          gEcs;
+extern ecs_Registry*          gRegistry;
 extern SDL_Renderer* gRenderer;
 
 static u32          _current;
@@ -42,7 +42,7 @@ void merchant_system()
 {
   if (_merchant == ECS_NULL_ENT)
     return;
-  Merchant* merchant = ecs_get(gEcs, _merchant, MERCHANT);
+  Merchant* merchant = ecs_get(gRegistry, _merchant, MERCHANT);
 
   RECT bg = { SHOP_X, SHOP_Y, 110, MAX_DISPLAYABLE * CELL_HEIGHT };
 
@@ -119,7 +119,7 @@ static void process_input(SDL_UNUSED void* arg)
   Merchant* merchant;
   if (_merchant == ECS_NULL_ENT)
     return;
-  merchant = ecs_get(gEcs, _merchant, MERCHANT);
+  merchant = ecs_get(gRegistry, _merchant, MERCHANT);
   if (button_just_pressed(BUTTON_UP))
   {
     if (_current > 0)
@@ -161,7 +161,7 @@ static void on_quality_selected(pointer_t arg, u32 value)
   Merchant*    merchant;
   ItemPayload* payload;
 
-  merchant = ecs_get(gEcs, _merchant, MERCHANT);
+  merchant = ecs_get(gRegistry, _merchant, MERCHANT);
 
   payload = &merchant->payloads[_current];
 

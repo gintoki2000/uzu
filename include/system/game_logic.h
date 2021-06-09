@@ -1,8 +1,10 @@
 #ifndef GAME_LOGIC_H
 #define GAME_LOGIC_H
 #include "ecs/ecs.h"
+#include "global.h"
 
 #define RUN_SYSTEM(sys) sys()
+
 
 void action_system(void);
 void action_system_init(void);
@@ -16,7 +18,7 @@ void damage_system_init(void);
 void dialogue_system(void);
 void dialogue_system_fini(void);
 void dialogue_system_init(void);
-void display_dialogue(u16 conversation_id, ecs_entity_t entity);
+void display_dialogue(const Conversation* con, ecs_entity_t entity);
 void door_system_init(void);
 void drop_system_init(void);
 void effect_system_init(void);

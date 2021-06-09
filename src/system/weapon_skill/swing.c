@@ -5,7 +5,7 @@
 #include "system/event_messaging_sys.h"
 #include "toolbox/toolbox.h"
 
-extern Ecs* gEcs;
+extern ecs_Registry* gRegistry;
 
 static HandAnimKeyFrame _keyframes[] = {
   { .duration = 5, .angle = -60.0 },
@@ -35,18 +35,18 @@ static void query_overlap_callback(struct _QueryOverlapCallbackData* d, ecs_enti
 
 static void hand_animation_finished_callback(SDL_UNUSED void* arg, ecs_entity_t entity)
 {
-  HandAnimation* hanim         = ecs_get(gEcs, entity, HAND_ANIMATION);
-  Hand*          hand          = ecs_get(gEcs, entity, HAND);
-  AttackMask*    mask          = ecs_get(gEcs, entity, ATTACK_MASK);
-  Transform*     transform     = ecs_get(gEcs, entity, TRANSFORM);
-  AimDirection*  aimDirection  = ecs_get(gEcs, entity, AIM_DIRECTION);
-  AttackCommand* attackCommand = ecs_get(gEcs, entity, ATTACK_COMMAND);
+  HandAnimation* hanim         = ecs_get(gRegistry, entity, HAND_ANIMATION);
+  Hand*          hand          = ecs_get(gRegistry, entity, HAND);
+  AttackMask*    mask          = ecs_get(gRegistry, entity, ATTACK_MASK);
+  Transform*     transform     = ecs_get(gRegistry, entity, TRANSFORM);
+  AimDirection*  aimDirection  = ecs_get(gRegistry, entity, AIM_DIRECTION);
+  AttackCommand* attackCommand = ecs_get(gRegistry, entity, ATTACK_COMMAND);
 
-  WeaponAttributes*  weaponAttributes = ecs_get(gEcs, hand->weapon, WEAPON_ATTRIBUTES);
-  WeaponSwingAttack* swing            = ecs_get(gEcs, hand->weapon, WEAPON_SWING_ATTACK);
+  WeaponAttributes*  weaponAttributes = ecs_get(gRegistry, hand->weapon, WEAPON_ATTRIBUTES);
+  WeaponSwingAttack* swing            = ecs_get(gRegistry, hand->weapon, WEAPON_SWING_ATTACK);
 
   INVOKE_EVENT(attackCommand->cbCompleted, TRUE);
-  ecs_rmv(gEcs, entity, ATTACK_COMMAND);
+  ecs_rmv(gRegistry, entity, ATTACK_COMMAND);
   double a        = hanim->initialAngle * DEG_TO_RAD;
   int    midRange = (weaponAttributes->range.min + weaponAttributes->range.max) / 2;
 
@@ -67,7 +67,7 @@ static void hand_animation_finished_callback(SDL_UNUSED void* arg, ecs_entity_t 
   collision_box_query(&box, mask->value, CALLBACK_1(&cbdata, query_overlap_callback));
 }
 
-static void play_slash_effect(Ecs* registry, ecs_entity_t entity, float length)
+static void play_slash_effect(ecs_Registry* registry, ecs_entity_t entity, float length)
 {
   Vec2             pos;
   double           rot;
@@ -100,27 +100,27 @@ void weapon_swing_attack_system(void)
   Holder*            holder;
   AttackCommand*     attackCommand;
 
-  ecs_raw(gEcs, WEAPON_SWING_ATTACK, &entities, (void**)&swing, &cnt);
+  ecs_raw(gRegistry, WEAPON_SWING_ATTACK, &entities, (void**)&swing, &cnt);
   for (int i = 0; i < cnt; ++i)
   {
-    holder = ecs_get(gEcs, entities[i], HOLDER);
-    if (holder == NULL || !ecs_is_valid(gEcs, holder->value))
+    holder = ecs_get(gRegistry, entities[i], HOLDER);
+    if (holder == NULL || !ecs_is_valid(gRegistry, holder->value))
       continue;
 
-    attackCommand = ecs_get(gEcs, holder->value, ATTACK_COMMAND);
+    attackCommand = ecs_get(gRegistry, holder->value, ATTACK_COMMAND);
     if (attackCommand == NULL || attackCommand->processing)
       continue;
 
     if (attackCommand->triggerCode == swing[i].code &&
-        !ecs_has(gEcs, holder->value, HAND_ANIMATION))
+        !ecs_has(gRegistry, holder->value, HAND_ANIMATION))
     {
       HandAnimParams params       = { 0 };
       params.cbFinished           = CALLBACK_2(hand_animation_finished_callback);
       params.keyframes            = _keyframes;
       params.realtiveCurrentState = TRUE;
-      ett_animate_hand(gEcs, holder->value, &params);
+      ett_animate_hand(gRegistry, holder->value, &params);
       attackCommand->processing = TRUE;
-      play_slash_effect(gEcs, holder->value, 16);
+      play_slash_effect(gRegistry, holder->value, 16);
       Mix_PlayChannel(-1, get_sfx(SFX_WEAPON_SWORD), 0);
     }
   }

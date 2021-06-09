@@ -7,7 +7,7 @@
 #include "ui_msgbox_w_icon.h"
 #include <string.h>
 
-extern Ecs* gEcs;
+extern ecs_Registry* gRegistry;
 
 static void on_level_loaded(void*, const LevelLoadedMsg*);
 static void on_level_unload(void*, const LevelUnloadedMsg*);
@@ -17,11 +17,11 @@ static void open_chest(ecs_entity_t entity)
   ChestAttributes* attrs;
   Visual*          visual;
 
-  attrs = ecs_get(gEcs, entity, CHEST);
+  attrs = ecs_get(gRegistry, entity, CHEST);
 
   if (attrs->numSlots == 0)
   {
-    visual              = ecs_get(gEcs, entity, VISUAL);
+    visual              = ecs_get(gRegistry, entity, VISUAL);
     visual->sprite.rect = gRectChestOpen;
     attrs->state        = CHEST_STATE_OPEN;
     ui_msgbox_display("chest empty!");
@@ -39,7 +39,7 @@ static void open_chest(ecs_entity_t entity)
     }
     ui_msgbox_w_icon_show(entries, attrs->numSlots);
     attrs->numSlots     = 0;
-    visual              = ecs_get(gEcs, entity, VISUAL);
+    visual              = ecs_get(gRegistry, entity, VISUAL);
     visual->sprite.rect = gRectChestOpen;
     attrs->state        = CHEST_STATE_OPEN;
   }
@@ -48,7 +48,7 @@ static void open_chest(ecs_entity_t entity)
 static void on_command_selected(pointer_t arg, const CommandSelectedMsg* event)
 {
   (void)arg;
-  if (!strcmp(event->cmd, gCmdOpen) && ecs_has(gEcs, event->entity, CHEST))
+  if (!strcmp(event->cmd, gCmdOpen) && ecs_has(gRegistry, event->entity, CHEST))
     open_chest(event->entity);
 }
 
@@ -65,7 +65,7 @@ static void on_level_unload(SDL_UNUSED void* arg, const LevelUnloadedMsg* event)
 
   if ((file = SDL_RWFromFile(sav, "w")) != NULL)
   {
-    ecs_raw(gEcs, CHEST, NULL, (void**)&chest, &numChests);
+    ecs_raw(gRegistry, CHEST, NULL, (void**)&chest, &numChests);
     SDL_RWwrite(file, &numChests, sizeof(numChests), 1);
     SDL_RWwrite(file, chest, sizeof(ChestAttributes), numChests);
     SDL_RWclose(file);
@@ -79,7 +79,7 @@ static void on_level_loaded(SDL_UNUSED void* arg, const LevelLoadedMsg* event)
 
   ChestAttributes* savData;
   ChestAttributes* chest;
-  ecs_size_t       numSavobjs;
+  ecs_size_t       numSavObjs;
   ecs_size_t       numChests;
 
   SDL_strlcpy(sav, event->level_name, 255);
@@ -87,14 +87,14 @@ static void on_level_loaded(SDL_UNUSED void* arg, const LevelLoadedMsg* event)
 
   if ((file = SDL_RWFromFile(sav, "r")) != NULL)
   {
-    SDL_RWread(file, &numSavobjs, sizeof(ecs_size_t), 1);
-    savData = SDL_malloc(numSavobjs * sizeof(ChestAttributes));
-    SDL_RWread(file, savData, sizeof(ChestAttributes), numSavobjs);
+    SDL_RWread(file, &numSavObjs, sizeof(ecs_size_t), 1);
+    savData = SDL_malloc(numSavObjs * sizeof(ChestAttributes));
+    SDL_RWread(file, savData, sizeof(ChestAttributes), numSavObjs);
 
-    ecs_raw(gEcs, CHEST, NULL, (void**)&chest, &numChests);
+    ecs_raw(gRegistry, CHEST, NULL, (void**)&chest, &numChests);
     for (int ichest = 0; ichest < numChests; ++ichest)
     {
-      for (int isaveobj = 0; isaveobj < numSavobjs; ++isaveobj)
+      for (int isaveobj = 0; isaveobj < numSavObjs; ++isaveobj)
       {
         if (chest[ichest].id == savData[isaveobj].id)
           SDL_memcpy(&chest[ichest], &savData[isaveobj], sizeof(ChestAttributes));

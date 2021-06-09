@@ -1,13 +1,17 @@
 set(BEHAVIOR_NODE_SOURCE_FILES
-  src/behavior_tree/root.c
-  src/behavior_tree/inverter.c
-  src/behavior_tree/repeater.c
-  src/behavior_tree/selector.c
-  src/behavior_tree/sequence.c
-  src/behavior_tree/decorator.c
-  src/behavior_tree/wait_task.c
-  src/behavior_tree/get_random_location_task.c
-  src/behavior_tree/walk_directly_toward_task.c
-  src/behavior_tree/composite_node.c
+  src/behavior_tree/bt_composite_node.c
+  src/behavior_tree/bt_decorator.c
+  src/behavior_tree/bt_get_random_location_task.c
+  src/behavior_tree/bt_inverter.c
+  src/behavior_tree/bt_repeater.c
+  src/behavior_tree/bt_root.c
+  src/behavior_tree/bt_selector.c
+  src/behavior_tree/bt_sequence.c
+  src/behavior_tree/bt_wait_task.c
+  src/behavior_tree/bt_walk_directly_toward_task.c
+  src/behavior_tree/bt_runtime.c
+  src/behavior_tree/bt_node.c
+  src/behavior_tree/bt_tree.c
+  src/behavior_tree/bt_tree_parser.c
   src/blackboard.c
 )

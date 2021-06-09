@@ -4,15 +4,15 @@
 
 typedef struct Heap
 {
-  int         cap;
-  int         cnt;
+  int         size;
+  int         count;
   pointer_t*  storage;
   DestroyFunc destroyFunc;
   CompareFunc compareFunc;
 } Heap;
 
-Heap* heap_new(CompareFunc compareFunc, DestroyFunc destroyFunc);
-void  heap_delete(Heap* heap);
+Heap* heap_create(CompareFunc compareFunc, DestroyFunc destroyFunc);
+void  heap_free(Heap* heap);
 
 Heap*     heap_init(Heap* self, CompareFunc, DestroyFunc destroyFunc);
 void      heap_fini(Heap* self);
@@ -21,6 +21,6 @@ pointer_t heap_poll(Heap* heap);
 void      heap_add(Heap* heap, pointer_t v);
 
 INLINE BOOL heap_empty(const Heap* heap)
-{ return heap->cnt == 0; }
+{ return heap->count == 0; }
 
 #endif // HEAP_H

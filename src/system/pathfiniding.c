@@ -251,7 +251,7 @@ static void rcpy(POINT* in, POINT* out, int count)
     out[j] = in[i];
 }
 
-extern Ecs* gEcs;
+extern ecs_Registry* gRegistry;
 static POINT _nodeBuff[100];
 void pathfinding_system(void)
 {
@@ -260,23 +260,23 @@ void pathfinding_system(void)
    PathfindingParams* params;
    Path* path;
    int nodeCount;
-   void (*completedCallback)(void*, Ecs*, ecs_entity_t, Path*);
-   ecs_raw (gEcs, PATHFINDING_PARAMS, &entities, (void**)&params, &count);
+   void (*completedCallback)(void*, ecs_Registry*, ecs_entity_t, Path*);
+   ecs_raw (gRegistry, PATHFINDING_PARAMS, &entities, (void**)&params, &count);
    for (int i = count -1; i >= 0; --i)
    {
-     completedCallback = SDL_static_cast(void(*)(void*, Ecs*, ecs_entity_t, Path*), params[i].cbCompleted.func);
+     completedCallback = SDL_static_cast(void(*)(void*, ecs_Registry*, ecs_entity_t, Path*), params[i].cbCompleted.func);
      if (find_path(params[i].start, params[i].goal, _nodeBuff, &nodeCount)){
-        path = ecs_add (gEcs, entities[i], PATH);
+        path = ecs_add (gRegistry, entities[i], PATH);
         path->count        = nodeCount;
         path->currentIndex = 0;
         rcpy(_nodeBuff, path->nodes, nodeCount);
         if (completedCallback)
-          completedCallback(params[i].cbCompleted.user_data, gEcs, entities[i], path);
+          completedCallback(params[i].cbCompleted.userData, gRegistry, entities[i], path);
      } else {
         if (completedCallback)
-          completedCallback(params[i].cbCompleted.user_data, gEcs, entities[i], NULL);
+          completedCallback(params[i].cbCompleted.userData, gRegistry, entities[i], NULL);
      } 
-     ecs_rmv(gEcs, entities[i], PATHFINDING_PARAMS);
+     ecs_rmv(gRegistry, entities[i], PATHFINDING_PARAMS);
    }
 }
 

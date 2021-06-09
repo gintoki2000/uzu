@@ -3,18 +3,20 @@
 
 #define SIGNAL_DEFAULT_CAPACITY 16
 
+
+
 struct Emitter
 {
-  u32     num_singals;
+  u32     numSingals;
   Signal* signals;
 };
 
 Signal* signal_init(Signal* self)
 {
-  self->cnt        = 0;
-  self->cap        = SIGNAL_DEFAULT_CAPACITY;
+  self->count        = 0;
+  self->size        = SIGNAL_DEFAULT_CAPACITY;
   self->slots      = SDL_calloc(SIGNAL_DEFAULT_CAPACITY, sizeof(Callback));
-  self->is_emiting = FALSE;
+  self->isEmiting = FALSE;
   return self;
 }
 
@@ -23,14 +25,14 @@ void signal_fini(Signal* sig)
   SDL_free(sig->slots);
 }
 
-Signal* signal_new()
+Signal* signal_create()
 {
   Signal* sig = malloc(sizeof(Signal));
   signal_init(sig);
   return sig;
 }
 
-void signal_destroy(Signal* sig)
+void signal_free(Signal* sig)
 {
   if (sig)
   {
@@ -42,8 +44,8 @@ void signal_destroy(Signal* sig)
 static BOOL signal_contains(Signal* self, Callback callback)
 {
   Callback* slots = self->slots;
-  for (int i = self->cnt - 1; i >= 0; --i)
-    if (callback.user_data == slots[i].user_data && callback.func == slots[i].func)
+  for (int i = self->count - 1; i >= 0; --i)
+    if (callback.userData == slots[i].userData && callback.func == slots[i].func)
       return TRUE;
   return FALSE;
 }
@@ -52,21 +54,21 @@ void signal_connect(Signal* self, Callback callback)
 {
   if (signal_contains(self, callback))
     return;
-  if (self->cnt == self->cap)
+  if (self->count == self->size)
   {
-    self->cap *= 2;
-    self->slots = SDL_realloc(self->slots, self->cap * sizeof(Callback));
+    self->size *= 2;
+    self->slots = SDL_realloc(self->slots, self->size * sizeof(Callback));
   }
-  self->slots[self->cnt++] = callback;
+  self->slots[self->count++] = callback;
 }
 
 BOOL signal_disconnect(Signal* self, void (*func)())
 {
   Callback* slots = self->slots;
-  for (int i = self->cnt - 1; i >= 0; --i)
-    if (slots[i].user_data == NULL && slots[i].func == func)
+  for (int i = self->count - 1; i >= 0; --i)
+    if (slots[i].userData == NULL && slots[i].func == func)
     {
-      slots[i] = slots[--self->cnt];
+      slots[i] = slots[--self->count];
       return TRUE;
     }
   return FALSE;
@@ -75,10 +77,10 @@ BOOL signal_disconnect(Signal* self, void (*func)())
 BOOL signal_disconnect_ex(Signal* self, void* instance, void (*func)())
 {
   Callback* slots = self->slots;
-  for (int i = self->cnt - 1; i >= 0; --i)
-    if (instance == slots[i].user_data && func == slots[i].func)
+  for (int i = self->count - 1; i >= 0; --i)
+    if (instance == slots[i].userData && func == slots[i].func)
     {
-      slots[i] = slots[--self->cnt];
+      slots[i] = slots[--self->count];
       return TRUE;
     }
   return FALSE;
@@ -86,18 +88,18 @@ BOOL signal_disconnect_ex(Signal* self, void* instance, void (*func)())
 
 void signal_emit(Signal* self, const void* data)
 {
-  ASSERT(!self->is_emiting);
-  self->is_emiting = TRUE;
-  for (int i = self->cnt - 1; i >= 0; --i)
+  ASSERT(!self->isEmiting);
+  self->isEmiting = TRUE;
+  for (int i = self->count - 1; i >= 0; --i)
   {
     INVOKE_EVENT(self->slots[i], data);
   }
-  self->is_emiting = FALSE;
+  self->isEmiting = FALSE;
 }
 
 static Emitter* emitter_init(Emitter* self, u32 num_singals)
 {
-  self->num_singals = num_singals;
+  self->numSingals = num_singals;
   self->signals     = SDL_calloc(num_singals, sizeof(Signal));
   for (u32 i = 0; i < num_singals; ++i)
   {
@@ -108,21 +110,21 @@ static Emitter* emitter_init(Emitter* self, u32 num_singals)
 
 static void emitter_fini(Emitter* self)
 {
-  for (u32 i = 0; i < self->num_singals; ++i)
+  for (u32 i = 0; i < self->numSingals; ++i)
   {
     signal_fini(self->signals + i);
   }
   SDL_free(self->signals);
 }
 
-Emitter* emitter_new(u32 num_singals)
+Emitter* emitter_create(u32 num_singals)
 {
   Emitter* self = malloc(sizeof(Emitter));
   emitter_init(self, num_singals);
   return self;
 }
 
-void emitter_delete(Emitter* self)
+void emitter_free(Emitter* self)
 {
   if (self)
   {

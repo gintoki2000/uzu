@@ -10,7 +10,7 @@
   ((unsigned char*)pool->dense.components + ((idx)*pool->type_size))
 #define ECS_POOL_SET(pool, e, cidx) (pool->sparse.data[ECS_ENT_IDX(e)] = cidx)
 #define ECS_POOL_DFAULT_SIZE 16
-static void swap_component_data(EcsPool* self, ecs_size_t cidx1, ecs_size_t cidx2)
+static void swap_component_data(ecs_Pool* self, ecs_size_t cidx1, ecs_size_t cidx2)
 {
   unsigned char  tmp[self->type_size];
   unsigned char* mem1;
@@ -32,7 +32,7 @@ static void swap_component_data(EcsPool* self, ecs_size_t cidx1, ecs_size_t cidx
   ECS_POOL_SET(self, self->dense.entities[cidx2], cidx2);
 }
 
-static void realloc_sparse_array(EcsPool* self, ecs_size_t new_size)
+static void realloc_sparse_array(ecs_Pool* self, ecs_size_t new_size)
 {
   ecs_size_t old_size;
 
@@ -45,7 +45,7 @@ static void realloc_sparse_array(EcsPool* self, ecs_size_t new_size)
     self->sparse.data[i] = ECS_NULL_IDX;
 }
 
-static void realloc_dense_array(EcsPool* self, ecs_size_t new_size)
+static void realloc_dense_array(ecs_Pool* self, ecs_size_t new_size)
 {
   ecs_size_t old_size    = self->dense.size;
   self->dense.size       = new_size;
@@ -55,18 +55,18 @@ static void realloc_dense_array(EcsPool* self, ecs_size_t new_size)
     self->dense.entities[i] = ECS_NULL_ENT;
 }
 
-EcsPool* ecs_pool_new(ecs_size_t type_size)
+ecs_Pool* ecs_pool_create(ecs_size_t type_size)
 {
-  return ecs_pool_init(SDL_malloc(sizeof(EcsPool)), type_size);
+  return ecs_pool_init(SDL_malloc(sizeof(ecs_Pool)), type_size);
 }
 
-void ecs_pool_del(EcsPool* pool)
+void ecs_pool_free(ecs_Pool* pool)
 {
   ecs_pool_fini(pool);
   free(pool);
 }
 
-EcsPool* ecs_pool_init(EcsPool* self, ecs_size_t type_size)
+ecs_Pool* ecs_pool_init(ecs_Pool* self, ecs_size_t type_size)
 {
   if (self != NULL)
   {
@@ -87,7 +87,7 @@ EcsPool* ecs_pool_init(EcsPool* self, ecs_size_t type_size)
   return self;
 }
 
-void ecs_pool_fini(EcsPool* self)
+void ecs_pool_fini(ecs_Pool* self)
 {
   if (self != NULL)
   {
@@ -97,7 +97,7 @@ void ecs_pool_fini(EcsPool* self)
   }
 }
 
-void* ecs_pool_add(EcsPool* self, ecs_entity_t e)
+void* ecs_pool_add(ecs_Pool* self, ecs_entity_t e)
 {
   ecs_size_t idx = ECS_ENT_IDX(e);
 
@@ -114,7 +114,7 @@ void* ecs_pool_add(EcsPool* self, ecs_entity_t e)
   return ECS_POOL_OFFSET(self, self->dense.cnt - 1);
 }
 
-void ecs_pool_rmv(EcsPool* self, ecs_entity_t e)
+void ecs_pool_rmv(ecs_Pool* self, ecs_entity_t e)
 {
   ecs_size_t eidx, cidx, last_cidx;
 
@@ -132,23 +132,23 @@ void ecs_pool_rmv(EcsPool* self, ecs_entity_t e)
   self->dense.cnt--;
 }
 
-void* ecs_pool_get(EcsPool* self, ecs_entity_t e)
+void* ecs_pool_get(ecs_Pool* self, ecs_entity_t e)
 {
   ecs_size_t idx = ECS_ENT_IDX(e);
   return ECS_POOL_CONTAINS(self, idx) ? ECS_POOL_OFFSET(self, self->sparse.data[idx]) : NULL;
 }
 
-void ecs_pool_swp(EcsPool* self, ecs_entity_t e1, ecs_entity_t e2)
+void ecs_pool_swp(ecs_Pool* self, ecs_entity_t e1, ecs_entity_t e2)
 {
   swap_component_data(self, self->sparse.data[ECS_ENT_IDX(e1)], self->sparse.data[ECS_ENT_IDX(e2)]);
 }
 
-ecs_size_t ecs_pool_cnt(EcsPool* self)
+ecs_size_t ecs_pool_count(ecs_Pool* self)
 {
   return self->dense.cnt;
 }
 
-SDL_bool ecs_pool_contains(EcsPool* self, ecs_entity_t e)
+SDL_bool ecs_pool_contains(ecs_Pool* self, ecs_entity_t e)
 {
   return ECS_POOL_CONTAINS(self, ECS_ENT_IDX(e));
 }

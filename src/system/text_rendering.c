@@ -3,7 +3,7 @@
 #include "ecs/ecs.h"
 #include "toolbox/toolbox.h"
 
-extern Ecs*          gEcs;
+extern ecs_Registry*          gRegistry;
 extern SDL_Renderer* gRenderer;
 extern SDL_Rect      gViewport;
 
@@ -15,11 +15,11 @@ void text_rendering_system()
   Text*      texts;
   Transform* transform;
 
-  ecs_raw(gEcs, TEXT, &entities, (void**)&texts, &cnt);
+  ecs_raw(gRegistry, TEXT, &entities, (void**)&texts, &cnt);
 
   for (int i = 0; i < cnt; ++i)
   {
-    if ((transform = ecs_get(gEcs, entities[i], TRANSFORM)))
+    if ((transform = ecs_get(gRegistry, entities[i], TRANSFORM)))
     {
       FC_DrawEffect(texts[i].font,
                     gRenderer,

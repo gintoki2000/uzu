@@ -2,7 +2,7 @@
 #include "components.h"
 
 extern SDL_Rect gViewport;
-extern Ecs*     gEcs;
+extern ecs_Registry*     gRegistry;
 void            camera_system()
 {
   ecs_entity_t* entities;
@@ -11,9 +11,9 @@ void            camera_system()
 
   Vec2 target;
 
-  ecs_raw(gEcs, CAMERA_TARGET_TAG, &entities, NULL, &cnt);
+  ecs_raw(gRegistry, CAMERA_TARGET_TAG, &entities, NULL, &cnt);
 
-  if (cnt > 0 && (transform = ecs_get(gEcs, entities[0], TRANSFORM)))
+  if (cnt > 0 && (transform = ecs_get(gRegistry, entities[0], TRANSFORM)))
   {
     target.x = transform->position.x - gViewport.w / 2.f;
     target.y = transform->position.y - gViewport.h / 2.f;

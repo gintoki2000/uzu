@@ -87,8 +87,8 @@ Sprite animation_keyframe(const Animation* animation, u16 elapsed);
 typedef struct
 {
   char*     name;
-  PtrArray* sentences;
-  PtrArray* responses;
+  PointerArray* sentences;
+  PointerArray* responses;
 } Conversation;
 
 #define ITEM_MAX_STACK 255
@@ -136,7 +136,7 @@ typedef struct ItemType
   const char*  description;
   ItemCategory category;
   BOOL         stackable;
-  void (*use)(const void* data, Ecs*, ecs_entity_t);
+  void (*use)(const void* data, ecs_Registry*, ecs_entity_t);
   const void* data;
   Icon        icon;
 } ItemType;
@@ -173,8 +173,8 @@ typedef enum
 typedef struct Spell
 {
   const char* name;
-  void (*cast)(Ecs*, ecs_entity_t, ecs_entity_t);
-  BOOL (*process)(Ecs*, ecs_entity_t, ecs_entity_t);
+  void (*cast)(ecs_Registry*, ecs_entity_t, ecs_entity_t);
+  BOOL (*process)(ecs_Registry*, ecs_entity_t, ecs_entity_t);
   u16  cost;
   u16  coolDownTime;
   Icon icon;
@@ -212,11 +212,11 @@ typedef struct Cursor
 } Cursor;
 
 
-extern ecs_entity_t (*const gMakeWeaponFnTbl[])(Ecs*);
-extern ecs_entity_t (*const gMakeCharacterFnTbl[NUM_JOBS])(Ecs*, Vec2);
-extern ecs_entity_t (*const gMakePickupableFnTbl[NUM_ITEM_TYPES])(Ecs*, Vec2 pos);
-extern ecs_entity_t (*const gMakeProjectileFn[])(Ecs*, Vec2 pos, Vec2 dir, u16 mask);
-extern ecs_entity_t (*const gMakeCastEffectFnTbl[NUM_CAST_EFFECTS])(Ecs* ecs, Vec2 pos);
+extern ecs_entity_t (*const gMakeWeaponFnTbl[])(ecs_Registry*);
+extern ecs_entity_t (*const gMakeCharacterFnTbl[NUM_JOBS])(ecs_Registry*, Vec2);
+extern ecs_entity_t (*const gMakePickupableFnTbl[NUM_ITEM_TYPES])(ecs_Registry*, Vec2 pos);
+extern ecs_entity_t (*const gMakeProjectileFn[])(ecs_Registry*, Vec2 pos, Vec2 dir, u16 mask);
+extern ecs_entity_t (*const gMakeCastEffectFnTbl[NUM_CAST_EFFECTS])(ecs_Registry* ecs, Vec2 pos);
 extern const ItemType gItemTypes[NUM_ITEM_TYPES];
 extern const Spell    gSpellTbl[NUM_SPELLS];
 extern const u16      gPickupableToItemTypeIdTbl[];

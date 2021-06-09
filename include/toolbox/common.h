@@ -12,7 +12,7 @@ typedef Sint32 s32;
 typedef Uint32 u32;
 
 typedef void* pointer_t;
-typedef void (*funcptr_t)();
+typedef void (*Func)();
 
 typedef int (*CompareFunc)(const void* lhs, const void* rhs);
 typedef void (*DestroyFunc)(void* p);
@@ -31,8 +31,8 @@ typedef u32 (*HashFunc)(const void* v);
 
 typedef struct
 {
-  pointer_t user_data;
-  funcptr_t func;
+  pointer_t userData;
+  Func func;
 } Callback;
 
 #define BOOL SDL_bool
@@ -48,24 +48,31 @@ typedef struct
 #define ASSERT(cd) SDL_assert(cd)
 #define ASSERT_MSG(cd, msg) ASSERT((cd) && (msg))
 
+
+#ifdef __GNUC__ 
+  #define STATIC_ASSERT(con, msg) _Static_assert(con, #msg)
+#else
+  #define STATIC_ASSERT(con, msg) typedef static_assert_##msg[(con) ? 1 : -1]
+#endif
+
 #define CALLBACK_1(_user_data, _func)                                                              \
   ((Callback){                                                                                     \
-      .user_data = (pointer_t)_user_data,                                                          \
-      .func      = (funcptr_t)_func,                                                               \
+      .userData = (pointer_t)_user_data,                                                          \
+      .func      = (Func)_func,                                                               \
   })
-#define CALLBACK_2(__func) ((Callback){ .func = (funcptr_t)__func })
+#define CALLBACK_2(__func) ((Callback){ .func = (Func)__func })
 
 #define INVOKE_CALLBACK(__callback, __return_type, ...)                                            \
-  (((__return_type(*)())(__callback).func)((__callback).user_data, __VA_ARGS__))
+  (((__return_type(*)())(__callback).func)((__callback).userData, __VA_ARGS__))
 
 #define INVOKE_CALLBACK_NOARGS(__callback, __return_type)                                          \
-  (((__return_type(*)())(__callback).func)((__callback).user_data))
+  (((__return_type(*)())(__callback).func)((__callback).userData))
 
 #define INVOKE_EVENT(__callback, ...)                                                              \
   do                                                                                               \
   {                                                                                                \
     if ((__callback).func != NULL)                                                                 \
-      (((void (*)())(__callback).func)((__callback).user_data, __VA_ARGS__));                      \
+      (((void (*)())(__callback).func)((__callback).userData, __VA_ARGS__));                      \
   } while (0)
 
 #define INLINE static inline
@@ -218,7 +225,7 @@ INLINE Vec2 vec2_mul(Vec2 a, float k)
 
 INLINE float vec2_mag(Vec2 v)
 {
-  return SDL_sqrt(v.x * v.x + v.y * v.y);
+  return SDL_sqrtf(v.x * v.x + v.y * v.y);
 }
 
 INLINE float vec2_normalize(Vec2* v)
@@ -244,7 +251,7 @@ INLINE float invsqrt(float x)
   return x;
 }
 
-INLINE void vec2_scale_to_length(Vec2* v, float len)
+INLINE void vec2_scale_to(Vec2* v, float len)
 {
   float ivlen = invsqrt(v->x * v->x + v->y * v->y);
   v->x *= ivlen;

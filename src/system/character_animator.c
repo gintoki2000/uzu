@@ -1,7 +1,7 @@
 #include "components.h"
 #include "system/game_logic.h"
 
-extern Ecs* gEcs;
+extern ecs_Registry* gRegistry;
 
 static void play_animation(Animator* animator, u32 newAnimState)
 {
@@ -30,16 +30,16 @@ void character_controller_system()
   float          vx, vy;
   AnimationState nextState;
 
-  ecs_raw(gEcs, CHARACTER_ANIMATOR_TAG, &entities, NULL, &cnt);
+  ecs_raw(gRegistry, CHARACTER_ANIMATOR_TAG, &entities, NULL, &cnt);
   for (int i = 0; i < cnt; ++i)
   {
-    if ((motion = ecs_get(gEcs, entities[i], MOTION)) &&
-        (visual = ecs_get(gEcs, entities[i], VISUAL)) &&
-        (animator = ecs_get(gEcs, entities[i], ANIMATOR)) &&
-        (aimDirection = ecs_get(gEcs, entities[i], AIM_DIRECTION)))
+    if ((motion = ecs_get(gRegistry, entities[i], MOTION)) &&
+        (visual = ecs_get(gRegistry, entities[i], VISUAL)) &&
+        (animator = ecs_get(gRegistry, entities[i], ANIMATOR)) &&
+        (aimDirection = ecs_get(gRegistry, entities[i], AIM_DIRECTION)))
     {
 
-      if (ecs_has(gEcs, entities[i], INVULNERABLE) || ecs_has(gEcs, entities[i], STAGGER))
+      if (ecs_has(gRegistry, entities[i], INVULNERABLE) || ecs_has(gRegistry, entities[i], STAGGER))
       {
         play_animation(animator, ANIM_STATE_HIT);
         return;

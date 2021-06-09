@@ -5,31 +5,29 @@
 typedef struct PtrArray
 {
   pointer_t*  storage;
-  s32         cnt;
-  s32         cap;
+  s32         count;
+  s32         size;
   DestroyFunc destroyFunc;
-} PtrArray;
+} PointerArray;
 
-PtrArray* ptr_array_new(DestroyFunc destroyFunc);
-PtrArray* ptr_array_new_copy(const PtrArray* other);
-void      ptr_array_delete(PtrArray* arr);
+PointerArray* pointer_array_create(DestroyFunc destroyFunc);
+PointerArray* pointer_array_create_sized(DestroyFunc destroyFunc, int size);
+void          pointer_array_free(PointerArray* arr);
 
-PtrArray* ptr_array_init(PtrArray* self, DestroyFunc destroyFunc);
-PtrArray* ptr_array_init_w_cap(PtrArray* self, DestroyFunc destroyFunc, s32 cap);
-PtrArray* ptr_array_init_copy(PtrArray* self, const PtrArray* other);
-PtrArray* ptr_array_init_w_array(PtrArray* self, DestroyFunc destroyFunc, pointer_t* data, s32 n);
-void      ptr_array_fini(PtrArray* self);
+PointerArray* pointer_array_init(PointerArray* self, DestroyFunc destroyFunc);
+PointerArray* pointer_array_init_sized(PointerArray* self, DestroyFunc destroyFunc, s32 size);
+void pointer_array_fini(PointerArray* self);
 
-pointer_t ptr_array_add(PtrArray* self, pointer_t p);
-BOOL      ptr_array_rmv(PtrArray* self, pointer_t p);
-void      ptr_array_rmv_idx(PtrArray* self, s32 idx);
-void      ptr_array_qrmv(PtrArray* self, s32 idx);
+pointer_t pointer_array_add(PointerArray* self, pointer_t p);
+BOOL      pointer_array_rmv(PointerArray* self, pointer_t p);
+void      pointer_array_rmv_idx(PointerArray* self, s32 idx);
+void      pointer_array_qrmv(PointerArray* self, s32 idx);
 
-int  ptr_array_index_of(PtrArray* self, pointer_t p);
-BOOL ptr_array_contains(PtrArray* self, pointer_t p);
-void ptr_array_reserve(PtrArray* self, s32 n);
-void ptr_array_sort(PtrArray* self, CompareFunc comp);
-void ptr_array_clear(PtrArray* self);
+int  pointer_array_find(PointerArray* self, pointer_t p);
+BOOL pointer_array_contains(PointerArray* self, pointer_t p);
+void pointer_array_reserve(PointerArray* self, s32 n);
+void pointer_array_sort(PointerArray* self, CompareFunc comp);
+void pointer_array_clear(PointerArray* self);
 
 #define ptr_array_storage(__T, __self) ((__T**)(__self)->storage)
 #define ptr_array_at(__self, idx) ((__self)->storage[(idx)])

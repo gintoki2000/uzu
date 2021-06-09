@@ -8,7 +8,7 @@
 typedef struct
 {
   AABB  aabb;
-  void* user_data;
+  void* userData;
   int   parent;
   int   child1;
   int   child2;
@@ -61,7 +61,7 @@ static int rtree_allocate_node(RTree* self)
   TreeNode* nodes      = self->nodes;
   int       idx        = self->free_index;
   self->free_index     = self->next[idx];
-  nodes[idx].user_data = NULL;
+  nodes[idx].userData = NULL;
   nodes[idx].parent    = RTREE_NULL_NODE;
   nodes[idx].child1    = RTREE_NULL_NODE;
   nodes[idx].child2    = RTREE_NULL_NODE;
@@ -282,7 +282,7 @@ static void rtree_insert_leaf(RTree* self, int leaf)
   int old_parent              = nodes[sibling].parent;
   int new_parent              = rtree_allocate_node(self);
   nodes[new_parent].parent    = old_parent;
-  nodes[new_parent].user_data = NULL;
+  nodes[new_parent].userData = NULL;
   nodes[new_parent].aabb      = aabb_merge(&leaf_aabb, &nodes[sibling].aabb);
   nodes[new_parent].height    = nodes[sibling].height + 1;
 
@@ -459,7 +459,7 @@ int rtree_create_proxy(RTree* self, void* user_data, const AABB* aabb)
   nodes[idx].child1    = RTREE_NULL_NODE;
   nodes[idx].child2    = RTREE_NULL_NODE;
   nodes[idx].height    = 0;
-  nodes[idx].user_data = user_data;
+  nodes[idx].userData = user_data;
 
   aabb_extend(&nodes[idx].aabb, 5.f);
 
@@ -551,7 +551,7 @@ void rtree_query(RTree* self, const AABB* aabb, Callback cb)
     {
       if (node_is_leaf(node))
       {
-        if (!callback_fn(cb.user_data, id))
+        if (!callback_fn(cb.userData, id))
           break;
       }
       else
@@ -568,7 +568,7 @@ void* rtree_get_user_data(RTree* self, int proxy_id)
 {
   ASSERT(proxy_id >= 0 && proxy_id < self->capacity);
   ASSERT(node_is_leaf(&self->nodes[proxy_id]));
-  return self->nodes[proxy_id].user_data;
+  return self->nodes[proxy_id].userData;
 }
 
 const AABB* rtree_get_fat_aabb(RTree* self, int proxy_id)

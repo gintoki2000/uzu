@@ -6,7 +6,7 @@
 #include "toolbox/toolbox.h"
 #include "entity_utils.h"
 
-extern Ecs* gEcs;
+extern ecs_Registry* gRegistry;
 
 static const Vec2 _trapImpactForce = { 100.f, 0.f };
 
@@ -14,7 +14,7 @@ static const Vec2 _trapImpactForce = { 100.f, 0.f };
 
 static void on_hit_trap(SDL_UNUSED void* arg, const EntityHitTrapMsg* event)
 {
-  const AimDirection*    aimDirection = ecs_get(gEcs, event->entity, AIM_DIRECTION);
+  const AimDirection*    aimDirection = ecs_get(gRegistry, event->entity, AIM_DIRECTION);
   Vec2                   force = vec2_mul(_trapImpactForce, signf(aimDirection->value.x));
   ems_broadcast(MSG_DEAL_DAMAGE,
                 &(InflictDamageMsg){ .damage     = 1,
@@ -29,7 +29,7 @@ static void on_hit_trap(SDL_UNUSED void* arg, const EntityHitTrapMsg* event)
 static void on_projectile_hit(SDL_UNUSED void* arg, const ProjectileHitMsg* event)
 {
   ProjectileAttributes* attributes;
-  if ((attributes = ecs_get(gEcs, event->projectile, PROJECTILE_ATTRIBUTES)) != NULL)
+  if ((attributes = ecs_get(gRegistry, event->projectile, PROJECTILE_ATTRIBUTES)) != NULL)
   {
     ems_broadcast(MSG_DEAL_DAMAGE,
                   &(InflictDamageMsg){
@@ -41,11 +41,11 @@ static void on_projectile_hit(SDL_UNUSED void* arg, const ProjectileHitMsg* even
                       .impactTime = attributes->impactTime,
                       .zforce     = attributes->impactForceZ,
                   });
-    ett_apply_status_effect(gEcs, event->entity, STATUS_EFFECT_FREEZED, 240);
+    ett_apply_status_effect(gRegistry, event->entity, STATUS_EFFECT_FREEZED, 240);
     begin_sake_camera(4, 6);
     if (attributes->destroyWhenHit)
     {
-      ecs_add(gEcs, event->projectile, DESTROYED_TAG);
+      ecs_add(gRegistry, event->projectile, DESTROYED_TAG);
     }
   }
 }

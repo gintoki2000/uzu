@@ -132,21 +132,12 @@ typedef enum
 
 #define SFX_ID_NULL NUM_SFXS
 
-typedef enum
-{
-  CON_BRIAN_FIRST_ENCOUNTER,
-  CON_BRIAN_RESCUE_1,
-  CON_BRIAN_RESCUE_2,
-  CON_BRIAN_RESCUE_3,
-  NUM_CONVERSATIONS,
-} ConversationId;
-
 BOOL          resources_load(void);
 void          resources_unload(void);
 SDL_Texture*  get_texture(TextureId id);
 Mix_Music*    get_bg_mus(BgMusId id);
 Mix_Chunk*    get_sfx(SfxId id);
 FONT*         get_font(FontId id);
-Conversation* get_conversation(ConversationId id);
+Conversation* get_conversation(const char* name);
 Icon          get_key_icon(u16 key);
 #endif // RESOURCES_H

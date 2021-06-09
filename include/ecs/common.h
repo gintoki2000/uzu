@@ -6,17 +6,17 @@
 typedef uint32_t ecs_entity_t;
 typedef uint16_t ecs_size_t;
 
-typedef void (*ecs_comp_init_fn_t)(void*);
-typedef void (*ecs_comp_fini_fn_t)(void*);
-typedef void (*ecs_comp_cpy_fn_t)(void*, const void*);
+typedef void (*ecs_CompInitFunc)(void*);
+typedef void (*ecs_CompFiniFunc)(void*);
+typedef void (*ecs_CompCpyFunc)(void*, const void*);
 
-typedef struct EcsType
+typedef struct ecs_CompDesc
 {
-  ecs_comp_init_fn_t init_fn;
-  ecs_comp_init_fn_t fini_fn;
-  ecs_comp_cpy_fn_t  cpy_fn;
+  ecs_CompInitFunc initFunc;
+  ecs_CompInitFunc finiFunc;
+  ecs_CompCpyFunc  cpyFunc;
   ecs_size_t         size;
-} EcsCompDesc;
+} ecs_CompDesc;
 
 #define ECS_ENT_VER_SHIFT 16
 #define ECS_ENT_IDX_SHIFT 0

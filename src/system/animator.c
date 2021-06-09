@@ -3,7 +3,7 @@
 #include "resources.h"
 #include "system/game_logic.h"
 
-extern Ecs* gEcs;
+extern ecs_Registry* gRegistry;
 
 void animator_system(void)
 {
@@ -16,11 +16,11 @@ void animator_system(void)
   int                      idx;
   RECT                     rect;
 
-  ecs_raw(gEcs, ANIMATOR, &entities, (void**)&animator, &cnt);
+  ecs_raw(gRegistry, ANIMATOR, &entities, (void**)&animator, &cnt);
 
   for (int i = 0; i < cnt; ++i)
   {
-    visual = ecs_get(gEcs, entities[i], VISUAL);
+    visual = ecs_get(gRegistry, entities[i], VISUAL);
     curr   = &animator[i].anims[animator[i].currentAnimation];
 
     idx = animator[i].elapsed / curr->frameDuration;

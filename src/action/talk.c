@@ -11,7 +11,7 @@ typedef struct TalkAction
   BOOL   finished;
 } TalkAction;
 
-static void on_conversation_finished(TalkAction* self, const MSG_ConversationFinished* msg)
+static void on_conversation_finished(TalkAction* self, const ConversationFinishedMsg* msg)
 {
   if (self->conversation_id == msg->id)
     self->finished = TRUE;

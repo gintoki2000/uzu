@@ -2,7 +2,7 @@
 #include "entity_factory.h"
 #include "system/game_logic.h"
 
-extern Ecs* gEcs;
+extern ecs_Registry* gRegistry;
 
 struct hand_frame
 {

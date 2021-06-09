@@ -3,7 +3,7 @@
 #include "ecs/common.h"
 #include "toolbox/toolbox.h"
 
-typedef struct EcsPool
+typedef struct ecs_Pool
 {
   ecs_size_t type_size;
   struct
@@ -20,20 +20,20 @@ typedef struct EcsPool
     void*         components;
   } dense;
 
-} EcsPool;
+} ecs_Pool;
 
-EcsPool* ecs_pool_new(ecs_size_t type_size);
-void     ecs_pool_del(EcsPool* pool);
+ecs_Pool* ecs_pool_create(ecs_size_t type_size);
+void     ecs_pool_free(ecs_Pool* pool);
 
-EcsPool* ecs_pool_init(EcsPool* self, ecs_size_t type_size);
-void     ecs_pool_fini(EcsPool* self);
+ecs_Pool* ecs_pool_init(ecs_Pool* self, ecs_size_t type_size);
+void     ecs_pool_fini(ecs_Pool* self);
 
-void* ecs_pool_add(EcsPool* self, ecs_entity_t e);
-void  ecs_pool_rmv(EcsPool* self, ecs_entity_t e);
-void* ecs_pool_get(EcsPool* self, ecs_entity_t e);
-void  ecs_pool_swp(EcsPool* self, ecs_entity_t e1, ecs_entity_t e2);
+void* ecs_pool_add(ecs_Pool* self, ecs_entity_t e);
+void  ecs_pool_rmv(ecs_Pool* self, ecs_entity_t e);
+void* ecs_pool_get(ecs_Pool* self, ecs_entity_t e);
+void  ecs_pool_swp(ecs_Pool* self, ecs_entity_t e1, ecs_entity_t e2);
 
-ecs_size_t ecs_pool_cnt(EcsPool* self);
-SDL_bool   ecs_pool_contains(EcsPool* self, ecs_entity_t e);
+ecs_size_t ecs_pool_count(ecs_Pool* self);
+SDL_bool   ecs_pool_contains(ecs_Pool* self, ecs_entity_t e);
 
 #endif // ECS_POOL_H

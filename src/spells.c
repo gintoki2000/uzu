@@ -3,13 +3,13 @@
 #include "global.h"
 #include "resources.h"
 
-static void fire_ball_cast(Ecs* registry, ecs_entity_t caster, ecs_entity_t weapon);
-static void ice_arrow_cast(Ecs* registry, ecs_entity_t caster, ecs_entity_t weapon);
+static void fire_ball_cast(ecs_Registry* registry, ecs_entity_t caster, ecs_entity_t weapon);
+static void ice_arrow_cast(ecs_Registry* registry, ecs_entity_t caster, ecs_entity_t weapon);
 
-static BOOL dummy_process_callback(Ecs*, ecs_entity_t, ecs_entity_t);
-static void dummy_cast_callback(Ecs*, ecs_entity_t, ecs_entity_t);
+static BOOL dummy_process_callback(ecs_Registry*, ecs_entity_t, ecs_entity_t);
+static void dummy_cast_callback(ecs_Registry*, ecs_entity_t, ecs_entity_t);
 
-static void* get_spell_state(Ecs* registry, ecs_entity_t weapon)
+static void* get_spell_state(ecs_Registry* registry, ecs_entity_t weapon)
 {
   WeaponCast* component = ecs_get(registry, weapon, WEAPON_CAST);
   return (void*)component->state;
@@ -35,7 +35,7 @@ static Vec2 vec2_rot(Vec2 v, float angle)
 }
 */
 
-static void fire_ball_cast(Ecs* registry, ecs_entity_t caster, SDL_UNUSED ecs_entity_t weapon)
+static void fire_ball_cast(ecs_Registry* registry, ecs_entity_t caster, SDL_UNUSED ecs_entity_t weapon)
 {
   const float SPEED = 250.f;
   Vec2  position;
@@ -52,7 +52,7 @@ static void fire_ball_cast(Ecs* registry, ecs_entity_t caster, SDL_UNUSED ecs_en
   PLAY_SOUND(SFX_FIRE_BALL_LAUCH);
 }
 
-static void ice_arrow_cast(Ecs* registry, ecs_entity_t caster, ecs_entity_t SDL_UNUSED weapon)
+static void ice_arrow_cast(ecs_Registry* registry, ecs_entity_t caster, ecs_entity_t SDL_UNUSED weapon)
 {
   const float SPEED = 250.f;
   Vec2  position;
@@ -72,14 +72,14 @@ static void ice_arrow_cast(Ecs* registry, ecs_entity_t caster, ecs_entity_t SDL_
 }
 
 
-static BOOL dummy_process_callback(SDL_UNUSED Ecs*         registry, 
+static BOOL dummy_process_callback(SDL_UNUSED ecs_Registry*         registry, 
                                    SDL_UNUSED ecs_entity_t caster, 
                                    SDL_UNUSED ecs_entity_t weapon)
 {
   return TRUE;
 }
 
-static void dummy_cast_callback(SDL_UNUSED Ecs*         registry, 
+static void dummy_cast_callback(SDL_UNUSED ecs_Registry*         registry, 
                                 SDL_UNUSED ecs_entity_t caster, 
                                 SDL_UNUSED ecs_entity_t weapon)
 {

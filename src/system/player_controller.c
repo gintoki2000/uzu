@@ -11,7 +11,7 @@
 #include "system/event_messaging_sys.h"
 #include "ui_list.h"
 
-extern Ecs* gEcs;
+extern ecs_Registry* gRegistry;
 extern RECT gViewport;
 
 #define INTERACTABLE_DISTANCE (TILE_SIZE * 1)
@@ -53,9 +53,9 @@ static BOOL
 query_closest_interactable_entity_callback(struct _QueryClosestInteracableEntityArgs* args,
                                            ecs_entity_t                               e)
 {
-  Vec2  entity_position = ett_get_position(gEcs, e);
+  Vec2  entity_position = ett_get_position(gRegistry, e);
   float dist            = vec2_dist(args->player_position, entity_position);
-  if (dist < args->closest_distance && ecs_has(gEcs, e, INTERACTABLE))
+  if (dist < args->closest_distance && ecs_has(gRegistry, e, INTERACTABLE))
   {
     args->closest_distance = dist;
     args->closest_entity   = e;
@@ -72,7 +72,7 @@ static void update_interactable_entity()
 
     struct _QueryClosestInteracableEntityArgs cbargs;
 
-    player_pos = snn_get_player_position(gEcs);
+    player_pos = snn_get_player_position(gRegistry);
     rect.x     = player_pos.x - INTERACTABLE_DISTANCE / 2;
     rect.y     = player_pos.y - INTERACTABLE_DISTANCE / 2;
     rect.w     = INTERACTABLE_DISTANCE;
@@ -91,11 +91,11 @@ static void update_interactable_entity()
   {
     Vec2 player_pos, ientity_pos;
 
-    player_pos  = snn_get_player_position(gEcs);
-    ientity_pos = ett_get_position(gEcs, gCurrentInteractingEntity);
+    player_pos  = snn_get_player_position(gRegistry);
+    ientity_pos = ett_get_position(gRegistry, gCurrentInteractingEntity);
 
     if (vec2_dist(player_pos, ientity_pos) > INTERACTABLE_DISTANCE ||
-        !ecs_has(gEcs, gCurrentInteractingEntity, INTERACTABLE))
+        !ecs_has(gRegistry, gCurrentInteractingEntity, INTERACTABLE))
     {
       gCurrentInteractingEntity = ECS_NULL_ENT;
     }
@@ -104,7 +104,7 @@ static void update_interactable_entity()
 
 static void begin_interact(ecs_entity_t entity)
 {
-  Interactable* interactable = ecs_get(gEcs, entity, INTERACTABLE);
+  Interactable* interactable = ecs_get(gRegistry, entity, INTERACTABLE);
   if (!interactable)
     return;
   ui_list_display((const char**)interactable->commands, interactable->numCommands);
@@ -119,14 +119,14 @@ void player_process_input(SDL_UNUSED void* arg)
   ecs_entity_t      player;
   DesiredDirection* desired_direction;
 
-  if ((player = scn_get_player(gEcs)) == ECS_NULL_ENT)
+  if ((player = scn_get_player(gRegistry)) == ECS_NULL_ENT)
     return;
-  if (ecs_has(gEcs, player, SCRIPT))
+  if (ecs_has(gRegistry, player, SCRIPT))
     return;
   update_interactable_entity();
 
-  desired_direction = ecs_get(gEcs, player, DESIRED_DIRECTION);
-  if (!ecs_has(gEcs, player, INVULNERABLE))
+  desired_direction = ecs_get(gRegistry, player, DESIRED_DIRECTION);
+  if (!ecs_has(gRegistry, player, INVULNERABLE))
   {
     *desired_direction = VEC2_ZERO;
     if (button_pressed(BUTTON_UP))
@@ -148,17 +148,17 @@ void player_process_input(SDL_UNUSED void* arg)
       inventory_display();
       return;
     }
-    if (mouse_button_just_pressed(SDL_BUTTON_LEFT) && !ecs_has(gEcs, player, ATTACK_COMMAND))
+    if (mouse_button_just_pressed(SDL_BUTTON_LEFT) && !ecs_has(gRegistry, player, ATTACK_COMMAND))
     {
-      ecs_set(gEcs, player, ATTACK_COMMAND, &(AttackCommand){ .triggerCode = 0 });
+      ecs_set(gRegistry, player, ATTACK_COMMAND, &(AttackCommand){ .triggerCode = 0 });
     }
 
     if (button_just_pressed(BUTTON_JUMP))
     {
-      Transform* transform = ecs_get(gEcs, player, TRANSFORM);
+      Transform* transform = ecs_get(gRegistry, player, TRANSFORM);
       if (transform->z <= 0.f)
       {
-        Motion* motion = ecs_get(gEcs, player, MOTION);
+        Motion* motion = ecs_get(gRegistry, player, MOTION);
         motion->vz     = 100.f;
         Mix_PlayChannel(-1, get_sfx(SFX_MOV_JUMP), 0);
       }

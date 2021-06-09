@@ -6,10 +6,10 @@
 
 INLINE void ensure_capacity(Heap* heap)
 {
-  if (heap->cnt == heap->cap)
+  if (heap->count == heap->size)
   {
-    heap->cap *= 2;
-    heap->storage = SDL_realloc(heap->storage, heap->cap * sizeof(pointer_t));
+    heap->size *= 2;
+    heap->storage = SDL_realloc(heap->storage, heap->size * sizeof(pointer_t));
   }
 }
 INLINE int  left_child_index(int parent_index) 
@@ -22,10 +22,10 @@ INLINE int  parent_index(int child_index)
 { return (child_index - 1) / 2; }
 
 INLINE BOOL has_left_child(Heap* heap, int index)
-{ return left_child_index(index) < heap->cnt; }
+{ return left_child_index(index) < heap->count; }
 
 INLINE BOOL has_right_child(Heap* heap, int index)
-{ return right_child_index(index) < heap->cnt; }
+{ return right_child_index(index) < heap->count; }
 
 INLINE BOOL has_parent(int index) 
 { return parent_index(index) >= 0; }
@@ -48,7 +48,7 @@ INLINE void swap(Heap* heap, int lhs, int rhs)
 
 INLINE void heapify_up(Heap* heap)
 {
-  int index = heap->cnt - 1;
+  int index = heap->count - 1;
   int parent_idx;
 
   while (has_parent(index) && heap->compareFunc(parent(heap, index), heap->storage[index]) > 0)
@@ -88,12 +88,12 @@ INLINE void heapify_down(Heap* heap)
 static Heap* heap_alloc()
 { return SDL_malloc(sizeof(Heap)); }
 
-Heap* heap_new(CompareFunc compareFunc, DestroyFunc destroyFunc)
+Heap* heap_create(CompareFunc compareFunc, DestroyFunc destroyFunc)
 {
   return heap_init(heap_alloc(), compareFunc, destroyFunc);
 }
 
-void heap_delete(Heap* heap)
+void heap_free(Heap* heap)
 {
   if (heap)
   {
@@ -106,8 +106,8 @@ Heap* heap_init(Heap* self, CompareFunc compareFunc, DestroyFunc destroyFunc)
 {
   self->compareFunc = compareFunc;
   self->destroyFunc = destroyFunc;
-  self->cnt        = 0;
-  self->cap        = HEAP_DEFAULT_CAPACITY;
+  self->count        = 0;
+  self->size        = HEAP_DEFAULT_CAPACITY;
   self->storage    = SDL_malloc(sizeof(pointer_t) * HEAP_DEFAULT_CAPACITY);
   return self;
 }
@@ -116,7 +116,7 @@ void heap_fini(Heap* self)
 {
   if (self->destroyFunc != NULL)
   {
-    for (int i = 0; i < self->cnt; ++i)
+    for (int i = 0; i < self->count; ++i)
     {
       self->destroyFunc(self->storage[i]);
     }
@@ -126,16 +126,16 @@ void heap_fini(Heap* self)
 
 pointer_t heap_peak(Heap* heap)
 {
-  ASSERT(heap->cnt > 0 && "heap empty");
+  ASSERT(heap->count > 0 && "heap empty");
   return heap->storage[0];
 }
 
 pointer_t heap_poll(Heap* heap)
 {
-  ASSERT(heap->cnt > 0 && "heap empty");
+  ASSERT(heap->count > 0 && "heap empty");
   pointer_t item   = heap->storage[0];
-  heap->storage[0] = heap->storage[heap->cnt - 1];
-  heap->cnt--;
+  heap->storage[0] = heap->storage[heap->count - 1];
+  heap->count--;
   heapify_down(heap);
   return item;
 }
@@ -143,7 +143,7 @@ pointer_t heap_poll(Heap* heap)
 void heap_add(Heap* heap, pointer_t v)
 {
   ensure_capacity(heap);
-  heap->storage[heap->cnt] = v;
-  heap->cnt++;
+  heap->storage[heap->count] = v;
+  heap->count++;
   heapify_up(heap);
 }

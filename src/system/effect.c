@@ -8,7 +8,7 @@
 #include "system/event_messaging_sys.h"
 #include "system/game_logic.h"
 
-extern Ecs* gEcs;
+extern ecs_Registry* gRegistry;
 extern RECT gViewport;
 
 //<----------------------------event callback---------------------->//
@@ -26,15 +26,15 @@ void effect_system_init()
 
 static void on_item_picked_up(SDL_UNUSED void* arg, const ItemPickedUpMsg* event)
 {
-  PickupableAttributes* attrs = ecs_get(gEcs, event->pickupable_entity, PICKUPABLE_ATTRIBUTES);
+  PickupableAttributes* attrs = ecs_get(gRegistry, event->pickupable_entity, PICKUPABLE_ATTRIBUTES);
   u16                   itemTypeId = gPickupableToItemTypeIdTbl[attrs->id];
   if (attrs->sfx != SFX_ID_NULL)
     Mix_PlayChannel(-1, get_sfx(attrs->sfx), 0);
   if (itemTypeId != ITEM_TYPE_ID_NULL)
-    make_fx_item_picked_up(gEcs, event->position, gItemTypes[itemTypeId].name);
+    make_fx_item_picked_up(gRegistry, event->position, gItemTypes[itemTypeId].name);
 }
 
-static ecs_entity_t (*const _hitEffectFuncTbl[])(Ecs*, Vec2) = {
+static ecs_entity_t (*const _hitEffectFuncTbl[])(ecs_Registry*, Vec2) = {
   make_fx_blood_loss, make_fx_blood_loss, make_fx_fire_hit, make_fx_blood_loss, make_fx_ice_hit,
 };
 
@@ -56,13 +56,13 @@ static void on_get_damaged(SDL_UNUSED void* arg, const GetDamagedMsg* event)
   Vec2       damageeTopleft;
   POINT      damageePosition;
 
-  transform = ecs_get(gEcs, event->damagee, TRANSFORM);
-  hitbox    = ecs_get(gEcs, event->damagee, HITBOX);
+  transform = ecs_get(gRegistry, event->damagee, TRANSFORM);
+  hitbox    = ecs_get(gRegistry, event->damagee, HITBOX);
   if (transform != NULL)
   {
     particlePosition.x = transform->position.x;
     particlePosition.y = transform->position.y - 30.f;
-    make_fx_damage_indicator(gEcs,
+    make_fx_damage_indicator(gRegistry,
                              particlePosition,
                              _damageTypeColorTbl[event->type],
                              event->damage);
@@ -83,7 +83,7 @@ static void on_get_damaged(SDL_UNUSED void* arg, const GetDamagedMsg* event)
     particlePosition.x = rand() % ((int)hitbox->size.x) + damageeTopleft.x;
     particlePosition.y = rand() % ((int)hitbox->size.y) + damageeTopleft.y;
 
-    _hitEffectFuncTbl[event->type](gEcs, particlePosition);
+    _hitEffectFuncTbl[event->type](gRegistry, particlePosition);
   }
 }
 

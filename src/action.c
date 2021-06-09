@@ -45,7 +45,7 @@ BOOL action_on_update(SDL_UNUSED void* self, SDL_UNUSED ecs_entity_t target)
 //==============================================================//
 CompositeAction* composite_action_init(CompositeAction* self)
 {
-  self->children = ptr_array_new(NULL);
+  self->children = pointer_array_create(NULL);
   return self;
 }
 
@@ -55,18 +55,18 @@ void composite_action_cleanup(void* _self)
   int              count;
   Action**         children;
 
-  count    = self->children->cnt;
+  count    = self->children->count;
   children = ptr_array_storage(Action, self->children);
   for (int i = 0; i < count; ++i)
     action_delete(children[i]);
-  ptr_array_delete(self->children);
+  pointer_array_free(self->children);
   self->children = NULL;
 }
 
 void composite_action_add(CompositeAction* self, Action* action)
 {
   ASSERT(action != NULL);
-  ptr_array_add(self->children, action);
+  pointer_array_add(self->children, action);
 }
 #include <stdarg.h>
 void composite_action_addn(CompositeAction* self, ...)
@@ -76,7 +76,7 @@ void composite_action_addn(CompositeAction* self, ...)
   va_start(args, self);
   while ((action = va_arg(args, Action*)) != NULL)
   {
-    ptr_array_add(self->children, action);
+    pointer_array_add(self->children, action);
   }
   va_end(args);
 }
@@ -85,7 +85,7 @@ void composite_action_addn(CompositeAction* self, ...)
 //==============================================================//
 typedef struct ParallelAction
 {
-  CompositeAction parent_instance;
+  CompositeAction parentInst;
 } ParallelAction;
 
 static ParallelAction* parallel_action_init(ParallelAction* self)
@@ -99,7 +99,7 @@ static void parallel_action_start(void* _self, ecs_entity_t target)
   Action** children;
   int      count;
   children = ptr_array_storage(Action, COMPOSITE_ACTION(_self)->children);
-  count    = COMPOSITE_ACTION(_self)->children->cnt;
+  count    = COMPOSITE_ACTION(_self)->children->count;
   for (int i = 0; i < count; ++i)
   {
     ACTION_START(children[i], target);
@@ -111,7 +111,7 @@ static void parallel_action_end(void* _self, ecs_entity_t target)
   Action** children;
   int      count;
   children = ptr_array_storage(Action, COMPOSITE_ACTION(_self)->children);
-  count    = COMPOSITE_ACTION(_self)->children->cnt;
+  count    = COMPOSITE_ACTION(_self)->children->count;
   for (int i = 0; i < count; ++i)
   {
     ACTION_END(children[i], target);
@@ -125,7 +125,7 @@ static BOOL parallel_action_update(void* _self, ecs_entity_t target)
   BOOL     finished = TRUE;
 
   children = ptr_array_storage(Action, COMPOSITE_ACTION(_self)->children);
-  count    = COMPOSITE_ACTION(_self)->children->cnt;
+  count    = COMPOSITE_ACTION(_self)->children->count;
   for (int i = 0; i < count; ++i)
   {
     if (!ACTION_UPDATE(children[i], target))
@@ -151,7 +151,7 @@ CompositeAction* parallel_action_new(void)
 
 typedef struct SequenceAction
 {
-  CompositeAction parent_instance;
+  CompositeAction parentInst;
   int             currentChildIndex;
 } SequenceAction;
 
@@ -164,24 +164,24 @@ static SequenceAction* sequence_action_init(SequenceAction* self)
   return self;
 }
 
-void static sequence_action_start(void* _self, ecs_entity_t target)
+static void sequence_action_start(void* _self, ecs_entity_t target)
 {
   SequenceAction*  self  = _self;
   CompositeAction* super = COMPOSITE_ACTION(_self);
-  if (super->children->cnt == 0)
+  if (super->children->count == 0)
     return;
 
   self->currentChildIndex = 0;
   ACTION_START(ptr_array_at(super->children, 0), target);
 }
-void static sequence_action_end(void* self, SDL_UNUSED ecs_entity_t target)
+static void sequence_action_end(void* self, SDL_UNUSED ecs_entity_t target)
 {
   SEQUENCE_ACTION(self)->currentChildIndex = -1;
 }
 
 INLINE Action* sequence_action_next_child(SequenceAction* self)
 {
-  return self->currentChildIndex < COMPOSITE_ACTION(self)->children->cnt - 1
+  return self->currentChildIndex < COMPOSITE_ACTION(self)->children->count - 1
              ? ptr_array_at(COMPOSITE_ACTION(self)->children, ++self->currentChildIndex)
              : NULL;
 }
@@ -190,10 +190,10 @@ static BOOL sequence_action_update(void* _self, ecs_entity_t target)
 {
   SequenceAction* self = _self;
   Action *        current_child, *next_child;
-  PtrArray*       children;
+  PointerArray*   children;
 
   children = COMPOSITE_ACTION(self)->children;
-  if (children->cnt == 0)
+  if (children->count == 0)
     return TRUE;
   current_child = ptr_array_at(children, self->currentChildIndex);
   if (ACTION_UPDATE(current_child, target))

@@ -31,8 +31,8 @@ static RECT _cell_panel = { FIRST_CELL_X,
                             (CELL_SIZE + CELL_GAP) * NUM_COLS,
                             (CELL_SIZE + CELL_GAP) * NUM_ROWS };
 
-extern RENDERER* gRenderer;
-extern Ecs* gEcs;
+extern RENDERER*     gRenderer;
+extern ecs_Registry* gRegistry;
 
 static Item         _items[NUM_ITEM_CATEGORIES][MAX_CELLS];
 static s32          _currCol, _currRow;
@@ -96,7 +96,7 @@ static int find_item(ItemTypeId type)
 {
   const ItemCategory itemCategory = gItemTypes[type].category;
   for (int i = 0; i < MAX_CELLS; ++i)
-    if (_items[itemCategory][i].type == type)
+    if (_items[itemCategory][i].type == type && _items[itemCategory][i].quality)
       return i;
   return -1;
 }
@@ -198,7 +198,7 @@ static void on_list_selected(SDL_UNUSED pointer_t arg, const char* value)
   {
     if (type->category == ITEM_CATEGORY_CONSUMABLE)
       it->quality--;
-    type->use(type->data, gEcs, scn_get_player(gEcs));
+    type->use(type->data, gRegistry, scn_get_player(gRegistry));
   }
   else if (STREQ(value, _textDrop))
   {
@@ -265,7 +265,7 @@ BOOL inv_has_item(ItemTypeId type)
 Item* inv_get_item(ItemTypeId type)
 {
   ItemCategory category = gItemTypes[type].category;
-  int index    = find_item(type);
+  int          index    = find_item(type);
   return index != -1 ? &_items[category][index] : NULL;
 }
 

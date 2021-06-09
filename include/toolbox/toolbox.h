@@ -6,6 +6,5 @@
 #include "rtree.h"
 #include "heap.h"
 #include "ptrarray.h"
-#include "array.h"
 #include "queue.h"
 #endif //TOOLBOX_H

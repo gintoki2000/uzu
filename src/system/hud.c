@@ -28,7 +28,7 @@ static const SDL_Color _manaInactive = { 96, 47, 86, 255 };
 #define COINS_POSITION_X 5
 #define COINS_POSITION_Y 60
 
-extern Ecs*          gEcs;
+extern ecs_Registry*          gRegistry;
 extern SDL_Renderer* gRenderer;
 
 typedef struct DrawBarParams
@@ -51,7 +51,7 @@ static void draw_spell_icon(ecs_entity_t player);
 void hub_rendering_system()
 {
   ecs_entity_t player;
-  if ((player = scn_get_player(gEcs)) != ECS_NULL_ENT)
+  if ((player = scn_get_player(gRegistry)) != ECS_NULL_ENT)
   {
     draw_player_health_bar(player);
     draw_player_mana_bar(player);
@@ -122,7 +122,7 @@ static void draw_player_health_bar(ecs_entity_t player)
 {
   Health* health;
 
-  if ((health = ecs_get(gEcs, player, HEALTH)))
+  if ((health = ecs_get(gRegistry, player, HEALTH)))
   {
     DrawBarParams params;
     params.position_x     = HUD_HEALTH_BAR_POSITION_X;
@@ -139,7 +139,7 @@ static void draw_player_mana_bar(ecs_entity_t player)
 {
   Mana* mana;
 
-  if ((mana = ecs_get(gEcs, player, MANA)))
+  if ((mana = ecs_get(gRegistry, player, MANA)))
   {
     DrawBarParams params;
     params.position_x     = HUD_MANA_BAR_POSITION_X;
@@ -176,7 +176,7 @@ static void draw_spell_icon(ecs_entity_t player)
 
   SDL_RenderCopy(gRenderer, get_texture(TEX_SPELL_FRAME), NULL, &frame_dst);
 
-  aslot = ecs_get(gEcs, player, ATTUNEMENT_SLOT);
+  aslot = ecs_get(gRegistry, player, ATTUNEMENT_SLOT);
   if (aslot->spellId == SPELL_ID_NULL)
     return;
   spell = &gSpellTbl[aslot->spellId];

@@ -8,8 +8,8 @@
   }
 #define COMPONENT_DESC_EX(__T, __init_fn, __fini_fn, __cpy_fn)                                     \
   {                                                                                                \
-    .size = sizeof(__T), .init_fn = (ecs_comp_init_fn_t)__init_fn,                                 \
-    .fini_fn = (ecs_comp_fini_fn_t)__fini_fn, .cpy_fn = (ecs_comp_cpy_fn_t)__cpy_fn,               \
+    .size = sizeof(__T), .initFunc = (ecs_CompInitFunc)__init_fn,                                 \
+    .finiFunc = (ecs_CompFiniFunc)__fini_fn, .cpyFunc = (ecs_CompCpyFunc)__cpy_fn,               \
   }
 
 static void transform_init(Transform* transform);
@@ -23,7 +23,7 @@ static void script_fini(Script* script);
 
 void delete_action(void* action);
 
-const EcsCompDesc gCompDescs[NUM_COMPONENTS] = {
+const ecs_CompDesc gCompDescs[NUM_COMPONENTS] = {
   [AGGRO_AREA]                   = COMPONENT_DESC(AggroArea),
   [AGILITY_CHANGED]              = COMPONENT_DESC(AgilityChanged),
   [AIM_DIRECTION]                = COMPONENT_DESC_EX(AimDirection, aim_direction_init, NULL, NULL),
@@ -33,7 +33,6 @@ const EcsCompDesc gCompDescs[NUM_COMPONENTS] = {
   [ATTACK_MASK]                  = COMPONENT_DESC(AttackMask),
   [ATTACK_TARGET]                = COMPONENT_DESC_EX(AttackTarget, attack_target_init, NULL, NULL),
   [ATTUNEMENT_SLOT]              = COMPONENT_DESC(AttunementSlot),
-  [BLACKBOARD]                   = COMPONENT_DESC_EX(Blackboard, NULL, blackboard_fini, NULL),
   [BRAIN]                        = COMPONENT_DESC_EX(Brain, NULL, brain_fini, NULL),
   [CAMERA_TARGET_TAG]            = COMPONENT_DESC(CameraTargetTag),
   [CHARACTER_ANIMATOR_TAG]       = COMPONENT_DESC(CharacterAnimatorTag),
@@ -89,10 +88,17 @@ const EcsCompDesc gCompDescs[NUM_COMPONENTS] = {
   [PATHFINDING_PARAMS]           = COMPONENT_DESC(PathfindingParams),
 };
 
+void brain_init(Brain* brain, bt_Tree* behaviorTree)
+{
+  brain->behaviorTree   = behaviorTree;
+  brain->blackboard     = blackboard_create(bt_bbkey_set_count(bt_tree_key_set(behaviorTree)));
+  brain->runtimeDataManager = bt_runtime_data_manager_create(bt_tree_node_count(behaviorTree));
+}
+
 void brain_fini(Brain* brain)
 {
-  bt_node_del((BTNode*)brain->root);
-  brain->root = NULL;
+  blackboard_free(brain->blackboard);
+  bt_runtime_data_manager_free(brain->runtimeDataManager);
 }
 
 void hitbox_init(HitBox* h)

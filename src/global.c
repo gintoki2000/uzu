@@ -2,11 +2,11 @@
 #include "entity_factory.h"
 #include "json_helper.h"
 
-ecs_entity_t (*const gMakeWeaponFnTbl[NUM_WEAPONS])(Ecs*) = {
+ecs_entity_t (*const gMakeWeaponFnTbl[NUM_WEAPONS])(ecs_Registry*) = {
   make_spear, make_cleaver, make_golden_sword, make_anime_sword, make_staff, make_bow, make_katana,
 };
 
-ecs_entity_t (*const gMakeCharacterFnTbl[NUM_JOBS])(Ecs*, Vec2) = {
+ecs_entity_t (*const gMakeCharacterFnTbl[NUM_JOBS])(ecs_Registry*, Vec2) = {
   make_knight,
   make_lizzard,
   make_wizzard,
@@ -24,8 +24,8 @@ const u16 gPickupableToItemTypeIdTbl[] = {
 Conversation* conversation_init(Conversation* self)
 {
   self->name      = NULL;
-  self->responses = ptr_array_new(free);
-  self->sentences = ptr_array_new(free);
+  self->responses = pointer_array_create(free);
+  self->sentences = pointer_array_create(free);
   return self;
 }
 
@@ -36,8 +36,8 @@ void conversation_fini(Conversation* self)
     free(self->name);
     self->name = NULL;
   }
-  ptr_array_delete(self->responses);
-  ptr_array_delete(self->sentences);
+  pointer_array_free(self->responses);
+  pointer_array_free(self->sentences);
   self->responses = NULL;
   self->sentences = NULL;
 }
@@ -48,7 +48,7 @@ void sprite_init(Sprite* s, u16 texture_id)
   SDL_QueryTexture(get_texture(texture_id), NULL, NULL, &s->rect.w, &s->rect.h);
 }
 
-ecs_entity_t make_weapon(Ecs* registry, u16 type)
+ecs_entity_t make_weapon(ecs_Registry* registry, u16 type)
 {
   ASSERT(type < NUM_WEAPONS);
   return gMakeWeaponFnTbl[type](registry);

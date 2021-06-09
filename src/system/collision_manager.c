@@ -6,7 +6,7 @@
 #include "system/event_messaging_sys.h"
 #include <toolbox/toolbox.h>
 
-extern Ecs* gEcs;
+extern ecs_Registry* gRegistry;
 
 static void on_collision(void* arg, OverlapMsg* event);
 static void weapon_vs_entity(ecs_entity_t weapon, ecs_entity_t entity);
@@ -22,7 +22,7 @@ static void entity_vs_interacable(ecs_entity_t entity, ecs_entity_t interacable)
 static void entity_vs_trigger(ecs_entity_t entity, ecs_entity_t trigger);
 static void trigger_vs_entity(ecs_entity_t trigger, ecs_entity_t entity);
 
-static void (*_handle_fn_tbl[NUM_CATEGORIES][NUM_CATEGORIES])(ecs_entity_t, ecs_entity_t) =
+static void (*_handlerFuncTbl[NUM_CATEGORIES][NUM_CATEGORIES])(ecs_entity_t, ecs_entity_t) =
 {
   [CATEGORY_PLAYER] = {
     [CATEGORY_WEAPON] = entity_vs_weapon,
@@ -72,11 +72,11 @@ static void on_collision(SDL_UNUSED void* arg, OverlapMsg* event)
   HitBox* hitbox2;
   void (*fn)(ecs_entity_t, ecs_entity_t);
 
-  if ((hitbox1 = ecs_get(gEcs, event->e1, HITBOX)) != NULL &&
-      (hitbox2 = ecs_get(gEcs, event->e2, HITBOX)) != NULL)
+  if ((hitbox1 = ecs_get(gRegistry, event->e1, HITBOX)) != NULL &&
+      (hitbox2 = ecs_get(gRegistry, event->e2, HITBOX)) != NULL)
   {
 
-    fn = _handle_fn_tbl[hitbox1->category][hitbox2->category];
+    fn = _handlerFuncTbl[hitbox1->category][hitbox2->category];
     if (fn != NULL)
       fn(event->e1, event->e2);
   }
@@ -152,7 +152,7 @@ static void ladder_vs_player(ecs_entity_t ladder, ecs_entity_t player)
 
 static void interacable_vs_entity(ecs_entity_t interacable, ecs_entity_t entity)
 {
-  if (ecs_has(gEcs, interacable, DOOR_ATTRIBUTES))
+  if (ecs_has(gRegistry, interacable, DOOR_ATTRIBUTES))
   {
     ems_broadcast(MSG_HIT_DOOR, &(HitDoorMsg){ .door = interacable, .entity = entity });
   }

@@ -8,13 +8,13 @@
 
 static RTree*        _rtree;
 static CollisionPair _pairBuff[BUFF_SIZE];
-static u32           _pairCnt;
+static u32           _pairCount;
 
 extern SDL_Rect      gViewport;
 extern SDL_Renderer* gRenderer;
-extern Ecs*          gEcs;
+extern ecs_Registry*          gRegistry;
 
-static void on_hitbox_remove(SDL_UNUSED void* arg, const EcsComponentEvent* event)
+static void on_hitbox_remove(SDL_UNUSED void* arg, const ecs_ComponentEvent* event)
 {
   HitBox* hitbox = event->component;
   if (hitbox->proxyId != RTREE_NULL_NODE)
@@ -39,7 +39,7 @@ INLINE AABB* get_aabb(AABB* aabb, const HitBox* hitbox, const Transform* transfo
   return aabb;
 }
 
-static void update_proxies(Ecs* ecs)
+static void update_proxies(ecs_Registry* ecs)
 {
   ecs_entity_t* entites;
   ecs_size_t    cnt;
@@ -92,9 +92,9 @@ static BOOL cb_broard_phase_query(CBBroadPhaseQueryVars* vars, int proxy_id)
 {
   if (vars->proxy_id != proxy_id)
   {
-    ASSERT(_pairCnt < BUFF_SIZE);
+    ASSERT(_pairCount < BUFF_SIZE);
     ecs_entity_t entity     = (ecs_entity_t)rtree_get_user_data(_rtree, proxy_id);
-    _pairBuff[_pairCnt++] = (CollisionPair){
+    _pairBuff[_pairCount++] = (CollisionPair){
       maxe(vars->entity, entity),
       mine(vars->entity, entity),
     };
@@ -131,7 +131,7 @@ static int remove_duplicate_pairs(CollisionPair* pairs, int cnt)
   return j;
 }
 
-static void broad_phase(Ecs* ecs)
+static void broad_phase(ecs_Registry* ecs)
 {
   ecs_entity_t*         entities;
   ecs_size_t            cnt;
@@ -140,7 +140,7 @@ static void broad_phase(Ecs* ecs)
   AABB                  aabb;
   CBBroadPhaseQueryVars vars;
 
-  _pairCnt = 0;
+  _pairCount = 0;
   ecs_raw(ecs, HITBOX, &entities, (void**)&hitbox, &cnt);
   for (int i = 0; i < cnt; ++i)
   {
@@ -152,28 +152,28 @@ static void broad_phase(Ecs* ecs)
   }
 }
 
-static void narrow_phase(Ecs* ecs)
+static void narrow_phase(ecs_Registry* ecs)
 {
 
-  if (_pairCnt == 0)
+  if (_pairCount == 0)
     return;
 
   RECT       r1, r2;
   HitBox *   hitbox1, *hitbox2;
   Transform *transform1, *transform2;
 
-  SDL_qsort(_pairBuff, _pairCnt, sizeof(CollisionPair), (__compar_fn_t)compr_collision_pair);
+  SDL_qsort(_pairBuff, _pairCount, sizeof(CollisionPair), (__compar_fn_t)compr_collision_pair);
 
-  _pairCnt = remove_duplicate_pairs(_pairBuff, _pairCnt);
+  _pairCount = remove_duplicate_pairs(_pairBuff, _pairCount);
 
-  for (u32 i = 0; i < _pairCnt; ++i)
+  for (u32 i = 0; i < _pairCount; ++i)
   {
     hitbox1 = ecs_get(ecs, _pairBuff[i].e1, HITBOX);
     hitbox2 = ecs_get(ecs, _pairBuff[i].e2, HITBOX);
     if ((BIT(hitbox1->category) & hitbox2->mask) && (BIT(hitbox2->category) & hitbox1->mask))
     {
-      transform1 = ecs_get(gEcs, _pairBuff[i].e1, TRANSFORM);
-      transform2 = ecs_get(gEcs, _pairBuff[i].e2, TRANSFORM);
+      transform1 = ecs_get(gRegistry, _pairBuff[i].e1, TRANSFORM);
+      transform2 = ecs_get(gRegistry, _pairBuff[i].e2, TRANSFORM);
       calculate_bounding_rect(&r1, hitbox1, transform1);
       calculate_bounding_rect(&r2, hitbox2, transform2);
       if (SDL_HasIntersection(&r1, &r2))
@@ -191,7 +191,7 @@ static void narrow_phase(Ecs* ecs)
 void collision_system_init()
 {
   _rtree = rtree_new();
-  signal_connect(ecs_on_destruct(gEcs, HITBOX), CALLBACK_2(on_hitbox_remove));
+  signal_connect(ecs_on_destruct(gRegistry, HITBOX), CALLBACK_2(on_hitbox_remove));
 }
 
 void collision_system_fini()
@@ -212,9 +212,9 @@ void query_box_collision(const AABB* aabb, Callback callback)
 
 void collision_system()
 {
-  update_proxies(gEcs);
-  broad_phase(gEcs);
-  narrow_phase(gEcs);
+  update_proxies(gRegistry);
+  broad_phase(gRegistry);
+  narrow_phase(gRegistry);
 }
 
 typedef struct
@@ -226,9 +226,9 @@ typedef struct
 
   // output
   Callback callback;
-} CBCollision_BoxQueryArgs;
+} _BoxQueryArgs;
 
-static BOOL __callback_box_query(CBCollision_BoxQueryArgs* vars, int proxy_id)
+static BOOL box_query_callback(_BoxQueryArgs* args, int proxy_id)
 {
   ecs_entity_t entity;
   Transform*   transform;
@@ -237,15 +237,15 @@ static BOOL __callback_box_query(CBCollision_BoxQueryArgs* vars, int proxy_id)
 
   entity = (ecs_entity_t)rtree_get_user_data(_rtree, proxy_id);
 
-  transform = ecs_get(gEcs, entity, TRANSFORM);
-  hitbox    = ecs_get(gEcs, entity, HITBOX);
+  transform = ecs_get(gRegistry, entity, TRANSFORM);
+  hitbox    = ecs_get(gRegistry, entity, HITBOX);
 
-  if (BIT(hitbox->category) & vars->mask_bits)
+  if (BIT(hitbox->category) & args->mask_bits)
   {
     calculate_bounding_rect(&boundingRect, hitbox, transform);
-    if (SDL_HasIntersection(vars->rect, &boundingRect))
+    if (SDL_HasIntersection(args->rect, &boundingRect))
     {
-      return INVOKE_CALLBACK(vars->callback, BOOL, entity);
+      return INVOKE_CALLBACK(args->callback, BOOL, entity);
     }
   }
   return TRUE;
@@ -262,10 +262,10 @@ void collision_box_query(const RECT* rect, u16 maskBits, Callback callback)
 
   rtree_query(_rtree,
               &aabb,
-              CALLBACK_1((&(CBCollision_BoxQueryArgs){
+              CALLBACK_1((&(_BoxQueryArgs){
                              .rect      = rect,
                              .mask_bits = maskBits,
                              .callback  = callback,
                          }),
-                         __callback_box_query));
+                         box_query_callback));
 }

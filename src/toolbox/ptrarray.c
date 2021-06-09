@@ -1,113 +1,86 @@
 #include "toolbox/ptrarray.h"
-#include <assert.h>
 #include <stdlib.h>
 
-INLINE PtrArray* ptr_array_alloc()
+PointerArray* pointer_array_create(DestroyFunc destroyFunc)
 {
-  return (PtrArray*)malloc(sizeof(PtrArray));
+  return pointer_array_create_sized(destroyFunc, 16);
 }
 
-PtrArray* ptr_array_new(DestroyFunc destroyFunc)
-{
-  return ptr_array_init(ptr_array_alloc(), destroyFunc);
-}
 
-PtrArray* ptr_array_new_copy(const PtrArray* other)
-{
-  return ptr_array_init_copy(ptr_array_alloc(), other);
-}
-
-void ptr_array_delete(PtrArray* arr)
+void pointer_array_free(PointerArray* arr)
 {
   if (arr)
   {
-    ptr_array_fini(arr);
+    pointer_array_fini(arr);
     free(arr);
   }
 }
 
-PtrArray* ptr_array_init(PtrArray* self, DestroyFunc destroyFunc)
+PointerArray* pointer_array_init(PointerArray* self, DestroyFunc destroyFunc)
 {
-  return ptr_array_init_w_cap(self, destroyFunc, 16);
+  return pointer_array_init_sized(self, destroyFunc, 16);
 }
 
-PtrArray* ptr_array_init_w_cap(PtrArray* self, DestroyFunc destroyFunc, s32 cap)
+PointerArray* pointer_array_init_sized(PointerArray* self, DestroyFunc destroyFunc, s32 cap)
 {
-  self->cap         = cap;
-  self->cnt         = 0;
+  self->size        = cap;
+  self->count       = 0;
   self->destroyFunc = destroyFunc;
-  self->storage     = SDL_malloc(sizeof(pointer_t) * self->cap);
+  self->storage     = SDL_malloc(sizeof(pointer_t) * self->size);
   return self;
 }
 
-PtrArray* ptr_array_init_copy(PtrArray* self, const PtrArray* other)
+void pointer_array_fini(PointerArray* self)
 {
-  ptr_array_init_w_cap(self, NULL, other->cnt);
-  SDL_memcpy(self->storage, other->storage, other->cnt * sizeof(void*));
-  self->cnt = other->cnt;
-  return self;
-}
-
-void ptr_array_fini(PtrArray* self)
-{
-  if (self->destroyFunc != NULL)
-  {
-    for (s32 i = 0; i < self->cnt; ++i)
-    {
-      self->destroyFunc(self->storage[i]);
-    }
-  }
+  pointer_array_clear(self);
   free(self->storage);
 }
 
-pointer_t ptr_array_add(PtrArray* self, pointer_t p)
+pointer_t pointer_array_add(PointerArray* self, pointer_t p)
 {
-  if (self->cnt == self->cap)
-  {
-    ptr_array_reserve(self, self->cap * 2);
-  }
-
-  return self->storage[self->cnt++] = p;
+  if (self->count == self->size)
+    pointer_array_reserve(self, self->size * 2);
+  return self->storage[self->count++] = p;
 }
 
-BOOL ptr_array_rmv(PtrArray* self, pointer_t p)
+BOOL pointer_array_rmv(PointerArray* self, pointer_t p)
 {
-  int idx = ptr_array_index_of(self, p);
+  int idx = pointer_array_find(self, p);
   if (idx != -1)
   {
-    ptr_array_rmv_idx(self, idx);
+    pointer_array_rmv_idx(self, idx);
     return true;
   }
   return false;
 }
 
-void ptr_array_rmv_idx(PtrArray* self, s32 idx)
+void pointer_array_rmv_idx(PointerArray* self, s32 idx)
 {
-  assert(idx >= 0 && idx < self->cnt && "out of index");
-  int        cnt = self->cnt;
-  pointer_t* a   = self->storage;
+  ASSERT(idx >= 0 && idx < self->count && "out of index");
+  int        cnt     = self->count;
+  pointer_t* storage = self->storage;
+  if (self->destroyFunc)
+    self->destroyFunc(storage[idx]);
+
   for (int i = idx; i < cnt - 1; ++i)
-  {
-    a[i] = a[i + 1];
-  }
-  --self->cnt;
+    storage[i] = storage[i + 1];
+
+  --self->count;
 }
 
-void ptr_array_qrmv(PtrArray* self, s32 idx)
+void pointer_array_qrmv(PointerArray* self, s32 idx)
 {
-  assert(idx >= 0 && idx < self->cnt && "out of index");
+  ASSERT(idx >= 0 && idx < self->count && "out of index");
   if (self->destroyFunc != NULL)
-  {
     self->destroyFunc(self->storage[idx]);
-  }
 
-  self->storage[idx] = self->storage[self->cnt - 1];
-  self->cnt--;
+  self->storage[idx] = self->storage[self->count - 1];
+  self->count--;
 }
 
-int ptr_array_index_of(PtrArray* self, pointer_t p)
+int pointer_array_find(PointerArray* self, pointer_t p)
 {
-  int        cnt = self->cnt;
+  int        cnt = self->count;
   pointer_t* a   = self->storage;
   for (int i = 0; i < cnt; ++i)
     if (a[i] == p)
@@ -115,32 +88,35 @@ int ptr_array_index_of(PtrArray* self, pointer_t p)
   return -1;
 }
 
-BOOL ptr_array_contains(PtrArray* self, pointer_t p)
+BOOL pointer_array_contains(PointerArray* self, pointer_t p)
 {
-  return ptr_array_index_of(self, p) != -1;
+  return pointer_array_find(self, p) != -1;
 }
 
-void ptr_array_reserve(PtrArray* self, s32 n)
+void pointer_array_reserve(PointerArray* self, s32 n)
 {
-  if (n <= self->cap)
+  if (n <= self->size)
     return;
-  self->cap     = n;
-  self->storage = SDL_realloc(self->storage, self->cap * sizeof(pointer_t));
+  self->size     = n;
+  self->storage = SDL_realloc(self->storage, self->size * sizeof(pointer_t));
 }
 
-void ptr_array_sort(PtrArray* self, __compar_fn_t comp)
+void pointer_array_sort(PointerArray* self, CompareFunc compareFunc)
 {
-  SDL_qsort(self->storage, self->cnt, sizeof(void*), comp);
+  SDL_qsort(self->storage, self->count, sizeof(pointer_t), compareFunc);
 }
 
-void ptr_array_clear(PtrArray* self)
+void pointer_array_clear(PointerArray* self)
 {
   if (self->destroyFunc != NULL)
-  {
-    for (s32 i = 0; i < self->cnt; ++i)
-    {
+    for (s32 i = 0; i < self->count; ++i)
       self->destroyFunc(self->storage[i]);
-    }
-  }
-  self->cnt = 0;
+
+  self->count = 0;
+}
+
+PointerArray *pointer_array_create_sized(DestroyFunc destroyFunc, int size)
+{
+   PointerArray* self = SDL_malloc (sizeof (PointerArray));
+   return pointer_array_init_sized(self, destroyFunc, size);
 }

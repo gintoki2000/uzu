@@ -3,7 +3,7 @@
 #include <constances.h>
 extern SDL_Rect      gViewport;
 extern SDL_Renderer* gRenderer;
-extern Ecs*          gEcs;
+extern ecs_Registry*          gRegistry;
 
 void draw_path_system()
 {
@@ -12,7 +12,7 @@ void draw_path_system()
   Path*         paths;
   int           x1, y1, x2, y2;
 
-  ecs_raw(gEcs, PATH, &entities, (void**)&paths, &cnt);
+  ecs_raw(gRegistry, PATH, &entities, (void**)&paths, &cnt);
 
   for (int i = 0; i < cnt; ++i)
   {

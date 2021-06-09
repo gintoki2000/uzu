@@ -12,7 +12,7 @@ struct _Components
   HitBox*    hitbox;
 };
 
-extern Ecs*      gEcs;
+extern ecs_Registry*      gRegistry;
 extern RECT      gViewport;
 extern RENDERER* gRenderer;
 
@@ -129,11 +129,11 @@ void tile_collision_system()
   int  objBottom, objLeft, objRight, objMidle;
   BOOL has_collision = FALSE;
 
-  ecs_raw(gEcs, ENABLE_TILE_COLLISION_TAG, &entities, NULL, &cnt);
+  ecs_raw(gRegistry, ENABLE_TILE_COLLISION_TAG, &entities, NULL, &cnt);
 
   for (int i = 0; i < cnt; ++i)
   {
-    ecs_fill(gEcs, entities[i], _componentIds, 2, (void**)&components);
+    ecs_fill(gRegistry, entities[i], _componentIds, 2, (void**)&components);
     objBottom = get_obj_bottom(components);
     objLeft   = get_obj_left(components);
     objRight  = get_obj_right(components);

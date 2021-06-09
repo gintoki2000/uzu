@@ -3,7 +3,7 @@
 #define RADIUS_SQUARE 9
 void walk_directly_toward_system(void)
 {
-  extern Ecs*         gEcs;
+  extern ecs_Registry*         gRegistry;
   ecs_entity_t*       entities;
   ecs_size_t          cnt;
   WalkDirectlyToward* walkDirectlyToward;
@@ -11,11 +11,11 @@ void walk_directly_toward_system(void)
   Transform*          transform;
   Vec2                relativePosition;
 
-  ecs_raw(gEcs, WALK_DIRECTLY_TOWARD, &entities, (void**)&walkDirectlyToward, &cnt);
+  ecs_raw(gRegistry, WALK_DIRECTLY_TOWARD, &entities, (void**)&walkDirectlyToward, &cnt);
   for (int i = cnt - 1; i >= 0; --i)
   {
-    if ((desiredDirection = ecs_get(gEcs, entities[i], DESIRED_DIRECTION)) &&
-        (transform = ecs_get(gEcs, entities[i], TRANSFORM)))
+    if ((desiredDirection = ecs_get(gRegistry, entities[i], DESIRED_DIRECTION)) &&
+        (transform = ecs_get(gRegistry, entities[i], TRANSFORM)))
     {
       relativePosition = vec2_sub(walkDirectlyToward[i].destination, transform->position);
       if (vec2_mag2(relativePosition) <= RADIUS_SQUARE)
@@ -24,7 +24,7 @@ void walk_directly_toward_system(void)
         transform->position     = walkDirectlyToward[i].destination;
         *desiredDirection       = VEC2_ZERO;
         INVOKE_EVENT(walkDirectlyToward[i].cbCompleted, TRUE);
-        ecs_rmv(gEcs, entities[i], WALK_DIRECTLY_TOWARD);
+        ecs_rmv(gRegistry, entities[i], WALK_DIRECTLY_TOWARD);
         continue;
       }
       *desiredDirection = vec2_unit(relativePosition);

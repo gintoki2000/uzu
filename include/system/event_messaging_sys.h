@@ -127,11 +127,13 @@ typedef struct
   ecs_entity_t npc;
   const char*  response;
   u16          id;
-} MSG_ConversationFinished;
+  const char*  name;
+} ConversationFinishedMsg;
 
 typedef struct
 {
   int         code;
+  const char* event;
   const char* status;
 } EventFinishedMsg;
 
@@ -160,7 +162,7 @@ typedef struct
 typedef struct
 {
   ecs_entity_t pickupable_entity;
-  u16          item_type_id;
+  u16          itemTypeId;
   Vec2         position;
 } ItemPickedUpMsg;
 
@@ -170,11 +172,11 @@ typedef struct
   Vec2 position;
 } CoinPickedUpMsg;
 
-void ems_init();
-void ems_fini();
+void ems_init(void);
+void ems_fini(void);
 void ems_connect(int signal, Callback callback);
-void ems_disconnect(int signal, void (*fn)());
-void ems_disconnect_ex(int signal, void* instance, void (*fn)());
+void ems_disconnect(int signal, Func fn);
+void ems_disconnect_ex(int signal, void* instance, Func fn);
 void ems_broadcast(int signal, const void* data);
 
 #endif // MEDIATOR_H

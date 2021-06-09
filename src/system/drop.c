@@ -4,7 +4,7 @@
 #include "system/event_messaging_sys.h"
 #include "system/game_logic.h"
 
-static ecs_entity_t (*const _pickupableMakeFnTbl[NUM_PICKUPABLE_TYPES])(Ecs*, Vec2, u8) = {
+static ecs_entity_t (*const _pickupableMakeFnTbl[NUM_PICKUPABLE_TYPES])(ecs_Registry*, Vec2, u8) = {
   [PICKUPABLE_RED_FLASK]     = make_red_flask,
   [PICKUPABLE_BIG_RED_FLASK] = make_big_red_flask,
   [PICKUPABLE_BLUE_FLASK]    = make_blue_flask,
@@ -12,7 +12,7 @@ static ecs_entity_t (*const _pickupableMakeFnTbl[NUM_PICKUPABLE_TYPES])(Ecs*, Ve
   [PICKUPABLE_COIN]          = make_coin,
 };
 
-extern Ecs* gEcs;
+extern ecs_Registry* gRegistry;
 
 static Vec2 get_random_speed()
 {
@@ -38,8 +38,8 @@ static void on_entity_died(SDL_UNUSED void* arg, const EntityDiedMsg* event)
 
 
 
-  if ((drop      = ecs_get(gEcs, event->entity, DROP      )) &&
-      (transform = ecs_get(gEcs, event->entity, TRANSFORM)))
+  if ((drop      = ecs_get(gRegistry, event->entity, DROP      )) &&
+      (transform = ecs_get(gRegistry, event->entity, TRANSFORM)))
   {
     for (int i = 0; i < drop->cnt; ++i)
     {
@@ -48,8 +48,8 @@ static void on_entity_died(SDL_UNUSED void* arg, const EntityDiedMsg* event)
       if (shouldDrop)
       {
         pickupable =
-            _pickupableMakeFnTbl[drop->type[i]](gEcs, transform->position, drop->quality[i]);
-        motion      = ecs_get(gEcs, pickupable, MOTION);
+            _pickupableMakeFnTbl[drop->type[i]](gRegistry, transform->position, drop->quality[i]);
+        motion      = ecs_get(gRegistry, pickupable, MOTION);
         motion->vel = get_random_speed();
         motion->vz  = 80.f;
       }

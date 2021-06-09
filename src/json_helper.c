@@ -45,24 +45,24 @@ static void json_to_string(void* field, struct json_object* json)
 
 static void json_to_string_array(void* field, struct json_object* json)
 {
-  PtrArray*   array;
+  PointerArray* array;
   const char* str;
   int         cnt;
 
   if (json == NULL)
   {
-    *((PtrArray**)field) = NULL;
+    *((PointerArray**)field) = NULL;
     return;
   }
 
-  array = ptr_array_new(SDL_free);
+  array = pointer_array_create(SDL_free);
   cnt   = json_object_array_length(json);
   for (int i = 0; i < cnt; ++i)
   {
     str = json_object_array_get_idx_as_string(json, i);
-    ptr_array_add(array, SDL_strdup(str));
+    pointer_array_add(array, SDL_strdup(str));
   }
-  *((PtrArray**)field) = array;
+  *((PointerArray**)field) = array;
 }
 
 json_object* load_json_from_file(const char* filename)

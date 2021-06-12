@@ -42,6 +42,7 @@ static void open_chest(ecs_entity_t entity)
     visual              = ecs_get(gRegistry, entity, VISUAL);
     visual->sprite.rect = gRectChestOpen;
     attrs->state        = CHEST_STATE_OPEN;
+    ems_broadcast(MSG_CHEST_OPEN, &(ChestOpenedMsg){ entity });
   }
 }
 

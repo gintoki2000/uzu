@@ -73,6 +73,7 @@ static BOOL _drawPathEnabled;
 #endif
 
 static LuaScript* _testScript;
+static LuaScript* _trapChest;
 
 static void spawn_player(Vec2 position)
 {
@@ -143,6 +144,7 @@ static void on_load()
   inventory_load();
 
   _testScript = lua_script_create("res/test.lua");
+  _trapChest = lua_script_create("res/scripts/trapchest.lua");
   ems_broadcast(MSG_GAME_SCENE_LOADED, NULL);
   load_level(gSession.level);
   ems_broadcast(MSG_LEVEL_LOADED, &(LevelLoadedMsg){ gSession.level });
@@ -158,6 +160,7 @@ static void on_unload()
   ems_fini();
 
   lua_script_free(_testScript);
+  lua_script_free(_trapChest);
 
   gRegistry = NULL;
 }

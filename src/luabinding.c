@@ -242,8 +242,22 @@ static int lua_scene_newbrian(lua_State* L)
   return 1;
 }
 
+static int lua_scene_newchort(lua_State* L)
+{
+  Vec2 position;
+
+  position.x = luaL_checkinteger(L, 1);
+  position.y = luaL_checkinteger(L, 2);
+
+  ecs_entity_t chort = make_chort(gRegistry, position);
+
+  lua_pushentity(L, (lua_EntityHandle){ .registry = gRegistry, .entity = chort });
+  return 1;
+}
+
 static const luaL_Reg _libscene[] = {
   { "new_brian", lua_scene_newbrian },
+  { "new_chort", lua_scene_newchort },
   { NULL, NULL },
 };
 

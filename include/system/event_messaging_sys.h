@@ -33,6 +33,7 @@ enum
   MSG_COIN_PICKED_UP,
   MSG_GAME_PAUSED,
   MSG_GAME_RESUMED,
+  MSG_CHEST_OPEN,
   NUM_MSGS,
 };
 
@@ -177,6 +178,12 @@ typedef struct
   u16  amount;
   Vec2 position;
 } CoinPickedUpMsg;
+
+typedef struct 
+{
+  ecs_entity_t chest;
+} ChestOpenedMsg;
+
 
 void ems_init(void);
 void ems_fini(void);

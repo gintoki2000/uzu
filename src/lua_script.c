@@ -10,7 +10,9 @@
 #define LUA_ON_SCENE_UNLOAD "_on_scene_unload"
 #define LUA_ON_LEVEL_LOAD "_on_level_load"
 #define LUA_ON_LEVEL_UNLOAD "_on_level_unload"
-#define LUA_ON_ITEM_PICKED_UP "_on_item_picked_up"
+#define LUA_ON_ITEM_PICKED_UP "_on_item_pickup"
+#define LUA_ON_CHEST_OPEN "_on_chest_open"
+
 
 extern ecs_Registry* gRegistry;
 
@@ -25,6 +27,7 @@ static void on_scene_unload(struct LuaScript* script, const void* msg);
 static void on_level_load(struct LuaScript* script, const LevelLoadedMsg* msg);
 static void on_level_unload(struct LuaScript* script, const LevelLoadedMsg* msg);
 static void on_item_pickuped(LuaScript* script, const ItemPickedUpMsg* msg);
+static void on_chest_open(LuaScript* script, const ChestOpenedMsg* msg);
 
 static int lua_script_notify_finish(lua_State* L)
 {
@@ -66,6 +69,7 @@ LuaScript* lua_script_create(const char* scriptFile)
   lua_script_connect_signal(script, MSG_LEVEL_LOADED, LUA_ON_LEVEL_LOAD, on_level_load);
   lua_script_connect_signal(script, MSG_LEVEL_UNLOADED, LUA_ON_LEVEL_UNLOAD, on_level_unload);
   lua_script_connect_signal(script, MSG_ITEM_PICKED_UP, LUA_ON_ITEM_PICKED_UP, on_item_pickuped);
+  lua_script_connect_signal(script, MSG_CHEST_OPEN, LUA_ON_CHEST_OPEN, on_chest_open);
 
   return script;
 }
@@ -164,4 +168,20 @@ static void on_item_pickuped(LuaScript* script, const ItemPickedUpMsg* msg)
 
 static void on_conversation_finished(LuaScript* self, const ConversationFinishedMsg* msg)
 {
+}
+
+
+static void on_chest_open(LuaScript* script, const ChestOpenedMsg* msg)
+{
+  lua_State* L = script->L;
+  lua_getglobal(L, LUA_ON_CHEST_OPEN);
+
+  lua_newtable(L);
+  lua_pushstring(L, "chest");
+  lua_pushentity(L, (lua_EntityHandle){.registry = gRegistry, .entity = msg->chest });
+  lua_settable(L, -3);
+
+  if (lua_pcall(L, 1, 0, 0) != LUA_OK) {
+    printf("%s\n", lua_tostring(L, -1));
+  }
 }

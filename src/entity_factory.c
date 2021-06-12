@@ -680,6 +680,8 @@ ecs_entity_t make_chest(ecs_Registry* registry, const MakeChestParams* params)
   transform           = ecs_add(registry, entity, TRANSFORM);
   transform->position = params->position;
 
+  ecs_set(registry, entity, NAME, &(Name){ "trap" });
+
   return entity;
 }
 

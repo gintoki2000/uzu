@@ -127,6 +127,7 @@ static FONT* _fonts[NUM_FONTS];
 static HashTable* _conversations;
 static char*      _conversation_files[] = {
   "res/conversation/rescue_brian_3.json",
+  "res/conversation/test.json",
   NULL,
 };
 

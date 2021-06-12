@@ -7,7 +7,6 @@
 #include "inventory.h"
 #include "lauxlib.h"
 #include "resources.h"
-#include "rfl.h"
 #include "ui_msgbox.h"
 
 void lua_pushentity(lua_State* L, lua_EntityHandle handle)
@@ -77,6 +76,21 @@ static int lua_entity_setdialogue(lua_State* L)
     ecs_set(handle.registry, handle.entity, DIALOGUE, &(Dialogue){ conversation });
   else
     printf("no conversation name %s", name);
+  return 0;
+}
+
+static int lua_entity_setsupply(lua_State* L)
+{
+  return 0;
+}
+
+static int lua_entity_setwellcome(lua_State* L)
+{
+  return 0;
+}
+
+static int lua_entity_setgoodbye(lua_State* L)
+{
   return 0;
 }
 
@@ -211,13 +225,25 @@ int lua_openlib_inventory(lua_State* L)
 /* scene lib*/
 extern ecs_Registry* gRegistry;
 
-static int lua_scene_newentity(lua_State* L)
+static int lua_scene_newbrian(lua_State* L)
 {
+
+  Vec2        position;
+  const char* dialogue;
+
+  position.x = luaL_checkinteger(L, 1);
+  position.y = luaL_checknumber(L, 2);
+  dialogue   = luaL_checkstring(L, 3);
+
+  ecs_entity_t brian = make_npc_brian(gRegistry, position, dialogue);
+
+  lua_pushentity(L, (lua_EntityHandle){ .registry = gRegistry, .entity = brian });
 
   return 1;
 }
 
 static const luaL_Reg _libscene[] = {
+  { "new_brian", lua_scene_newbrian },
   { NULL, NULL },
 };
 
@@ -247,38 +273,5 @@ int lua_openlib_ui(lua_State* L)
   luaL_newlib(L, _libui);
   lua_setglobal(L, "ui");
 
-  return 1;
-}
-
-//
-
-#include "system/event_messaging_sys.h"
-
-static rfl_Field m1fs[] = {
-  RFL_FIELD(EntityDiedMsg, ENTITY, entity),
-  RFL_FIELD_END,
-};
-
-static rfl_Struct m1 = RFL_STRUCT(EntityDiedMsg, m1fs);
-
-int lua_pushstruct(lua_State* L, const rfl_Struct* md, const void* s)
-{
-  u8* mem = s;
-  lua_newtable(L);
-  for (rfl_Field* f = md->fields; f; ++f)
-  {
-    lua_pushstring(L, f->name);
-    switch (f->type)
-    {
-    case RFL_FIELD_TYPE_INT:
-      lua_pushinteger(L, *((int*)mem + f->offset));
-      lua_settable(L, -3);
-      break;
-    case RFL_FIELD_TYPE_STRING:
-      lua_pushstring(L, *((char**)mem + f->offset));
-      lua_settable(L, -3);
-      break;
-    }
-  }
   return 1;
 }

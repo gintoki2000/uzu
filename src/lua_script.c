@@ -25,7 +25,7 @@ static void on_scene_unload(struct LuaScript* script, const void* msg);
 static void on_level_load(struct LuaScript* script, const LevelLoadedMsg* msg);
 static void on_level_unload(struct LuaScript* script, const LevelLoadedMsg* msg);
 static void on_item_pickuped(LuaScript* script, const ItemPickedUpMsg* msg);
-// [-2, +0]
+
 static int lua_script_notify_finish(lua_State* L)
 {
   const char* event  = luaL_checkstring(L, 1);
@@ -34,8 +34,7 @@ static int lua_script_notify_finish(lua_State* L)
   return 0;
 }
 
-static void
-lua_script_connect_signal(LuaScript* s, int signal, const char* luaFuncName, Func fn)
+static void lua_script_connect_signal(LuaScript* s, int signal, const char* luaFuncName, Func fn)
 {
   lua_getglobal(s->L, luaFuncName);
   if (lua_isfunction(s->L, -1))
@@ -136,7 +135,10 @@ static void on_level_unload(struct LuaScript* script, const LevelLoadedMsg* msg)
   lua_pushstring(L, msg->level_name);
   lua_settable(L, -3);
 
-  lua_call(L, 1, 0);
+  if (lua_pcall(L, 1, 0, 0) != LUA_OK)
+  {
+    printf("Fail to call lua function: %s\n", lua_tostring(L, -1));
+  }
 }
 
 static void on_item_pickuped(LuaScript* script, const ItemPickedUpMsg* msg)
@@ -145,7 +147,6 @@ static void on_item_pickuped(LuaScript* script, const ItemPickedUpMsg* msg)
 
   /*push function to stack*/
   lua_getglobal(L, LUA_ON_ITEM_PICKED_UP);
-
 
   /*set up arguments*/
   lua_newtable(L);
@@ -157,14 +158,10 @@ static void on_item_pickuped(LuaScript* script, const ItemPickedUpMsg* msg)
   lua_pushstring(L, gItemTypes[msg->itemTypeId].name);
   lua_settable(L, -3);
 
-  //call function
+  // call function
   lua_call(L, 1, 0);
 }
 
-
 static void on_conversation_finished(LuaScript* self, const ConversationFinishedMsg* msg)
 {
-  lua_getglobal(self->L, "_on_conversation_finish");
-  lua_call(self->L, 1, 0);
 }
-

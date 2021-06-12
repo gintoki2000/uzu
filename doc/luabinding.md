@@ -99,7 +99,7 @@ entity:set_mood(Mood.HAPPY, 180)
 >
 >***@param supply[table]*** a lua table describe each availiable item
 >
-> ***@see*** [Item](#2.1-constances)  
+> ***@see*** [Item](#21-constances)  
 
 Example:
 ```lua

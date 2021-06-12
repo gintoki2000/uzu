@@ -4,6 +4,12 @@
 - [] load_dialogue
 - [] load_action_script
 
+local dialogue1 = load_dialogue('res/scripts/dialogue/brian1.json')
+
+function \_on_level_load(msg)
+  brian:set_dialogue(dialogue1)
+end
+
 ## Event reciving functions
 - [] conversation_finish
 - [x] entity_died
@@ -19,11 +25,12 @@
 - [x] get_dialogue
 - [x] set_dialogue
 - [] play_acrion_script
-- [x] set_mood
-- [x] die
+- [] set_mood
+- [] die
 - [] set_supply(entity, supply) -- set what are going to sell by this entity
-- [] set_wellcome_dialogue -- display before dialog showing up
-- [] set_leave_dialogue -- display affter dialog closing
+- [] set_wellcome -- display before dialog showing up
+- [] set_leave -- display affter dialog closing
+
 
 ## Scene
 - [] find_entity

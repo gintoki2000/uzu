@@ -2,30 +2,30 @@
 #include "read_all.h"
 #include "global.h"
 
-static void json_to_int(void* field, struct json_object*);
-static void json_to_string(void* field, struct json_object*);
-static void json_to_string_array(void* field, struct json_object*);
+static void json_to_int(void* fMem, struct json_object*);
+static void json_to_string(void* fMem, struct json_object*);
+static void json_to_string_array(void* fMem, struct json_object*);
 
-static void (*const _jsonToFieldDataFuncTabl[NUM_JSON_FIELD_TYPES])(void*, struct json_object*) = {
-  [JSON_FIELD_TYPE_STRING]       = json_to_string,
-  [JSON_FIELD_TYPE_STRING_ARRAY] = json_to_string_array,
-  [JSON_FIELD_TYPE_INT]          = json_to_int,
+static void (*const parsingFuncTbl[RFL_NUM_FIELD_TYPES])(void*, struct json_object*) = {
+  [RFL_FIELD_TYPE_STRING]       = json_to_string,
+  [RFL_FIELD_TYPE_STRING_ARRAY] = json_to_string_array,
+  [RFL_FIELD_TYPE_INT]          = json_to_int,
 };
 
-void parse_struct(const FieldMetaData* fields, void* obj, struct json_object* json)
+void parse_struct(const rfl_Field* fields, void* obj, struct json_object* json)
 {
-  void*               field;
-  struct json_object* jsonField;
+  void*               fMem;
+  struct json_object* jField;
 
   for (int i = 0; fields[i].type != -1; ++i)
   {
-    field      = (u8*)obj + fields[i].offset;
-    jsonField = json_object_object_get(json, fields[i].name);
-    _jsonToFieldDataFuncTabl[fields[i].type](field, jsonField);
+    fMem      = (u8*)obj + fields[i].offset;
+    jField = json_object_object_get(json, fields[i].name);
+    parsingFuncTbl[fields[i].type](fMem, jField);
   }
 }
 
-void* json_to_struct(const StructMetaData* metaData, struct json_object* json)
+void* deserialize(const rfl_Struct* metaData, struct json_object* json)
 {
   void* obj;
   obj = SDL_malloc(metaData->size);
@@ -33,17 +33,17 @@ void* json_to_struct(const StructMetaData* metaData, struct json_object* json)
   return obj;
 }
 
-static void json_to_int(void* field, struct json_object* json)
+static void json_to_int(void* fMem, struct json_object* json)
 {
-  *((int*)field) = json != NULL ? json_object_get_int(json) : 0;
+  *((int*)fMem) = json != NULL ? json_object_get_int(json) : 0;
 }
 
-static void json_to_string(void* field, struct json_object* json)
+static void json_to_string(void* fMem, struct json_object* json)
 {
-  *((char**)field) = json != NULL ? SDL_strdup(json_object_get_string(json)) : NULL;
+  *((char**)fMem) = json != NULL ? SDL_strdup(json_object_get_string(json)) : NULL;
 }
 
-static void json_to_string_array(void* field, struct json_object* json)
+static void json_to_string_array(void* fMem, struct json_object* json)
 {
   PointerArray* array;
   const char* str;
@@ -51,7 +51,7 @@ static void json_to_string_array(void* field, struct json_object* json)
 
   if (json == NULL)
   {
-    *((PointerArray**)field) = NULL;
+    *((PointerArray**)fMem) = NULL;
     return;
   }
 
@@ -62,7 +62,7 @@ static void json_to_string_array(void* field, struct json_object* json)
     str = json_object_array_get_idx_as_string(json, i);
     pointer_array_add(array, SDL_strdup(str));
   }
-  *((PointerArray**)field) = array;
+  *((PointerArray**)fMem) = array;
 }
 
 json_object* load_json_from_file(const char* filename)
@@ -70,16 +70,16 @@ json_object* load_json_from_file(const char* filename)
   FILE*        file;
   char*        filedata = NULL;
   size_t       len;
-  json_object* jsonObj = NULL;
+  json_object* jObj = NULL;
 
   if ((file = fopen(filename, "r")) != NULL)
   {
     if (readall(file, &filedata, &len) == READALL_OK)
     {
-      jsonObj = json_tokener_parse(filedata);
+      jObj = json_tokener_parse(filedata);
       free(filedata);
     }
     fclose(file);
   }
-  return jsonObj;
+  return jObj;
 }

@@ -6,8 +6,11 @@
 #include "toolbox/toolbox.h"
 
 ecs_entity_t make_golden_cross_hit_effect(ecs_Registry* ecs, Vec2 position);
-ecs_entity_t
-make_static_pickupable_entity(ecs_Registry* ecs, u16 textureId, u16 itemType, Vec2 position, u8 quality);
+ecs_entity_t make_static_pickupable_entity(ecs_Registry* ecs,
+                                           u16           textureId,
+                                           u16           itemType,
+                                           Vec2          position,
+                                           u8            quality);
 
 typedef struct
 {
@@ -19,8 +22,12 @@ typedef struct
   u16         direction;
 } MakePortalParams;
 ecs_entity_t make_portal(ecs_Registry* ecs, const MakePortalParams* params);
-ecs_entity_t
-make_text_particle(ecs_Registry* ecs, const char* text, Vec2 position, Vec2 speed, FONT* font, COLOR color);
+ecs_entity_t make_text_particle(ecs_Registry* ecs,
+                                const char*   text,
+                                Vec2          position,
+                                Vec2          speed,
+                                FONT*         font,
+                                COLOR         color);
 
 ecs_entity_t make_player(ecs_Registry* ecs, ecs_entity_t baseCharacter);
 
@@ -57,7 +64,7 @@ typedef struct MakeChestParams
 {
   Vec2 position;
   Item items[CHEST_MAX_ITEMS];
-  u16  num_slots;
+  u16  numSlots;
   u16  state;
   u32  id;
 } MakeChestParams;
@@ -65,7 +72,7 @@ typedef struct MakeChestParams
 typedef struct
 {
   Vec2 position;
-  u16  required_key;
+  u32  requiredKey;
 } MakeDoorParams;
 
 ecs_entity_t make_door(ecs_Registry* ecs, Vec2 position);
@@ -75,7 +82,7 @@ ecs_entity_t make_trigger(ecs_Registry* ecs, Vec2 position, Vec2 size, u16 mask)
 // effects
 ecs_entity_t make_fx_blood_loss(ecs_Registry* ecs, Vec2 position);
 ecs_entity_t make_fx_damage_indicator(ecs_Registry* ecs, Vec2 position, COLOR color, int amount);
-ecs_entity_t make_fx_item_picked_up(ecs_Registry* ecs, Vec2 position, const char* item_name);
+ecs_entity_t make_fx_item_picked_up(ecs_Registry* ecs, Vec2 position, const char* itemName);
 ecs_entity_t make_fx_cast_ice(ecs_Registry* ecs, Vec2 position);
 ecs_entity_t make_fx_cast_fire(ecs_Registry* ecs, Vec2 position);
 ecs_entity_t make_fx_ice_hit(ecs_Registry* ecs, Vec2 position);
@@ -97,7 +104,8 @@ make_fire_ball(ecs_Registry* ecs, ecs_entity_t shooter, Vec2 position, Vec2 dire
 ecs_entity_t
 make_ice_arrow(ecs_Registry* ecs, ecs_entity_t shooter, Vec2 position, Vec2 direction, u16 mask);
 
-ecs_entity_t make_arrow(ecs_Registry* ecs, ecs_entity_t shooter, Vec2 position, Vec2 speed, u16 mask);
+ecs_entity_t
+make_arrow(ecs_Registry* ecs, ecs_entity_t shooter, Vec2 position, Vec2 speed, u16 mask);
 
 // npcs
 ecs_entity_t make_npc_brian(ecs_Registry* ecs, Vec2 position, const char* conversation);

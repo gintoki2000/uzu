@@ -1,6 +1,7 @@
 #ifndef MEDIATOR_H
 #define MEDIATOR_H
 #include "ecs/ecs.h"
+#include "rfl.h"
 #include "toolbox/toolbox.h"
 
 enum
@@ -45,6 +46,8 @@ typedef struct
 {
   ecs_entity_t entity;
 } EntityDiedMsg;
+
+extern rfl_Struct gEntityDiedMsgRfl;
 
 typedef struct
 {
@@ -111,16 +114,23 @@ typedef struct
   ecs_entity_t entity;
 } BeginInteractionMsg;
 
+extern rfl_Struct gBeginInteractionMsgRfl;
+
 typedef struct
 {
   ecs_entity_t entity;
 } EndInteractionMsg;
+
+extern rfl_Struct gEndInteractionMsgRfl;
 
 typedef struct
 {
   ecs_entity_t entity;
   const char*  cmd;
 } CommandSelectedMsg;
+
+extern rfl_Struct gCommandSelectedMsgRfl;
+
 
 typedef struct
 {
@@ -130,9 +140,10 @@ typedef struct
   const char*  name;
 } ConversationFinishedMsg;
 
+extern rfl_Struct gConversationFinisedRfl;
+
 typedef struct
 {
-  int         code;
   const char* event;
   const char* status;
 } EventFinishedMsg;
@@ -154,6 +165,7 @@ typedef struct
 } HitDoorMsg;
 
 typedef struct
+
 {
   ecs_entity_t entity;
   ecs_entity_t trigger;

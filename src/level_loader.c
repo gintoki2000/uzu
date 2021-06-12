@@ -248,7 +248,7 @@ static void parse_chest(ecs_Registry* registry, const EntityProperties* props)
   chest_params.state    = CHEST_STATE_CLOSE;
 
   parse_item_list(chest_params.items,
-                  &chest_params.num_slots,
+                  &chest_params.numSlots,
                   json_object_object_get_as_string(props->properties, "items"));
   make_chest(registry, &chest_params);
 }

@@ -1,4 +1,5 @@
 // ngotrung Tue 08 Jun 2021 06:19:01 PM +07
+//
 
 #include "luabinding.h"
 #include "components.h"
@@ -6,6 +7,7 @@
 #include "inventory.h"
 #include "lauxlib.h"
 #include "resources.h"
+#include "rfl.h"
 #include "ui_msgbox.h"
 
 void lua_pushentity(lua_State* L, lua_EntityHandle handle)
@@ -161,6 +163,15 @@ static int lua_item_getname(lua_State* L)
   return 1;
 }
 
+static int lua_item_drop(lua_State* L)
+{
+  Item* item = lua_checkitem(L, 1);
+  int   n    = luaL_checkinteger(L, 2);
+
+  item->quality -= max(0, min(n, item->quality));
+  return 0;
+}
+
 static const struct _ItemId _itemIds[] = {
   { "RED_FLASK", ITEM_TYPE_RED_FLASK },
   { "BIG_RED_FLASK", ITEM_TYPE_BIG_RED_FLASK },
@@ -176,6 +187,7 @@ static const luaL_Reg _libitem[] = {
   { "get_quality", lua_item_getquality },
   { "set_quality", lua_item_setquality },
   { "get_name", lua_item_getname },
+  { "drop", lua_item_drop },
 };
 
 int lua_openlib_inventory(lua_State* L)
@@ -199,21 +211,13 @@ int lua_openlib_inventory(lua_State* L)
 /* scene lib*/
 extern ecs_Registry* gRegistry;
 
-static int lua_scene_instbrian(lua_State* L)
+static int lua_scene_newentity(lua_State* L)
 {
-  int top = lua_gettop(L);
-  ASSERT(top == 3 && "expect 3 arguments");
 
-  float        x            = luaL_checknumber(L, 1);
-  float        y            = luaL_checknumber(L, 2);
-  const char*  conversation = luaL_checkstring(L, 3);
-  ecs_entity_t brian        = make_npc_brian(gRegistry, (Vec2){ x, y }, conversation);
-  lua_pushentity(L, (lua_EntityHandle){ .entity = brian, .registry = gRegistry });
   return 1;
 }
 
 static const luaL_Reg _libscene[] = {
-  { "instantiate_npc_brian", lua_scene_instbrian },
   { NULL, NULL },
 };
 
@@ -242,5 +246,39 @@ int lua_openlib_ui(lua_State* L)
 {
   luaL_newlib(L, _libui);
   lua_setglobal(L, "ui");
+
+  return 1;
+}
+
+//
+
+#include "system/event_messaging_sys.h"
+
+static rfl_Field m1fs[] = {
+  RFL_FIELD(EntityDiedMsg, ENTITY, entity),
+  RFL_FIELD_END,
+};
+
+static rfl_Struct m1 = RFL_STRUCT(EntityDiedMsg, m1fs);
+
+int lua_pushstruct(lua_State* L, const rfl_Struct* md, const void* s)
+{
+  u8* mem = s;
+  lua_newtable(L);
+  for (rfl_Field* f = md->fields; f; ++f)
+  {
+    lua_pushstring(L, f->name);
+    switch (f->type)
+    {
+    case RFL_FIELD_TYPE_INT:
+      lua_pushinteger(L, *((int*)mem + f->offset));
+      lua_settable(L, -3);
+      break;
+    case RFL_FIELD_TYPE_STRING:
+      lua_pushstring(L, *((char**)mem + f->offset));
+      lua_settable(L, -3);
+      break;
+    }
+  }
   return 1;
 }

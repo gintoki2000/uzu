@@ -217,7 +217,7 @@ BOOL resources_load()
   for (int i = 0; _conversation_files[i] ; ++i)
   {
     struct json_object* json         = load_json_from_file(_conversation_files[i]);
-    Conversation*       conversation = json_to_struct(&gStructMetaData_Conversation, json);
+    Conversation*       conversation = deserialize(&gMetaData_Conversation, json);
     hash_table_insert(_conversations, conversation->name, conversation);
     json_object_put(json);
   }

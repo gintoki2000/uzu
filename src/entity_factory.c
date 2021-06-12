@@ -662,8 +662,8 @@ ecs_entity_t make_chest(ecs_Registry* registry, const MakeChestParams* params)
   visual->anchor.y         = 16.f;
 
   chest = ecs_add(registry, entity, CHEST);
-  SDL_memcpy(chest->items, params->items, params->num_slots * sizeof(Item));
-  chest->numSlots = params->num_slots;
+  SDL_memcpy(chest->items, params->items, params->numSlots * sizeof(Item));
+  chest->numSlots = params->numSlots;
   chest->id       = params->id;
   chest->state    = params->state;
 

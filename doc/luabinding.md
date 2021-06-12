@@ -2,11 +2,7 @@
 ****
 ## Table of content
 1. [Entity](#1-entity)
-  1. [Constances](1.1-constances)
-  2. [Functions](1.2-functions)
 2. [Item](#2-item)
-  1. [Constances](2.1-constances)
-  2. [Functions](2.2-functions)
 
 
 functions are marked by '**\***' mean it not is implemented yet 
@@ -167,7 +163,7 @@ local name = item:get_name()
 >
 >***@param item[Item]*** an item
 
-**Item.drop(item, n)** [*]
+**Item.drop(item, n = 1)** [*]
 >drop item by n
 >
 >***@param item[Item]*** an item
@@ -176,7 +172,7 @@ local name = item:get_name()
 
 
 ## 3 Inventory
-**inventory.add_item(type_id, quality)**
+**inventory.add_item(type_id, n = 1)**
 >add new item to player inventory
 
 **inventory.get_item(type_id)**

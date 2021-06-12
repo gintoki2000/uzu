@@ -165,7 +165,6 @@ static void on_item_pickuped(LuaScript* script, const ItemPickedUpMsg* msg)
 static void on_conversation_finished(LuaScript* self, const ConversationFinishedMsg* msg)
 {
   lua_getglobal(self->L, "_on_conversation_finish");
-  lua_pushstruct(self->L, &gConversationFinisedRfl, msg);  
   lua_call(self->L, 1, 0);
 }
 
